@@ -1,0 +1,15 @@
+title:
+  ca: Frenesí
+description:
+  ca: El teu personatge entra en un estat de trànsit en que perd el control i ataca amb una violència desfermada.
+capabilities:
+  - action:
+      cost:
+        strength: 2
+      effects:
+        - damage:
+            target:
+              entities:
+                location: current
+            attackDice: 1
+            ignoreDefense: true

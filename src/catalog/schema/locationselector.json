@@ -1,0 +1,34 @@
+{
+	"oneOf": [
+		{
+			"type": "string",
+			"const": "current",
+			"description": "Location of the entity that triggers the effect."
+		},
+		{
+			"type": "string",
+			"const": "playerSelected",
+			"description": "Location chosen by the player that triggers the effect."
+		},
+		{
+			"type": "string",
+			"const": "adjacent",
+			"description": "Locations adjacent to the entity that triggers the effect."
+		},
+		{
+			"type": "string",
+			"const": "nearest",
+			"description": "The nearest location to the entity that triggers the effect."
+		},
+		{
+			"type": "string",
+			"const": "furthest",
+			"description": "The furthest location from the entity that triggers the effect."
+		},
+		{
+			"type": "string",
+			"const": "all",
+			"description": "All locations on the board."
+		}
+	]
+}

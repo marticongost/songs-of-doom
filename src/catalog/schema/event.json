@@ -1,0 +1,23 @@
+{
+	"type": "string",
+	"description": "A specific event that can trigger a reaction.",
+	"oneOf": [
+		{
+			"const": "acquired",
+			"description": "Triggered when this card is first acquired by a character."
+		},
+		{ "const": "attacking", "description": "Triggered when the entity is attacking." },
+		{
+			"const": "defending",
+			"description": "Triggered when the entity is the target of an attack."
+		},
+		{
+			"const": "enemyDefeated",
+			"description": "Triggered when an enemy is defeated as a result of an effect triggered by the entity."
+		},
+		{
+			"const": "payingCapability",
+			"description": "Triggered when a player pays the cost of a capability."
+		}
+	]
+}

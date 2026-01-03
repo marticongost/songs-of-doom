@@ -1,0 +1,21 @@
+{
+	"type": "object",
+	"description": "An effect that inflicts damage to one or more targets.",
+	"properties": {
+		"attackDice": {
+			"type": "integer",
+			"minimum": 1,
+			"description": "Amount of attack dice to roll."
+		},
+		"target": {
+			"$ref": "target.json",
+			"description": "The target(s) to wound."
+		},
+		"ignoreDefense": {
+			"type": "boolean",
+			"description": "If true, targets won't get a defense roll to reduce the damage. Defaults to false."
+		}
+	},
+	"required": ["attackDice", "target"],
+	"additionalProperties": false
+}

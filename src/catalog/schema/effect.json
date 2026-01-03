@@ -1,0 +1,66 @@
+{
+	"type": "object",
+	"oneOf": [
+		{
+			"description": "An effect that allows the player to choose exactly one of several possible effects.",
+			"properties": {
+				"oneOf": {
+					"type": "array",
+					"items": {
+						"$ref": "effect.json"
+					},
+					"minItems": 2
+				}
+			},
+			"required": ["oneOf"],
+			"additionalProperties": false
+		},
+		{
+			"description": "An effect that executes a series of effects in order.",
+			"properties": {
+				"sequence": {
+					"type": "array",
+					"items": {
+						"$ref": "effect.json"
+					},
+					"minItems": 2
+				}
+			},
+			"required": ["sequence"],
+			"additionalProperties": false
+		},
+		{
+			"properties": {
+				"draw": {
+					"$ref": "effect-draw.json"
+				}
+			},
+			"required": ["draw"],
+			"additionalProperties": false
+		},
+		{
+			"properties": {
+				"wound": {
+					"$ref": "effect-wound.json"
+				}
+			},
+			"additionalProperties": false
+		},
+		{
+			"properties": {
+				"changeCost": {
+					"$ref": "effect-changecost.json"
+				}
+			},
+			"additionalProperties": false
+		},
+		{
+			"properties": {
+				"modifyStats": {
+					"$ref": "effect-modifystats.json"
+				}
+			},
+			"additionalProperties": false
+		}
+	]
+}

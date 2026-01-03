@@ -1,0 +1,75 @@
+{
+	"oneOf": [
+		{
+			"type": "object",
+			"properties": {
+				"action": {
+					"$ref": "#/$defs/commonProperties"
+				}
+			},
+			"required": ["action"],
+			"additionalProperties": false
+		},
+		{
+			"type": "object",
+			"properties": {
+				"reaction": {
+					"allOf": [
+						{
+							"type": "object",
+							"properties": {
+								"triggers": {
+									"type": "array",
+									"items": {
+										"$ref": "event.json"
+									},
+									"minItems": 1,
+									"uniqueItems": true
+								}
+							},
+							"required": ["triggers"]
+						},
+						{
+							"$ref": "#/$defs/commonProperties"
+						}
+					]
+				}
+			},
+			"required": ["reaction"],
+			"additionalProperties": false
+		}
+	],
+	"$defs": {
+		"commonProperties": {
+			"type": "object",
+			"properties": {
+				"cost": {
+					"description": "The aptitude the player must spend to trigger this capability.",
+					"allOf": [
+						{
+							"$ref": "aptitudes.json"
+						},
+						{
+							"type": "object",
+							"properties": {
+								"exhaust": {
+									"type": "boolean",
+									"description": "Whether triggering this capability exhausts the capability for the remainder of the turn."
+								}
+							}
+						}
+					]
+				},
+				"effects": {
+					"type": "array",
+					"description": "The effects that occur when the capability is triggered.",
+					"items": {
+						"$ref": "effect.json"
+					},
+					"minItems": 1
+				}
+			},
+			"required": ["effects"]
+		}
+	}
+}

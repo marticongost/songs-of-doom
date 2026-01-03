@@ -1,0 +1,18 @@
+{
+	"type": "object",
+	"description": "A text object that supports multiple languages.",
+	"properties": {
+		"en": {
+			"type": "string",
+			"description": "Text in English."
+		},
+		"es": {
+			"type": "string",
+			"description": "Text in Spanish."
+		},
+		"ca": {
+			"type": "string",
+			"description": "Text in Catalan."
+		}
+	}
+}

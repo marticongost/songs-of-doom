@@ -1,0 +1,110 @@
+{
+	"oneOf": [
+		{ "$ref": "#/$defs/singleTarget" },
+		{
+			"type": "object",
+			"properties": {
+				"anyOf": {
+					"type": "array",
+					"description": "Affects one of the indicated targets.",
+					"items": { "$ref": "#/$defs/singleTarget" }
+				}
+			},
+			"required": ["anyOf"],
+			"additionalProperties": false
+		},
+		{
+			"type": "object",
+			"properties": {
+				"allOf": {
+					"type": "array",
+					"description": "Affects all of the indicated targets.",
+					"items": { "$ref": "#/$defs/singleTarget" }
+				}
+			},
+			"required": ["allOf"],
+			"additionalProperties": false
+		}
+	],
+	"$defs": {
+		"singleTarget": {
+			"oneOf": [
+				{
+					"type": "string",
+					"const": "self",
+					"description": "The target is the entity that triggers the effect."
+				},
+				{
+					"type": "object",
+					"properties": {
+						"location": {
+							"type": "object",
+							"description": "Affects the given location.",
+							"properties": {
+								"selector": {
+									"$ref": "locationselector.json"
+								}
+							},
+							"required": ["selector"]
+						}
+					}
+				},
+				{
+					"type": "object",
+					"properties": {
+						"entities": {
+							"type": "object",
+							"description": "Affects one or more entities.",
+							"properties": {
+								"quantity": {
+									"oneOf": [
+										{
+											"type": "string",
+											"description": "Affects all entities.",
+											"const": "all"
+										},
+										{
+											"type": "integer",
+											"description": "Number of entities to target.",
+											"minimum": 1
+										},
+										{
+											"type": "object",
+											"description": "Specifies a range for the number of entities to target.",
+											"properties": {
+												"min": {
+													"type": "integer",
+													"minimum": 1,
+													"description": "Minimum number of entities to target."
+												},
+												"max": {
+													"type": "integer",
+													"minimum": 1,
+													"description": "Maximum number of entities to target."
+												}
+											},
+											"required": ["min", "max"],
+											"additionalProperties": false
+										}
+									]
+								},
+								"properties": {
+									"type": "array",
+									"description": "List of properties that the targeted entities must possess.",
+									"items": {
+										"type": "string"
+									},
+									"uniqueItems": true
+								},
+								"location": {
+									"$ref": "locationselector.json",
+									"description": "The location selector to find the entities to target."
+								}
+							}
+						}
+					}
+				}
+			]
+		}
+	}
+}

@@ -1,0 +1,11 @@
+title:
+  ca: Entrenament marcial
+capabilities:
+  - reaction:
+      triggers:
+      - payingCapability
+      cost:
+        exhaust: true
+      effects:
+      - changeCost:
+          strength: -1

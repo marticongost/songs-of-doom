@@ -1,0 +1,16 @@
+{
+	"type": "object",
+	"description": "An effect that allows a player to draw a number of cards from their deck.",
+	"properties": {
+		"amount": {
+			"type": "integer",
+			"minimum": 1,
+			"description": "Number of cards to draw. Defaults to 1."
+		},
+		"keep": {
+			"type": "integer",
+			"minimum": 1,
+			"description": "Number of cards to keep from the drawn cards. Defaults to the same value as `amount`."
+		}
+	}
+}
