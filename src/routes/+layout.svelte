@@ -1,4 +1,5 @@
 <script lang="ts">
+	import "$lib/css/global.css";
 	import favicon from '$lib/assets/favicon.svg';
 	import { page } from '$app/state';
 	import { getDocumentTitle } from '../meta';
@@ -16,12 +17,6 @@
 </svelte:head>
 
 <style>
-	:global(body) {
-		--heading-font: 'Amarante', serif;
-		--text-font: 'Rosario', sans-serif;
-		font-family: var(--text-font);
-	}
-
 	.pageTitle {
 		font-family: var(--heading-font);
 		font-size: 2rem;
