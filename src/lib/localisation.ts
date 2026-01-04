@@ -2,7 +2,7 @@ const locales = ['ca', 'es', 'en'] as const;
 
 export type Locale = (typeof locales)[number];
 
-export type LocalisedText = Record<Locale, string>;
+export type LocalisedText = Partial<Record<Locale, string>>;
 
 type LocalisedKeys<T> = { [K in keyof T]: T[K] extends LocalisedText ? K : never }[keyof T];
 
