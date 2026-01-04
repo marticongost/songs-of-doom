@@ -2,6 +2,8 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { page } from '$app/state';
 	import { getDocumentTitle } from '../meta';
+	import { setLocale } from '$lib/context/locale';
+	setLocale("ca")
 	let { children } = $props();
 </script>
 
