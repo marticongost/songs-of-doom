@@ -1,6 +1,19 @@
 import adapter from '@sveltejs/adapter-auto';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
+import { optimize } from 'svgo';
+
+const optimizeSvg = {
+	name: 'optimize-inline-svg',
+	enforce: 'pre',
+	transform(src, id) {
+		if (!id.endsWith('.svg')) return;
+		console.log(`Optimizing SVG: ${id}`);
+		const result = optimize(src, { multipass: true });
+		return { code: result.data, map: null };
+	}
+};
+
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	// Consult https://svelte.dev/docs/kit/integrations
@@ -11,6 +24,9 @@ const config = {
 		// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
 		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 		adapter: adapter()
+	},
+	vite: {
+		plugins: [optimizeSvg]
 	}
 };
 
