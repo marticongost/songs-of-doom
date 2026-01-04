@@ -1,0 +1,24 @@
+import { ModifyCapabilityCostEffect } from '$lib/catalog/models/effects';
+import { Reaction } from '$lib/catalog/models/reaction';
+import { Trait } from '$lib/catalog/models/trait';
+
+export default new Trait({
+	title: {
+		ca: 'Entrenament Marcial',
+		es: 'Entrenamiento Marcial',
+		en: 'Martial Training'
+	},
+	capabilities: [
+		new Reaction({
+			triggers: ['payingCapability'],
+			cost: {
+				exhaust: true
+			},
+			effects: [
+				new ModifyCapabilityCostEffect({
+					strength: -1
+				})
+			]
+		})
+	]
+});

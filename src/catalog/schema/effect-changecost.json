@@ -1,5 +1,0 @@
-{
-	"type": "object",
-	"description": "An effect that changes the cost of triggering a capability.",
-	"$ref": "aptitudes.json"
-}
