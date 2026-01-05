@@ -1,9 +1,10 @@
 <script lang="ts">
-	import "$lib/css/global.css";
+	import "$lib/css/global.scss";
 	import favicon from '$lib/assets/favicon.svg';
 	import { page } from '$app/state';
 	import { getDocumentTitle } from '../meta';
 	import { setLocale } from '$lib/context/locale';
+	import InlineSvg from "$lib/components/InlineSvg.svelte";
 	setLocale("ca")
 	let { children } = $props();
 </script>
@@ -24,7 +25,7 @@
 </style>
 
 <header>
-	<InlineSvg class="game-logo" src="logo.svg" style="--svg-height: 10rem;"/>
+	<InlineSvg class="game-logo" src="logo.svg" style="height: 10rem;"/>
 	<h1 class="pageTitle">{ page.data.title }</h1>
 </header>
 

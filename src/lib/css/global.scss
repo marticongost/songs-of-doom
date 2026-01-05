@@ -1,0 +1,43 @@
+@use '@reguitzell/styles' as rz;
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	--heading-font: 'Amarante', serif;
+	--text-font: 'Rosario', sans-serif;
+	font-family: var(--text-font);
+	background-color: black;
+	color: white;
+	@include rz.define-grid;
+
+	// === Palete ===
+	$palette-brown: #a17a55;
+	$palette-red: #a15555;
+	$palette-green: #55a155;
+	$palette-yellow: #a1a155;
+	$palette-blue: #5555a1;
+	$palette-purple: #a155a1;
+	$palette-somber: #222;
+
+	// === Color assignments ===
+
+	// Stats
+	--stat-agility-color: #{$palette-green};
+	--stat-strength-color: #{$palette-brown};
+	--stat-intelligence-color: #{$palette-purple};
+	--stat-charisma-color: #{$palette-yellow};
+	--stat-health-color: #{$palette-red};
+	--stat-sanity-color: #{$palette-blue};
+
+	// Panels
+	--panel-background-color: #{$palette-somber};
+
+	// Text
+	--text-subtle-color: #888;
+}
+
+@include rz.reset-elements;
