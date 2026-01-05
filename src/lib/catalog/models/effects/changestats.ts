@@ -1,3 +1,5 @@
+import { statTypes, type StatType } from '../stats';
+
 export interface ChangeStatsEffectProps {
 	strength?: number;
 	agility?: number;
@@ -5,6 +7,11 @@ export interface ChangeStatsEffectProps {
 	charisma?: number;
 	health?: number;
 	sanity?: number;
+}
+
+export interface GrouppedStatChanges {
+	increase?: Partial<Record<StatType, number>>;
+	decrease?: Partial<Record<StatType, number>>;
 }
 
 export class ChangeStatsEffect {
@@ -29,5 +36,24 @@ export class ChangeStatsEffect {
 		this.charisma = charisma ?? 0;
 		this.health = health ?? 0;
 		this.sanity = sanity ?? 0;
+	}
+
+	get(stat: StatType): number {
+		return this[stat];
+	}
+
+	group(): GrouppedStatChanges {
+		const groups = { increase: undefined, decrease: undefined } as GrouppedStatChanges;
+		for (const stat of statTypes) {
+			const value = this.get(stat);
+			if (value > 0) {
+				groups.increase = groups.increase ?? {};
+				groups.increase[stat] = value;
+			} else if (value < 0) {
+				groups.decrease = groups.decrease ?? {};
+				groups.decrease[stat] = -value;
+			}
+		}
+		return groups;
 	}
 }
