@@ -15,7 +15,7 @@
         @include rz.column(sm);
         width: 30rem;
         padding: 1rem;
-        border: 1px solid #ccc;
+        border: var(--panel-border);
         border-radius: 0.5rem;
         background-color: var(--panel-background-color);
     }
@@ -23,6 +23,7 @@
     h1 {
         font-family: var(--heading-font);
         font-size: 1.4rem;
+        color: var(--text-heading-color);
     }
 
     .details {

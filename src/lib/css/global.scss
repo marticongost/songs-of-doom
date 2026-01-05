@@ -22,6 +22,8 @@ body {
 	$palette-blue: #5555a1;
 	$palette-purple: #a155a1;
 	$palette-somber: #222;
+	$palette-cloud: rgb(207, 213, 219);
+	$palette-ash: #333;
 
 	// === Color assignments ===
 
@@ -35,9 +37,11 @@ body {
 
 	// Panels
 	--panel-background-color: #{$palette-somber};
+	--panel-border: 2px solid #{$palette-ash};
 
 	// Text
 	--text-subtle-color: #888;
+	--text-heading-color: #{$palette-cloud};
 }
 
 @include rz.reset-elements;
