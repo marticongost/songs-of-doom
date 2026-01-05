@@ -1,10 +1,9 @@
-import { finalise } from '$lib/modelling';
 import { type CapabilityProps, Capability } from './capability';
-import { Event, type EventProps } from './event';
+import { Event, type EventType, events } from './event';
 
 export interface ReactionProps extends CapabilityProps {
 	/** The events that can trigger this reaction. */
-	triggers: Array<Event | EventProps>;
+	triggers: Array<Event | EventType>;
 
 	/** Indicates if the reaction is mandatory or optional.
 	 *
@@ -31,7 +30,7 @@ export class Reaction extends Capability {
 
 	constructor({ cost, effects, triggers, mandatory }: ReactionProps) {
 		super({ cost, effects });
-		this.triggers = triggers.map((event) => finalise(Event, event));
+		this.triggers = triggers.map((event) => (typeof event === 'string' ? events[event] : event));
 		this.mandatory = mandatory ?? this.cost?.isFree();
 	}
 }
