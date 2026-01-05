@@ -10,10 +10,18 @@ export default new Trait({
 	},
 	capabilities: [
 		new Reaction({
-			triggers: ['attacking', 'defending'],
+			triggers: ['attacking'],
 			effects: [
 				new ModifyRollEffect({
 					modifier: 1
+				})
+			]
+		}),
+		new Reaction({
+			triggers: ['defending'],
+			effects: [
+				new ModifyRollEffect({
+					modifier: -1
 				})
 			]
 		})
