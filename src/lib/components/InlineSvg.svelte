@@ -29,7 +29,7 @@
 <style>
     :global(.inline-svg) {
         display: inline-block;
-        width: 1em;
+        width: auto;
         height: 1em;
         vertical-align: middle;
         fill: currentColor;
