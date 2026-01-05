@@ -1,4 +1,4 @@
-import type { StatType } from './stats';
+import type { AttributeType } from './stats';
 
 export interface CapabilityCostProps {
 	strength?: number;
@@ -44,7 +44,7 @@ export class CapabilityCost {
 		);
 	}
 
-	get(stat: StatType): number {
-		return this[stat];
+	get(attribute: AttributeType): number {
+		return this[attribute];
 	}
 }
