@@ -62,3 +62,7 @@ const isLocalisedText = (value: unknown): value is LocalisedText => {
 		locales.find((locale) => locale in value) !== undefined
 	);
 };
+
+export const plural2 = (n: number, singular: string, plural: string): string => {
+	return n === 1 ? singular : plural;
+};
