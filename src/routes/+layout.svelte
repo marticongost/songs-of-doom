@@ -23,6 +23,9 @@
 	}
 </style>
 
-<h1 class="pageTitle">{ page.data.title }</h1>
+<header>
+	<InlineSvg class="game-logo" src="logo.svg" style="--svg-height: 10rem;"/>
+	<h1 class="pageTitle">{ page.data.title }</h1>
+</header>
 
 {@render children()}
