@@ -8,11 +8,11 @@
     export let trait: Trait;
 </script>
 
-<style>
+<style lang="scss">
+    @use "@reguitzell/styles" as rz;
+
     .trait-tree-node :global(.subtraits) {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
+        @include rz.column(md);
         margin-left: 1.5rem;
         margin-top: 0.5rem;
     }

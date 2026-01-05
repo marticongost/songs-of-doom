@@ -7,11 +7,11 @@
     export let ItemComponent = TraitCard;
 </script>
 
-<style>
+<style lang="scss">
+    @use "@reguitzell/styles" as rz;
+
     .trait-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
+        @include rz.column(md);
     }
 </style>
 

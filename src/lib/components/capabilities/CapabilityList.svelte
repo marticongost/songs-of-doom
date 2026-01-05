@@ -5,18 +5,11 @@
     export let capabilities: Capability[];
 </script>
 
-<style>
+<style lang="scss">
+    @use "@reguitzell/styles" as rz;
     .capability-list {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5em;
-    }
-    .capability-list li {
-        margin: 0;
-        padding: 0;
+        @include rz.column(sm);
+        align-items: stretch;
     }
 </style>
 
