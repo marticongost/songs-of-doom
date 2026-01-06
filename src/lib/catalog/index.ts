@@ -1,3 +1,4 @@
+import type { Item } from './models/inventory';
 import type { Trait } from './models/trait';
 
 export interface EntryMetadata<T = unknown> {
@@ -87,6 +88,13 @@ const getEntryPathFromFileName = (fileName: string): Array<string> => {
 
 export const traits = new TraitsCatalog(
 	import.meta.glob<Trait>(`./data/traits/**/*.ts`, {
+		eager: true,
+		import: 'default'
+	})
+);
+
+export const items = new Catalog(
+	import.meta.glob<Item>(`./data/items/**/*.ts`, {
 		eager: true,
 		import: 'default'
 	})

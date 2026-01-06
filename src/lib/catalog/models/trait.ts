@@ -1,31 +1,15 @@
-import type { LocalisedText } from '$lib/localisation';
 import { getEntryMetadata } from '..';
-import type { Capability } from './capability';
-import type { Property } from './properties';
-
-export interface TraitProps {
-	title: LocalisedText;
-	description?: LocalisedText;
-	properties?: Array<Property>;
-	capabilities?: Array<Capability>;
-}
+import { Card, type CardProps } from './card';
 
 const NOT_COMPUTED = Symbol('not computed');
 
-export class Trait {
-	readonly title: LocalisedText;
-	readonly description?: LocalisedText;
-	readonly properties: Array<Property>;
-	readonly capabilities: Array<Capability>;
+export class Trait extends Card {
 	private _archetype: Trait | undefined | typeof NOT_COMPUTED;
 	private _isArchetype: boolean | typeof NOT_COMPUTED;
 	private _subtraits: Array<Trait> | typeof NOT_COMPUTED;
 
-	constructor({ title, description, properties, capabilities }: TraitProps) {
-		this.title = title;
-		this.description = description;
-		this.properties = properties ?? [];
-		this.capabilities = capabilities ?? [];
+	constructor({ title, description, properties, capabilities }: CardProps) {
+		super({ title, description, properties, capabilities });
 		this._archetype = NOT_COMPUTED;
 		this._isArchetype = NOT_COMPUTED;
 		this._subtraits = NOT_COMPUTED;
