@@ -4,14 +4,14 @@ import type { Capability } from './capability';
 import type { Property } from './properties';
 import type { Trait } from './trait';
 
-export interface CardProps {
+export interface EntityProps {
 	title: LocalisedText;
 	description?: LocalisedText;
 	properties?: Array<Property>;
 	capabilities?: Array<Capability>;
 }
 
-export abstract class Card {
+export abstract class Entity {
 	readonly title: LocalisedText;
 	readonly description?: LocalisedText;
 	readonly properties: Array<Property>;
@@ -19,7 +19,7 @@ export abstract class Card {
 
 	abstract readonly archetype: Trait | undefined;
 
-	constructor({ title, description, properties, capabilities }: CardProps) {
+	constructor({ title, description, properties, capabilities }: EntityProps) {
 		this.title = title;
 		this.description = description;
 		this.properties = properties ?? [];
@@ -28,5 +28,9 @@ export abstract class Card {
 
 	get id() {
 		return getEntryMetadata(this).id;
+	}
+
+	get isArchetype(): boolean {
+		return false;
 	}
 }

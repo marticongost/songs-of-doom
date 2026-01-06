@@ -1,7 +1,7 @@
 <script lang="ts">
-    import ItemList from '$lib/components/items/ItemList.svelte';
+    import EntityList from '$lib/components/EntityList.svelte';
 	import type { PageProps } from './$types';
 	let { data }: PageProps = $props();
 </script>
 
-<ItemList items={data.items} />
+<EntityList entities={data.items} />

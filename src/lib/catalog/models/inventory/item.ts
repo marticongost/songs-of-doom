@@ -1,12 +1,12 @@
-import { Card, type CardProps } from '../card';
+import { Entity, type EntityProps } from '../entity';
 import type { Trait } from '../trait';
 import { slots, type Slot, type SlotType } from './slots';
 
-export interface ItemProps extends CardProps {
+export interface ItemProps extends EntityProps {
 	slot: Slot | SlotType;
 }
 
-export class Item extends Card {
+export class Item extends Entity {
 	readonly slot: Slot;
 	readonly archetype: Trait | undefined = undefined;
 

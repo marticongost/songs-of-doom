@@ -1,14 +1,14 @@
 import { getEntryMetadata } from '..';
-import { Card, type CardProps } from './card';
+import { Entity, type EntityProps } from './entity';
 
 const NOT_COMPUTED = Symbol('not computed');
 
-export class Trait extends Card {
+export class Trait extends Entity {
 	private _archetype: Trait | undefined | typeof NOT_COMPUTED;
 	private _isArchetype: boolean | typeof NOT_COMPUTED;
 	private _subtraits: Array<Trait> | typeof NOT_COMPUTED;
 
-	constructor({ title, description, properties, capabilities }: CardProps) {
+	constructor({ title, description, properties, capabilities }: EntityProps) {
 		super({ title, description, properties, capabilities });
 		this._archetype = NOT_COMPUTED;
 		this._isArchetype = NOT_COMPUTED;
