@@ -1,4 +1,5 @@
 import type { LocalisedText } from '$lib/localisation';
+import { getEntryMetadata } from '..';
 import type { Capability } from './capability';
 import type { Property } from './properties';
 import type { Trait } from './trait';
@@ -23,5 +24,9 @@ export abstract class Card {
 		this.description = description;
 		this.properties = properties ?? [];
 		this.capabilities = capabilities ?? [];
+	}
+
+	get id() {
+		return getEntryMetadata(this).id;
 	}
 }

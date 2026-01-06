@@ -4,6 +4,7 @@
 	import CapabilityList from '$lib/components/capabilities/CapabilityList.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { standardAttributes } from '$lib/components/standardattributes';
+	import InlineSvg from '../InlineSvg.svelte';
     const locale = getLocale();
     export let trait: Trait;
 </script>
@@ -11,8 +12,24 @@
 <style lang="scss">
     @use "@reguitzell/styles" as rz;
 
+    .card-header {
+        @include rz.row(sm);
+
+        :global(.own-archetype-icon) {
+            flex: 0 0 auto;
+            height: 1.8rem;
+        }
+
+        :global(.required-archetype-icon) {
+            flex: 0 0 auto;
+            height: 1.5rem;
+            color: var(--text-subtle-color);
+        }
+    }
+
     .trait-card {
         @include rz.column(sm);
+        align-items: stretch;
         width: 30rem;
         padding: 1rem;
         border: var(--panel-border);
@@ -24,6 +41,7 @@
         font-family: var(--heading-font);
         font-size: 1.4rem;
         color: var(--text-heading-color);
+        margin-right: auto;
     }
 
     .details {
@@ -32,7 +50,15 @@
 </style>
 
 <article {...standardAttributes($$props, 'trait-card')}>
-    <h1>{trait.title[locale]}</h1>
+    <div class="card-header">
+        {#if trait.isArchetype}
+           <InlineSvg class="own-archetype-icon" src="archetypes/{trait.id}.svg"/>
+        {/if}
+        <h1>{trait.title[locale]}</h1>
+        {#if trait.archetype}
+            <InlineSvg class="required-archetype-icon" src="archetypes/{trait.archetype.id}.svg"/>
+        {/if}
+    </div>
     {#if trait.archetype || trait.properties.length}
         <div class="details">
             {#if trait.archetype}
