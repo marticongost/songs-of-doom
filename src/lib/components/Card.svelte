@@ -3,6 +3,7 @@
 	import CapabilityList from '$lib/components/capabilities/CapabilityList.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { standardAttributes } from '$lib/components/standardattributes';
+	import ChargesChip from './capabilities/ChargesChip.svelte';
 	import InlineSvg from './InlineSvg.svelte';
     export let entity: Entity;
 </script>
@@ -35,11 +36,15 @@
         background-color: var(--panel-background-color);
     }
 
+    .title {
+        @include rz.row(sm);
+        margin-right: auto;
+    }
+
     h1 {
         font-family: var(--heading-font);
         font-size: 1.4rem;
         color: var(--text-heading-color);
-        margin-right: auto;
     }
 
     .properties {
@@ -53,7 +58,12 @@
         {#if entity.isArchetype}
            <InlineSvg class="own-archetype-icon" src="archetypes/{entity.id}.svg"/>
         {/if}
-        <h1><Text {...entity.title}/></h1>
+        <div class="title">
+            <h1><Text {...entity.title}/></h1>
+            {#if entity.maxCharges}
+                <ChargesChip charges={entity.maxCharges}/>
+            {/if}
+        </div>
         {#if entity.archetype}
             <InlineSvg class="required-archetype-icon" src="archetypes/{entity.archetype.id}.svg"/>
         {/if}

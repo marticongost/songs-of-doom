@@ -1,4 +1,5 @@
 import { attributeTypes, type AttributeType } from '../stats';
+import { Effect } from './effect';
 
 export interface ModifyCapabilityCostEffectProps {
 	strength?: number;
@@ -12,13 +13,14 @@ export interface GrouppedCapabilityCosts {
 	decrease?: Partial<Record<AttributeType, number>>;
 }
 
-export class ModifyCapabilityCostEffect {
+export class ModifyCapabilityCostEffect extends Effect {
 	readonly strength: number;
 	readonly agility: number;
 	readonly intelligence: number;
 	readonly charisma: number;
 
 	constructor({ strength, agility, intelligence, charisma }: ModifyCapabilityCostEffectProps) {
+		super();
 		this.strength = strength ?? 0;
 		this.agility = agility ?? 0;
 		this.intelligence = intelligence ?? 0;

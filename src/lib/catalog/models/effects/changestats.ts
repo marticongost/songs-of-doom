@@ -1,4 +1,5 @@
 import { statTypes, type StatType } from '../stats';
+import { Effect } from './effect';
 
 export interface ChangeStatsEffectProps {
 	strength?: number;
@@ -14,7 +15,7 @@ export interface GrouppedStatChanges {
 	decrease?: Partial<Record<StatType, number>>;
 }
 
-export class ChangeStatsEffect {
+export class ChangeStatsEffect extends Effect {
 	readonly strength: number;
 	readonly agility: number;
 	readonly intelligence: number;
@@ -30,6 +31,7 @@ export class ChangeStatsEffect {
 		health,
 		sanity
 	}: ChangeStatsEffectProps) {
+		super();
 		this.strength = strength ?? 0;
 		this.agility = agility ?? 0;
 		this.intelligence = intelligence ?? 0;

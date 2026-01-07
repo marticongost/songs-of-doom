@@ -5,7 +5,8 @@ export type EventType =
 	| 'defending'
 	| 'enemyDefeated'
 	| 'payingCapability'
-	| 'acquired';
+	| 'acquired'
+	| 'chapterStart';
 
 export type EventProps = { type: EventType; name: LocalisedText };
 
@@ -47,5 +48,9 @@ export const events: Record<EventType, Event> = {
 	acquired: new Event({
 		type: 'acquired',
 		name: { ca: 'En adquirir', es: 'Al adquirir', en: 'When acquired' }
+	}),
+	chapterStart: new Event({
+		type: 'chapterStart',
+		name: { ca: 'En començar el capítol', es: 'Al empezar el capítulo', en: 'Start of chapter' }
 	})
 };

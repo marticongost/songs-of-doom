@@ -1,10 +1,14 @@
 <script lang="ts">
-	import { ChangeStatsEffect, DrawCardsEffect, ModifyCapabilityCostEffect, ModifyRollEffect, type Effect } from "$lib/catalog/models/effects";
+	import { ChangeStatsEffect, DrawCardsEffect, FightEffect, ModifyCapabilityCostEffect, ModifyRollEffect, type Effect } from "$lib/catalog/models/effects";
 	import Text from "$lib/components/localisation/Text.svelte";
 	import { plural2 } from "$lib/localisation";
 	import { type StatType } from "$lib/catalog/models/stats";
 	import StatChip from "../stats/StatChip.svelte";
 	import CommaSeparatedList from "../localisation/CommaSeparatedList.svelte";
+	import Parameters from "../capabilities/Parameters.svelte";
+	import StatExpressionChip from "../StatExpressionChip.svelte";
+	import DamageTable from "../damage/DamageTable.svelte";
+	import { RechargeEffect } from "$lib/catalog/models/effects/recharge";
 
     export let effect: Effect;
 </script>
@@ -59,6 +63,27 @@
                 es="Reducir "
                 en="Decrease "/>
             <CommaSeparatedList items={Object.entries(grouppedChanges.decrease)} renderItem={renderStatValue}/>
+        {/if}
+    {:else if effect instanceof FightEffect}
+        <Text
+            ca="Lluitar"
+            es="Luchar"
+            en="Fight"/>
+        <Parameters>
+            <StatExpressionChip statExpression={effect.expression}/>
+            <DamageTable damage={effect.damage}/>
+        </Parameters>
+    {:else if effect instanceof RechargeEffect}
+        {#if effect.amount === "max"}
+            <Text
+                ca="Recarregar del tot"
+                es="Recargar del todo"
+                en="Recharge fully"/>
+        {:else}
+            <Text
+                ca="Recuperar fins a {plural2(effect.amount, "una càrrega", `${effect.amount} càrregues`)}"
+                es="Recuperar hasta {plural2(effect.amount, "una carga", `${effect.amount} cargas`)}"
+                en="Recover up to {plural2(effect.amount, "one charge", `${effect.amount} charges`)}"/>
         {/if}
     {/if}
 </div>

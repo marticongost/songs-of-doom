@@ -7,6 +7,8 @@
 	import InlineSvg from "../InlineSvg.svelte";
 	import EffectList from "../effects/EffectList.svelte";
 	import Text from "$lib/components/localisation/Text.svelte";
+	import StatIcon from "../stats/StatIcon.svelte";
+	import Parameters from "./Parameters.svelte";
 
     export let capability: Capability;
 </script>
@@ -21,6 +23,7 @@
 
     .capability-activation {
         @include rz.row;
+        white-space: nowrap;
 
         :global(.capability-icon) {
             margin-right: #{rz.size(xs)};
@@ -30,6 +33,11 @@
          &:after {
             content: ":";
         }
+    }
+
+    .moment {
+        @include rz.row;
+        margin-right: #{rz.size(xs)};
     }
 
     .trigger-label {
@@ -44,19 +52,6 @@
         }
     }
 
-    .cost {
-        margin-left: #{rz.size(sm)};
-
-        &:before {
-            content: "[";
-            color: var(--text-subtle-color);
-        }
-        &:after {
-            content: "]";
-            color: var(--text-subtle-color);
-        }
-    }
-
     .capability-effects {
         flex: 1 1 auto;
     }
@@ -67,39 +62,41 @@
     <div class="capability-activation">
 
         <!-- Capability type / triggers -->
-        {#if capability instanceof Action}
-            <InlineSvg class="capability-icon" src="capabilities/action.svg" />
-            <span class="trigger-label"><Text ca="Acció" es="Acción" en="Action"/></span>
-        {:else if capability instanceof Reaction}
-            <InlineSvg class="capability-icon" src="capabilities/reaction.svg" />
-            <ul class="reaction-triggers">
-                {#each capability.triggers as trigger}
+        <div class="moment">
+            {#if capability instanceof Action}
+                <InlineSvg class="capability-icon" src="capabilities/action.svg" />
+                <span class="trigger-label"><Text ca="Acció" es="Acción" en="Action"/></span>
+            {:else if capability instanceof Reaction}
+                <InlineSvg class="capability-icon" src="capabilities/reaction.svg" />
+                <ul class="reaction-triggers">
+                    {#each capability.triggers as trigger}
                     <li class="trigger-label"><Text {...trigger.name}/></li>
-                {/each}
-            </ul>
-        {/if}
+                    {/each}
+                </ul>
+            {/if}
+        </div>
 
         <!-- Cost -->
         {#if !capability.cost.isFree()}
-            <div class="cost">
+            <Parameters>
                 {#each attributeTypes as attribute}
                     {#if capability.cost.get(attribute) !== 0}
-                        <div class="stat-cost">
-                            <InlineSvg src={`stats/${attribute}.svg`} class="stat" data-stat={attribute}/>
+                        <span class="stat-cost">
+                            <StatIcon stat={attribute}/>
                             <span class="stat-value">{capability.cost.get(attribute)}</span>
-                        </div>
+                        </span>
                     {/if}
                 {/each}
                 {#if capability.cost.charges}
-                    <div class="charges-cost">
+                    <span class="charges-cost">
                         <InlineSvg src="capabilities/charge.svg" class="charges-icon"/>
                         <span class="charge-value">{capability.cost.charges}</span>
-                    </div>
+                    </span>
                 {/if}
                 {#if capability.cost.exhaust}
                     <InlineSvg src="capabilities/exhaust.svg" class="exhaust-icon"/>
                 {/if}
-            </div>
+            </Parameters>
         {/if}
     </div>
 

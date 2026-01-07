@@ -10,8 +10,8 @@ export class Item extends Entity {
 	readonly slot: Slot;
 	readonly archetype: Trait | undefined = undefined;
 
-	constructor({ title, slot, properties, capabilities }: ItemProps) {
-		super({ title, description: undefined, properties, capabilities });
+	constructor({ title, slot, properties, capabilities, maxCharges }: ItemProps) {
+		super({ title, description: undefined, properties, capabilities, maxCharges });
 		this.slot = typeof slot === 'string' ? slots[slot] : slot;
 	}
 }

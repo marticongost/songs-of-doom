@@ -1,9 +1,9 @@
 
 <script lang="ts">
 	import { stats, type Stat, type StatType } from "$lib/catalog/models/stats";
-	import InlineSvg from "$lib/components/InlineSvg.svelte";
 	import { standardAttributes } from "$lib/components/standardattributes";
 	import Text from "$lib/components/localisation/Text.svelte";
+	import StatIcon from "./StatIcon.svelte";
 
     export let stat: Stat | StatType;
     const statObject = typeof stat === "string" ? stats[stat] : stat;
@@ -30,6 +30,6 @@
 </style>
 
 <span {...standardAttributes($$props, "stat-chip")} data-stat={statObject.type}>
-    <InlineSvg style="align-self: center;" src="stats/{statObject.type}.svg"/>
+    <StatIcon stat={statObject}/>
     <span class="stat-name"><Text {...statObject.name}/></span>
 </span>

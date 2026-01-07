@@ -5,7 +5,7 @@ export type IndicatorType = 'health' | 'sanity';
 
 export type StatType = AttributeType | IndicatorType;
 
-export class Stat {
+export abstract class Stat {
 	readonly type: StatType;
 	readonly name: LocalisedText;
 
@@ -15,19 +15,31 @@ export class Stat {
 	}
 }
 
+export class Attribute extends Stat {
+	constructor(type: AttributeType, name: LocalisedText) {
+		super(type, name);
+	}
+}
+
+export class Indicator extends Stat {
+	constructor(type: IndicatorType, name: LocalisedText) {
+		super(type, name);
+	}
+}
+
 export const attributeTypes: AttributeType[] = ['strength', 'agility', 'intelligence', 'charisma'];
 export const indicatorTypes: IndicatorType[] = ['health', 'sanity'];
 export const statTypes: StatType[] = [...attributeTypes, ...indicatorTypes];
 
 export const stats: Record<StatType, Stat> = {
-	agility: new Stat('agility', { en: 'Agility', es: 'Agilidad', ca: 'Agilitat' }),
-	strength: new Stat('strength', { en: 'Strength', es: 'Fuerza', ca: 'Força' }),
-	intelligence: new Stat('intelligence', {
+	agility: new Attribute('agility', { en: 'Agility', es: 'Agilidad', ca: 'Agilitat' }),
+	strength: new Attribute('strength', { en: 'Strength', es: 'Fuerza', ca: 'Força' }),
+	intelligence: new Attribute('intelligence', {
 		en: 'Intelligence',
 		es: 'Inteligencia',
 		ca: 'Intel·ligència'
 	}),
-	charisma: new Stat('charisma', { en: 'Charisma', es: 'Carisma', ca: 'Carisma' }),
-	health: new Stat('health', { en: 'Health', es: 'Salud', ca: 'Salut' }),
-	sanity: new Stat('sanity', { en: 'Sanity', es: 'Cordura', ca: 'Seny' })
+	charisma: new Attribute('charisma', { en: 'Charisma', es: 'Carisma', ca: 'Carisma' }),
+	health: new Indicator('health', { en: 'Health', es: 'Salud', ca: 'Salut' }),
+	sanity: new Indicator('sanity', { en: 'Sanity', es: 'Cordura', ca: 'Seny' })
 };

@@ -1,6 +1,7 @@
 export { ChangeStatsEffect } from './changestats';
 export { DrawCardsEffect } from './drawcards';
 export { Effect } from './effect';
+export { FightEffect } from './fight';
 export { ModifyCapabilityCostEffect } from './modifycapabilitycost';
 export { ModifyRollEffect } from './modifyroll';
 export { OneOfEffect } from './oneof';
