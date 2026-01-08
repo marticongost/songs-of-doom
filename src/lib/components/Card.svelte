@@ -5,6 +5,7 @@
 	import { standardAttributes } from '$lib/components/standardattributes';
 	import ChargesChip from './capabilities/ChargesChip.svelte';
 	import InlineSvg from './InlineSvg.svelte';
+    import PropertyList from '$lib/components/properties/PropertyList.svelte';
     export let entity: Entity;
 </script>
 
@@ -46,11 +47,6 @@
         font-size: 1.4rem;
         color: var(--text-heading-color);
     }
-
-    .properties {
-        @include rz.row(sm);
-        font-style: italic;
-    }
 </style>
 
 <article {...standardAttributes($$props, 'card')}>
@@ -68,13 +64,7 @@
             <InlineSvg class="required-archetype-icon" src="archetypes/{entity.archetype.id}.svg"/>
         {/if}
     </div>
-    {#if entity.properties.length}
-        <ul class="properties">
-            {#each entity.properties as property}
-                <li><Text {...property.title}/></li>
-            {/each}
-        </ul>
-    {/if}
+    <PropertyList properties={entity.properties} />
     <div class="description">{entity.description}</div>
     <CapabilityList capabilities={entity.capabilities} />
 </article>
