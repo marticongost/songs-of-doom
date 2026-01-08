@@ -45,6 +45,9 @@ export const parseExpression = (x: string): StatExpressionNode => {
 	return node;
 };
 
+export const resolveExpression = (node: StatExpression): StatExpressionNode =>
+	typeof node === 'string' ? parseExpression(node) : node;
+
 export function tokenizeExpression(x: string): string[] {
 	const re = /([+\-*/])/g;
 	return x.split(re).filter((part) => part !== '');

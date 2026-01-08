@@ -1,4 +1,4 @@
-import { parseExpression, type StatExpression, type StatExpressionNode } from '../expression';
+import { resolveExpression, type StatExpression, type StatExpressionNode } from '../expression';
 import { parseResultString, type Result, type ResultRange, type ResultString } from '../results';
 import { Effect, type EffectProps } from './effect';
 
@@ -20,7 +20,7 @@ export class AttackEffect extends Effect {
 
 	constructor({ expression, damage, properties }: FightEffectProps) {
 		super({ properties });
-		this.expression = typeof expression === 'string' ? parseExpression(expression) : expression;
+		this.expression = resolveExpression(expression);
 		this.damage =
 			damage instanceof Array
 				? damage
