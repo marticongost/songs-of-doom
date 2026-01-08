@@ -1,8 +1,8 @@
 export { AttackEffect } from './attack';
 export { ChangeStatsEffect } from './changestats';
+export { DefendEffect } from './defend';
 export { DrawCardsEffect } from './drawcards';
 export { Effect } from './effect';
-export { FightEffect } from './fight';
 export { ModifyCapabilityCostEffect } from './modifycapabilitycost';
 export { ModifyRollEffect } from './modifyroll';
 export { OneOfEffect } from './oneof';

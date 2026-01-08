@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChangeStatsEffect, DrawCardsEffect, FightEffect, ModifyCapabilityCostEffect, ModifyRollEffect, type Effect } from "$lib/catalog/models/effects";
+	import { ChangeStatsEffect, DefendEffect, DrawCardsEffect, AttackEffect, ModifyCapabilityCostEffect, ModifyRollEffect, type Effect } from "$lib/catalog/models/effects";
 	import Text from "$lib/components/localisation/Text.svelte";
 	import { plural2 } from "$lib/localisation";
 	import { type StatType } from "$lib/catalog/models/stats";
@@ -9,6 +9,7 @@
 	import StatExpressionChip from "../StatExpressionChip.svelte";
 	import DamageTable from "../damage/DamageTable.svelte";
 	import { RechargeEffect } from "$lib/catalog/models/effects/recharge";
+	import PropertyList from "../properties/PropertyList.svelte";
 
     export let effect: Effect;
 </script>
@@ -72,6 +73,7 @@
         <Parameters>
             <StatExpressionChip statExpression={effect.expression}/>
             <DamageTable damage={effect.damage}/>
+            <PropertyList properties={effect.properties}/>
         </Parameters>
     {:else if effect instanceof RechargeEffect}
         {#if effect.amount === "max"}
@@ -85,5 +87,14 @@
                 es="Recuperar hasta {plural2(effect.amount, "una carga", `${effect.amount} cargas`)}"
                 en="Recover up to {plural2(effect.amount, "one charge", `${effect.amount} charges`)}"/>
         {/if}
+    {:else if effect instanceof DefendEffect}
+        <Text
+            ca="Defensa"
+            es="Defensa"
+            en="Defense"/>
+        <Parameters>
+            <StatExpressionChip statExpression={effect.expression}/>
+            <PropertyList properties={effect.properties}/>
+        </Parameters>
     {/if}
 </div>

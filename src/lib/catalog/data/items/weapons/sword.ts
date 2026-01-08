@@ -1,8 +1,9 @@
 import { Action } from '$lib/catalog/models/action';
-import { AttackEffect } from '$lib/catalog/models/effects';
+import { DefendEffect, AttackEffect } from '$lib/catalog/models/effects';
 import { RechargeEffect } from '$lib/catalog/models/effects/recharge';
 import { Item } from '$lib/catalog/models/inventory/item';
 import { Reaction } from '$lib/catalog/models/reaction';
+import parry from '../../properties/parry';
 import weapon from '../../properties/weapon';
 
 export default new Item({
@@ -30,6 +31,16 @@ export default new Item({
 				new AttackEffect({
 					expression: 'strength+2',
 					damage: { 1: 1, '2-3': 3, 4: 6 }
+				})
+			]
+		}),
+		new Reaction({
+			cost: { agility: 1, charges: 1 },
+			triggers: ['receivingAttack'],
+			effects: [
+				new DefendEffect({
+					properties: [parry],
+					expression: 'agility+2'
 				})
 			]
 		})
