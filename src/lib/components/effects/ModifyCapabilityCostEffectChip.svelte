@@ -11,8 +11,9 @@
 {#snippet renderStatValue([stat, value]: [string, number])}
     <span>
         <StatChip stat={stat as StatType}/>
+        <Text ca=" en " es=" en " en=" by "/>
         <strong>
-            <Text ca=" en {value}" es=" en {value}" en=" by {value}"/>
+            {value}
         </strong>
     </span>
 {/snippet}
