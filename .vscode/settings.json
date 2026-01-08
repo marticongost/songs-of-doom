@@ -2,5 +2,10 @@
 	"yaml.schemas": {
 		"src/catalog/schema/trait.json": "src/catalog/data/traits/*/*.yaml",
 		"src/catalog/schema/property.json": "src/catalog/data/properties/*.yaml"
+	},
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.formatOnSave": true,
+	"[svelte]": {
+		"editor.defaultFormatter": "svelte.svelte-vscode"
 	}
 }

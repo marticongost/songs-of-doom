@@ -1,341 +1,522 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Dice Visualizer</title>
-<style>
-body{font-family:sans-serif;margin:0;padding:1rem;background:#f4f4f7;color:#222}
-h1{margin:0 0 .5rem 0}h2{margin:.8rem 0 .4rem 0}
-.section{background:#fff;padding:.7rem;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:1rem}
-button{padding:.3rem .6rem;border:none;border-radius:4px;background:#2563eb;color:#fff;cursor:pointer;font-weight:600;font-size:.85rem}
-button:hover{background:#1d4ed8}button:active{background:#1e40af}
-button.danger{background:#e11d48}button.danger:hover{background:#be123c}button.danger:active{background:#9f1239}
-input[type=number],input[type=text]{padding:.2rem;font-size:.85rem}
-table{border-collapse:collapse;width:100%;font-size:.8rem}
-td,th{border:1px solid #e5e7eb;padding:.2rem;text-align:center}
-th{background:#f9fafb}
-.dice-type{border:1px solid #e5e7eb;padding:.5rem;border-radius:6px;margin-bottom:.7rem}
-.dice-header{display:flex;justify-content:space-between;align-items:center}
-.pool{background:#fff;border-radius:6px;padding:.6rem;box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:1rem}
-.chart{display:flex;align-items:flex-end;gap:.25rem;height:120px;margin-top:.4rem}
-.bar{flex:1;background:#0ea5e9;border-radius:3px 3px 0 0}
-.bar.zero{background:#e5e7eb}
-.xlabel{font-size:.7rem;text-align:center;margin-top:.2rem}
-.nonNumericNA{color:#666;font-size:.75rem}
-</style>
-</head><body>
-<h1>Dice System Visualizer</h1>
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Dice Visualizer</title>
+		<style>
+			body {
+				font-family: sans-serif;
+				margin: 0;
+				padding: 1rem;
+				background: #f4f4f7;
+				color: #222;
+			}
+			h1 {
+				margin: 0 0 0.5rem 0;
+			}
+			h2 {
+				margin: 0.8rem 0 0.4rem 0;
+			}
+			.section {
+				background: #fff;
+				padding: 0.7rem;
+				border-radius: 6px;
+				box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+				margin-bottom: 1rem;
+			}
+			button {
+				padding: 0.3rem 0.6rem;
+				border: none;
+				border-radius: 4px;
+				background: #2563eb;
+				color: #fff;
+				cursor: pointer;
+				font-weight: 600;
+				font-size: 0.85rem;
+			}
+			button:hover {
+				background: #1d4ed8;
+			}
+			button:active {
+				background: #1e40af;
+			}
+			button.danger {
+				background: #e11d48;
+			}
+			button.danger:hover {
+				background: #be123c;
+			}
+			button.danger:active {
+				background: #9f1239;
+			}
+			input[type='number'],
+			input[type='text'] {
+				padding: 0.2rem;
+				font-size: 0.85rem;
+			}
+			table {
+				border-collapse: collapse;
+				width: 100%;
+				font-size: 0.8rem;
+			}
+			td,
+			th {
+				border: 1px solid #e5e7eb;
+				padding: 0.2rem;
+				text-align: center;
+			}
+			th {
+				background: #f9fafb;
+			}
+			.dice-type {
+				border: 1px solid #e5e7eb;
+				padding: 0.5rem;
+				border-radius: 6px;
+				margin-bottom: 0.7rem;
+			}
+			.dice-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+			.pool {
+				background: #fff;
+				border-radius: 6px;
+				padding: 0.6rem;
+				box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+				margin-bottom: 1rem;
+			}
+			.chart {
+				display: flex;
+				align-items: flex-end;
+				gap: 0.25rem;
+				height: 120px;
+				margin-top: 0.4rem;
+			}
+			.bar {
+				flex: 1;
+				background: #0ea5e9;
+				border-radius: 3px 3px 0 0;
+			}
+			.bar.zero {
+				background: #e5e7eb;
+			}
+			.xlabel {
+				font-size: 0.7rem;
+				text-align: center;
+				margin-top: 0.2rem;
+			}
+			.nonNumericNA {
+				color: #666;
+				font-size: 0.75rem;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Dice System Visualizer</h1>
 
-<div class="section">
-<h2>Numeric Result Clamping</h2>
-<label>Min: <input id="clampMin" type="number" value="0" style="width:60px"></label>
-<label>Max: <input id="clampMax" type="number" value="5" style="width:60px;margin-left:.5rem"></label>
-</div>
+		<div class="section">
+			<h2>Numeric Result Clamping</h2>
+			<label>Min: <input id="clampMin" type="number" value="0" style="width: 60px" /></label>
+			<label
+				>Max: <input id="clampMax" type="number" value="5" style="width: 60px; margin-left: 0.5rem"
+			/></label>
+		</div>
 
-<div class="section">
-<h2>Dice Types</h2>
-<div id="diceTypes"></div>
-<button id="addDiceTypeBtn">Add Dice Type</button>
-</div>
+		<div class="section">
+			<h2>Dice Types</h2>
+			<div id="diceTypes"></div>
+			<button id="addDiceTypeBtn">Add Dice Type</button>
+		</div>
 
-<div class="section">
-<h2>Dice Pools</h2>
-<button id="addPoolBtn">Add Pool</button>
-<div id="poolContainer"></div>
-</div>
-<script>
-let diceTypes=[];let pools=[];let clampMin=0;let clampMax=5;
+		<div class="section">
+			<h2>Dice Pools</h2>
+			<button id="addPoolBtn">Add Pool</button>
+			<div id="poolContainer"></div>
+		</div>
+		<script>
+			let diceTypes = [];
+			let pools = [];
+			let clampMin = 0;
+			let clampMax = 5;
 
-function saveState(){
-localStorage.setItem("diceVisualizerState",JSON.stringify({diceTypes,pools,clampMin,clampMax}));
-}
-function loadState(){
-let raw=localStorage.getItem("diceVisualizerState");if(!raw)return null;
-try{return JSON.parse(raw);}catch{return null;}
-}
+			function saveState() {
+				localStorage.setItem(
+					'diceVisualizerState',
+					JSON.stringify({ diceTypes, pools, clampMin, clampMax })
+				);
+			}
+			function loadState() {
+				let raw = localStorage.getItem('diceVisualizerState');
+				if (!raw) return null;
+				try {
+					return JSON.parse(raw);
+				} catch {
+					return null;
+				}
+			}
 
-let saved=loadState();
-if(saved){
-diceTypes=saved.diceTypes||[];
-pools=saved.pools||[];
-clampMin=saved.clampMin??0;
-clampMax=saved.clampMax??5;
-document.getElementById("clampMin").value=clampMin;
-document.getElementById("clampMax").value=clampMax;
-}else{
-diceTypes=[
-{id:crypto.randomUUID(),name:"Skill",faces:[
-{value:"2",weight:1,priority:null},
-{value:"1",weight:3,priority:null},
-{value:"0",weight:2,priority:null}
-]},
-{id:crypto.randomUUID(),name:"Bonus",faces:[
-{value:"1",weight:3,priority:null},
-{value:"0",weight:3,priority:null}
-]},
-{id:crypto.randomUUID(),name:"Penalty",faces:[
-{value:"-1",weight:3,priority:null},
-{value:"0",weight:3,priority:null}
-]}
-];
-pools=[{id:crypto.randomUUID(),dice:{}}];
-}
+			let saved = loadState();
+			if (saved) {
+				diceTypes = saved.diceTypes || [];
+				pools = saved.pools || [];
+				clampMin = saved.clampMin ?? 0;
+				clampMax = saved.clampMax ?? 5;
+				document.getElementById('clampMin').value = clampMin;
+				document.getElementById('clampMax').value = clampMax;
+			} else {
+				diceTypes = [
+					{
+						id: crypto.randomUUID(),
+						name: 'Skill',
+						faces: [
+							{ value: '2', weight: 1, priority: null },
+							{ value: '1', weight: 3, priority: null },
+							{ value: '0', weight: 2, priority: null }
+						]
+					},
+					{
+						id: crypto.randomUUID(),
+						name: 'Bonus',
+						faces: [
+							{ value: '1', weight: 3, priority: null },
+							{ value: '0', weight: 3, priority: null }
+						]
+					},
+					{
+						id: crypto.randomUUID(),
+						name: 'Penalty',
+						faces: [
+							{ value: '-1', weight: 3, priority: null },
+							{ value: '0', weight: 3, priority: null }
+						]
+					}
+				];
+				pools = [{ id: crypto.randomUUID(), dice: {} }];
+			}
 
-function renderDiceTypes(){
-let container=document.getElementById("diceTypes");
-container.innerHTML="";
-diceTypes.forEach((dt,dtIndex)=>{
-let div=document.createElement("div");
-div.className="dice-type";
-div.innerHTML=`<div class="dice-header">
+			function renderDiceTypes() {
+				let container = document.getElementById('diceTypes');
+				container.innerHTML = '';
+				diceTypes.forEach((dt, dtIndex) => {
+					let div = document.createElement('div');
+					div.className = 'dice-type';
+					div.innerHTML = `<div class="dice-header">
 <input type="text" value="${dt.name}" style="width:140px">
 <button class="danger">Remove</button>
 </div>
 <table><thead><tr><th>Value</th><th>Weight</th><th>Priority</th><th></th><th></th><th></th></tr></thead><tbody></tbody></table>
 <button class="addFaceBtn">Add Face</button>`;
-let nameInput=div.querySelector("input[type=text]");
-nameInput.addEventListener("input",()=>{dt.name=nameInput.value;renderPools();saveState();});
-div.querySelector(".danger").addEventListener("click",()=>{
-diceTypes.splice(dtIndex,1);
-pools.forEach(p=>delete p.dice[dt.id]);
-renderDiceTypes();renderPools();saveState();
-});
-let tbody=div.querySelector("tbody");
-dt.faces.forEach((face,fIndex)=>{
-let row=document.createElement("tr");
-let isNumeric=!isNaN(parseFloat(face.value));
-row.innerHTML=`<td><input type="text" value="${face.value}" style="width:70px"></td>
+					let nameInput = div.querySelector('input[type=text]');
+					nameInput.addEventListener('input', () => {
+						dt.name = nameInput.value;
+						renderPools();
+						saveState();
+					});
+					div.querySelector('.danger').addEventListener('click', () => {
+						diceTypes.splice(dtIndex, 1);
+						pools.forEach((p) => delete p.dice[dt.id]);
+						renderDiceTypes();
+						renderPools();
+						saveState();
+					});
+					let tbody = div.querySelector('tbody');
+					dt.faces.forEach((face, fIndex) => {
+						let row = document.createElement('tr');
+						let isNumeric = !isNaN(parseFloat(face.value));
+						row.innerHTML = `<td><input type="text" value="${face.value}" style="width:70px"></td>
 <td><input type="number" value="${face.weight}" min="1" style="width:60px"></td>
-<td>${isNumeric?`<span class="nonNumericNA">N/A</span>`:`<input type="number" value="${face.priority??0}" style="width:60px">`}</td>
+<td>${isNumeric ? `<span class="nonNumericNA">N/A</span>` : `<input type="number" value="${face.priority ?? 0}" style="width:60px">`}</td>
 <td><button class="moveUp">↑</button></td>
 <td><button class="moveDown">↓</button></td>
 <td><button class="danger">X</button></td>`;
-let valInput=row.children[0].querySelector("input");
-let weightInput=row.children[1].querySelector("input");
-let priorityInput=isNumeric?null:row.children[2].querySelector("input");
-valInput.addEventListener("input",()=>{
-face.value=valInput.value;
-if(isNaN(parseFloat(face.value))){if(face.priority==null)face.priority=0;}
-else{face.priority=null;}
-renderDiceTypes();renderPools();saveState();
-});
-weightInput.addEventListener("input",()=>{
-face.weight=Math.max(1,parseInt(weightInput.value));renderPools();saveState();
-});
-if(priorityInput){
-priorityInput.addEventListener("input",()=>{
-face.priority=parseInt(priorityInput.value);renderPools();saveState();
-});
-}
-row.querySelector(".moveUp").addEventListener("click",()=>{
-if(fIndex>0){let tmp=dt.faces[fIndex-1];dt.faces[fIndex-1]=dt.faces[fIndex];dt.faces[fIndex]=tmp;renderDiceTypes();renderPools();saveState();}
-});
-row.querySelector(".moveDown").addEventListener("click",()=>{
-if(fIndex<dt.faces.length-1){let tmp=dt.faces[fIndex+1];dt.faces[fIndex+1]=dt.faces[fIndex];dt.faces[fIndex]=tmp;renderDiceTypes();renderPools();saveState();}
-});
-row.querySelector(".danger").addEventListener("click",()=>{
-dt.faces.splice(fIndex,1);renderDiceTypes();renderPools();saveState();
-});
-tbody.appendChild(row);
-});
-div.querySelector(".addFaceBtn").addEventListener("click",()=>{
-dt.faces.push({value:"0",weight:1,priority:null});
-renderDiceTypes();renderPools();saveState();
-});
-container.appendChild(div);
-});
-}
+						let valInput = row.children[0].querySelector('input');
+						let weightInput = row.children[1].querySelector('input');
+						let priorityInput = isNumeric ? null : row.children[2].querySelector('input');
+						valInput.addEventListener('input', () => {
+							face.value = valInput.value;
+							if (isNaN(parseFloat(face.value))) {
+								if (face.priority == null) face.priority = 0;
+							} else {
+								face.priority = null;
+							}
+							renderDiceTypes();
+							renderPools();
+							saveState();
+						});
+						weightInput.addEventListener('input', () => {
+							face.weight = Math.max(1, parseInt(weightInput.value));
+							renderPools();
+							saveState();
+						});
+						if (priorityInput) {
+							priorityInput.addEventListener('input', () => {
+								face.priority = parseInt(priorityInput.value);
+								renderPools();
+								saveState();
+							});
+						}
+						row.querySelector('.moveUp').addEventListener('click', () => {
+							if (fIndex > 0) {
+								let tmp = dt.faces[fIndex - 1];
+								dt.faces[fIndex - 1] = dt.faces[fIndex];
+								dt.faces[fIndex] = tmp;
+								renderDiceTypes();
+								renderPools();
+								saveState();
+							}
+						});
+						row.querySelector('.moveDown').addEventListener('click', () => {
+							if (fIndex < dt.faces.length - 1) {
+								let tmp = dt.faces[fIndex + 1];
+								dt.faces[fIndex + 1] = dt.faces[fIndex];
+								dt.faces[fIndex] = tmp;
+								renderDiceTypes();
+								renderPools();
+								saveState();
+							}
+						});
+						row.querySelector('.danger').addEventListener('click', () => {
+							dt.faces.splice(fIndex, 1);
+							renderDiceTypes();
+							renderPools();
+							saveState();
+						});
+						tbody.appendChild(row);
+					});
+					div.querySelector('.addFaceBtn').addEventListener('click', () => {
+						dt.faces.push({ value: '0', weight: 1, priority: null });
+						renderDiceTypes();
+						renderPools();
+						saveState();
+					});
+					container.appendChild(div);
+				});
+			}
 
-function renderPools(){
-let container=document.getElementById("poolContainer");
-container.innerHTML="";
-pools.forEach((pool,pIndex)=>{
-let div=document.createElement("div");
-div.className="pool";
-div.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
+			function renderPools() {
+				let container = document.getElementById('poolContainer');
+				container.innerHTML = '';
+				pools.forEach((pool, pIndex) => {
+					let div = document.createElement('div');
+					div.className = 'pool';
+					div.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
 <strong>Pool</strong><button class="danger">Remove</button></div>
 <div class="poolDice"></div>
 <table class="pmfTable"><thead><tr><th>Result</th><th>P(r)</th><th>P(r≥)</th></tr></thead><tbody></tbody></table>
 <div class="chart"></div>
 <div class="xlabels" style="display:flex;justify-content:space-between"></div>`;
-div.querySelector(".danger").addEventListener("click",()=>{
-pools.splice(pIndex,1);renderPools();saveState();
-});
-let diceDiv=div.querySelector(".poolDice");
-diceDiv.innerHTML="";
-diceTypes.forEach(dt=>{
-if(pool.dice[dt.id]==null)pool.dice[dt.id]=0;
-let wrap=document.createElement("div");
-wrap.innerHTML=`<label>${dt.name}: <input type="number" min="0" value="${pool.dice[dt.id]}" style="width:60px"></label>`;
-let input=wrap.querySelector("input");
-input.addEventListener("input",()=>{
-pool.dice[dt.id]=Math.max(0,parseInt(input.value));updatePool(div,pool);saveState();
-});
-diceDiv.appendChild(wrap);
-});
-container.appendChild(div);
-updatePool(div,pool);
-});
-}
-function buildDieDistribution(faces){
-let numericDist={};let nonNumeric=[];
-let totalWeight=0;
-faces.forEach(f=>{totalWeight+=f.weight;});
-faces.forEach(f=>{
-let p=f.weight/totalWeight;
-if(!isNaN(parseFloat(f.value))){
-let v=parseFloat(f.value);
-numericDist[v]=(numericDist[v]||0)+p;
-}else{
-nonNumeric.push({name:f.value,priority:f.priority??0,prob:p});
-}
-});
-return{numeric:numericDist,nonNumeric};
-}
+					div.querySelector('.danger').addEventListener('click', () => {
+						pools.splice(pIndex, 1);
+						renderPools();
+						saveState();
+					});
+					let diceDiv = div.querySelector('.poolDice');
+					diceDiv.innerHTML = '';
+					diceTypes.forEach((dt) => {
+						if (pool.dice[dt.id] == null) pool.dice[dt.id] = 0;
+						let wrap = document.createElement('div');
+						wrap.innerHTML = `<label>${dt.name}: <input type="number" min="0" value="${pool.dice[dt.id]}" style="width:60px"></label>`;
+						let input = wrap.querySelector('input');
+						input.addEventListener('input', () => {
+							pool.dice[dt.id] = Math.max(0, parseInt(input.value));
+							updatePool(div, pool);
+							saveState();
+						});
+						diceDiv.appendChild(wrap);
+					});
+					container.appendChild(div);
+					updatePool(div, pool);
+				});
+			}
+			function buildDieDistribution(faces) {
+				let numericDist = {};
+				let nonNumeric = [];
+				let totalWeight = 0;
+				faces.forEach((f) => {
+					totalWeight += f.weight;
+				});
+				faces.forEach((f) => {
+					let p = f.weight / totalWeight;
+					if (!isNaN(parseFloat(f.value))) {
+						let v = parseFloat(f.value);
+						numericDist[v] = (numericDist[v] || 0) + p;
+					} else {
+						nonNumeric.push({ name: f.value, priority: f.priority ?? 0, prob: p });
+					}
+				});
+				return { numeric: numericDist, nonNumeric };
+			}
 
-function convolveNumeric(a,b){
-let out={};
-for(let ka in a){for(let kb in b){
-let s=parseFloat(ka)+parseFloat(kb);
-out[s]=(out[s]||0)+a[ka]*b[kb];
-}}
-return out;
-}
+			function convolveNumeric(a, b) {
+				let out = {};
+				for (let ka in a) {
+					for (let kb in b) {
+						let s = parseFloat(ka) + parseFloat(kb);
+						out[s] = (out[s] || 0) + a[ka] * b[kb];
+					}
+				}
+				return out;
+			}
 
-function combineNonNumeric(a,b){
-let out=[...a];
-b.forEach(x=>{
-let existing=out.find(y=>y.name===x.name);
-if(existing)existing.prob+=x.prob;
-else out.push({...x});
-});
-return out;
-}
+			function combineNonNumeric(a, b) {
+				let out = [...a];
+				b.forEach((x) => {
+					let existing = out.find((y) => y.name === x.name);
+					if (existing) existing.prob += x.prob;
+					else out.push({ ...x });
+				});
+				return out;
+			}
 
-function raiseDistribution(dist,n){
-if(n===0)return{numeric:{0:1},nonNumeric:[]};
-let out={numeric:{...dist.numeric},nonNumeric:[...dist.nonNumeric]};
-for(let i=1;i<n;i++){
-out.numeric=convolveNumeric(out.numeric,dist.numeric);
-out.nonNumeric=combineNonNumeric(out.nonNumeric,dist.nonNumeric);
-}
-return out;
-}
+			function raiseDistribution(dist, n) {
+				if (n === 0) return { numeric: { 0: 1 }, nonNumeric: [] };
+				let out = { numeric: { ...dist.numeric }, nonNumeric: [...dist.nonNumeric] };
+				for (let i = 1; i < n; i++) {
+					out.numeric = convolveNumeric(out.numeric, dist.numeric);
+					out.nonNumeric = combineNonNumeric(out.nonNumeric, dist.nonNumeric);
+				}
+				return out;
+			}
 
-function mergePoolDistributions(list){
-let numeric={0:1};let nonNumeric=[];
-list.forEach(d=>{
-numeric=convolveNumeric(numeric,d.numeric);
-nonNumeric=combineNonNumeric(nonNumeric,d.nonNumeric);
-});
-return{numeric,nonNumeric};
-}
+			function mergePoolDistributions(list) {
+				let numeric = { 0: 1 };
+				let nonNumeric = [];
+				list.forEach((d) => {
+					numeric = convolveNumeric(numeric, d.numeric);
+					nonNumeric = combineNonNumeric(nonNumeric, d.nonNumeric);
+				});
+				return { numeric, nonNumeric };
+			}
 
-function resolveFinalDistribution(numeric,nonNumeric){
-if(nonNumeric.length>0){
-let best=nonNumeric.reduce((a,b)=>{
-if(a.priority<b.priority)return a;
-if(a.priority>b.priority)return b;
-return a.name<b.name?a:b;
-});
-return{type:"nonNumeric",name:best.name,prob:best.prob};
-}
-let pmf={};
-for(let k in numeric){
-let v=parseFloat(k);
-let c=Math.max(clampMin,Math.min(clampMax,v));
-pmf[c]=(pmf[c]||0)+numeric[k];
-}
-return{type:"numeric",pmf};
-}
+			function resolveFinalDistribution(numeric, nonNumeric) {
+				if (nonNumeric.length > 0) {
+					let best = nonNumeric.reduce((a, b) => {
+						if (a.priority < b.priority) return a;
+						if (a.priority > b.priority) return b;
+						return a.name < b.name ? a : b;
+					});
+					return { type: 'nonNumeric', name: best.name, prob: best.prob };
+				}
+				let pmf = {};
+				for (let k in numeric) {
+					let v = parseFloat(k);
+					let c = Math.max(clampMin, Math.min(clampMax, v));
+					pmf[c] = (pmf[c] || 0) + numeric[k];
+				}
+				return { type: 'numeric', pmf };
+			}
 
-function computeFullPMF(numeric,nonNumeric){
-let out={};
-nonNumeric.forEach(n=>{out[n.name]=n.prob;});
-for(let k in numeric){
-let v=parseFloat(k);
-let c=Math.max(clampMin,Math.min(clampMax,v));
-out[c]=(out[c]||0)+numeric[k];
-}
-return out;
-}
+			function computeFullPMF(numeric, nonNumeric) {
+				let out = {};
+				nonNumeric.forEach((n) => {
+					out[n.name] = n.prob;
+				});
+				for (let k in numeric) {
+					let v = parseFloat(k);
+					let c = Math.max(clampMin, Math.min(clampMax, v));
+					out[c] = (out[c] || 0) + numeric[k];
+				}
+				return out;
+			}
 
-function computeCCDF(pmf){
-let out={};
-for(let r=clampMin;r<=clampMax;r++){
-let sum=0;
-for(let x=r;x<=clampMax;x++){
-if(pmf[x]!=null)sum+=pmf[x];
-}
-out[r]=sum;
-}
-return out;
-}
+			function computeCCDF(pmf) {
+				let out = {};
+				for (let r = clampMin; r <= clampMax; r++) {
+					let sum = 0;
+					for (let x = r; x <= clampMax; x++) {
+						if (pmf[x] != null) sum += pmf[x];
+					}
+					out[r] = sum;
+				}
+				return out;
+			}
 
-function updatePool(div,pool){
-let dists=[];
-diceTypes.forEach(dt=>{
-let count=pool.dice[dt.id]||0;
-let base=buildDieDistribution(dt.faces);
-let raised=raiseDistribution(base,count);
-dists.push(raised);
-});
-let merged=mergePoolDistributions(dists);
-let fullPMF=computeFullPMF(merged.numeric,merged.nonNumeric);
-let ccdf=computeCCDF(fullPMF);
+			function updatePool(div, pool) {
+				let dists = [];
+				diceTypes.forEach((dt) => {
+					let count = pool.dice[dt.id] || 0;
+					let base = buildDieDistribution(dt.faces);
+					let raised = raiseDistribution(base, count);
+					dists.push(raised);
+				});
+				let merged = mergePoolDistributions(dists);
+				let fullPMF = computeFullPMF(merged.numeric, merged.nonNumeric);
+				let ccdf = computeCCDF(fullPMF);
 
-let tbody=div.querySelector(".pmfTable tbody");
-tbody.innerHTML="";
-Object.keys(fullPMF).sort((a,b)=>{
-let na=parseFloat(a),nb=parseFloat(b);
-let aNum=!isNaN(na),bNum=!isNaN(nb);
-if(aNum&&bNum)return na-nb;
-if(aNum&&!bNum)return 1;
-if(!aNum&&bNum)return -1;
-return a.localeCompare(b);
-}).forEach(key=>{
-let p=fullPMF[key];
-let tr=document.createElement("tr");
-let isNumeric=!isNaN(parseFloat(key));
-let cc=isNumeric?((ccdf[key]*100).toFixed(2)+"%"):"N/A";
-tr.innerHTML=`<td>${key}</td><td>${(p*100).toFixed(2)}%</td><td>${cc}</td>`;
-tbody.appendChild(tr);
-});
+				let tbody = div.querySelector('.pmfTable tbody');
+				tbody.innerHTML = '';
+				Object.keys(fullPMF)
+					.sort((a, b) => {
+						let na = parseFloat(a),
+							nb = parseFloat(b);
+						let aNum = !isNaN(na),
+							bNum = !isNaN(nb);
+						if (aNum && bNum) return na - nb;
+						if (aNum && !bNum) return 1;
+						if (!aNum && bNum) return -1;
+						return a.localeCompare(b);
+					})
+					.forEach((key) => {
+						let p = fullPMF[key];
+						let tr = document.createElement('tr');
+						let isNumeric = !isNaN(parseFloat(key));
+						let cc = isNumeric ? (ccdf[key] * 100).toFixed(2) + '%' : 'N/A';
+						tr.innerHTML = `<td>${key}</td><td>${(p * 100).toFixed(2)}%</td><td>${cc}</td>`;
+						tbody.appendChild(tr);
+					});
 
-let chart=div.querySelector(".chart");
-let xlabels=div.querySelector(".xlabels");
-chart.innerHTML="";xlabels.innerHTML="";
-let maxP=0;
-for(let r=clampMin;r<=clampMax;r++){
-if(fullPMF[r]!=null)maxP=Math.max(maxP,fullPMF[r]);
-}
-for(let r=clampMin;r<=clampMax;r++){
-let p=fullPMF[r]||0;
-let bar=document.createElement("div");
-bar.className="bar"+(p===0?" zero":"");
-bar.style.height=(maxP>0?(p/maxP*100):0)+"%";
-chart.appendChild(bar);
-let xl=document.createElement("div");
-xl.className="xlabel";xl.textContent=r;
-xlabels.appendChild(xl);
-}
-}
+				let chart = div.querySelector('.chart');
+				let xlabels = div.querySelector('.xlabels');
+				chart.innerHTML = '';
+				xlabels.innerHTML = '';
+				let maxP = 0;
+				for (let r = clampMin; r <= clampMax; r++) {
+					if (fullPMF[r] != null) maxP = Math.max(maxP, fullPMF[r]);
+				}
+				for (let r = clampMin; r <= clampMax; r++) {
+					let p = fullPMF[r] || 0;
+					let bar = document.createElement('div');
+					bar.className = 'bar' + (p === 0 ? ' zero' : '');
+					bar.style.height = (maxP > 0 ? (p / maxP) * 100 : 0) + '%';
+					chart.appendChild(bar);
+					let xl = document.createElement('div');
+					xl.className = 'xlabel';
+					xl.textContent = r;
+					xlabels.appendChild(xl);
+				}
+			}
 
-document.getElementById("clampMin").addEventListener("input",()=>{
-clampMin=parseInt(document.getElementById("clampMin").value);
-renderPools();saveState();
-});
-document.getElementById("clampMax").addEventListener("input",()=>{
-clampMax=parseInt(document.getElementById("clampMax").value);
-renderPools();saveState();
-});
+			document.getElementById('clampMin').addEventListener('input', () => {
+				clampMin = parseInt(document.getElementById('clampMin').value);
+				renderPools();
+				saveState();
+			});
+			document.getElementById('clampMax').addEventListener('input', () => {
+				clampMax = parseInt(document.getElementById('clampMax').value);
+				renderPools();
+				saveState();
+			});
 
-document.getElementById("addDiceTypeBtn").addEventListener("click",()=>{
-diceTypes.push({id:crypto.randomUUID(),name:"New Die",faces:[{value:"0",weight:1,priority:null}]});
-renderDiceTypes();renderPools();saveState();
-});
+			document.getElementById('addDiceTypeBtn').addEventListener('click', () => {
+				diceTypes.push({
+					id: crypto.randomUUID(),
+					name: 'New Die',
+					faces: [{ value: '0', weight: 1, priority: null }]
+				});
+				renderDiceTypes();
+				renderPools();
+				saveState();
+			});
 
-document.getElementById("addPoolBtn").addEventListener("click",()=>{
-pools.push({id:crypto.randomUUID(),dice:{}});
-renderPools();saveState();
-});
+			document.getElementById('addPoolBtn').addEventListener('click', () => {
+				pools.push({ id: crypto.randomUUID(), dice: {} });
+				renderPools();
+				saveState();
+			});
 
-renderDiceTypes();renderPools();
-</script>
-</body></html>
+			renderDiceTypes();
+			renderPools();
+		</script>
+	</body>
+</html>
