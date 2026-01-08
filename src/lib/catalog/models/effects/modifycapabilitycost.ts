@@ -1,7 +1,7 @@
 import { attributeTypes, type AttributeType } from '../stats';
-import { Effect } from './effect';
+import { Effect, type EffectProps } from './effect';
 
-export interface ModifyCapabilityCostEffectProps {
+export interface ModifyCapabilityCostEffectProps extends EffectProps {
 	strength?: number;
 	agility?: number;
 	intelligence?: number;
@@ -19,8 +19,14 @@ export class ModifyCapabilityCostEffect extends Effect {
 	readonly intelligence: number;
 	readonly charisma: number;
 
-	constructor({ strength, agility, intelligence, charisma }: ModifyCapabilityCostEffectProps) {
-		super();
+	constructor({
+		strength,
+		agility,
+		intelligence,
+		charisma,
+		properties
+	}: ModifyCapabilityCostEffectProps) {
+		super({ properties });
 		this.strength = strength ?? 0;
 		this.agility = agility ?? 0;
 		this.intelligence = intelligence ?? 0;

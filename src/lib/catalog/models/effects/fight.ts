@@ -1,8 +1,8 @@
 import { parseExpression, type StatExpression, type StatExpressionNode } from '../expression';
 import { parseResultString, type Result, type ResultRange, type ResultString } from '../results';
-import { Effect } from './effect';
+import { Effect, type EffectProps } from './effect';
 
-export interface FightEffectProps {
+export interface FightEffectProps extends EffectProps {
 	expression: StatExpression;
 	damage: DamageTable | Partial<Record<ResultString, number>>;
 }
@@ -18,8 +18,8 @@ export class FightEffect extends Effect {
 	readonly expression: StatExpressionNode;
 	readonly damage: DamageTable;
 
-	constructor({ expression, damage }: FightEffectProps) {
-		super();
+	constructor({ expression, damage, properties }: FightEffectProps) {
+		super({ properties });
 		this.expression = typeof expression === 'string' ? parseExpression(expression) : expression;
 		this.damage =
 			damage instanceof Array

@@ -1,14 +1,14 @@
-import { Effect } from './effect';
+import { Effect, type EffectProps } from './effect';
 
-export interface DrawCardsEffectProps {
+export interface DrawCardsEffectProps extends EffectProps {
 	amount: number;
 }
 
 export class DrawCardsEffect extends Effect {
 	readonly amount: number;
 
-	constructor({ amount }: DrawCardsEffectProps) {
-		super();
+	constructor({ amount, properties }: DrawCardsEffectProps) {
+		super({ properties });
 		this.amount = amount;
 	}
 }
