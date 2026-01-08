@@ -24,6 +24,7 @@ body {
 	$palette-somber: #222;
 	$palette-cloud: rgb(207, 213, 219);
 	$palette-ash: #333;
+	$palette-cinder: #444;
 
 	// === Color assignments ===
 
@@ -38,6 +39,7 @@ body {
 	// Panels
 	--panel-background-color: #{$palette-somber};
 	--panel-border: 2px solid #{$palette-ash};
+	--panel-separator: 2px solid #{$palette-cinder};
 
 	// Text
 	--text-subtle-color: #888;

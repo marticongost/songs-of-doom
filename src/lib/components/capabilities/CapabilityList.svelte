@@ -8,7 +8,7 @@
 <style lang="scss">
     @use "@reguitzell/styles" as rz;
     .capability-list {
-        @include rz.column(sm);
+        @include rz.column(md);
         align-items: stretch;
     }
 </style>

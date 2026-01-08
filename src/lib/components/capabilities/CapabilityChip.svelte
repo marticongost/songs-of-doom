@@ -17,21 +17,16 @@
     @use "@reguitzell/styles" as rz;
 
     .capability-chip {
-        @include rz.row(sm);
-        align-items: flex-start;
+        @include rz.column(xs);
+        align-items: stretch;
     }
 
     .capability-activation {
         @include rz.row;
-        white-space: nowrap;
 
         :global(.capability-icon) {
             margin-right: #{rz.size(xs)};
             color: var(--text-subtle-color);
-        }
-
-         &:after {
-            content: ":";
         }
     }
 
@@ -50,10 +45,6 @@
         li + li:before {
             content: ", ";
         }
-    }
-
-    .capability-effects {
-        flex: 1 1 auto;
     }
 </style>
 
@@ -101,5 +92,5 @@
     </div>
 
     <!-- Effects -->
-    <EffectList style="flex: 1 1 auto;" effects={capability.effects} />
+    <EffectList style="flex: 1 1 auto; margin-left: 1.2em;" effects={capability.effects} />
 </div>
