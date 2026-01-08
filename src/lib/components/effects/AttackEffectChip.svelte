@@ -1,7 +1,6 @@
 <script lang="ts">
     import { AttackEffect } from "$lib/catalog/models/effects";
     import Text from "$lib/components/localisation/Text.svelte";
-    import Parameters from "../capabilities/Parameters.svelte";
     import StatExpressionChip from "../StatExpressionChip.svelte";
     import DamageTable from "../damage/DamageTable.svelte";
     import PropertyList from "../properties/PropertyList.svelte";
@@ -9,12 +8,15 @@
     export let effect: AttackEffect;
 </script>
 
-<Text
-    ca="Atac"
-    es="Ataque"
-    en="Attack"/>
-<Parameters>
+<div>
+    <Text
+        ca="Atacar amb"
+        es="Atacar con"
+        en="Attack with"/>
     <StatExpressionChip statExpression={effect.expression}/>
-    <DamageTable damage={effect.damage}/>
+    {#if effect.properties.length}
+        {", "}
+    {/if}
     <PropertyList properties={effect.properties}/>
-</Parameters>
+</div>
+<DamageTable damage={effect.damage}/>
