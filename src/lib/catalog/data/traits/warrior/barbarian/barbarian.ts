@@ -18,7 +18,7 @@ export default new Trait({
 			]
 		}),
 		new Reaction({
-			triggers: ['defending'],
+			triggers: ['receivingAttack'],
 			effects: [
 				new ModifyRollEffect({
 					modifier: -1

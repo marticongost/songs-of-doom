@@ -2,7 +2,7 @@ import type { LocalisedText } from '$lib/localisation';
 
 export type EventType =
 	| 'attacking'
-	| 'defending'
+	| 'receivingAttack'
 	| 'enemyDefeated'
 	| 'payingCapability'
 	| 'acquired'
@@ -25,9 +25,9 @@ export const events: Record<EventType, Event> = {
 		type: 'attacking',
 		name: { ca: 'En atacar', es: 'Al atacar', en: 'When attacking' }
 	}),
-	defending: new Event({
-		type: 'defending',
-		name: { ca: 'En defensar', es: 'Al defender', en: 'When defending' }
+	receivingAttack: new Event({
+		type: 'receivingAttack',
+		name: { ca: 'En rebre un atac', es: 'Al recibir un ataque', en: 'When attacked' }
 	}),
 	enemyDefeated: new Event({
 		type: 'enemyDefeated',
