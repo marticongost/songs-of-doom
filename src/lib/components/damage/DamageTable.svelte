@@ -1,6 +1,5 @@
 <script lang="ts">
-	import type { DamageTable } from "$lib/catalog/models/effects/fight";
-	import InlineSvg from "../InlineSvg.svelte";
+	import type { DamageTable } from "$lib/catalog/models/effects/attack";
 	import ResultSelectorChip from "../ResultSelectorChip.svelte";
 	import { standardAttributes } from "../standardattributes";
 	import DamageChip from "./DamageChip.svelte";

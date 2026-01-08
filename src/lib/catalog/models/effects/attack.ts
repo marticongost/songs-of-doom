@@ -14,7 +14,7 @@ export interface DamageTableEntry {
 
 export type DamageTable = Array<DamageTableEntry>;
 
-export class FightEffect extends Effect {
+export class AttackEffect extends Effect {
 	readonly expression: StatExpressionNode;
 	readonly damage: DamageTable;
 

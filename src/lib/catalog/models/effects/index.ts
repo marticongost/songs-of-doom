@@ -1,3 +1,4 @@
+export { AttackEffect } from './attack';
 export { ChangeStatsEffect } from './changestats';
 export { DrawCardsEffect } from './drawcards';
 export { Effect } from './effect';

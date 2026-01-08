@@ -64,11 +64,11 @@
                 en="Decrease "/>
             <CommaSeparatedList items={Object.entries(grouppedChanges.decrease)} renderItem={renderStatValue}/>
         {/if}
-    {:else if effect instanceof FightEffect}
+    {:else if effect instanceof AttackEffect}
         <Text
-            ca="Lluitar"
-            es="Luchar"
-            en="Fight"/>
+            ca="Atac"
+            es="Ataque"
+            en="Attack"/>
         <Parameters>
             <StatExpressionChip statExpression={effect.expression}/>
             <DamageTable damage={effect.damage}/>
