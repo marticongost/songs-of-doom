@@ -15,7 +15,7 @@ export interface EntityProps {
 export abstract class Entity {
 	readonly title: LocalisedText;
 	readonly description?: LocalisedText;
-	readonly properties: Array<Property>;
+	protected readonly explicitProperties: Array<Property>;
 	readonly capabilities: Array<Capability>;
 	readonly maxCharges: number;
 
@@ -24,7 +24,7 @@ export abstract class Entity {
 	constructor({ title, description, properties, capabilities, maxCharges }: EntityProps) {
 		this.title = title;
 		this.description = description;
-		this.properties = properties ?? [];
+		this.explicitProperties = properties ?? [];
 		this.capabilities = capabilities ?? [];
 		this.maxCharges = maxCharges ?? 0;
 	}
@@ -35,5 +35,13 @@ export abstract class Entity {
 
 	get isArchetype(): boolean {
 		return false;
+	}
+
+	get properties(): Array<Property> {
+		return [...this.getImplicitProperties(), ...this.explicitProperties];
+	}
+
+	protected getImplicitProperties(): Array<Property> {
+		return [];
 	}
 }

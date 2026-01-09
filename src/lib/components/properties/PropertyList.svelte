@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { CardType } from '$lib/catalog/models/properties';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { standardAttributes } from '../standardattributes';
 
@@ -8,7 +9,9 @@
 {#if properties.length}
 	<ul {...standardAttributes($$props, 'property-list')}>
 		{#each properties as property}
-			<li><Text {...(property as any).title} /></li>
+			<li class={property instanceof CardType ? 'card-type' : ''}>
+				<Text {...(property as any).title} />
+			</li>
 		{/each}
 	</ul>
 {/if}
@@ -23,6 +26,10 @@
 	li {
 		display: inline;
 		font-style: italic;
+
+		&.card-type {
+			font-weight: bold;
+		}
 	}
 
 	li + li:before {

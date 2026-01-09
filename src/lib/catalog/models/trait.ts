@@ -1,5 +1,8 @@
 import { getEntryMetadata } from '..';
+import archetype from '../data/properties/archetype';
+import trait from '../data/properties/trait';
 import { Entity, type EntityProps } from './entity';
+import type { Property } from './properties';
 
 const NOT_COMPUTED = Symbol('not computed');
 
@@ -52,5 +55,13 @@ export class Trait extends Entity {
 				.filter((trait) => trait.archetype === this);
 		}
 		return this._subtraits;
+	}
+
+	override getImplicitProperties(): Array<Property> {
+		const implicitTraits = [trait];
+		if (this.isArchetype) {
+			implicitTraits.push(archetype);
+		}
+		return implicitTraits;
 	}
 }
