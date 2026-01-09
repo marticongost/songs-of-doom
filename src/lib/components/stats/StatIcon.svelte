@@ -20,7 +20,7 @@
 		align-self: center;
 	}
 
-	@each $stat in strength, agility, intelligence, charisma, health, sanity {
+	@each $stat in strength, agility, intelligence, charisma, will, health, sanity {
 		:global(.stat-icon[data-stat='#{$stat}']) {
 			color: var(--stat-#{$stat}-color);
 		}

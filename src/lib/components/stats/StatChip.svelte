@@ -21,7 +21,7 @@
 		display: inline-flex;
 		align-items: baseline;
 
-		@each $stat in strength, agility, intelligence, charisma, health, sanity {
+		@each $stat in strength, agility, intelligence, charisma, will, health, sanity {
 			&[data-stat='#{$stat}'] {
 				color: var(--stat-#{$stat}-color);
 			}

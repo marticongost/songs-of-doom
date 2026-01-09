@@ -1,6 +1,6 @@
 import type { LocalisedText } from '$lib/localisation';
 
-export type AttributeType = 'strength' | 'agility' | 'intelligence' | 'charisma';
+export type AttributeType = 'strength' | 'agility' | 'intelligence' | 'charisma' | 'will';
 export type IndicatorType = 'health' | 'sanity';
 
 export type StatType = AttributeType | IndicatorType;
@@ -27,7 +27,13 @@ export class Indicator extends Stat {
 	}
 }
 
-export const attributeTypes: AttributeType[] = ['strength', 'agility', 'intelligence', 'charisma'];
+export const attributeTypes: AttributeType[] = [
+	'strength',
+	'agility',
+	'intelligence',
+	'charisma',
+	'will'
+];
 export const indicatorTypes: IndicatorType[] = ['health', 'sanity'];
 export const statTypes: StatType[] = [...attributeTypes, ...indicatorTypes];
 
@@ -40,6 +46,7 @@ export const stats: Record<StatType, Stat> = {
 		ca: 'Intel·ligència'
 	}),
 	charisma: new Attribute('charisma', { en: 'Charisma', es: 'Carisma', ca: 'Carisma' }),
+	will: new Attribute('will', { en: 'Will', es: 'Voluntad', ca: 'Voluntat' }),
 	health: new Indicator('health', { en: 'Health', es: 'Salud', ca: 'Salut' }),
 	sanity: new Indicator('sanity', { en: 'Sanity', es: 'Cordura', ca: 'Seny' })
 };

@@ -6,6 +6,7 @@ export interface ChangeStatsEffectProps extends EffectProps {
 	agility?: number;
 	intelligence?: number;
 	charisma?: number;
+	will?: number;
 	health?: number;
 	sanity?: number;
 }
@@ -20,6 +21,7 @@ export class ChangeStatsEffect extends Effect {
 	readonly agility: number;
 	readonly intelligence: number;
 	readonly charisma: number;
+	readonly will: number;
 	readonly health: number;
 	readonly sanity: number;
 
@@ -28,6 +30,7 @@ export class ChangeStatsEffect extends Effect {
 		agility,
 		intelligence,
 		charisma,
+		will,
 		health,
 		sanity,
 		properties
@@ -37,6 +40,7 @@ export class ChangeStatsEffect extends Effect {
 		this.agility = agility ?? 0;
 		this.intelligence = intelligence ?? 0;
 		this.charisma = charisma ?? 0;
+		this.will = will ?? 0;
 		this.health = health ?? 0;
 		this.sanity = sanity ?? 0;
 	}

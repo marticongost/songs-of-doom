@@ -5,6 +5,7 @@ export interface CapabilityCostProps {
 	agility?: number;
 	intelligence?: number;
 	charisma?: number;
+	will?: number;
 	exhaust?: boolean;
 	charges?: number;
 }
@@ -14,6 +15,7 @@ export class CapabilityCost {
 	readonly agility: number;
 	readonly intelligence: number;
 	readonly charisma: number;
+	readonly will: number;
 	readonly exhaust: boolean;
 	readonly charges: number;
 
@@ -22,6 +24,7 @@ export class CapabilityCost {
 		agility,
 		intelligence,
 		charisma,
+		will,
 		exhaust,
 		charges
 	}: CapabilityCostProps) {
@@ -29,6 +32,7 @@ export class CapabilityCost {
 		this.agility = agility ?? 0;
 		this.intelligence = intelligence ?? 0;
 		this.charisma = charisma ?? 0;
+		this.will = will ?? 0;
 		this.exhaust = exhaust ?? false;
 		this.charges = charges ?? 0;
 	}

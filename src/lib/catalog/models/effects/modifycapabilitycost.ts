@@ -6,6 +6,7 @@ export interface ModifyCapabilityCostEffectProps extends EffectProps {
 	agility?: number;
 	intelligence?: number;
 	charisma?: number;
+	will?: number;
 }
 
 export interface GrouppedCapabilityCosts {
@@ -18,12 +19,14 @@ export class ModifyCapabilityCostEffect extends Effect {
 	readonly agility: number;
 	readonly intelligence: number;
 	readonly charisma: number;
+	readonly will: number;
 
 	constructor({
 		strength,
 		agility,
 		intelligence,
 		charisma,
+		will,
 		properties
 	}: ModifyCapabilityCostEffectProps) {
 		super({ properties });
@@ -31,6 +34,7 @@ export class ModifyCapabilityCostEffect extends Effect {
 		this.agility = agility ?? 0;
 		this.intelligence = intelligence ?? 0;
 		this.charisma = charisma ?? 0;
+		this.will = will ?? 0;
 	}
 
 	get(attribute: AttributeType): number {

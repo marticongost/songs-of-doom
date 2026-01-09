@@ -20,7 +20,8 @@ body {
 	$palette-green: #55a155;
 	$palette-yellow: #a1a155;
 	$palette-blue: #5555a1;
-	$palette-purple: #a155a1;
+	$palette-purple: #7655a1;
+	$palette-violet: #a155a1;
 	$palette-somber: #222;
 	$palette-cloud: rgb(207, 213, 219);
 	$palette-ash: #333;
@@ -34,6 +35,7 @@ body {
 	--stat-strength-color: #{$palette-brown};
 	--stat-intelligence-color: #{$palette-purple};
 	--stat-charisma-color: #{$palette-yellow};
+	--stat-will-color: #{$palette-violet};
 	--stat-health-color: #{$palette-red};
 	--stat-sanity-color: #{$palette-blue};
 
