@@ -9,7 +9,7 @@
 </script>
 
 {#if entities.length > 0}
-	<div {...standardAttributes($$props, 'trait-list')}>
+	<div {...standardAttributes($$props, 'entity-list')}>
 		{#each entities as entity}
 			<svelte:component this={EntityComponent} {entity} />
 		{/each}
@@ -19,7 +19,7 @@
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
 
-	.trait-list {
+	.entity-list {
 		@include rz.column(md);
 	}
 </style>
