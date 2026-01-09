@@ -6,6 +6,7 @@
 	import ChargesChip from './capabilities/ChargesChip.svelte';
 	import InlineSvg from './InlineSvg.svelte';
 	import PropertyList from '$lib/components/properties/PropertyList.svelte';
+	import Image from './Image.svelte';
 	export let entity: Entity;
 </script>
 
@@ -24,6 +25,7 @@
 			<InlineSvg class="required-archetype-icon" src="archetypes/{entity.archetype.id}.svg" />
 		{/if}
 	</div>
+	<Image src="cards/{entity.id}.jpg" />
 	<PropertyList properties={entity.properties} />
 	<div class="description">{entity.description}</div>
 	<CapabilityList capabilities={entity.capabilities} />
