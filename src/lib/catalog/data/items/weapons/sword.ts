@@ -1,6 +1,6 @@
 import { Action } from '$lib/catalog/models/action';
+import { fullyRechargeOnChapterStart } from '$lib/catalog/models/common';
 import { DefendEffect, AttackEffect } from '$lib/catalog/models/effects';
-import { RechargeEffect } from '$lib/catalog/models/effects/recharge';
 import { Item } from '$lib/catalog/models/inventory/item';
 import { Reaction } from '$lib/catalog/models/reaction';
 import parry from '../../properties/parry';
@@ -12,10 +12,7 @@ export default new Item({
 	properties: [weapon],
 	maxCharges: 3,
 	capabilities: [
-		new Reaction({
-			triggers: ['chapterStart'],
-			effects: [new RechargeEffect({ amount: 'max' })]
-		}),
+		fullyRechargeOnChapterStart,
 		new Action({
 			cost: { strength: 1, charges: 1 },
 			effects: [
