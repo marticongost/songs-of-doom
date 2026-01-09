@@ -25,6 +25,7 @@ body {
 	$palette-cloud: rgb(207, 213, 219);
 	$palette-ash: #333;
 	$palette-cinder: #444;
+	$palette-steel: #b0baba;
 
 	// === Color assignments ===
 
@@ -45,6 +46,7 @@ body {
 
 	// Text
 	--text-subtle-color: #888;
+	--text-highlight: #{$palette-steel};
 	--text-heading-color: #{$palette-cloud};
 }
 

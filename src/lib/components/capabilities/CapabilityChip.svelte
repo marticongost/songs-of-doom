@@ -78,6 +78,7 @@
 	.moment {
 		@include rz.row;
 		margin-right: #{rz.size(xs)};
+		color: var(--text-highlight);
 	}
 
 	.trigger-label {
