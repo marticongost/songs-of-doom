@@ -30,9 +30,11 @@
 		{/if}
 	</div>
 	<Image src="cards/{entity.id}.jpg" />
-	<PropertyList properties={entity.properties} />
-	<div class="description">{entity.description}</div>
-	<CapabilityList capabilities={entity.capabilities} />
+	<div class="body">
+		<PropertyList properties={entity.properties} />
+		<div class="description">{entity.description}</div>
+		<CapabilityList capabilities={entity.capabilities} />
+	</div>
 </article>
 
 <style lang="scss">
@@ -44,8 +46,24 @@
 	$card-screen-width: 24;
 	$card-content-scale: 2.3;
 
+	.card {
+		@include rz.column;
+		align-items: stretch;
+		border: var(--panel-border);
+		border-radius: 0.5em;
+		background-color: var(--panel-background-color);
+		font-size: #{math.div($card-screen-width, $card-print-width) * $card-content-scale}em;
+		width: #{math.div($card-print-width, $card-content-scale)}em;
+		height: #{math.div($card-print-height, $card-content-scale)}em;
+
+		@media print {
+			font-size: #{$card-content-scale}mm;
+		}
+	}
+
 	.header {
 		@include rz.row(sm);
+		@include rz.padding(sm);
 
 		:global(.own-archetype-icon) {
 			flex: 0 0 auto;
@@ -59,20 +77,9 @@
 		}
 	}
 
-	.card {
+	.body {
 		@include rz.column(sm);
-		align-items: stretch;
-		padding: 1em;
-		border: var(--panel-border);
-		border-radius: 0.5em;
-		background-color: var(--panel-background-color);
-		font-size: #{math.div($card-screen-width, $card-print-width) * $card-content-scale}em;
-		width: #{math.div($card-print-width, $card-content-scale)}em;
-		height: #{math.div($card-print-height, $card-content-scale)}em;
-
-		@media print {
-			font-size: #{$card-content-scale}mm;
-		}
+		@include rz.padding(sm);
 	}
 
 	.title {

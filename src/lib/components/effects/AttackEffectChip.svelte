@@ -29,6 +29,6 @@
 	}
 
 	.attack-stats {
-		flex: 0 0 50%;
+		margin-right: auto;
 	}
 </style>
