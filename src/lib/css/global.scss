@@ -39,7 +39,9 @@ body {
 	// Panels
 	--panel-background-color: #{$palette-somber};
 	--panel-border: 2px solid #{$palette-ash};
-	--panel-separator: 2px solid #{$palette-cinder};
+	--panel-separator: 1px solid #{$palette-ash};
+	--panel-heading: linear-gradient(45deg, rgb(68 69 86), #141416);
+	--panel-subheading: linear-gradient(45deg, rgb(24, 29, 34), #1a1b1c);
 
 	// Text
 	--text-subtle-color: #888;

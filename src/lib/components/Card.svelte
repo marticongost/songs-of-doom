@@ -30,8 +30,10 @@
 		{/if}
 	</div>
 	<Image src="cards/{entity.id}.jpg" />
-	<div class="body">
+	<div class="details">
 		<PropertyList properties={entity.properties} />
+	</div>
+	<div class="body">
 		<div class="description">{entity.description}</div>
 		<CapabilityList capabilities={entity.capabilities} />
 	</div>
@@ -64,6 +66,8 @@
 	.header {
 		@include rz.row(sm);
 		@include rz.padding(sm);
+		border-bottom: var(--panel-separator);
+		background-image: var(--panel-heading);
 
 		:global(.own-archetype-icon) {
 			flex: 0 0 auto;
@@ -75,6 +79,14 @@
 			height: 1.5em;
 			color: var(--text-subtle-color);
 		}
+	}
+
+	.details {
+		@include rz.row(sm);
+		@include rz.padding(sm);
+		border-top: var(--panel-separator);
+		border-bottom: var(--panel-separator);
+		background-image: var(--panel-subheading);
 	}
 
 	.body {
@@ -95,5 +107,6 @@
 		font-family: var(--heading-font);
 		font-size: 1.4em;
 		color: var(--text-heading-color);
+		text-shadow: 0 0 0.5em rgba(0, 0, 0, 0.8);
 	}
 </style>
