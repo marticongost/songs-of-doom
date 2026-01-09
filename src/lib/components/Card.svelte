@@ -29,7 +29,7 @@
 			<InlineSvg class="required-archetype-icon" src="archetypes/{entity.archetype.id}.svg" />
 		{/if}
 	</div>
-	<Image src="cards/{entity.id}.jpg" />
+	<Image class="image" src="cards/{entity.id}.jpg" />
 	<div class="details">
 		<PropertyList properties={entity.properties} />
 	</div>
@@ -61,6 +61,11 @@
 		@media print {
 			font-size: #{$card-content-scale}mm;
 		}
+	}
+
+	:global(.card .image) {
+		height: #{math.div($card-print-width, $card-content-scale) / 16 * 9}em;
+		object-fit: cover;
 	}
 
 	.header {
