@@ -36,19 +36,25 @@
 </article>
 
 <style lang="scss">
+	@use 'sass:math';
 	@use '@reguitzell/styles' as rz;
+
+	$card-print-width: 64;
+	$card-print-height: 89;
+	$card-screen-width: 24;
+	$card-content-scale: 2.3;
 
 	.header {
 		@include rz.row(sm);
 
 		:global(.own-archetype-icon) {
 			flex: 0 0 auto;
-			height: 1.8rem;
+			height: 1.8em;
 		}
 
 		:global(.required-archetype-icon) {
 			flex: 0 0 auto;
-			height: 1.5rem;
+			height: 1.5em;
 			color: var(--text-subtle-color);
 		}
 	}
@@ -56,11 +62,17 @@
 	.card {
 		@include rz.column(sm);
 		align-items: stretch;
-		width: 30rem;
-		padding: 1rem;
+		padding: 1em;
 		border: var(--panel-border);
-		border-radius: 0.5rem;
+		border-radius: 0.5em;
 		background-color: var(--panel-background-color);
+		font-size: #{math.div($card-screen-width, $card-print-width) * $card-content-scale}em;
+		width: #{math.div($card-print-width, $card-content-scale)}em;
+		height: #{math.div($card-print-height, $card-content-scale)}em;
+
+		@media print {
+			font-size: #{$card-content-scale}mm;
+		}
 	}
 
 	.title {
@@ -68,9 +80,13 @@
 		margin-right: auto;
 	}
 
+	:global(.card .title svg) {
+		vertical-align: baseline;
+	}
+
 	h1 {
 		font-family: var(--heading-font);
-		font-size: 1.4rem;
+		font-size: 1.4em;
 		color: var(--text-heading-color);
 	}
 </style>
