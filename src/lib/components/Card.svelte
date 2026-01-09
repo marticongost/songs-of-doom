@@ -7,6 +7,7 @@
 	import InlineSvg from './InlineSvg.svelte';
 	import PropertyList from '$lib/components/properties/PropertyList.svelte';
 	import Image from './Image.svelte';
+	import { Item } from '$lib/catalog/models/inventory';
 	export let entity: Entity;
 </script>
 
@@ -19,6 +20,9 @@
 			<h1><Text {...entity.title} /></h1>
 			{#if entity.maxCharges}
 				<ChargesChip charges={entity.maxCharges} />
+			{/if}
+			{#if entity instanceof Item && entity.slot}
+				<InlineSvg class="slot" src="slots/{entity.slot.type}.svg" />
 			{/if}
 		</div>
 		{#if entity.archetype}
