@@ -8,6 +8,7 @@
 		ModifyRollEffect,
 		type Effect,
 		DrawAptitudeEffect,
+		ConditionalEffect
 	} from '$lib/catalog/models/effects';
 	import { RechargeEffect } from '$lib/catalog/models/effects/recharge';
 
@@ -19,6 +20,7 @@
 	import RechargeEffectChip from './RechargeEffectChip.svelte';
 	import DefendEffectChip from './DefendEffectChip.svelte';
 	import DrawAptitudeEffectChip from './DrawAptitudeEffectChip.svelte';
+	import ConditionalEffectChip from './ConditionalEffectChip.svelte';
 
 	export let effect: Effect;
 </script>
@@ -40,5 +42,7 @@
 		<DefendEffectChip {effect} />
 	{:else if effect instanceof DrawAptitudeEffect}
 		<DrawAptitudeEffectChip {effect} />
+	{:else if effect instanceof ConditionalEffect}
+		<ConditionalEffectChip {effect} />
 	{/if}
 </div>
