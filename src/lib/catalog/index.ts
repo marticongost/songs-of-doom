@@ -1,3 +1,4 @@
+import { Entity } from './models/entity';
 import type { Item } from './models/inventory';
 import type { Trait } from './models/trait';
 
@@ -12,17 +13,21 @@ const metadataCache = new WeakMap<object, EntryMetadata>();
 export class Catalog<T> {
 	private readonly entries: Record<string, T>;
 
-	constructor(entries: Record<string, T>) {
-		this.entries = {};
-		Object.entries(entries).forEach(([key, entry]) => {
-			const metadata = {
-				id: getEntryIdFromFileName(key),
-				path: getEntryPathFromFileName(key),
-				catalog: this
-			};
-			metadataCache.set(entry as object, metadata);
-			this.entries[metadata.id] = entry;
-		});
+	constructor(data: Record<string, T> | Array<Catalog<T>>) {
+		if (data instanceof Array) {
+			this.entries = Object.assign({}, ...data.map((catalog) => catalog.entries));
+		} else {
+			this.entries = {};
+			Object.entries(data).forEach(([key, entry]) => {
+				const metadata = {
+					id: getEntryIdFromFileName(key),
+					path: getEntryPathFromFileName(key),
+					catalog: this
+				};
+				metadataCache.set(entry as object, metadata);
+				this.entries[metadata.id] = entry;
+			});
+		}
 	}
 
 	require(id: string): T {
@@ -99,3 +104,5 @@ export const items = new Catalog(
 		import: 'default'
 	})
 );
+
+export const entities = new Catalog<Entity>([traits, items]);

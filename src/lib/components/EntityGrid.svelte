@@ -9,7 +9,7 @@
 </script>
 
 {#if entities.length > 0}
-	<div {...standardAttributes($$props, 'entity-list')}>
+	<div {...standardAttributes($$props, 'entity-grid')}>
 		{#each entities as entity}
 			<svelte:component this={EntityComponent} {entity} />
 		{/each}
@@ -19,7 +19,7 @@
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
 
-	.entity-list {
-		@include rz.column(md);
+	.entity-grid {
+		@include rz.grid(lg);
 	}
 </style>
