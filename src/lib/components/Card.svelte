@@ -64,7 +64,7 @@
 	}
 
 	:global(.card .image) {
-		height: #{math.div($card-print-width, $card-content-scale) / 16 * 9}em;
+		height: #{math.div($card-print-width, $card-content-scale) * math.div(9, 16)}em;
 		object-fit: cover;
 	}
 
