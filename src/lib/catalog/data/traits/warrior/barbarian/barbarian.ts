@@ -8,6 +8,7 @@ export default new Trait({
 		es: 'Bárbaro',
 		en: 'Barbarian'
 	},
+	xpCost: 5,
 	capabilities: [
 		new Reaction({
 			triggers: ['attacking'],

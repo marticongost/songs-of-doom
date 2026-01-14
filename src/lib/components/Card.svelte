@@ -8,30 +8,38 @@
 	import PropertyList from '$lib/components/properties/PropertyList.svelte';
 	import Image from './Image.svelte';
 	import { Item } from '$lib/catalog/models/inventory';
+	import ExperienceChip from './ExperienceChip.svelte';
 	export let entity: Entity;
+	const archetype = entity.isArchetype ? entity : entity.archetype;
 </script>
 
 <article {...standardAttributes($$props, 'card')}>
 	<div class="header">
-		{#if entity.isArchetype}
-			<InlineSvg class="own-archetype-icon" src="archetypes/{entity.id}.svg" />
+		{#if archetype}
+			<InlineSvg class="archetype-icon" src="archetypes/{archetype.id}.svg" />
 		{/if}
-		<div class="title">
-			<h1><Text {...entity.title} /></h1>
-			{#if entity.maxCharges}
-				<ChargesChip charges={entity.maxCharges} />
-			{/if}
-			{#if entity instanceof Item && entity.slot}
-				<InlineSvg class="slot" src="slots/{entity.slot.type}.svg" />
-			{/if}
-		</div>
-		{#if entity.archetype}
-			<InlineSvg class="required-archetype-icon" src="archetypes/{entity.archetype.id}.svg" />
+		<h1><Text {...entity.title} /></h1>
+		{#if entity.isArchetype && entity.archetype}
+			<div class="parent-archetype">
+				<Text {...entity.archetype.title} />
+			</div>
+		{/if}
+		{#if entity.xpCost !== undefined}
+			<ExperienceChip
+				amount={entity.xpCost}
+				style="font-size: 1.5em; margin-left: auto; align-self: center"
+			/>
 		{/if}
 	</div>
 	<Image class="image" src="cards/{entity.id}.jpg" />
 	<div class="details">
-		<PropertyList properties={entity.properties} />
+		<PropertyList style="margin-right: auto" properties={entity.properties} />
+		{#if entity.maxCharges}
+			<ChargesChip charges={entity.maxCharges} />
+		{/if}
+		{#if entity instanceof Item && entity.slot}
+			<InlineSvg class="slot" src="slots/{entity.slot.type}.svg" />
+		{/if}
 	</div>
 	<div class="body">
 		<div class="description">{entity.description}</div>
@@ -74,15 +82,22 @@
 		border-bottom: var(--panel-separator);
 		background-image: var(--panel-heading);
 
-		:global(.own-archetype-icon) {
+		:global(.archetype-icon) {
 			flex: 0 0 auto;
 			height: 1.8em;
 		}
+	}
 
-		:global(.required-archetype-icon) {
-			flex: 0 0 auto;
-			height: 1.5em;
-			color: var(--text-subtle-color);
+	.parent-archetype {
+		font-size: 0.9em;
+		color: var(--text-subtle-color);
+
+		&:before {
+			content: '(';
+		}
+
+		&:after {
+			content: ')';
 		}
 	}
 
@@ -97,11 +112,6 @@
 	.body {
 		@include rz.column(sm);
 		@include rz.padding(sm);
-	}
-
-	.title {
-		@include rz.row(sm);
-		margin-right: auto;
 	}
 
 	:global(.card .title svg) {

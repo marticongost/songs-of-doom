@@ -8,6 +8,7 @@ export default new Trait({
 		es: 'Sed de Sangre',
 		en: 'Bloodlust'
 	},
+	xpCost: 2,
 	capabilities: [
 		new Reaction({
 			triggers: ['enemyDefeated'],

@@ -10,6 +10,7 @@ export default new Trait({
 		es: 'Cuantos más, mejor',
 		en: 'The more the merrier'
 	},
+	xpCost: 2,
 	capabilities: [
 		new Reaction({
 			triggers: ['chapterStart'],

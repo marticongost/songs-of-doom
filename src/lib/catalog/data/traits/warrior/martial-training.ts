@@ -8,6 +8,7 @@ export default new Trait({
 		es: 'Entrenamiento Marcial',
 		en: 'Martial Training'
 	},
+	xpCost: 3,
 	capabilities: [
 		new Reaction({
 			triggers: ['payingCapability'],

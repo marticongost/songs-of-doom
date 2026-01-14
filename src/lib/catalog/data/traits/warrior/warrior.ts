@@ -8,6 +8,7 @@ export default new Trait({
 		es: 'Guerrero',
 		en: 'Warrior'
 	},
+	xpCost: 5,
 	capabilities: [
 		new Reaction({
 			triggers: ['acquired'],

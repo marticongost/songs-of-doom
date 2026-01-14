@@ -11,8 +11,8 @@ export class Trait extends Entity {
 	private _isArchetype: boolean | typeof NOT_COMPUTED;
 	private _subtraits: Array<Trait> | typeof NOT_COMPUTED;
 
-	constructor({ title, description, properties, capabilities }: EntityProps) {
-		super({ title, description, properties, capabilities });
+	constructor({ title, description, properties, capabilities, xpCost }: EntityProps) {
+		super({ title, description, properties, capabilities, xpCost: xpCost ?? 0 });
 		this._archetype = NOT_COMPUTED;
 		this._isArchetype = NOT_COMPUTED;
 		this._subtraits = NOT_COMPUTED;

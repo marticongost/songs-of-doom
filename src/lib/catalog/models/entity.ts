@@ -10,6 +10,7 @@ export interface EntityProps {
 	properties?: Array<Property>;
 	capabilities?: Array<Capability>;
 	maxCharges?: number;
+	xpCost?: number;
 }
 
 export abstract class Entity {
@@ -18,15 +19,17 @@ export abstract class Entity {
 	protected readonly explicitProperties: Array<Property>;
 	readonly capabilities: Array<Capability>;
 	readonly maxCharges: number;
+	readonly xpCost?: number;
 
 	abstract readonly archetype: Trait | undefined;
 
-	constructor({ title, description, properties, capabilities, maxCharges }: EntityProps) {
+	constructor({ title, description, properties, capabilities, maxCharges, xpCost }: EntityProps) {
 		this.title = title;
 		this.description = description;
 		this.explicitProperties = properties ?? [];
 		this.capabilities = capabilities ?? [];
 		this.maxCharges = maxCharges ?? 0;
+		this.xpCost = xpCost;
 	}
 
 	get id() {

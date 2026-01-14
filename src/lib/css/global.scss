@@ -27,6 +27,7 @@ body {
 	$palette-ash: #333;
 	$palette-cinder: #444;
 	$palette-steel: #b0baba;
+	$palette-ivory: #f0f0e0;
 
 	// === Color assignments ===
 
@@ -38,6 +39,10 @@ body {
 	--stat-will-color: #{$palette-violet};
 	--stat-health-color: #{$palette-red};
 	--stat-sanity-color: #{$palette-blue};
+
+	// Experience
+	--experience-foreground-color: #{$palette-somber};
+	--experience-background-color: #{$palette-ivory};
 
 	// Panels
 	--panel-background-color: #{$palette-somber};
