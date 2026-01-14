@@ -99,14 +99,19 @@
 	}
 
 	.archetype-frame {
-		@include rz.padding($header-padding);
 		background-color: rgba(black, 0.2);
 		border-right: 1px solid rgba(black, 0.1);
+		width: 3em;
+		height: 100%;
 		flex: 0 0 auto;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 
 		:global(.archetype-icon) {
-			height: 1.8em;
+			height: 2.1em;
 			filter: drop-shadow(0 0 0.8rem black);
+			color: rgba(white, 0.7);
 		}
 	}
 
