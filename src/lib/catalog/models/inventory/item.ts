@@ -1,5 +1,5 @@
 import item from '$lib/catalog/data/properties/item';
-import { Entity, type EntityProps } from '../entity';
+import { Entity, type EntityProps, type EntityType } from '../entity';
 import type { Property } from '../properties';
 import type { Trait } from '../trait';
 import { slots, type Slot, type SlotType } from './slots';
@@ -15,6 +15,10 @@ export class Item extends Entity {
 	constructor({ title, slot, properties, capabilities, maxCharges }: ItemProps) {
 		super({ title, description: undefined, properties, capabilities, maxCharges });
 		this.slot = typeof slot === 'string' ? slots[slot] : slot;
+	}
+
+	override get type(): EntityType {
+		return 'item';
 	}
 
 	override getImplicitProperties(): Array<Property> {

@@ -13,6 +13,8 @@ export interface EntityProps {
 	xpCost?: number;
 }
 
+export type EntityType = 'archetype' | 'trait' | 'skill' | 'ally' | 'item';
+
 export abstract class Entity {
 	readonly title: LocalisedText;
 	readonly description?: LocalisedText;
@@ -21,6 +23,7 @@ export abstract class Entity {
 	readonly maxCharges: number;
 	readonly xpCost?: number;
 
+	abstract readonly type: EntityType;
 	abstract readonly archetype: Trait | undefined;
 
 	constructor({ title, description, properties, capabilities, maxCharges, xpCost }: EntityProps) {

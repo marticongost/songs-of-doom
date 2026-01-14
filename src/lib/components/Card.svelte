@@ -13,7 +13,7 @@
 	const archetype = entity.isArchetype ? entity : entity.archetype;
 </script>
 
-<article {...standardAttributes($$props, 'card')}>
+<article {...standardAttributes($$props, 'card')} data-type={entity.type}>
 	<div class="header">
 		{#if archetype}
 			<InlineSvg class="archetype-icon" src="archetypes/{archetype.id}.svg" />
@@ -66,6 +66,13 @@
 		width: #{math.div($card-print-width, $card-content-scale)}em;
 		height: #{math.div($card-print-height, $card-content-scale)}em;
 
+		@each $type in archetype, trait, skill, ally, item {
+			&[data-type='#{$type}'] {
+				--main-background: var(--card-type-#{$type}-main-background);
+				--secondary-background: var(--card-type-#{$type}-secondary-background);
+			}
+		}
+
 		@media print {
 			font-size: #{$card-content-scale}mm;
 		}
@@ -80,7 +87,7 @@
 		@include rz.row(sm);
 		@include rz.padding(sm);
 		border-bottom: var(--panel-separator);
-		background-image: var(--panel-heading);
+		background-image: var(--main-background);
 
 		:global(.archetype-icon) {
 			flex: 0 0 auto;
@@ -90,7 +97,7 @@
 
 	.parent-archetype {
 		font-size: 0.9em;
-		color: var(--text-subtle-color);
+		opacity: 0.7;
 
 		&:before {
 			content: '(';
@@ -106,7 +113,7 @@
 		@include rz.padding(sm);
 		border-top: var(--panel-separator);
 		border-bottom: var(--panel-separator);
-		background-image: var(--panel-subheading);
+		background-image: var(--secondary-background);
 	}
 
 	.body {

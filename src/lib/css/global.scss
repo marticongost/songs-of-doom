@@ -44,12 +44,18 @@ body {
 	--experience-foreground-color: #{$palette-somber};
 	--experience-background-color: #{$palette-ivory};
 
+	// Card types
+	--card-type-archetype-main-background: linear-gradient(45deg, #8b7b57, #231603);
+	--card-type-archetype-secondary-background: linear-gradient(45deg, #423e38, #090909);
+	--card-type-trait-main-background: linear-gradient(45deg, rgb(68 69 86), #141416);
+	--card-type-trait-secondary-background: linear-gradient(45deg, rgb(24, 29, 34), #1a1b1c);
+	--card-type-item-main-background: linear-gradient(45deg, rgb(108 55 42), #1d0f02);
+	--card-type-item-secondary-background: linear-gradient(45deg, rgb(38 26 21), #090909);
+
 	// Panels
 	--panel-background-color: #{$palette-somber};
 	--panel-border: 2px solid #{$palette-ash};
 	--panel-separator: 1px solid #{$palette-ash};
-	--panel-heading: linear-gradient(45deg, rgb(68 69 86), #141416);
-	--panel-subheading: linear-gradient(45deg, rgb(24, 29, 34), #1a1b1c);
 
 	// Text
 	--text-subtle-color: #888;

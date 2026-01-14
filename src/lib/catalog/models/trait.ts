@@ -1,7 +1,7 @@
 import { getEntryMetadata } from '..';
 import archetype from '../data/properties/archetype';
 import trait from '../data/properties/trait';
-import { Entity, type EntityProps } from './entity';
+import { Entity, type EntityProps, type EntityType } from './entity';
 import type { Property } from './properties';
 
 const NOT_COMPUTED = Symbol('not computed');
@@ -46,6 +46,10 @@ export class Trait extends Entity {
 			}
 		}
 		return this._archetype;
+	}
+
+	override get type(): EntityType {
+		return this.isArchetype ? 'archetype' : 'trait';
 	}
 
 	get subtraits(): Array<Trait> {
