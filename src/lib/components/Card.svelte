@@ -19,17 +19,19 @@
 			<InlineSvg class="archetype-icon" src="archetypes/{archetype.id}.svg" />
 		{/if}
 		<h1><Text {...entity.title} /></h1>
-		{#if entity.isArchetype && entity.archetype}
-			<div class="parent-archetype">
-				<Text {...entity.archetype.title} />
-			</div>
-		{/if}
-		{#if entity.xpCost !== undefined}
-			<ExperienceChip
-				amount={entity.xpCost}
-				style="font-size: 1.5em; margin-left: auto; align-self: center"
-			/>
-		{/if}
+		<div class="acquisition">
+			{#if entity.archetype}
+				<div class="required-archetype">
+					<Text {...entity.archetype.title} />
+				</div>
+			{/if}
+			{#if entity.xpCost !== undefined}
+				<ExperienceChip
+					amount={entity.xpCost}
+					style="font-size: 1.3em; margin-left: auto; align-self: center"
+				/>
+			{/if}
+		</div>
 	</div>
 	<Image class="image" src="cards/{entity.id}.jpg" />
 	<div class="details">
@@ -95,17 +97,14 @@
 		}
 	}
 
-	.parent-archetype {
+	.acquisition {
+		@include rz.row(sm);
+		margin-left: auto;
+	}
+
+	.required-archetype {
 		font-size: 0.9em;
 		opacity: 0.7;
-
-		&:before {
-			content: '(';
-		}
-
-		&:after {
-			content: ')';
-		}
 	}
 
 	.details {
