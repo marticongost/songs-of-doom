@@ -16,9 +16,11 @@
 <article {...standardAttributes($$props, 'card')} data-type={entity.type}>
 	<div class="header">
 		{#if archetype}
-			<InlineSvg class="archetype-icon" src="archetypes/{archetype.id}.svg" />
+			<div class="archetype-frame">
+				<InlineSvg class="archetype-icon" src="archetypes/{archetype.id}.svg" />
+			</div>
 		{/if}
-		<h1><Text {...entity.title} /></h1>
+		<h1 class="title"><Text {...entity.title} /></h1>
 		<div class="acquisition">
 			{#if entity.archetype}
 				<div class="required-archetype">
@@ -57,6 +59,7 @@
 	$card-print-height: 89;
 	$card-screen-width: 24;
 	$card-content-scale: 2.3;
+	$header-padding: sm;
 
 	.card {
 		@include rz.column;
@@ -86,19 +89,30 @@
 	}
 
 	.header {
-		@include rz.row(sm);
-		@include rz.padding(sm);
+		@include rz.row;
 		border-bottom: var(--panel-separator);
 		background-image: var(--main-background);
+	}
+
+	.title {
+		@include rz.padding($header-padding);
+	}
+
+	.archetype-frame {
+		@include rz.padding($header-padding);
+		background-color: rgba(black, 0.2);
+		border-right: 1px solid rgba(black, 0.1);
+		flex: 0 0 auto;
 
 		:global(.archetype-icon) {
-			flex: 0 0 auto;
 			height: 1.8em;
+			filter: drop-shadow(0 0 0.8rem black);
 		}
 	}
 
 	.acquisition {
 		@include rz.row(sm);
+		@include rz.padding($header-padding);
 		margin-left: auto;
 	}
 
