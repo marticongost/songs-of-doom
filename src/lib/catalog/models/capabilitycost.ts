@@ -1,21 +1,11 @@
-import type { AttributeType } from './stats';
+import { Aptitudes, type AptitudesProps } from './aptitude';
 
-export interface CapabilityCostProps {
-	strength?: number;
-	agility?: number;
-	intelligence?: number;
-	charisma?: number;
-	will?: number;
+export interface CapabilityCostProps extends AptitudesProps {
 	exhaust?: boolean;
 	charges?: number;
 }
 
-export class CapabilityCost {
-	readonly strength: number;
-	readonly agility: number;
-	readonly intelligence: number;
-	readonly charisma: number;
-	readonly will: number;
+export class CapabilityCost extends Aptitudes {
 	readonly exhaust: boolean;
 	readonly charges: number;
 
@@ -25,30 +15,20 @@ export class CapabilityCost {
 		intelligence,
 		charisma,
 		will,
+		focus,
 		exhaust,
 		charges
 	}: CapabilityCostProps) {
-		this.strength = strength ?? 0;
-		this.agility = agility ?? 0;
-		this.intelligence = intelligence ?? 0;
-		this.charisma = charisma ?? 0;
-		this.will = will ?? 0;
+		super({ strength, agility, intelligence, charisma, will, focus });
 		this.exhaust = exhaust ?? false;
 		this.charges = charges ?? 0;
 	}
 
-	isFree(): boolean {
-		return (
-			this.strength === 0 &&
-			this.agility === 0 &&
-			this.intelligence === 0 &&
-			this.charisma === 0 &&
-			!this.exhaust &&
-			this.charges === 0
-		);
+	empty(): boolean {
+		return super.empty() && !this.exhaust && this.charges === 0;
 	}
 
-	get(attribute: AttributeType): number {
-		return this[attribute];
+	isFree(): boolean {
+		return !this.empty();
 	}
 }
