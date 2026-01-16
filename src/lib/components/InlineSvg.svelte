@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { standardAttributes } from '$lib/components/standardattributes';
-	import { svgs } from '$lib/svg';
+	import { svgs } from '$lib/assets/svg';
 
 	// Props
 	export let src: string;

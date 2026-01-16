@@ -1,5 +1,5 @@
 // Load all SVGs as raw text
-const svgsRecord = import.meta.glob('/src/lib/svg/**/*.svg', {
+const svgsRecord = import.meta.glob('/src/lib/assets/svg/**/*.svg', {
 	query: '?raw',
 	import: 'default',
 	eager: true
@@ -8,5 +8,5 @@ const svgsRecord = import.meta.glob('/src/lib/svg/**/*.svg', {
 // Export as a map with normalized keys
 export const svgs = new Map<string, string>();
 for (const [key, value] of Object.entries(svgsRecord)) {
-	svgs.set(key.replace('/src/lib/svg/', ''), value as string);
+	svgs.set(key.replace('/src/lib/assets/svg/', ''), value as string);
 }
