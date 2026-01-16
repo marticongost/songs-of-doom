@@ -11,7 +11,9 @@
 	{#each effect.entries as entry}
 		<div class="entry">
 			<ResultSelectorChip class="result" result={entry.result} />
-			<InlineSvg class="arrow" src="arrow.svg" />
+			<div>
+				<InlineSvg class="arrow" src="arrow.svg" />
+			</div>
 			<EffectList class="effects" effects={entry.effects} />
 		</div>
 	{/each}
@@ -22,6 +24,7 @@
 
 	.result-table-effect-chip {
 		display: table;
+		table-layout: fixed;
 
 		:global(.arrow) {
 			color: var(--text-subtle-color);
