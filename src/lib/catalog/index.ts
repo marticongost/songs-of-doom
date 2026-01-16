@@ -1,5 +1,6 @@
 import { Entity } from './models/entity';
 import type { Item } from './models/inventory';
+import type { Skill } from './models/skill';
 import type { Trait } from './models/trait';
 
 export interface EntryMetadata<T = unknown> {
@@ -13,12 +14,10 @@ const metadataCache = new WeakMap<object, EntryMetadata>();
 export class Catalog<T> {
 	private readonly entries: Record<string, T>;
 
-	constructor(data: Record<string, T> | Array<Catalog<T>>) {
-		if (data instanceof Array) {
-			this.entries = Object.assign({}, ...data.map((catalog) => catalog.entries));
-		} else {
-			this.entries = {};
-			Object.entries(data).forEach(([key, entry]) => {
+	constructor(...entrySets: Array<Record<string, T>>) {
+		this.entries = {};
+		for (const entrySet of entrySets) {
+			Object.entries(entrySet).forEach(([key, entry]) => {
 				const metadata = {
 					id: getEntryIdFromFileName(key),
 					path: getEntryPathFromFileName(key),
@@ -48,12 +47,6 @@ export class Catalog<T> {
 
 	all(): Array<T> {
 		return Object.values(this.entries);
-	}
-}
-
-export class TraitsCatalog extends Catalog<Trait> {
-	rootTraits(): Array<Trait> {
-		return this.all().filter((trait) => trait.isRootTrait());
 	}
 }
 
@@ -91,18 +84,13 @@ const getEntryPathFromFileName = (fileName: string): Array<string> => {
 	return parts.slice(2); // Remove the initial 'data' and category folder
 };
 
-export const traits = new TraitsCatalog(
-	import.meta.glob<Trait>(`./data/traits/**/*.ts`, {
+export const entities = new Catalog<Entity>(
+	import.meta.glob<Trait | Skill>(`./data/archetypes/**/*.ts`, {
 		eager: true,
 		import: 'default'
-	})
-);
-
-export const items = new Catalog(
+	}),
 	import.meta.glob<Item>(`./data/items/**/*.ts`, {
 		eager: true,
 		import: 'default'
 	})
 );
-
-export const entities = new Catalog<Entity>([traits, items]);
