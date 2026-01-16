@@ -63,6 +63,7 @@ body {
 	--text-subtle-color: #888;
 	--text-highlight: #{$palette-steel};
 	--text-heading-color: #{$palette-cloud};
+	--positive-color: #{$palette-green};
 }
 
 @include rz.reset-elements;

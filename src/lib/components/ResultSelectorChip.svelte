@@ -7,7 +7,7 @@
 </script>
 
 {#snippet resultSnippet(result: Result)}
-	<InlineSvg src="dice/success-{result}.svg" />
+	<InlineSvg class="die" src="dice/success-{result}.svg" />
 {/snippet}
 
 <span {...standardAttributes($$props, 'result-selector-chip')}>
@@ -19,14 +19,23 @@
 		{/each}
 	{:else if result.min}
 		{@render resultSnippet(result.min)}
-		<span class="plus">+</span>
+		<InlineSvg class="plus" src="plus.svg" />
 	{/if}
 </span>
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
 
-	:global(.result-selector-chip svg + svg) {
-		margin-left: rz.size(xs);
+	.result-selector-chip {
+		position: relative;
+
+		:global(.die + .die) {
+			margin-left: rz.size(xs);
+		}
+
+		:global(.plus) {
+			height: 0.5em;
+			color: var(--positive-color);
+		}
 	}
 </style>
