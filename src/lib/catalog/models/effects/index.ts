@@ -10,3 +10,4 @@ export { OneOfEffect } from './oneof';
 export { SequenceEffect } from './sequence';
 export { WoundEffect } from './wound';
 export { ConditionalEffect, type Case } from './conditional';
+export { TriggerAttackEffect } from './triggerattack';
