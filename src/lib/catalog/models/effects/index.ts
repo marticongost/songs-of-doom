@@ -11,3 +11,4 @@ export { SequenceEffect } from './sequence';
 export { WoundEffect } from './wound';
 export { ConditionalEffect, type Case } from './conditional';
 export { TriggerAttackEffect } from './triggerattack';
+export { ResultsTableEffect, type ResultsTableEntry } from './resultstable';

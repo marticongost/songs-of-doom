@@ -9,7 +9,8 @@
 		type Effect,
 		DrawAptitudeEffect,
 		ConditionalEffect,
-		TriggerAttackEffect
+		TriggerAttackEffect,
+		ResultsTableEffect
 	} from '$lib/catalog/models/effects';
 	import { RechargeEffect } from '$lib/catalog/models/effects/recharge';
 
@@ -23,6 +24,7 @@
 	import DrawAptitudeEffectChip from './DrawAptitudeEffectChip.svelte';
 	import ConditionalEffectChip from './ConditionalEffectChip.svelte';
 	import TriggerAttackEffectChip from './TriggerAttackEffectChip.svelte';
+	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
 
 	export let effect: Effect;
 </script>
@@ -48,5 +50,7 @@
 		<ConditionalEffectChip {effect} />
 	{:else if effect instanceof TriggerAttackEffect}
 		<TriggerAttackEffectChip {effect} />
+	{:else if effect instanceof ResultsTableEffect}
+		<ResultsTableEffectChip {effect} />
 	{/if}
 </div>

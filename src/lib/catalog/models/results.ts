@@ -36,3 +36,7 @@ export const parseResultString = (str: ResultString): ResultSelector => {
 		throw new Error(`Invalid ResultString: ${str}`);
 	}
 };
+
+export const resolveResultExpression = (
+	expression: ResultSelector | ResultString
+): ResultSelector => (typeof expression === 'string' ? parseResultString(expression) : expression);
