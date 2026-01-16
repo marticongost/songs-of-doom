@@ -17,7 +17,9 @@ export default new Trait({
 			},
 			effects: [
 				new ModifyCapabilityCostEffect({
-					strength: -1
+					cost: {
+						strength: -1
+					}
 				})
 			]
 		})

@@ -31,12 +31,17 @@ body {
 
 	// === Color assignments ===
 
-	// Stats
+	// Stats and aptitudes
 	--stat-agility-color: #{$palette-green};
+	--aptitude-agility-color: #{$palette-green};
 	--stat-strength-color: #{$palette-brown};
+	--aptitude-strength-color: #{$palette-brown};
 	--stat-intelligence-color: #{$palette-purple};
+	--aptitude-intelligence-color: #{$palette-purple};
 	--stat-charisma-color: #{$palette-yellow};
+	--aptitude-charisma-color: #{$palette-yellow};
 	--stat-will-color: #{$palette-violet};
+	--aptitude-will-color: #{$palette-violet};
 	--stat-health-color: #{$palette-red};
 	--stat-sanity-color: #{$palette-blue};
 

@@ -1,4 +1,5 @@
 import {
+	ModifyCapabilityCostEffect,
 	ModifyRollEffect,
 	ResultsTableEffect,
 	TriggerAttackEffect
@@ -30,10 +31,13 @@ export default new Skill({
 									modifiers: [
 										new ModifyRollEffect({
 											modifier: 1
+										}),
+										new ModifyCapabilityCostEffect({
+											cost: {
+												strength: -1,
+												charges: -1
+											}
 										})
-										// TODO: Change ModifyCapabilityCostEffect to allow:
-										// - Reducing the cost in charges
-										// - Select any aptitude (player's choice)
 									]
 								})
 							]

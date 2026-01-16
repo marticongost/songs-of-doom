@@ -1,56 +1,43 @@
-import { attributeTypes, type AttributeType } from '../stats';
+import { finalise } from '$lib/modelling';
+import {
+	CapabilityCost,
+	scalarCapabilityCostTypes,
+	type CapabilityCostProps,
+	type ScalarCapabilityCostType
+} from '../capabilitycost';
 import { Effect, type EffectProps } from './effect';
 
 export interface ModifyCapabilityCostEffectProps extends EffectProps {
-	strength?: number;
-	agility?: number;
-	intelligence?: number;
-	charisma?: number;
-	will?: number;
+	cost: CapabilityCost | CapabilityCostProps;
 }
 
 export interface GrouppedCapabilityCosts {
-	increase?: Partial<Record<AttributeType, number>>;
-	decrease?: Partial<Record<AttributeType, number>>;
+	increase?: Partial<Record<ScalarCapabilityCostType, number>>;
+	decrease?: Partial<Record<ScalarCapabilityCostType, number>>;
 }
 
 export class ModifyCapabilityCostEffect extends Effect {
-	readonly strength: number;
-	readonly agility: number;
-	readonly intelligence: number;
-	readonly charisma: number;
-	readonly will: number;
+	readonly cost: CapabilityCost;
 
-	constructor({
-		strength,
-		agility,
-		intelligence,
-		charisma,
-		will,
-		properties
-	}: ModifyCapabilityCostEffectProps) {
+	constructor({ cost, properties }: ModifyCapabilityCostEffectProps) {
 		super({ properties });
-		this.strength = strength ?? 0;
-		this.agility = agility ?? 0;
-		this.intelligence = intelligence ?? 0;
-		this.charisma = charisma ?? 0;
-		this.will = will ?? 0;
+		this.cost = finalise(CapabilityCost, cost);
 	}
 
-	get(attribute: AttributeType): number {
-		return this[attribute];
+	get(attribute: ScalarCapabilityCostType): number {
+		return this.cost[attribute];
 	}
 
 	group(): GrouppedCapabilityCosts {
 		const groups = { increase: undefined, decrease: undefined } as GrouppedCapabilityCosts;
-		for (const attribute of attributeTypes) {
-			const value = this.get(attribute);
+		for (const costType of scalarCapabilityCostTypes) {
+			const value = this.get(costType);
 			if (value > 0) {
 				groups.increase = groups.increase ?? {};
-				groups.increase[attribute] = value;
+				groups.increase[costType] = value;
 			} else if (value < 0) {
 				groups.decrease = groups.decrease ?? {};
-				groups.decrease[attribute] = -value;
+				groups.decrease[costType] = -value;
 			}
 		}
 		return groups;

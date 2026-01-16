@@ -9,6 +9,11 @@
 	import Text from '$lib/components/localisation/Text.svelte';
 	import StatIcon from '../stats/StatIcon.svelte';
 	import Parameters from './Parameters.svelte';
+	import CapabilityCostChip from './CapabilityCostChip.svelte';
+	import {
+		capabilityCostTypes,
+		scalarCapabilityCostTypes
+	} from '$lib/catalog/models/capabilitycost';
 
 	export let capability: Capability;
 </script>
@@ -33,20 +38,15 @@
 		<!-- Cost -->
 		{#if !capability.cost.isFree()}
 			<Parameters>
-				{#each attributeTypes as attribute}
-					{#if capability.cost.get(attribute) !== 0}
+				{#each scalarCapabilityCostTypes as costType}
+					{#if capability.cost.get(costType) !== 0}
+						{console.log(capability.cost, costType, capability.cost.get(costType))}
 						<span class="stat-cost">
-							<StatIcon stat={attribute} />
-							<span class="stat-value">{capability.cost.get(attribute)}</span>
+							<CapabilityCostChip type={costType} />
+							<span class="stat-value">{capability.cost.get(costType)}</span>
 						</span>
 					{/if}
 				{/each}
-				{#if capability.cost.charges}
-					<span class="charges-cost">
-						<InlineSvg src="capabilities/charge.svg" class="charges-icon" />
-						<span class="charge-value">{capability.cost.charges}</span>
-					</span>
-				{/if}
 				{#if capability.cost.exhaust}
 					<InlineSvg src="capabilities/exhaust.svg" class="exhaust-icon" />
 				{/if}
