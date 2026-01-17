@@ -8,10 +8,10 @@
 	import { standardAttributes } from '$lib/components/standardattributes';
 	import { getLocale } from '$lib/context/locale';
 	import ChargesChip from './capabilities/ChargesChip.svelte';
+	import CreatureStats from './CreatureStats.svelte';
 	import ExperienceChip from './ExperienceChip.svelte';
 	import Image from './Image.svelte';
 	import InlineSvg from './InlineSvg.svelte';
-	import HealthChip from './stats/HealthChip.svelte';
 	export let entity: Entity;
 	export let linked: boolean = true;
 	const archetype = entity.isArchetype ? entity : entity.archetype;
@@ -53,11 +53,10 @@
 		{#if entity instanceof Item && entity.slot}
 			<InlineSvg class="slot" src="slots/{entity.slot.type}.svg" />
 		{/if}
-		{#if entity instanceof Creature}
-			{@const creature = entity as Creature}
-			<HealthChip amount={creature.health} />
-		{/if}
 	</div>
+	{#if entity instanceof Creature}
+		<CreatureStats stats={entity.stats} />
+	{/if}
 	<div class="body">
 		<div class="description">{entity.description}</div>
 		<CapabilityList capabilities={entity.capabilities} />

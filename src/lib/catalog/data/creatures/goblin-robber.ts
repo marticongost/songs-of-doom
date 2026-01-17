@@ -6,5 +6,12 @@ export default new Creature({
 		es: 'Ladrón goblin',
 		en: 'Goblin robber'
 	},
-	health: 3
+	stats: {
+		agility: 3,
+		strength: 2,
+		intelligence: 3,
+		charisma: 2,
+		will: 2,
+		health: 3
+	}
 });

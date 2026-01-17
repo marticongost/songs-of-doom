@@ -6,5 +6,12 @@ export default new Creature({
 		es: 'Incursor orco',
 		en: 'Orc incursor'
 	},
-	health: 5
+	stats: {
+		agility: 2,
+		strength: 4,
+		intelligence: 2,
+		charisma: 1,
+		will: 3,
+		health: 5
+	}
 });
