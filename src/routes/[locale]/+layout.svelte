@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { getDocumentTitle } from '../../meta.js';
-	import { setLocale } from '$lib/context/locale';
 	import InlineSvg from '$lib/components/InlineSvg.svelte';
+	import { setLocale } from '$lib/context/locale';
+	import { getDocumentTitle } from '../../meta.js';
 	let { data, children } = $props();
 	setLocale(data.locale);
 </script>
@@ -13,20 +13,22 @@
 
 <header>
 	<InlineSvg class="game-logo" src="logo.svg" style="height: 10rem;" />
-	<h1 class="pageTitle">{page.data.title}</h1>
 </header>
+
+<h1 class="page-title">{page.data.title}</h1>
 
 {@render children()}
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
 
-	.pageTitle {
+	.page-title {
 		font-family: var(--heading-font);
-		font-size: 2rem;
+		font-size: 3rem;
+		margin-bottom: rz.size(lg);
 	}
 
 	header {
-		margin-bottom: rz.size(lg);
+		margin-bottom: rz.size(xl);
 	}
 </style>
