@@ -26,7 +26,7 @@
 		:global(.icon) {
 			position: absolute;
 			left: 0;
-			top: 0.1em;
+			top: 0;
 			color: var(--experience-background-color);
 			height: #{$size};
 			width: #{$size};
@@ -35,6 +35,7 @@
 
 	.amount {
 		position: relative;
+		top: -0.1em;
 		z-index: 1;
 		font-weight: bold;
 		color: var(--experience-foreground-color);
