@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ConditionalEffect, Effect, type Case } from '$lib/catalog/models/effects';
+	import { ConditionalEffect } from '$lib/catalog/models/effects';
 	import BlockQuote from '../BlockQuote.svelte';
 	import ConditionChip from '../conditions/ConditionChip.svelte';
 	import Text from '../localisation/Text.svelte';

@@ -3,7 +3,6 @@
 	import Text from '$lib/components/localisation/Text.svelte';
 	import EffectList from './EffectList.svelte';
 	import { standardAttributes } from '../standardattributes';
-	import InlineSvg from '../InlineSvg.svelte';
 	import BlockQuote from '../BlockQuote.svelte';
 
 	export let effect: TriggerAttackEffect;

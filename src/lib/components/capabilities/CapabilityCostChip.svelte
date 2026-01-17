@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { indicatorTypes, stats, type Stat, type StatType } from '$lib/catalog/models/stats';
+	import { indicatorTypes, type StatType } from '$lib/catalog/models/stats';
 	import { standardAttributes } from '$lib/components/standardattributes';
 	import AptitudeIcon from '../aptitudes/AptitudeIcon.svelte';
 	import type { CapabilityCostType } from '$lib/catalog/models/capabilitycost';

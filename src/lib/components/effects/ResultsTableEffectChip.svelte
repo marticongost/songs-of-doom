@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ResultsTableEffect, Effect, type ResultsTableEntry } from '$lib/catalog/models/effects';
+	import { ResultsTableEffect } from '$lib/catalog/models/effects';
 	import InlineSvg from '../InlineSvg.svelte';
 	import ResultSelectorChip from '../ResultSelectorChip.svelte';
 	import { standardAttributes } from '../standardattributes';

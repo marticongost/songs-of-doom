@@ -3,17 +3,12 @@
 	import type { Capability } from '$lib/catalog/models/capability';
 	import { Reaction } from '$lib/catalog/models/reaction';
 	import { standardAttributes } from '../standardattributes';
-	import { attributeTypes, statTypes, type StatType } from '$lib/catalog/models/stats';
 	import InlineSvg from '../InlineSvg.svelte';
 	import EffectList from '../effects/EffectList.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
-	import StatIcon from '../stats/StatIcon.svelte';
 	import Parameters from './Parameters.svelte';
 	import CapabilityCostChip from './CapabilityCostChip.svelte';
-	import {
-		capabilityCostTypes,
-		scalarCapabilityCostTypes
-	} from '$lib/catalog/models/capabilitycost';
+	import { scalarCapabilityCostTypes } from '$lib/catalog/models/capabilitycost';
 
 	export let capability: Capability;
 </script>

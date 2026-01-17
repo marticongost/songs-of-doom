@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Entity } from '$lib/catalog/models/entity';
-	import type { CardType } from '$lib/catalog/models/properties';
 	import { Trait } from '$lib/catalog/models/trait';
 	import Card from '$lib/components/Card.svelte';
 	import CardButton from '$lib/components/CardButton.svelte';

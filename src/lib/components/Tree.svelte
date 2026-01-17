@@ -64,7 +64,7 @@
 {#snippet itemList(context: TreeContext<T>)}
 	{@const children = getChildren(context)}
 	{#if children.length}
-		{@const childContexts = children.map((child, index) => context.child(child))}
+		{@const childContexts = children.map((child) => context.child(child))}
 		<ul class="item-list" data-depth={context.depth}>
 			{#each childContexts as childContext (getItemKey(childContext))}
 				<li class="item-list-entry" data-depth={childContext.depth}>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { StatExpression, StatExpressionNode } from '$lib/catalog/models/expression';
+	import type { StatExpressionNode } from '$lib/catalog/models/expression';
 	import { Stat } from '$lib/catalog/models/stats';
 	import StatIcon from './stats/StatIcon.svelte';
 

@@ -2,8 +2,6 @@
 	import { ModifyCapabilityCostEffect } from '$lib/catalog/models/effects';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import CommaSeparatedList from '../localisation/CommaSeparatedList.svelte';
-	import StatChip from '../stats/StatChip.svelte';
-	import { type StatType } from '$lib/catalog/models/stats';
 	import CapabilityCostChip from '../capabilities/CapabilityCostChip.svelte';
 	import { type CapabilityCostType } from '$lib/catalog/models/capabilitycost';
 
