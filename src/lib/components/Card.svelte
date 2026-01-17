@@ -44,7 +44,12 @@
 			{/if}
 		</div>
 	</div>
-	<Image class="image" src="cards/{entity.id}.jpg" />
+	<div class="image-row">
+		{#if entity instanceof Creature}
+			<CreatureStats stats={entity.stats} />
+		{/if}
+		<Image class="image" src="cards/{entity.id}.jpg" />
+	</div>
 	<div class="details">
 		<PropertyList style="margin-right: auto" properties={entity.properties} />
 		{#if entity.maxCharges}
@@ -54,9 +59,6 @@
 			<InlineSvg class="slot" src="slots/{entity.slot.type}.svg" />
 		{/if}
 	</div>
-	{#if entity instanceof Creature}
-		<CreatureStats stats={entity.stats} />
-	{/if}
 	<div class="body">
 		<div class="description">{entity.description}</div>
 		<CapabilityList capabilities={entity.capabilities} />
@@ -100,9 +102,17 @@
 		border-color: var(--text-highlight);
 	}
 
+	.image-row {
+		@include rz.row;
+		align-items: stretch;
+	}
+
 	:global(.card .image) {
+		flex: 1;
+		min-width: 0;
 		height: #{math.div($card-print-width, $card-content-scale) * math.div(9, 16)}em;
 		object-fit: cover;
+		object-position: center;
 	}
 
 	.header {

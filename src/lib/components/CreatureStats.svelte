@@ -18,19 +18,20 @@
 	@use '@reguitzell/styles' as rz;
 
 	.creature-stats {
-		@include rz.row;
-		background-image: linear-gradient(to bottom, transparent, rgba(black, 0.1));
-		border-bottom: var(--panel-separator);
+		@include rz.column;
+		background-image: linear-gradient(to right, transparent, rgba(black, 0.1));
+		border-right: var(--panel-separator);
 	}
 
 	.creature-stat {
-		flex: 1 0 auto;
+		flex: 1;
 		@include rz.row(sm);
-		@include rz.padding(sm);
+		@include rz.hpadding(sm);
 		justify-content: center;
+		align-items: center;
 
 		& + .creature-stat {
-			border-left: 1px solid rgba(white, 0.05);
+			border-top: 1px solid rgba(white, 0.05);
 		}
 	}
 
