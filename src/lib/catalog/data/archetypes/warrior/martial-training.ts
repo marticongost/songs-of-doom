@@ -13,7 +13,7 @@ export default new Trait({
 		new Reaction({
 			triggers: ['payingCapability'],
 			cost: {
-				exhaust: true
+				cardTransition: 'exhaust'
 			},
 			effects: [
 				new ModifyCapabilityCostEffect({

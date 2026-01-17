@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { indicatorTypes, stats, type Stat, type StatType } from '$lib/catalog/models/stats';
 	import { standardAttributes } from '$lib/components/standardattributes';
-	import Text from '$lib/components/localisation/Text.svelte';
 	import AptitudeIcon from '../aptitudes/AptitudeIcon.svelte';
 	import type { CapabilityCostType } from '$lib/catalog/models/capabilitycost';
-	import { aptitudes, aptitudeTypes, type AptitudeType } from '$lib/catalog/models/aptitude';
+	import { aptitudeTypes, type AptitudeType } from '$lib/catalog/models/aptitude';
 	import StatChip from '../stats/StatChip.svelte';
-	import ChargesChip from './ChargesChip.svelte';
 	import InlineSvg from '../InlineSvg.svelte';
 
 	export let type: CapabilityCostType;
@@ -19,6 +17,10 @@
 		<StatChip stat={type as StatType} />
 	{:else if type === 'charges'}
 		<InlineSvg class="icon" src="capabilities/charge.svg" />
+	{:else if type === 'exhaust'}
+		<InlineSvg class="icon" src="capabilities/exhaust.svg" />
+	{:else if type === 'discard'}
+		<InlineSvg class="icon" src="capabilities/discard.svg" />
 	{/if}
 </span>
 

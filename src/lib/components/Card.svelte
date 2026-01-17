@@ -9,6 +9,7 @@
 	import Image from './Image.svelte';
 	import { Item } from '$lib/catalog/models/inventory';
 	import ExperienceChip from './ExperienceChip.svelte';
+	import { Skill } from '$lib/catalog/models/skill';
 	export let entity: Entity;
 	const archetype = entity.isArchetype ? entity : entity.archetype;
 </script>

@@ -13,7 +13,7 @@ export default new Trait({
 		new Reaction({
 			triggers: ['enemyDefeated'],
 			cost: {
-				exhaust: true
+				cardTransition: 'exhaust'
 			},
 			effects: [
 				new DrawCardsEffect({

@@ -1,8 +1,35 @@
+import type { LocalisedText } from '$lib/localisation';
 import { aptitudeTypes, type AptitudesProps, type AptitudeType } from './aptitude';
 import type { IndicatorType } from './stats';
 
 export type ScalarCapabilityCostType = AptitudeType | IndicatorType | 'charges';
-export type CapabilityCostType = ScalarCapabilityCostType | 'exhaust';
+export type CapabilityCostType = ScalarCapabilityCostType | CardTransitionType;
+export type CardTransitionType = 'exhaust' | 'discard';
+
+export class CardTransition {
+	readonly type: CardTransitionType;
+	readonly title: LocalisedText;
+
+	constructor(type: CardTransitionType, title: LocalisedText) {
+		this.type = type;
+		this.title = title;
+	}
+}
+
+export const cardTransitionTypes = ['exhaust', 'discard'] as const;
+
+export const cardTransitions: Record<CardTransitionType, CardTransition> = {
+	exhaust: new CardTransition('exhaust', {
+		ca: 'Esgotar',
+		es: 'Agotar',
+		en: 'Exhaust'
+	}),
+	discard: new CardTransition('discard', {
+		ca: 'Descartar',
+		es: 'Descartar',
+		en: 'Discard'
+	})
+};
 
 export const scalarCapabilityCostTypes: Array<ScalarCapabilityCostType> = [
 	...aptitudeTypes,
@@ -10,14 +37,14 @@ export const scalarCapabilityCostTypes: Array<ScalarCapabilityCostType> = [
 ];
 export const capabilityCostTypes: Array<CapabilityCostType> = [
 	...scalarCapabilityCostTypes,
-	'exhaust'
+	...cardTransitionTypes
 ];
 
 export interface CapabilityCostProps extends AptitudesProps {
 	health?: number;
 	sanity?: number;
-	exhaust?: boolean;
 	charges?: number;
+	cardTransition?: CardTransitionType | CardTransition;
 }
 
 export class CapabilityCost implements Readonly<Record<AptitudeType, number>> {
@@ -30,10 +57,10 @@ export class CapabilityCost implements Readonly<Record<AptitudeType, number>> {
 	readonly any: number;
 	readonly health: number;
 	readonly sanity: number;
-	readonly exhaust: boolean;
 	readonly charges: number;
+	readonly cardTransition?: CardTransition;
 
-	constructor({ health, sanity, exhaust, charges, ...aptitudes }: CapabilityCostProps) {
+	constructor({ health, sanity, charges, cardTransition, ...aptitudes }: CapabilityCostProps) {
 		this.strength = aptitudes.strength ?? 0;
 		this.agility = aptitudes.agility ?? 0;
 		this.intelligence = aptitudes.intelligence ?? 0;
@@ -43,8 +70,9 @@ export class CapabilityCost implements Readonly<Record<AptitudeType, number>> {
 		this.any = aptitudes.any ?? 0;
 		this.health = health ?? 0;
 		this.sanity = sanity ?? 0;
-		this.exhaust = exhaust ?? false;
 		this.charges = charges ?? 0;
+		this.cardTransition =
+			typeof cardTransition === 'string' ? cardTransitions[cardTransition] : cardTransition;
 	}
 
 	get(costType: ScalarCapabilityCostType): number {
@@ -63,7 +91,7 @@ export class CapabilityCost implements Readonly<Record<AptitudeType, number>> {
 			this.health === 0 &&
 			this.sanity === 0 &&
 			this.charges === 0 &&
-			!this.exhaust
+			!this.cardTransition
 		);
 	}
 }

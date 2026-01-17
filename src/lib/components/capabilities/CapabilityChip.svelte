@@ -40,15 +40,17 @@
 			<Parameters>
 				{#each scalarCapabilityCostTypes as costType}
 					{#if capability.cost.get(costType) !== 0}
-						{console.log(capability.cost, costType, capability.cost.get(costType))}
 						<span class="stat-cost">
 							<CapabilityCostChip type={costType} />
 							<span class="stat-value">{capability.cost.get(costType)}</span>
 						</span>
 					{/if}
 				{/each}
-				{#if capability.cost.exhaust}
-					<InlineSvg src="capabilities/exhaust.svg" class="exhaust-icon" />
+				{#if capability.cost.cardTransition?.type === 'exhaust'}
+					<CapabilityCostChip type="exhaust" />
+				{/if}
+				{#if capability.cost.cardTransition?.type === 'discard'}
+					<CapabilityCostChip type="discard" />
 				{/if}
 			</Parameters>
 		{/if}
