@@ -4,7 +4,7 @@
 	import { setLocale } from '$lib/context/locale';
 	import { getDocumentTitle } from '../../meta.js';
 	let { data, children } = $props();
-	setLocale(data.locale);
+	setLocale(() => data.locale);
 </script>
 
 <svelte:head>
