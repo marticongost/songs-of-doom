@@ -6,7 +6,9 @@
 	import { setLocale } from '$lib/context/locale';
 	import InlineSvg from '$lib/components/InlineSvg.svelte';
 	let { data, children } = $props();
-	setLocale(data.locale);
+	$effect(() => {
+		setLocale(data.locale);
+	});
 </script>
 
 <svelte:head>
