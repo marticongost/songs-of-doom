@@ -27,9 +27,15 @@
 
 {@render children()}
 
-<style>
+<style lang="scss">
+	@use '@reguitzell/styles' as rz;
+
 	.pageTitle {
 		font-family: var(--heading-font);
 		font-size: 2rem;
+	}
+
+	header {
+		margin-bottom: rz.size(lg);
 	}
 </style>
