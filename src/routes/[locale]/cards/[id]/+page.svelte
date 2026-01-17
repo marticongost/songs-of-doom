@@ -26,7 +26,7 @@
 {/snippet}
 
 <div class="card-page">
-	<Card entity={data.entity} />
+	<Card entity={data.entity} linked={false} />
 
 	<aside>
 		{#if data.entity.isArchetype}

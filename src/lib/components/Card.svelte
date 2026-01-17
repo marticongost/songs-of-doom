@@ -9,18 +9,25 @@
 	import Image from './Image.svelte';
 	import { Item } from '$lib/catalog/models/inventory';
 	import ExperienceChip from './ExperienceChip.svelte';
+	import { getLocale } from '$lib/context/locale';
 	export let entity: Entity;
+	export let linked: boolean = true;
 	const archetype = entity.isArchetype ? entity : entity.archetype;
 </script>
 
-<article {...standardAttributes($$props, 'card')} data-type={entity.type}>
+<svelte:element
+	this={linked ? 'a' : 'div'}
+	href={linked ? `/${getLocale()}/cards/${entity.id}` : undefined}
+	{...standardAttributes($$props, 'card')}
+	data-type={entity.type}
+>
 	<div class="header">
 		{#if archetype}
 			<div class="archetype-frame">
 				<InlineSvg class="archetype-icon" src="archetypes/{archetype.id}.svg" />
 			</div>
 		{/if}
-		<h1 class="title"><Text {...entity.title} /></h1>
+		<div class="title"><Text {...entity.title} /></div>
 		<div class="acquisition">
 			{#if entity.archetype}
 				<div class="required-archetype">
@@ -49,7 +56,7 @@
 		<div class="description">{entity.description}</div>
 		<CapabilityList capabilities={entity.capabilities} />
 	</div>
-</article>
+</svelte:element>
 
 <style lang="scss">
 	@use 'sass:math';
@@ -70,6 +77,7 @@
 		font-size: #{math.div($card-screen-width, $card-print-width) * $card-content-scale}em;
 		width: #{math.div($card-print-width, $card-content-scale)}em;
 		height: #{math.div($card-print-height, $card-content-scale)}em;
+		overflow: hidden;
 
 		@each $type in archetype, trait, skill, ally, item {
 			&[data-type='#{$type}'] {
@@ -81,6 +89,10 @@
 		@media print {
 			font-size: #{$card-content-scale}mm;
 		}
+	}
+
+	a.card:hover {
+		border-color: var(--text-highlight);
 	}
 
 	:global(.card .image) {
@@ -96,6 +108,10 @@
 
 	.title {
 		@include rz.padding($header-padding);
+		font-family: var(--heading-font);
+		font-size: 1.4em;
+		color: var(--text-heading-color);
+		text-shadow: 0 0 0.5em rgba(0, 0, 0, 0.8);
 	}
 
 	.archetype-frame {
@@ -137,16 +153,5 @@
 	.body {
 		@include rz.column(sm);
 		@include rz.padding(sm);
-	}
-
-	:global(.card .title svg) {
-		vertical-align: baseline;
-	}
-
-	h1 {
-		font-family: var(--heading-font);
-		font-size: 1.4em;
-		color: var(--text-heading-color);
-		text-shadow: 0 0 0.5em rgba(0, 0, 0, 0.8);
 	}
 </style>
