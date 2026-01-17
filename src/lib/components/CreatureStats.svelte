@@ -19,7 +19,8 @@
 
 	.creature-stats {
 		@include rz.row;
-		background-image: linear-gradient(to bottom, rgba(black, 0.2), rgba(black, 0.5));
+		background-image: linear-gradient(to bottom, transparent, rgba(black, 0.1));
+		border-bottom: var(--panel-separator);
 	}
 
 	.creature-stat {
