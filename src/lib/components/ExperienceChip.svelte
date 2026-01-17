@@ -21,6 +21,8 @@
 		width: $size;
 		height: $size;
 		position: relative;
+		font-family: var(--heading-font);
+		font-weight: bold;
 
 		:global(.icon) {
 			position: absolute;

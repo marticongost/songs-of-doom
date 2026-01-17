@@ -1,15 +1,15 @@
 <script lang="ts">
 	import type { Entity } from '$lib/catalog/models/entity';
+	import { Item } from '$lib/catalog/models/inventory';
 	import CapabilityList from '$lib/components/capabilities/CapabilityList.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
-	import { standardAttributes } from '$lib/components/standardattributes';
-	import ChargesChip from './capabilities/ChargesChip.svelte';
-	import InlineSvg from './InlineSvg.svelte';
 	import PropertyList from '$lib/components/properties/PropertyList.svelte';
-	import Image from './Image.svelte';
-	import { Item } from '$lib/catalog/models/inventory';
-	import ExperienceChip from './ExperienceChip.svelte';
+	import { standardAttributes } from '$lib/components/standardattributes';
 	import { getLocale } from '$lib/context/locale';
+	import ChargesChip from './capabilities/ChargesChip.svelte';
+	import ExperienceChip from './ExperienceChip.svelte';
+	import Image from './Image.svelte';
+	import InlineSvg from './InlineSvg.svelte';
 	export let entity: Entity;
 	export let linked: boolean = true;
 	const archetype = entity.isArchetype ? entity : entity.archetype;
@@ -110,6 +110,7 @@
 		@include rz.padding($header-padding);
 		font-family: var(--heading-font);
 		font-size: 1.4em;
+		font-weight: bold;
 		color: var(--text-heading-color);
 		text-shadow: 0 0 0.5em rgba(0, 0, 0, 0.8);
 	}
