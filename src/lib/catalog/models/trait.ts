@@ -9,13 +9,13 @@ const NOT_COMPUTED = Symbol('not computed');
 export class Trait extends Entity {
 	private _archetype: Trait | undefined | typeof NOT_COMPUTED;
 	private _isArchetype: boolean | typeof NOT_COMPUTED;
-	private _subtraits: Array<Trait> | typeof NOT_COMPUTED;
+	private _children: Array<Entity> | typeof NOT_COMPUTED;
 
 	constructor({ title, description, properties, capabilities, xpCost }: EntityProps) {
 		super({ title, description, properties, capabilities, xpCost: xpCost ?? 0 });
 		this._archetype = NOT_COMPUTED;
 		this._isArchetype = NOT_COMPUTED;
-		this._subtraits = NOT_COMPUTED;
+		this._children = NOT_COMPUTED;
 	}
 
 	isRootTrait(): boolean {
@@ -52,13 +52,17 @@ export class Trait extends Entity {
 		return this.isArchetype ? 'archetype' : 'trait';
 	}
 
-	get subtraits(): Array<Trait> {
-		if (this._subtraits === NOT_COMPUTED) {
-			this._subtraits = getEntryMetadata(this)
+	get children(): Array<Entity> {
+		if (this._children === NOT_COMPUTED) {
+			this._children = getEntryMetadata(this)
 				.catalog.all()
 				.filter((trait) => trait.archetype === this);
 		}
-		return this._subtraits;
+		return this._children;
+	}
+
+	getChildrenOfType(type: EntityType): Array<Entity> {
+		return this.children.filter((child) => child.type === type);
 	}
 
 	override getImplicitProperties(): Array<Property> {
