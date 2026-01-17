@@ -2,11 +2,11 @@
 	import '$lib/css/global.scss';
 	import favicon from '$lib/assets/favicon.svg?url';
 	import { page } from '$app/state';
-	import { getDocumentTitle } from '../meta';
+	import { getDocumentTitle } from '../../meta.js';
 	import { setLocale } from '$lib/context/locale';
 	import InlineSvg from '$lib/components/InlineSvg.svelte';
-	setLocale('ca');
-	let { children } = $props();
+	let { data, children } = $props();
+	setLocale(data.locale);
 </script>
 
 <svelte:head>

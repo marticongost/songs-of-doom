@@ -1,4 +1,4 @@
-const locales = ['ca', 'es', 'en'] as const;
+export const locales = ['ca', 'es', 'en'] as const;
 
 export type Locale = (typeof locales)[number];
 
@@ -65,4 +65,8 @@ const isLocalisedText = (value: unknown): value is LocalisedText => {
 
 export const plural2 = (n: number, singular: string, plural: string): string => {
 	return n === 1 ? singular : plural;
+};
+
+export const translate = (localisedText: LocalisedText, locale: Locale): string => {
+	return localisedText[locale] || '';
 };
