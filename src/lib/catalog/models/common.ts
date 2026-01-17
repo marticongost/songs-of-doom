@@ -11,7 +11,6 @@ export const fullyRechargeOnChapterStart = new Reaction({
 export const reduceCostByDiscarding = (cost: CapabilityCostProps) => {
 	return new Reaction({
 		triggers: ['payingCapability'],
-		cost: { cardTransition: 'discard' },
 		effects: [new ModifyCapabilityCostEffect({ cost })]
 	});
 };
