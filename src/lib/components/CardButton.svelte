@@ -27,7 +27,7 @@
 		border: var(--panel-border);
 		border-radius: rz.size(sm);
 
-		@each $type in archetype, trait, skill, ally, item {
+		@each $type in archetype, trait, skill, ally, item, creature {
 			&[data-type='#{$type}'] {
 				background-image: var(--card-type-#{$type}-main-background);
 			}

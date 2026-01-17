@@ -56,8 +56,10 @@ body {
 	--card-type-trait-secondary-background: linear-gradient(45deg, rgb(24, 29, 34), #1a1b1c);
 	--card-type-skill-main-background: linear-gradient(45deg, rgb(93 104 96), #080808);
 	--card-type-skill-secondary-background: linear-gradient(45deg, rgb(32 38 21), #090909);
-	--card-type-item-main-background: linear-gradient(45deg, rgb(108 55 42), #1d0f02);
-	--card-type-item-secondary-background: linear-gradient(45deg, rgb(38 26 21), #090909);
+	--card-type-item-main-background: linear-gradient(45deg, rgb(100 80 68), #1d0d02);
+	--card-type-item-secondary-background: linear-gradient(45deg, rgb(46 39 26), #090909);
+	--card-type-creature-main-background: linear-gradient(45deg, rgb(152 80 63), #1d0f02);
+	--card-type-creature-secondary-background: linear-gradient(45deg, rgb(63 38 28), #090909);
 
 	// Panels
 	--panel-background-color: #{$palette-somber};
@@ -65,6 +67,7 @@ body {
 	--panel-separator: 1px solid #{$palette-ash};
 
 	// Text
+	--text-color: white;
 	--text-subtle-color: #888;
 	--text-highlight: #{$palette-steel};
 	--text-heading-color: #{$palette-cloud};

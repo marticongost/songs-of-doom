@@ -1,3 +1,4 @@
+import type { Creature } from './models/creature';
 import { Entity } from './models/entity';
 import type { Item } from './models/inventory';
 import type { Skill } from './models/skill';
@@ -90,6 +91,10 @@ export const entities = new Catalog<Entity>(
 		import: 'default'
 	}),
 	import.meta.glob<Item>(`./data/items/**/*.ts`, {
+		eager: true,
+		import: 'default'
+	}),
+	import.meta.glob<Creature>(`./data/creatures/**/*.ts`, {
 		eager: true,
 		import: 'default'
 	})

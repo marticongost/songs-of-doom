@@ -13,7 +13,7 @@ export interface EntityProps {
 	xpCost?: number;
 }
 
-export type EntityType = 'archetype' | 'trait' | 'skill' | 'ally' | 'item';
+export type EntityType = 'archetype' | 'trait' | 'skill' | 'ally' | 'item' | 'creature';
 
 export abstract class Entity {
 	readonly title: LocalisedText;

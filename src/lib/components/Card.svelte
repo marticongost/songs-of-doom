@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Creature } from '$lib/catalog/models/creature';
 	import type { Entity } from '$lib/catalog/models/entity';
 	import { Item } from '$lib/catalog/models/inventory';
 	import CapabilityList from '$lib/components/capabilities/CapabilityList.svelte';
@@ -10,6 +11,7 @@
 	import ExperienceChip from './ExperienceChip.svelte';
 	import Image from './Image.svelte';
 	import InlineSvg from './InlineSvg.svelte';
+	import HealthChip from './stats/HealthChip.svelte';
 	export let entity: Entity;
 	export let linked: boolean = true;
 	const archetype = entity.isArchetype ? entity : entity.archetype;
@@ -51,6 +53,10 @@
 		{#if entity instanceof Item && entity.slot}
 			<InlineSvg class="slot" src="slots/{entity.slot.type}.svg" />
 		{/if}
+		{#if entity instanceof Creature}
+			{@const creature = entity as Creature}
+			<HealthChip amount={creature.health} />
+		{/if}
 	</div>
 	<div class="body">
 		<div class="description">{entity.description}</div>
@@ -79,7 +85,7 @@
 		height: #{math.div($card-print-height, $card-content-scale)}em;
 		overflow: hidden;
 
-		@each $type in archetype, trait, skill, ally, item {
+		@each $type in archetype, trait, skill, ally, item, creature {
 			&[data-type='#{$type}'] {
 				--main-background: var(--card-type-#{$type}-main-background);
 				--secondary-background: var(--card-type-#{$type}-secondary-background);
