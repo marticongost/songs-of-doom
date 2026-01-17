@@ -7,7 +7,8 @@ export type EventType =
 	| 'enemyDefeated'
 	| 'payingCapability'
 	| 'acquired'
-	| 'chapterStart';
+	| 'chapterStart'
+	| 'provoked';
 
 export type EventProps = { type: EventType; name: LocalisedText };
 
@@ -61,5 +62,9 @@ export const events: Record<EventType, Event> = {
 	chapterStart: new Event({
 		type: 'chapterStart',
 		name: { ca: 'En començar el capítol', es: 'Al empezar el capítulo', en: 'Start of chapter' }
+	}),
+	provoked: new Event({
+		type: 'provoked',
+		name: { ca: 'En ser provocat', es: 'Al ser provocado', en: 'When provoked' }
 	})
 };
