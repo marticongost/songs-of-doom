@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '$lib/css/global.scss';
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '$lib/assets/favicon.svg?url';
 	import { page } from '$app/state';
 	import { getDocumentTitle } from '../meta';
 	import { setLocale } from '$lib/context/locale';
