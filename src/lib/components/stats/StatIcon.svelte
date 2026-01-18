@@ -1,14 +1,22 @@
 <script lang="ts">
 	import { stats, type Stat, type StatType } from '$lib/catalog/models/stats';
 	import InlineSvg from '$lib/components/InlineSvg.svelte';
-	import { standardAttributes } from '$lib/components/standardattributes';
+	import {
+		standardAttributes,
+		type StandardAttributeProps
+	} from '$lib/components/standardattributes';
 
-	export let stat: Stat | StatType;
-	const statObject = typeof stat === 'string' ? stats[stat] : stat;
+	interface Props extends StandardAttributeProps {
+		stat: Stat | StatType;
+	}
+
+	const { stat, ...attributes }: Props = $props();
+
+	const statObject = $derived(typeof stat === 'string' ? stats[stat] : stat);
 </script>
 
 <InlineSvg
-	{...standardAttributes($$props, 'stat-icon')}
+	{...standardAttributes(attributes, 'stat-icon')}
 	data-stat={statObject.type}
 	src="stats/{statObject.type}.svg"
 />

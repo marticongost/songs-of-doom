@@ -1,11 +1,16 @@
 <script lang="ts">
 	import type { CreatureStatType } from '$lib/catalog/models/creature';
-	import { standardAttributes } from './standardattributes';
+	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
 	import StatIcon from './stats/StatIcon.svelte';
-	export let stats: Record<CreatureStatType, number>;
+
+	interface Props extends StandardAttributeProps {
+		stats: Record<CreatureStatType, number>;
+	}
+
+	const { stats, ...attributes }: Props = $props();
 </script>
 
-<div {...standardAttributes($$props, 'creature-stats')}>
+<div {...standardAttributes(attributes, 'creature-stats')}>
 	{#each Object.entries(stats) as [stat, value]}
 		<span class="creature-stat" data-stat={stat}>
 			<StatIcon stat={stat as CreatureStatType} />

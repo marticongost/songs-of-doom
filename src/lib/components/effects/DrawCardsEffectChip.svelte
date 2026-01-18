@@ -3,7 +3,11 @@
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { plural2 } from '$lib/localisation';
 
-	export let effect: DrawCardsEffect;
+	interface Props {
+		effect: DrawCardsEffect;
+	}
+
+	const { effect }: Props = $props();
 </script>
 
 <Text

@@ -51,14 +51,25 @@
 
 <script lang="ts" generics="T">
 	import type { Snippet } from 'svelte';
-	import { standardAttributes } from './standardattributes';
 	import InlineSvg from './InlineSvg.svelte';
+	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
 
-	export let root: T;
-	export let getChildren: (context: TreeContext<T>) => T[];
-	export let getItemKey: (context: TreeContext<T>) => string = (context) => context.key;
-	export let itemSnippet: Snippet<[TreeContext<T>]>;
-	export let appearence: 'bullets' | 'arrows' = 'bullets';
+	interface Props extends StandardAttributeProps {
+		root: T;
+		getChildren: (context: TreeContext<T>) => T[];
+		getItemKey?: (context: TreeContext<T>) => string;
+		itemSnippet: Snippet<[TreeContext<T>]>;
+		appearence?: 'bullets' | 'arrows';
+	}
+
+	let {
+		root,
+		getChildren,
+		getItemKey = (context: TreeContext<T>) => context.key,
+		itemSnippet,
+		appearence = 'bullets',
+		...rest
+	}: Props = $props();
 </script>
 
 {#snippet itemList(context: TreeContext<T>)}
@@ -83,7 +94,7 @@
 	{/if}
 {/snippet}
 
-<div {...standardAttributes($$props, 'tree')} data-appearence={appearence}>
+<div {...standardAttributes(rest, 'tree')} data-appearence={appearence}>
 	{@render itemList(new TreeContext<T>(undefined, root, 0))}
 </div>
 

@@ -1,35 +1,40 @@
 <script lang="ts">
 	import {
-		ChangeStatsEffect,
-		DefendEffect,
-		DrawCardsEffect,
 		AttackEffect,
+		ChangeStatsEffect,
+		ConditionalEffect,
+		DefendEffect,
+		DrawAptitudeEffect,
+		DrawCardsEffect,
 		ModifyCapabilityCostEffect,
 		ModifyRollEffect,
-		type Effect,
-		DrawAptitudeEffect,
-		ConditionalEffect,
+		ResultsTableEffect,
 		TriggerAttackEffect,
-		ResultsTableEffect
+		type Effect
 	} from '$lib/catalog/models/effects';
 	import { RechargeEffect } from '$lib/catalog/models/effects/recharge';
 
-	import DrawCardsEffectChip from './DrawCardsEffectChip.svelte';
-	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
-	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
-	import ChangeStatsEffectChip from './ChangeStatsEffectChip.svelte';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import AttackEffectChip from './AttackEffectChip.svelte';
-	import RechargeEffectChip from './RechargeEffectChip.svelte';
+	import ChangeStatsEffectChip from './ChangeStatsEffectChip.svelte';
+	import ConditionalEffectChip from './ConditionalEffectChip.svelte';
 	import DefendEffectChip from './DefendEffectChip.svelte';
 	import DrawAptitudeEffectChip from './DrawAptitudeEffectChip.svelte';
-	import ConditionalEffectChip from './ConditionalEffectChip.svelte';
-	import TriggerAttackEffectChip from './TriggerAttackEffectChip.svelte';
+	import DrawCardsEffectChip from './DrawCardsEffectChip.svelte';
+	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
+	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
+	import RechargeEffectChip from './RechargeEffectChip.svelte';
 	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
+	import TriggerAttackEffectChip from './TriggerAttackEffectChip.svelte';
 
-	export let effect: Effect;
+	interface Props extends StandardAttributeProps {
+		effect: Effect;
+	}
+
+	const { effect, ...attributes }: Props = $props();
 </script>
 
-<div class="effect-chip">
+<div {...standardAttributes(attributes, 'effect-chip')}>
 	{#if effect instanceof DrawCardsEffect}
 		<DrawCardsEffectChip {effect} />
 	{:else if effect instanceof ModifyRollEffect}

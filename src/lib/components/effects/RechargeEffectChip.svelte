@@ -3,7 +3,11 @@
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { plural2 } from '$lib/localisation';
 
-	export let effect: RechargeEffect;
+	interface Props {
+		effect: RechargeEffect;
+	}
+
+	const { effect }: Props = $props();
 </script>
 
 {#if effect.amount === 'max'}

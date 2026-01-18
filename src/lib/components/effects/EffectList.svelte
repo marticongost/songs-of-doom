@@ -1,12 +1,15 @@
 <script lang="ts">
 	import type { Effect } from '$lib/catalog/models/effects';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import EffectChip from './EffectChip.svelte';
-	import { standardAttributes } from '../standardattributes';
 
-	export let effects: Effect[];
+	interface Props extends StandardAttributeProps {
+		effects: Effect[];
+	}
+	const { effects, ...attributes }: Props = $props();
 </script>
 
-<ul {...standardAttributes($$props, 'effect-list')}>
+<ul {...standardAttributes(attributes, 'effect-list')}>
 	{#each effects as effect}
 		<li class="effect"><EffectChip {effect} /></li>
 	{/each}

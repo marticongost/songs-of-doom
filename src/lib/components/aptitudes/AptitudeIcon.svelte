@@ -1,14 +1,22 @@
 <script lang="ts">
 	import { aptitudes, type Aptitude, type AptitudeType } from '$lib/catalog/models/aptitude';
 	import InlineSvg from '$lib/components/InlineSvg.svelte';
-	import { standardAttributes } from '$lib/components/standardattributes';
+	import {
+		standardAttributes,
+		type StandardAttributeProps
+	} from '$lib/components/standardattributes';
 
-	export let aptitude: Aptitude | AptitudeType;
-	const aptitudeObject = typeof aptitude === 'string' ? aptitudes[aptitude] : aptitude;
+	interface Props extends StandardAttributeProps {
+		aptitude: Aptitude | AptitudeType;
+	}
+
+	const { aptitude, ...attributes }: Props = $props();
+
+	const aptitudeObject = $derived(typeof aptitude === 'string' ? aptitudes[aptitude] : aptitude);
 </script>
 
 <InlineSvg
-	{...standardAttributes($$props, 'aptitude-icon')}
+	{...standardAttributes(attributes, 'aptitude-icon')}
 	data-aptitude={aptitudeObject.type}
 	src="aptitudes/{aptitudeObject.type}.svg"
 />

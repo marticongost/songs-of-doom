@@ -4,12 +4,16 @@
 	import StatExpressionChip from '../StatExpressionChip.svelte';
 	import DamageTable from '../damage/DamageTable.svelte';
 	import PropertyList from '../properties/PropertyList.svelte';
-	import { standardAttributes } from '../standardattributes';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
-	export let effect: AttackEffect;
+	interface Props extends StandardAttributeProps {
+		effect: AttackEffect;
+	}
+
+	const { effect, ...attributes }: Props = $props();
 </script>
 
-<div {...standardAttributes($$props, 'attack-effect-chip')}>
+<div {...standardAttributes(attributes, 'attack-effect-chip')}>
 	<div class="attack-stats">
 		<Text ca="Atacar amb" es="Atacar con" en="Attack with" />
 		<StatExpressionChip statExpression={effect.expression} />

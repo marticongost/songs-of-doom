@@ -1,9 +1,14 @@
 <script lang="ts">
 	import type { StatExpressionNode } from '$lib/catalog/models/expression';
 	import { Stat } from '$lib/catalog/models/stats';
+	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
 	import StatIcon from './stats/StatIcon.svelte';
 
-	export let statExpression: StatExpressionNode;
+	interface Props extends StandardAttributeProps {
+		statExpression: StatExpressionNode;
+	}
+
+	const { statExpression, ...attributes }: Props = $props();
 </script>
 
 {#snippet expressionNodeSnippet(node: StatExpressionNode)}
@@ -18,7 +23,7 @@
 	{/if}
 {/snippet}
 
-<span class="stat-expression-chip">
+<span {...standardAttributes(attributes, 'stat-expression-chip')}>
 	{@render expressionNodeSnippet(statExpression)}
 </span>
 

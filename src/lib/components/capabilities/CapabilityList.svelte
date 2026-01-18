@@ -2,7 +2,11 @@
 	import type { Capability } from '$lib/catalog/models/capability';
 	import CapabilityChip from './CapabilityChip.svelte';
 
-	export let capabilities: Capability[];
+	interface Props {
+		capabilities: Array<Capability>;
+	}
+
+	const { capabilities }: Props = $props();
 </script>
 
 {#if capabilities.length > 0}

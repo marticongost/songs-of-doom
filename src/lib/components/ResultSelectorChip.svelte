@@ -1,16 +1,20 @@
 <script lang="ts">
 	import type { Result, ResultSelector } from '$lib/catalog/models/results';
 	import InlineSvg from './InlineSvg.svelte';
-	import { standardAttributes } from './standardattributes';
+	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
 
-	export let result: ResultSelector;
+	interface Props extends StandardAttributeProps {
+		result: ResultSelector;
+	}
+
+	const { result, ...attributes }: Props = $props();
 </script>
 
 {#snippet resultSnippet(result: Result)}
 	<InlineSvg class="die" src="dice/success-{result}.svg" />
 {/snippet}
 
-<span {...standardAttributes($$props, 'result-selector-chip')}>
+<span {...standardAttributes(attributes, 'result-selector-chip')}>
 	{#if typeof result === 'number'}
 		{@render resultSnippet(result)}
 	{:else if result.min && result.max}

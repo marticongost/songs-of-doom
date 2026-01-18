@@ -5,22 +5,31 @@
 	import CapabilityList from '$lib/components/capabilities/CapabilityList.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import PropertyList from '$lib/components/properties/PropertyList.svelte';
-	import { standardAttributes } from '$lib/components/standardattributes';
+	import {
+		standardAttributes,
+		type StandardAttributeProps
+	} from '$lib/components/standardattributes';
 	import { getLocale } from '$lib/context/locale';
 	import ChargesChip from './capabilities/ChargesChip.svelte';
 	import CreatureStats from './CreatureStats.svelte';
 	import ExperienceChip from './ExperienceChip.svelte';
 	import Image from './Image.svelte';
 	import InlineSvg from './InlineSvg.svelte';
-	export let entity: Entity;
-	export let linked: boolean = true;
-	const archetype = entity.isArchetype ? entity : entity.archetype;
+
+	interface Props extends StandardAttributeProps {
+		entity: Entity;
+		linked?: boolean;
+	}
+
+	const { entity, linked = true, ...rest }: Props = $props();
+
+	const archetype = $derived(entity.isArchetype ? entity : entity.archetype);
 </script>
 
 <svelte:element
 	this={linked ? 'a' : 'div'}
 	href={linked ? `/${getLocale()}/cards/${entity.id}` : undefined}
-	{...standardAttributes($$props, 'card')}
+	{...standardAttributes(rest, 'card')}
 	data-type={entity.type}
 >
 	<div class="header">

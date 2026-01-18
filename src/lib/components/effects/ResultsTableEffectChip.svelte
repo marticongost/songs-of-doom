@@ -2,12 +2,17 @@
 	import { ResultsTableEffect } from '$lib/catalog/models/effects';
 	import InlineSvg from '../InlineSvg.svelte';
 	import ResultSelectorChip from '../ResultSelectorChip.svelte';
-	import { standardAttributes } from '../standardattributes';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import EffectList from './EffectList.svelte';
-	export let effect: ResultsTableEffect;
+
+	interface Props extends StandardAttributeProps {
+		effect: ResultsTableEffect;
+	}
+
+	const { effect, ...attributes }: Props = $props();
 </script>
 
-<div {...standardAttributes($$props, 'result-table-effect-chip')}>
+<div {...standardAttributes(attributes, 'result-table-effect-chip')}>
 	{#each effect.entries as entry}
 		<div class="entry">
 			<ResultSelectorChip class="result" result={entry.result} />

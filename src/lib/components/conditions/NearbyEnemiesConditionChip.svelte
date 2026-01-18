@@ -2,7 +2,11 @@
 	import type { NearbyEnemiesCondition } from '$lib/catalog/models/conditions';
 	import Text from '../localisation/Text.svelte';
 
-	export let condition: NearbyEnemiesCondition;
+	interface Props {
+		condition: NearbyEnemiesCondition;
+	}
+
+	const { condition }: Props = $props();
 </script>
 
 <Text

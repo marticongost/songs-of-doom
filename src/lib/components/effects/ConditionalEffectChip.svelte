@@ -4,7 +4,12 @@
 	import ConditionChip from '../conditions/ConditionChip.svelte';
 	import Text from '../localisation/Text.svelte';
 	import EffectList from './EffectList.svelte';
-	export let effect: ConditionalEffect;
+
+	interface Props {
+		effect: ConditionalEffect;
+	}
+
+	const { effect }: Props = $props();
 </script>
 
 {#each effect.cases as conditionCase}

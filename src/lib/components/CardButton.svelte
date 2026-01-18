@@ -3,13 +3,17 @@
 	import { getLocale } from '$lib/context/locale';
 	import ExperienceChip from './ExperienceChip.svelte';
 	import Text from './localisation/Text.svelte';
-	import { standardAttributes } from './standardattributes';
+	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
 
-	export let entity: Entity;
+	interface Props extends StandardAttributeProps {
+		entity: Entity;
+	}
+
+	const { entity, ...attributes }: Props = $props();
 </script>
 
 <a
-	{...standardAttributes($$props, 'card-button')}
+	{...standardAttributes(attributes, 'card-button')}
 	data-type={entity.type}
 	href="/{getLocale()}/cards/{entity.id}"
 >

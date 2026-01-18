@@ -2,7 +2,11 @@
 	import type { WoundedCondition } from '$lib/catalog/models/conditions';
 	import Text from '../localisation/Text.svelte';
 
-	export let condition: WoundedCondition;
+	interface Props {
+		condition: WoundedCondition;
+	}
+
+	const { condition }: Props = $props();
 	void condition;
 </script>
 

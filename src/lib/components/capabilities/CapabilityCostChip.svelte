@@ -1,16 +1,23 @@
 <script lang="ts">
-	import { indicatorTypes, type StatType } from '$lib/catalog/models/stats';
-	import { standardAttributes } from '$lib/components/standardattributes';
-	import AptitudeIcon from '../aptitudes/AptitudeIcon.svelte';
-	import type { CapabilityCostType } from '$lib/catalog/models/capabilitycost';
 	import { aptitudeTypes, type AptitudeType } from '$lib/catalog/models/aptitude';
-	import StatChip from '../stats/StatChip.svelte';
+	import type { CapabilityCostType } from '$lib/catalog/models/capabilitycost';
+	import { indicatorTypes, type StatType } from '$lib/catalog/models/stats';
+	import {
+		standardAttributes,
+		type StandardAttributeProps
+	} from '$lib/components/standardattributes';
+	import AptitudeIcon from '../aptitudes/AptitudeIcon.svelte';
 	import InlineSvg from '../InlineSvg.svelte';
+	import StatChip from '../stats/StatChip.svelte';
 
-	export let type: CapabilityCostType;
+	interface Props extends StandardAttributeProps {
+		type: CapabilityCostType;
+	}
+
+	const { type, ...attributes }: Props = $props();
 </script>
 
-<span {...standardAttributes($$props, 'capability-cost-chip')} data-type={type}>
+<span {...standardAttributes(attributes, 'capability-cost-chip')} data-type={type}>
 	{#if (aptitudeTypes as Array<CapabilityCostType>).includes(type)}
 		<AptitudeIcon aptitude={type as AptitudeType} />
 	{:else if (indicatorTypes as Array<CapabilityCostType>).includes(type)}

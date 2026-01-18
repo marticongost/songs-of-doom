@@ -1,15 +1,18 @@
 <script lang="ts" generics="T">
-	import { standardAttributes } from '../standardattributes';
 	import type { Snippet } from 'svelte';
-
+	import { standardAttributes } from '../standardattributes';
 	import Text from './Text.svelte';
 
-	export let items: T[];
-	export let renderItem: Snippet<[T]>;
-	export let operator: 'and' | 'or' = 'and';
+	interface Props {
+		items: T[];
+		renderItem: Snippet<[T]>;
+		operator?: 'and' | 'or';
+	}
+
+	const { items, renderItem, operator = 'and', ...attributes }: Props = $props();
 </script>
 
-<span {...standardAttributes($$props, 'comma-separated-list')}>
+<span {...standardAttributes(attributes, 'comma-separated-list')}>
 	{#each items as item, index}
 		{@render renderItem(item)}
 		{#if index === items.length - 2}

@@ -4,7 +4,11 @@
 	import StatExpressionChip from '../StatExpressionChip.svelte';
 	import PropertyList from '../properties/PropertyList.svelte';
 
-	export let effect: DefendEffect;
+	interface Props {
+		effect: DefendEffect;
+	}
+
+	const { effect }: Props = $props();
 </script>
 
 <Text ca="Defensar amb" es="Defender con" en="Defend with" />

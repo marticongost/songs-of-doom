@@ -1,11 +1,15 @@
 <script lang="ts">
+	import { type CapabilityCostType } from '$lib/catalog/models/capabilitycost';
 	import { ModifyCapabilityCostEffect } from '$lib/catalog/models/effects';
 	import Text from '$lib/components/localisation/Text.svelte';
-	import CommaSeparatedList from '../localisation/CommaSeparatedList.svelte';
 	import CapabilityCostChip from '../capabilities/CapabilityCostChip.svelte';
-	import { type CapabilityCostType } from '$lib/catalog/models/capabilitycost';
+	import CommaSeparatedList from '../localisation/CommaSeparatedList.svelte';
 
-	export let effect: ModifyCapabilityCostEffect;
+	interface Props {
+		effect: ModifyCapabilityCostEffect;
+	}
+
+	const { effect }: Props = $props();
 </script>
 
 {#snippet renderCost([type, value]: [CapabilityCostType, number])}

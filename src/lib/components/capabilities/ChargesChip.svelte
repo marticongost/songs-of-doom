@@ -1,11 +1,15 @@
 <script lang="ts">
 	import InlineSvg from '../InlineSvg.svelte';
-	import { standardAttributes } from '../standardattributes';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
-	export let charges: number;
+	interface Props extends StandardAttributeProps {
+		charges: number;
+	}
+
+	const { charges, ...attributes }: Props = $props();
 </script>
 
-<span {...standardAttributes($$props, 'charges-chip')}>
+<span {...standardAttributes(attributes, 'charges-chip')}>
 	<InlineSvg class="icon" src="capabilities/charge.svg" />
 	<span class="label">{charges}</span>
 </span>

@@ -1,3 +1,10 @@
+// Base interface for components that accept standard HTML attributes
+export interface StandardAttributeProps {
+	class?: string;
+	style?: string;
+	[key: string]: unknown;
+}
+
 // Accepts any HTML attributes, including data-* and aria-*.
 // Svelte's $$props is typed as Record<string, any>, so we refine it here.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,18 +1,25 @@
 <script lang="ts">
 	import type { DamageTable } from '$lib/catalog/models/effects/attack';
 	import ResultSelectorChip from '../ResultSelectorChip.svelte';
-	import { standardAttributes } from '../standardattributes';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import DamageChip from './DamageChip.svelte';
 
-	export let damage: DamageTable;
-	const sortedDamageEntries = damage.toSorted((a, b) => {
-		const aKey = typeof a.result === 'number' ? a.result : (a.result.min ?? 0);
-		const bKey = typeof b.result === 'number' ? b.result : (b.result.min ?? 0);
-		return aKey - bKey;
-	});
+	interface Props extends StandardAttributeProps {
+		damage: DamageTable;
+	}
+
+	const { damage, ...attributes }: Props = $props();
+
+	const sortedDamageEntries = $derived(
+		damage.toSorted((a, b) => {
+			const aKey = typeof a.result === 'number' ? a.result : (a.result.min ?? 0);
+			const bKey = typeof b.result === 'number' ? b.result : (b.result.min ?? 0);
+			return aKey - bKey;
+		})
+	);
 </script>
 
-<span {...standardAttributes($$props, 'damage-table')}>
+<span {...standardAttributes(attributes, 'damage-table')}>
 	{#each sortedDamageEntries as entry}
 		<span class="entry">
 			<ResultSelectorChip result={entry.result} />

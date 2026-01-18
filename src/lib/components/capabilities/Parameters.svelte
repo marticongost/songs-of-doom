@@ -7,13 +7,21 @@
 </script>
 
 <script lang="ts">
-	export let symbolType: SymbolType = 'parens';
+	import type { Snippet } from 'svelte';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
+
+	interface Props extends StandardAttributeProps {
+		symbolType?: SymbolType;
+		children: Snippet;
+	}
+
+	const { symbolType = 'parens', children, ...attributes }: Props = $props();
 </script>
 
-<span class="parameters">
+<span {...standardAttributes(attributes, 'parameters')}>
 	<span class="symbol">{symbols[symbolType][0]}</span>
 	<span class="parameter-items">
-		<slot />
+		{@render children()}
 	</span>
 	<span class="symbol">{symbols[symbolType][1]}</span>
 </span>

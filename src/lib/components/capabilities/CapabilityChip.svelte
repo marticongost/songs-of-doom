@@ -6,14 +6,18 @@
 	import Text from '$lib/components/localisation/Text.svelte';
 	import InlineSvg from '../InlineSvg.svelte';
 	import EffectList from '../effects/EffectList.svelte';
-	import { standardAttributes } from '../standardattributes';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import CapabilityCostChip from './CapabilityCostChip.svelte';
 	import Parameters from './Parameters.svelte';
 
-	export let capability: Capability;
+	interface Props extends StandardAttributeProps {
+		capability: Capability;
+	}
+
+	const { capability, ...attributes }: Props = $props();
 </script>
 
-<div {...standardAttributes($$props, 'capability-chip')}>
+<div {...standardAttributes(attributes, 'capability-chip')}>
 	<div class="capability-activation">
 		<!-- Capability type / triggers -->
 		<div class="moment">

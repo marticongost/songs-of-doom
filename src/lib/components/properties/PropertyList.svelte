@@ -1,13 +1,17 @@
 <script lang="ts">
-	import { CardType } from '$lib/catalog/models/properties';
+	import { CardType, type Property } from '$lib/catalog/models/properties';
 	import Text from '$lib/components/localisation/Text.svelte';
-	import { standardAttributes } from '../standardattributes';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
-	export let properties: Array<{ title: unknown }> = [];
+	interface Props extends StandardAttributeProps {
+		properties?: Array<Property>;
+	}
+
+	const { properties = [], ...attributes }: Props = $props();
 </script>
 
 {#if properties.length}
-	<ul {...standardAttributes($$props, 'property-list')}>
+	<ul {...standardAttributes(attributes, 'property-list')}>
 		{#each properties as property}
 			<li class={property instanceof CardType ? 'card-type' : ''}>
 				<Text {...(property as any).title} />

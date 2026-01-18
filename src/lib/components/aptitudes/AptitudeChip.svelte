@@ -1,14 +1,22 @@
 <script lang="ts">
 	import { aptitudes, type Aptitude, type AptitudeType } from '$lib/catalog/models/aptitude';
-	import { standardAttributes } from '$lib/components/standardattributes';
 	import Text from '$lib/components/localisation/Text.svelte';
+	import {
+		standardAttributes,
+		type StandardAttributeProps
+	} from '$lib/components/standardattributes';
 	import AptitudeIcon from './AptitudeIcon.svelte';
 
-	export let aptitude: Aptitude | AptitudeType;
-	const aptitudeObject = typeof aptitude === 'string' ? aptitudes[aptitude] : aptitude;
+	interface Props extends StandardAttributeProps {
+		aptitude: Aptitude | AptitudeType;
+	}
+
+	const { aptitude, ...attributes }: Props = $props();
+
+	const aptitudeObject = $derived(typeof aptitude === 'string' ? aptitudes[aptitude] : aptitude);
 </script>
 
-<span {...standardAttributes($$props, 'aptitude-chip')} data-aptitude={aptitudeObject.type}>
+<span {...standardAttributes(attributes, 'aptitude-chip')} data-aptitude={aptitudeObject.type}>
 	<AptitudeIcon aptitude={aptitudeObject} />
 	<span class="aptitude-name"><Text {...aptitudeObject.title} /></span>
 </span>

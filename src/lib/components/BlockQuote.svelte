@@ -1,9 +1,16 @@
-<script>
-	import { standardAttributes } from './standardattributes';
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
+
+	interface Props extends StandardAttributeProps {
+		children: Snippet;
+	}
+
+	const { children, ...attributes }: Props = $props();
 </script>
 
-<blockquote {...standardAttributes($$props, 'block-quote')}>
-	<slot />
+<blockquote {...standardAttributes(attributes, 'block-quote')}>
+	{@render children()}
 </blockquote>
 
 <style lang="scss">

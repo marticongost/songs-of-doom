@@ -13,12 +13,12 @@
 		[key: string]: unknown;
 	}
 
-	let {
+	const {
 		root,
 		maxDepth = undefined,
 		includeRoot = false,
 		currentPath = undefined,
-		...rest
+		...attributes
 	}: Props = $props();
 
 	const maxAllowedDepth = $derived(maxDepth === undefined ? undefined : root.depth + maxDepth);
@@ -54,7 +54,7 @@
 {/snippet}
 
 {#if root.children.length > 0 && (maxDepth === undefined || maxDepth > 0)}
-	<nav {...standardAttributes(rest, 'navigation')}>
+	<nav {...standardAttributes(attributes, 'navigation')}>
 		{@render sectionChildren(root, 0)}
 	</nav>
 {/if}

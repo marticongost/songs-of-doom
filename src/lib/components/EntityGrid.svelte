@@ -2,16 +2,20 @@
 	import type { Entity } from '$lib/catalog/models/entity';
 	import Card from '$lib/components/Card.svelte';
 	import type { Component } from 'svelte';
-	import { standardAttributes } from './standardattributes';
+	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
 
-	export let entities: Entity[];
-	export let EntityComponent: Component<{ entity: Entity }> = Card;
+	interface Props extends StandardAttributeProps {
+		entities: Entity[];
+		EntityComponent?: Component<{ entity: Entity }>;
+	}
+
+	const { entities, EntityComponent = Card, ...attributes }: Props = $props();
 </script>
 
 {#if entities.length > 0}
-	<div {...standardAttributes($$props, 'entity-grid')}>
+	<div {...standardAttributes(attributes, 'entity-grid')}>
 		{#each entities as entity}
-			<svelte:component this={EntityComponent} {entity} />
+			<EntityComponent {entity} />
 		{/each}
 	</div>
 {/if}

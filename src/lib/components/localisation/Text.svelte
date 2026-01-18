@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { getLocale } from '$lib/context/locale';
 
-	export let ca: string = '';
-	export let es: string = '';
-	export let en: string = '';
+	interface Props {
+		ca?: string;
+		es?: string;
+		en?: string;
+	}
+
+	const { ca = '', es = '', en = '' }: Props = $props();
 
 	const locale = getLocale();
 </script>

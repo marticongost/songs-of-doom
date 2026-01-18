@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { ChangeStatsEffect } from '$lib/catalog/models/effects';
+	import { type StatType } from '$lib/catalog/models/stats';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import CommaSeparatedList from '../localisation/CommaSeparatedList.svelte';
 	import StatChip from '../stats/StatChip.svelte';
-	import { type StatType } from '$lib/catalog/models/stats';
 
-	export let effect: ChangeStatsEffect;
+	interface Props {
+		effect: ChangeStatsEffect;
+	}
+
+	const { effect }: Props = $props();
 </script>
 
 {#snippet renderStatValue([stat, value]: [string, number])}

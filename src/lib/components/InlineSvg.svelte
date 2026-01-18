@@ -1,11 +1,15 @@
 <script lang="ts">
-	import { standardAttributes } from '$lib/components/standardattributes';
 	import { svgs } from '$lib/assets/svg';
+	import {
+		standardAttributes,
+		type StandardAttributeProps
+	} from '$lib/components/standardattributes';
 
-	// Props
-	export let src: string;
+	interface Props extends StandardAttributeProps {
+		src: string;
+	}
 
-	let svg: string | null = null;
+	let { src, ...attributes }: Props = $props();
 
 	// Inject attributes into the <svg> tag
 	function decorate(raw: string, attrs: Record<string, any>): string {
@@ -16,11 +20,11 @@
 		return raw.replace(/<svg([^>]*)>/, `<svg$1 ${attrString}>`);
 	}
 
-	$: {
-		const attrs = standardAttributes($$props, 'inline-svg');
+	const svg = $derived.by(() => {
+		const attrs = standardAttributes(attributes, 'inline-svg');
 		const rawSvg = svgs.get(src);
-		svg = rawSvg ? decorate(rawSvg, attrs) : null;
-	}
+		return rawSvg ? decorate(rawSvg, attrs) : null;
+	});
 </script>
 
 {#if svg}

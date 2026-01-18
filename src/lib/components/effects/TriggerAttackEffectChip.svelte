@@ -1,14 +1,18 @@
 <script lang="ts">
 	import { TriggerAttackEffect } from '$lib/catalog/models/effects';
 	import Text from '$lib/components/localisation/Text.svelte';
-	import EffectList from './EffectList.svelte';
-	import { standardAttributes } from '../standardattributes';
 	import BlockQuote from '../BlockQuote.svelte';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
+	import EffectList from './EffectList.svelte';
 
-	export let effect: TriggerAttackEffect;
+	interface Props extends StandardAttributeProps {
+		effect: TriggerAttackEffect;
+	}
+
+	const { effect, ...attributes }: Props = $props();
 </script>
 
-<div {...standardAttributes($$props, 'trigger-attack-effect-chip')}>
+<div {...standardAttributes(attributes, 'trigger-attack-effect-chip')}>
 	<Text
 		ca="Activar una acció Atacar amb els següents efectes:"
 		es="Activar una acción Atacar con los siguientes efectos:"

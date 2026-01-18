@@ -1,14 +1,22 @@
 <script lang="ts">
 	import { stats, type Stat, type StatType } from '$lib/catalog/models/stats';
-	import { standardAttributes } from '$lib/components/standardattributes';
 	import Text from '$lib/components/localisation/Text.svelte';
+	import {
+		standardAttributes,
+		type StandardAttributeProps
+	} from '$lib/components/standardattributes';
 	import StatIcon from './StatIcon.svelte';
 
-	export let stat: Stat | StatType;
-	const statObject = typeof stat === 'string' ? stats[stat] : stat;
+	interface Props extends StandardAttributeProps {
+		stat: Stat | StatType;
+	}
+
+	const { stat, ...attributes }: Props = $props();
+
+	const statObject = $derived(typeof stat === 'string' ? stats[stat] : stat);
 </script>
 
-<span {...standardAttributes($$props, 'stat-chip')} data-stat={statObject.type}>
+<span {...standardAttributes(attributes, 'stat-chip')} data-stat={statObject.type}>
 	<StatIcon stat={statObject} />
 	<span class="stat-name"><Text {...statObject.name} /></span>
 </span>
