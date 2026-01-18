@@ -69,6 +69,7 @@ body {
 	// Text
 	--text-color: white;
 	--text-subtle-color: #888;
+	--text-muted-color: #{$palette-cinder};
 	--text-highlight: #{$palette-steel};
 	--text-heading-color: #{$palette-cloud};
 	--positive-color: #{$palette-green};
