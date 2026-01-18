@@ -1,6 +1,6 @@
 import { Action } from '$lib/catalog/models/action';
 import { AttackEffect, DefendEffect } from '$lib/catalog/models/effects';
-import { Reaction } from '$lib/catalog/models/reaction';
+import { Opportunity } from '$lib/catalog/models/reaction';
 import { Trait } from '$lib/catalog/models/trait';
 import standard from '../../properties/standard';
 
@@ -23,7 +23,7 @@ export default new Trait({
 				})
 			]
 		}),
-		new Reaction({
+		new Opportunity({
 			triggers: ['receivingAttack'],
 			effects: [
 				new DefendEffect({

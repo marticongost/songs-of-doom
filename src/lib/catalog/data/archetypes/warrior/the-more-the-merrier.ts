@@ -1,7 +1,7 @@
 import { NearbyEnemiesCondition } from '$lib/catalog/models/conditions';
 import { DrawAptitudeEffect } from '$lib/catalog/models/effects';
 import { ConditionalEffect } from '$lib/catalog/models/effects/conditional';
-import { Reaction } from '$lib/catalog/models/reaction';
+import { Opportunity } from '$lib/catalog/models/reaction';
 import { Trait } from '$lib/catalog/models/trait';
 
 export default new Trait({
@@ -12,7 +12,7 @@ export default new Trait({
 	},
 	xpCost: 2,
 	capabilities: [
-		new Reaction({
+		new Opportunity({
 			triggers: ['chapterStart'],
 			effects: [
 				new ConditionalEffect({

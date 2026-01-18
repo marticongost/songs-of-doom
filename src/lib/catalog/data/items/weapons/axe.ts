@@ -2,7 +2,7 @@ import { Action } from '$lib/catalog/models/action';
 import { fullyRechargeOnChapterStart } from '$lib/catalog/models/common';
 import { AttackEffect, DefendEffect } from '$lib/catalog/models/effects';
 import { Item } from '$lib/catalog/models/inventory';
-import { Reaction } from '$lib/catalog/models/reaction';
+import { Opportunity } from '$lib/catalog/models/reaction';
 import parry from '../../properties/parry';
 import weapon from '../../properties/weapon';
 
@@ -22,7 +22,7 @@ export default new Item({
 				})
 			]
 		}),
-		new Reaction({
+		new Opportunity({
 			cost: { agility: 1, charges: 1 },
 			triggers: ['receivingAttack'],
 			effects: [

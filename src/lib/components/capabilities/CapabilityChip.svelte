@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { Action } from '$lib/catalog/models/action';
 	import type { Capability } from '$lib/catalog/models/capability';
+	import { scalarCapabilityCostTypes } from '$lib/catalog/models/capabilitycost';
 	import { Reaction } from '$lib/catalog/models/reaction';
-	import { standardAttributes } from '../standardattributes';
+	import Text from '$lib/components/localisation/Text.svelte';
 	import InlineSvg from '../InlineSvg.svelte';
 	import EffectList from '../effects/EffectList.svelte';
-	import Text from '$lib/components/localisation/Text.svelte';
-	import Parameters from './Parameters.svelte';
+	import { standardAttributes } from '../standardattributes';
 	import CapabilityCostChip from './CapabilityCostChip.svelte';
-	import { scalarCapabilityCostTypes } from '$lib/catalog/models/capabilitycost';
+	import Parameters from './Parameters.svelte';
 
 	export let capability: Capability;
 </script>
@@ -21,7 +21,11 @@
 				<InlineSvg class="capability-icon" src="capabilities/action.svg" />
 				<span class="trigger-label"><Text ca="Acció" es="Acción" en="Action" /></span>
 			{:else if capability instanceof Reaction}
-				<InlineSvg class="capability-icon" src="capabilities/reaction.svg" />
+				{@const reaction = capability as Reaction}
+				<InlineSvg
+					class="capability-icon"
+					src="capabilities/{reaction.mandatory ? 'obligation' : 'opportunity'}.svg"
+				/>
 				<ul class="reaction-triggers">
 					{#each capability.triggers as trigger}
 						<li class="trigger-label"><Text {...trigger.name} /></li>

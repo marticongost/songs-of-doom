@@ -5,7 +5,7 @@ import {
 	ResultsTableEffect,
 	TriggerAttackEffect
 } from '$lib/catalog/models/effects';
-import { Reaction } from '$lib/catalog/models/reaction';
+import { Opportunity } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
 
 export default new Skill({
@@ -17,7 +17,7 @@ export default new Skill({
 	xpCost: 0,
 	capabilities: [
 		reduceCostByDiscarding({ agility: -1 }),
-		new Reaction({
+		new Opportunity({
 			triggers: ['afterDefending'],
 			cost: { agility: 1 },
 			effects: [

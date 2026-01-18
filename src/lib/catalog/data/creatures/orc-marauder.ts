@@ -6,7 +6,7 @@ import {
 	DefendEffect,
 	ModifyRollEffect
 } from '$lib/catalog/models/effects';
-import { Reaction } from '$lib/catalog/models/reaction';
+import { Obligation } from '$lib/catalog/models/reaction';
 
 export default new Creature({
 	title: {
@@ -23,7 +23,7 @@ export default new Creature({
 		health: 5
 	},
 	capabilities: [
-		new Reaction({
+		new Obligation({
 			triggers: ['provoked'],
 			effects: [
 				new AttackEffect({
@@ -37,7 +37,7 @@ export default new Creature({
 				})
 			]
 		}),
-		new Reaction({
+		new Obligation({
 			triggers: ['attacking'],
 			effects: [
 				new ConditionalEffect({
@@ -50,7 +50,7 @@ export default new Creature({
 				})
 			]
 		}),
-		new Reaction({
+		new Obligation({
 			triggers: ['receivingAttack'],
 			effects: [
 				new DefendEffect({
