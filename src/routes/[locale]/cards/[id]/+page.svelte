@@ -28,6 +28,11 @@
 	<Card entity={data.entity} linked={false} />
 
 	<aside>
+		{#if data.entity.archetype}
+			{@render cardSet({ ca: 'Arquetip', es: 'Arquetipo', en: 'Archetype' }, [
+				data.entity.archetype
+			])}
+		{/if}
 		{#if data.entity.isArchetype}
 			{@const archetype = data.entity as Trait}
 			{@render cardSet(
