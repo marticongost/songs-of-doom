@@ -2,18 +2,14 @@
 	import { images } from '$lib/assets/img';
 	import { standardAttributes } from './standardattributes';
 
-	export let src: string;
-	export let alt: string = '';
+	let { src, alt = '', ...rest }: { src: string; alt?: string } = $props();
 
-	if (!src.startsWith('/')) {
-		src = `/${src}`;
-	}
-
-	const url = images.get(src);
+	const normalizedSrc = $derived(src.startsWith('/') ? src : `/${src}`);
+	const url = $derived(images.get(normalizedSrc));
 </script>
 
 {#if url}
-	<img {...standardAttributes($$props, 'image')} src={url} {alt} />
+	<img {...standardAttributes(rest, 'image')} src={url} {alt} />
 {:else}
 	<span class="image unknown"></span>
 {/if}
