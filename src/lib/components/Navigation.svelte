@@ -40,8 +40,13 @@
 
 {#snippet sectionEntry(section: Section, level: number, recursive: boolean)}
 	{@const match = getMatch(section)}
-	<li data-match={match} data-level={level}>
-		<a href="/{locale}{section.path}" data-match={match} data-level={level}>
+	<li data-match={match} data-level={level} data-path={section.path}>
+		<a
+			href="/{locale}{section.path}"
+			data-match={match}
+			data-level={level}
+			data-path={section.path}
+		>
 			<InlineSvg src="navigation/{section.getQualifiedName('--') || 'home'}.svg" />
 			<span class="label">
 				<Text {...section.title} />
@@ -80,7 +85,8 @@
 			color: var(--text-subtle-color);
 		}
 
-		&[data-match='selected'] {
+		&[data-match='selected'],
+		&[data-match='ancestor']:not([data-path='/']) {
 			:global(svg) {
 				color: var(--text-highlight);
 			}
