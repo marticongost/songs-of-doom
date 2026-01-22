@@ -18,7 +18,7 @@ export default new Item({
 			effects: [
 				new AttackEffect({
 					expression: 'strength+1',
-					damage: { '1-2': 2, 3: 3, 4: 5 }
+					damage: { 1: 2, 2: 3, 3: 5 }
 				})
 			]
 		}),
