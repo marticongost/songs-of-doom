@@ -4,17 +4,12 @@ import numpy as np
 # Define the bag composition
 # Format: (skill_required, num_successes, count)
 bag = [
-    # S1 tokens
-    (1, 0, 5),
-    (1, 1, 4), (1, 2, 3), (1, 3, 1),
-    # S2 tokens
+    (1, 0, 3), (1, 1, 4), (1, 2, 3), (1, 3, 1),
     (2, 1, 2), (2, 2, 1), (2, 3, 1),
-    # S3 tokens
     (3, 1, 1), (3, 2, 2), (3, 3, 1),
-    # S4 tokens
     (4, 1, 2), (4, 2, 2), (4, 3, 1),
-    # S5 tokens
-    (5, 1, 1), (5, 2, 2), (5, 3, 1),
+    (5, 1, 2), (5, 2, 1), (5, 3, 1),
+    (6, 2, 1), (6, 3, 1),
 ]
 
 # Calculate total tokens
