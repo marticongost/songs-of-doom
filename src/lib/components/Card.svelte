@@ -139,7 +139,7 @@
 	}
 
 	.discard-reward {
-		@include rz.row(xs);
+		@include rz.column(xs);
 		position: absolute;
 		top: rz.size(sm);
 		left: rz.size(sm);
