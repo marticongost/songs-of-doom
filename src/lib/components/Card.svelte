@@ -1,7 +1,10 @@
 <script lang="ts">
+	import { aptitudeTypes } from '$lib/catalog/models/aptitude';
 	import { Creature } from '$lib/catalog/models/creature';
 	import type { Entity } from '$lib/catalog/models/entity';
 	import { Item } from '$lib/catalog/models/inventory';
+	import { Skill } from '$lib/catalog/models/skill';
+	import AptitudeIcon from '$lib/components/aptitudes/AptitudeIcon.svelte';
 	import CapabilityList from '$lib/components/capabilities/CapabilityList.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import PropertyList from '$lib/components/properties/PropertyList.svelte';
@@ -24,6 +27,7 @@
 	const { entity, linked = true, ...rest }: Props = $props();
 
 	const archetype = $derived(entity.isArchetype ? entity : entity.archetype);
+	const discardReward = $derived(entity instanceof Skill ? entity.discardReward : undefined);
 </script>
 
 <svelte:element
@@ -58,6 +62,15 @@
 			<CreatureStats stats={entity.stats} />
 		{/if}
 		<Image class="image" src="cards/{entity.id}.jpg" />
+		{#if discardReward && !discardReward.empty()}
+			<div class="discard-reward">
+				{#each aptitudeTypes as aptitude}
+					{#each { length: discardReward.get(aptitude) } as _}
+						<AptitudeIcon {aptitude} />
+					{/each}
+				{/each}
+			</div>
+		{/if}
 	</div>
 	<div class="details">
 		<PropertyList style="margin-right: auto" properties={entity.properties} />
@@ -114,6 +127,7 @@
 	.image-row {
 		@include rz.row;
 		align-items: stretch;
+		position: relative;
 	}
 
 	:global(.card .image) {
@@ -122,6 +136,15 @@
 		height: #{math.div($card-print-width, $card-content-scale) * math.div(9, 16)}em;
 		object-fit: cover;
 		object-position: center;
+	}
+
+	.discard-reward {
+		@include rz.row(xs);
+		position: absolute;
+		top: rz.size(sm);
+		left: rz.size(sm);
+		font-size: 1.4em;
+		box-shadow: 0 0 1em rgba(black, 0.5);
 	}
 
 	.header {

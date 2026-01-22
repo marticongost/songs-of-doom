@@ -1,4 +1,3 @@
-import { reduceCostByDiscarding } from '$lib/catalog/models/common';
 import {
 	ModifyCapabilityCostEffect,
 	ModifyRollEffect,
@@ -15,8 +14,8 @@ export default new Skill({
 		en: 'Counter Attack'
 	},
 	xpCost: 0,
+	discardReward: { agility: 1 },
 	capabilities: [
-		reduceCostByDiscarding({ agility: -1 }),
 		new Opportunity({
 			triggers: ['afterDefending'],
 			cost: { agility: 1 },

@@ -1,5 +1,4 @@
 import { Action } from '$lib/catalog/models/action';
-import { reduceCostByDiscarding } from '$lib/catalog/models/common';
 import { EngagedCondition } from '$lib/catalog/models/conditions';
 import {
 	EngageEffect,
@@ -12,8 +11,8 @@ import { Skill } from '$lib/catalog/models/skill';
 export default new Skill({
 	title: { ca: 'Carregar', es: 'Cargar', en: 'Charge' },
 	xpCost: 0,
+	discardReward: { strength: 1 },
 	capabilities: [
-		reduceCostByDiscarding({ strength: -1 }),
 		new Action({
 			cost: { strength: 2 },
 			effects: [
