@@ -1,11 +1,6 @@
 import { WoundedCondition } from '$lib/catalog/models/conditions';
 import { Creature } from '$lib/catalog/models/creature';
-import {
-	AttackEffect,
-	ConditionalEffect,
-	DefendEffect,
-	ModifyRollEffect
-} from '$lib/catalog/models/effects';
+import { AttackEffect, DefendEffect, ModifyRollEffect } from '$lib/catalog/models/effects';
 import { Obligation } from '$lib/catalog/models/reaction';
 
 export default new Creature({
@@ -39,16 +34,7 @@ export default new Creature({
 		}),
 		new Obligation({
 			triggers: ['attacking'],
-			effects: [
-				new ConditionalEffect({
-					cases: [
-						{
-							condition: new WoundedCondition(),
-							effects: [new ModifyRollEffect({ modifier: 1 })]
-						}
-					]
-				})
-			]
+			effects: [new WoundedCondition().then(new ModifyRollEffect({ modifier: 1 }))]
 		}),
 		new Obligation({
 			triggers: ['receivingAttack'],

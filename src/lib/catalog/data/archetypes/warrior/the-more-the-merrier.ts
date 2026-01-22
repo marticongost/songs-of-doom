@@ -1,6 +1,5 @@
 import { NearbyEnemiesCondition } from '$lib/catalog/models/conditions';
 import { DrawAptitudeEffect } from '$lib/catalog/models/effects';
-import { ConditionalEffect } from '$lib/catalog/models/effects/conditional';
 import { Opportunity } from '$lib/catalog/models/reaction';
 import { Trait } from '$lib/catalog/models/trait';
 
@@ -15,14 +14,9 @@ export default new Trait({
 		new Opportunity({
 			triggers: ['chapterStart'],
 			effects: [
-				new ConditionalEffect({
-					cases: [
-						{
-							condition: new NearbyEnemiesCondition({ minEnemies: 2, distance: 0 }),
-							effects: [new DrawAptitudeEffect({ amount: 1 })]
-						}
-					]
-				})
+				new NearbyEnemiesCondition({ minEnemies: 2, distance: 0 }).then(
+					new DrawAptitudeEffect({ amount: 1 })
+				)
 			]
 		})
 	]
