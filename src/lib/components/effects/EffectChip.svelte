@@ -6,6 +6,7 @@
 		DefendEffect,
 		DrawAptitudeEffect,
 		DrawCardsEffect,
+		EngageEffect,
 		ModifyCapabilityCostEffect,
 		ModifyRollEffect,
 		ResultsTableEffect,
@@ -21,6 +22,7 @@
 	import DefendEffectChip from './DefendEffectChip.svelte';
 	import DrawAptitudeEffectChip from './DrawAptitudeEffectChip.svelte';
 	import DrawCardsEffectChip from './DrawCardsEffectChip.svelte';
+	import EngageEffectChip from './EngageEffectChip.svelte';
 	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
 	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
 	import RechargeEffectChip from './RechargeEffectChip.svelte';
@@ -51,6 +53,8 @@
 		<DefendEffectChip {effect} />
 	{:else if effect instanceof DrawAptitudeEffect}
 		<DrawAptitudeEffectChip {effect} />
+	{:else if effect instanceof EngageEffect}
+		<EngageEffectChip {effect} />
 	{:else if effect instanceof ConditionalEffect}
 		<ConditionalEffectChip {effect} />
 	{:else if effect instanceof TriggerAttackEffect}
