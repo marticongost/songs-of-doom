@@ -19,7 +19,7 @@ export default new Trait({
 			effects: [
 				new AttackEffect({
 					expression: 'strength',
-					damage: { '2': 1, '3': 2, '4': 3 }
+					damage: { 1: 1, 2: 2, 3: 3 }
 				})
 			]
 		}),
