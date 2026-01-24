@@ -16,13 +16,15 @@
 	const { cost, ...attributes }: Props = $props();
 </script>
 
-<span {...standardAttributes(attributes, 'capability-cost-list')}>
-	{#each scalarCapabilityCostTypes as type}
-		{#each { length: cost[type] ?? 0 } as _}
-			<CapabilityCostChip {type} />
+{#if cost}
+	<span {...standardAttributes(attributes, 'capability-cost-list')}>
+		{#each scalarCapabilityCostTypes as type}
+			{#each { length: cost[type] ?? 0 } as _}
+				<CapabilityCostChip {type} />
+			{/each}
 		{/each}
-	{/each}
-</span>
+	</span>
+{/if}
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
