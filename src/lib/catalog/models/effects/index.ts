@@ -5,6 +5,7 @@ export { DrawCardsEffect } from './drawcards';
 export { DrawAptitudeEffect } from './drawaptitudeeffect';
 export { Effect } from './effect';
 export { EngageEffect } from './engage';
+export { ModifyDamageEffect } from './modifydamage';
 export { ModifyCapabilityCostEffect } from './modifycapabilitycost';
 export { ModifyRollEffect } from './modifyroll';
 export { OneOfEffect } from './oneof';
