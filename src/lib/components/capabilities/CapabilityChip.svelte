@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { Action } from '$lib/catalog/models/action';
 	import type { Capability } from '$lib/catalog/models/capability';
-	import { scalarCapabilityCostTypes } from '$lib/catalog/models/capabilitycost';
 	import { Reaction } from '$lib/catalog/models/reaction';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import InlineSvg from '../InlineSvg.svelte';
 	import EffectList from '../effects/EffectList.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import CapabilityCostChip from './CapabilityCostChip.svelte';
+	import CapabilityCostList from './CapabilityCostList.svelte';
 	import Parameters from './Parameters.svelte';
 
 	interface Props extends StandardAttributeProps {
@@ -41,14 +41,7 @@
 		<!-- Cost -->
 		{#if !capability.cost.isFree()}
 			<Parameters>
-				{#each scalarCapabilityCostTypes as costType}
-					{#if capability.cost.get(costType) !== 0}
-						<span class="stat-cost">
-							<CapabilityCostChip type={costType} />
-							<span class="stat-value">{capability.cost.get(costType)}</span>
-						</span>
-					{/if}
-				{/each}
+				<CapabilityCostList cost={capability.cost} />
 				{#if capability.cost.cardTransition?.type === 'exhaust'}
 					<CapabilityCostChip type="exhaust" />
 				{/if}

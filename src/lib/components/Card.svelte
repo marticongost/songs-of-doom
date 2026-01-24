@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { aptitudeTypes } from '$lib/catalog/models/aptitude';
 	import { Creature } from '$lib/catalog/models/creature';
 	import type { Entity } from '$lib/catalog/models/entity';
 	import { Item } from '$lib/catalog/models/inventory';
 	import { Skill } from '$lib/catalog/models/skill';
-	import AptitudeIcon from '$lib/components/aptitudes/AptitudeIcon.svelte';
 	import CapabilityList from '$lib/components/capabilities/CapabilityList.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import PropertyList from '$lib/components/properties/PropertyList.svelte';
@@ -13,6 +11,7 @@
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
 	import { getLocale } from '$lib/context/locale';
+	import CapabilityCostList from './capabilities/CapabilityCostList.svelte';
 	import ChargesChip from './capabilities/ChargesChip.svelte';
 	import CreatureStats from './CreatureStats.svelte';
 	import ExperienceChip from './ExperienceChip.svelte';
@@ -62,14 +61,8 @@
 			<CreatureStats stats={entity.stats} />
 		{/if}
 		<Image class="image" src="cards/{entity.id}.jpg" />
-		{#if discardReward && !discardReward.empty()}
-			<div class="discard-reward">
-				{#each aptitudeTypes as aptitude}
-					{#each { length: discardReward.get(aptitude) } as _}
-						<AptitudeIcon {aptitude} />
-					{/each}
-				{/each}
-			</div>
+		{#if !discardReward?.empty()}
+			<CapabilityCostList class="discard-reward" cost={discardReward!} />
 		{/if}
 	</div>
 	<div class="details">
@@ -118,6 +111,15 @@
 		@media print {
 			font-size: #{$card-content-scale}mm;
 		}
+
+		:global(.discard-reward) {
+			@include rz.column(xs);
+			position: absolute;
+			top: rz.size(sm);
+			left: rz.size(sm);
+			font-size: 1.4em;
+			box-shadow: 0 0 1em rgba(black, 0.5);
+		}
 	}
 
 	a.card:hover {
@@ -136,15 +138,6 @@
 		height: #{math.div($card-print-width, $card-content-scale) * math.div(9, 16)}em;
 		object-fit: cover;
 		object-position: center;
-	}
-
-	.discard-reward {
-		@include rz.column(xs);
-		position: absolute;
-		top: rz.size(sm);
-		left: rz.size(sm);
-		font-size: 1.4em;
-		box-shadow: 0 0 1em rgba(black, 0.5);
 	}
 
 	.header {
