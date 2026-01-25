@@ -21,3 +21,6 @@ Use this skill when the user needs to add a new type of effect that can be added
 4. Modify the EffectChip component:
    - Import the effect class and the effect chip component at the top of the file
    - Add a branch for the new effect type, using its new Chip component for rendering
+
+Make sure to use the /svelte-component skill to follow project conventions when creating
+or updating Svelte files.

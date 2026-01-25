@@ -22,3 +22,6 @@ determine wheter a given card effect should be triggered.
 4. Modify the ConditionChip component:
    - Import the effect class and the effect chip component at the top of the file
    - Add a branch for the new effect type, using its new Chip component for rendering
+
+Make sure to use the /svelte-component skill to follow project conventions when creating
+or updating Svelte files.
