@@ -3,17 +3,17 @@ import { Target, type TargetProps } from '../target';
 import { Effect, type EffectProps } from './effect';
 
 export interface WoundEffectProps extends EffectProps {
-	damanage: number;
+	damage: number;
 	target: TargetProps | Target;
 }
 
 export class WoundEffect extends Effect {
-	readonly damanage: number;
+	readonly damage: number;
 	readonly target: Target;
 
-	constructor({ damanage, target, properties }: WoundEffectProps) {
+	constructor({ damage, target, properties }: WoundEffectProps) {
 		super({ properties });
-		this.damanage = damanage;
+		this.damage = damage;
 		this.target = finalise(Target, target);
 	}
 }

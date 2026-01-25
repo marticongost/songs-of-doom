@@ -12,6 +12,7 @@
 		ModifyRollEffect,
 		ResultsTableEffect,
 		TriggerAttackEffect,
+		WoundEffect,
 		type Effect
 	} from '$lib/catalog/models/effects';
 	import { RechargeEffect } from '$lib/catalog/models/effects/recharge';
@@ -30,6 +31,7 @@
 	import RechargeEffectChip from './RechargeEffectChip.svelte';
 	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
 	import TriggerAttackEffectChip from './TriggerAttackEffectChip.svelte';
+	import WoundEffectChip from './WoundEffectChip.svelte';
 
 	interface Props extends StandardAttributeProps {
 		effect: Effect;
@@ -65,5 +67,7 @@
 		<TriggerAttackEffectChip {effect} />
 	{:else if effect instanceof ResultsTableEffect}
 		<ResultsTableEffectChip {effect} />
+	{:else if effect instanceof WoundEffect}
+		<WoundEffectChip {effect} />
 	{/if}
 </div>
