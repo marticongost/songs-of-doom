@@ -1,4 +1,4 @@
-import { WoundedCondition } from '$lib/catalog/models/conditions';
+import { WOUNDED } from '$lib/catalog/models/conditions/wounded-condition';
 import { Creature } from '$lib/catalog/models/creature';
 import { AttackEffect, DefendEffect, ModifyRollEffect } from '$lib/catalog/models/effects';
 import { Obligation } from '$lib/catalog/models/reaction';
@@ -33,7 +33,7 @@ export default new Creature({
 		}),
 		new Obligation({
 			triggers: ['attacking'],
-			effects: [new WoundedCondition().then(new ModifyRollEffect({ modifier: 1 }))]
+			effects: [WOUNDED.then(new ModifyRollEffect({ modifier: 1 }))]
 		}),
 		new Obligation({
 			triggers: ['receivingAttack'],
