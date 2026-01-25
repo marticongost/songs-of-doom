@@ -7,6 +7,7 @@
 		DrawAptitudeEffect,
 		DrawCardsEffect,
 		EngageEffect,
+		EphemeralPropertiesEffect,
 		ModifyDamageEffect,
 		ModifyCapabilityCostEffect,
 		ModifyRollEffect,
@@ -25,6 +26,7 @@
 	import DrawAptitudeEffectChip from './DrawAptitudeEffectChip.svelte';
 	import DrawCardsEffectChip from './DrawCardsEffectChip.svelte';
 	import EngageEffectChip from './EngageEffectChip.svelte';
+	import EphemeralPropertiesEffectChip from './EphemeralPropertiesEffectChip.svelte';
 	import ModifyDamageEffectChip from './ModifyDamageEffectChip.svelte';
 	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
 	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
@@ -59,6 +61,8 @@
 		<DrawAptitudeEffectChip {effect} />
 	{:else if effect instanceof EngageEffect}
 		<EngageEffectChip {effect} />
+	{:else if effect instanceof EphemeralPropertiesEffect}
+		<EphemeralPropertiesEffectChip {effect} />
 	{:else if effect instanceof ModifyDamageEffect}
 		<ModifyDamageEffectChip {effect} />
 	{:else if effect instanceof ConditionalEffect}

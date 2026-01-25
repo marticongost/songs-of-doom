@@ -4,6 +4,7 @@ export { DefendEffect } from './defend';
 export { DrawCardsEffect } from './drawcards';
 export { DrawAptitudeEffect } from './drawaptitudeeffect';
 export { Effect } from './effect';
+export { EphemeralPropertiesEffect } from './ephemeralproperties';
 export { EngageEffect } from './engage';
 export { ModifyDamageEffect } from './modifydamage';
 export { ModifyCapabilityCostEffect } from './modifycapabilitycost';
