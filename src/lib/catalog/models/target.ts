@@ -1,6 +1,15 @@
 import type { Condition } from './conditions';
 
-export type TargetType = 'self' | 'enemy' | 'allEnemies' | 'ally' | 'allAllies';
+export type TargetType =
+	| 'self'
+	| 'enemy'
+	| 'allEnemies'
+	| 'ally'
+	| 'allAllies'
+	| 'object'
+	| 'allObjects'
+	| 'ownedObject'
+	| 'allOwnedObjects';
 
 export type TargetProps =
 	| TargetType
