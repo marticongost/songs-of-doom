@@ -1,4 +1,9 @@
+import { Action } from '$lib/catalog/models/action';
+import { WoundedCondition } from '$lib/catalog/models/conditions';
+import { SAME_LOCATION } from '$lib/catalog/models/conditions/distance-condition';
+import { WoundEffect } from '$lib/catalog/models/effects';
 import { Skill } from '$lib/catalog/models/skill';
+import piercing from '../../properties/piercing';
 
 export default new Skill({
 	title: {
@@ -7,6 +12,23 @@ export default new Skill({
 		en: 'Coup de grace'
 	},
 	xpCost: 0,
-	discardReward: { strength: 1 }
+	discardReward: { agility: 1 },
+	capabilities: [
+		new Action({
+			effects: [
+				new WoundEffect({
+					target: {
+						type: 'enemy',
+						conditions: [
+							SAME_LOCATION,
+							new WoundedCondition({ wounds: { metric: 'remaining', operator: '<=', value: 2 } })
+						]
+					},
+					damage: 2,
+					properties: [piercing.with({ value: 4 })]
+				})
+			]
+		})
+	]
 	// TODO: Atac +2 against an enemy with wounds >= 50%, no charge cost, draw card if enemy killed by the attack
 });
