@@ -10,9 +10,9 @@
 </script>
 
 <Text
-	ca="hi ha {condition.minEnemies} o més enemics a "
-	es="hay {condition.minEnemies} o más enemigos en "
-	en="there are {condition.minEnemies} or more enemies at "
+	ca="{condition.minEnemies} o més enemics a "
+	es="{condition.minEnemies} o más enemigos en "
+	en="{condition.minEnemies} or more enemies at "
 />
 {#if condition.distance === 0}
 	<Text ca="la ubicació" es="la ubicación" en="the location" />
