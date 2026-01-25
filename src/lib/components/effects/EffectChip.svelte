@@ -11,6 +11,7 @@
 		ModifyDamageEffect,
 		ModifyCapabilityCostEffect,
 		ModifyRollEffect,
+		ReceiveOpportunityAttacksEffect,
 		ResultsTableEffect,
 		TriggerAttackEffect,
 		WoundEffect,
@@ -31,6 +32,7 @@
 	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
 	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
 	import RechargeEffectChip from './RechargeEffectChip.svelte';
+	import ReceiveOpportunityAttacksEffectChip from './ReceiveOpportunityAttacksEffectChip.svelte';
 	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
 	import TriggerAttackEffectChip from './TriggerAttackEffectChip.svelte';
 	import WoundEffectChip from './WoundEffectChip.svelte';
@@ -69,6 +71,8 @@
 		<ConditionalEffectChip {effect} />
 	{:else if effect instanceof TriggerAttackEffect}
 		<TriggerAttackEffectChip {effect} />
+	{:else if effect instanceof ReceiveOpportunityAttacksEffect}
+		<ReceiveOpportunityAttacksEffectChip {effect} />
 	{:else if effect instanceof ResultsTableEffect}
 		<ResultsTableEffectChip {effect} />
 	{:else if effect instanceof WoundEffect}
