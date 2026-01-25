@@ -6,7 +6,6 @@
 	import InlineSvg from '../InlineSvg.svelte';
 	import EffectList from '../effects/EffectList.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
-	import CapabilityCostChip from './CapabilityCostChip.svelte';
 	import CapabilityCostList from './CapabilityCostList.svelte';
 	import Parameters from './Parameters.svelte';
 
@@ -42,12 +41,6 @@
 		{#if !capability.cost.isFree()}
 			<Parameters>
 				<CapabilityCostList cost={capability.cost} />
-				{#if capability.cost.cardTransition?.type === 'exhaust'}
-					<CapabilityCostChip type="exhaust" />
-				{/if}
-				{#if capability.cost.cardTransition?.type === 'discard'}
-					<CapabilityCostChip type="discard" />
-				{/if}
 			</Parameters>
 		{/if}
 	</div>

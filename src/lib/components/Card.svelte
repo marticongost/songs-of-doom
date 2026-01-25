@@ -61,8 +61,8 @@
 			<CreatureStats stats={entity.stats} />
 		{/if}
 		<Image class="image" src="cards/{entity.id}.jpg" />
-		{#if !discardReward?.empty()}
-			<CapabilityCostList class="discard-reward" cost={discardReward!} />
+		{#if discardReward && !discardReward.empty()}
+			<CapabilityCostList class="discard-reward" cost={discardReward} />
 		{/if}
 	</div>
 	<div class="details">
