@@ -70,3 +70,16 @@ export const plural2 = (n: number, singular: string, plural: string): string => 
 export const translate = (localisedText: LocalisedText, locale: Locale): string => {
 	return localisedText[locale] || '';
 };
+
+export const caPossessive = (text: string): string => {
+	if (!text) return '';
+
+	const firstChar = text[0].toLowerCase();
+	const vowels = ['a', 'e', 'i', 'o', 'u', 'à', 'è', 'é', 'í', 'ò', 'ó', 'ú'];
+
+	if (vowels.includes(firstChar)) {
+		return `d'${text}`;
+	}
+
+	return `de ${text}`;
+};
