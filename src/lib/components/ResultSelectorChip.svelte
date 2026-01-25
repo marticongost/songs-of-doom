@@ -32,6 +32,7 @@
 
 	.result-selector-chip {
 		position: relative;
+		white-space: nowrap;
 
 		:global(.die + .die) {
 			margin-left: rz.size(xs);
