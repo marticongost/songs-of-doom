@@ -1,6 +1,7 @@
 export { AttackEffect } from './attack';
 export { ChangeStatsEffect } from './changestats';
 export { DefendEffect } from './defend';
+export { DiscardCardEffect } from './discardcard';
 export { DrawCardsEffect } from './drawcards';
 export { DrawAptitudeEffect } from './drawaptitudeeffect';
 export { Effect } from './effect';

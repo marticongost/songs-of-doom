@@ -4,6 +4,7 @@
 		ChangeStatsEffect,
 		ConditionalEffect,
 		DefendEffect,
+		DiscardCardEffect,
 		DrawAptitudeEffect,
 		DrawCardsEffect,
 		EngageEffect,
@@ -27,6 +28,7 @@
 	import ChangeStatsEffectChip from './ChangeStatsEffectChip.svelte';
 	import ConditionalEffectChip from './ConditionalEffectChip.svelte';
 	import DefendEffectChip from './DefendEffectChip.svelte';
+	import DiscardCardEffectChip from './DiscardCardEffectChip.svelte';
 	import DrawAptitudeEffectChip from './DrawAptitudeEffectChip.svelte';
 	import DrawCardsEffectChip from './DrawCardsEffectChip.svelte';
 	import EngageEffectChip from './EngageEffectChip.svelte';
@@ -53,6 +55,8 @@
 <div {...standardAttributes(attributes, 'effect-chip')}>
 	{#if effect instanceof DrawCardsEffect}
 		<DrawCardsEffectChip {effect} />
+	{:else if effect instanceof DiscardCardEffect}
+		<DiscardCardEffectChip {effect} />
 	{:else if effect instanceof ModifyRollEffect}
 		<ModifyRollEffectChip {effect} />
 	{:else if effect instanceof ModifyCapabilityCostEffect}
