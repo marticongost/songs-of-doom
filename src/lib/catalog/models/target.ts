@@ -2,6 +2,8 @@ import type { Condition } from './conditions';
 
 export type TargetType =
 	| 'self'
+	| 'attacker'
+	| 'defender'
 	| 'enemy'
 	| 'allEnemies'
 	| 'ally'

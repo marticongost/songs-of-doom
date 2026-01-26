@@ -27,6 +27,10 @@
 	<span {...standardAttributes(attributes, 'target-chip')}>
 		{#if target.type === 'self'}
 			{@render text({ ca: 'tu mateix', es: 'ti mismo', en: 'yourself' })}
+		{:else if target.type === 'attacker'}
+			{@render text({ ca: "l'atacant", es: 'el atacante', en: 'the attacker' })}
+		{:else if target.type === 'defender'}
+			{@render text({ ca: 'el defensor', es: 'el defensor', en: 'the defender' })}
 		{:else if target.type === 'enemy'}
 			{@render text({ ca: 'un enemic', es: 'un enemigo', en: 'an enemy' })}
 		{:else if target.type === 'allEnemies'}
