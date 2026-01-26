@@ -6,10 +6,10 @@
 	import StatIcon from './stats/StatIcon.svelte';
 
 	interface Props extends StandardAttributeProps {
-		statExpression: ExpressionNode;
+		expression: ExpressionNode;
 	}
 
-	const { statExpression, ...attributes }: Props = $props();
+	const { expression: statExpression, ...attributes }: Props = $props();
 </script>
 
 {#snippet expressionNodeSnippet(node: ExpressionNode)}

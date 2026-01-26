@@ -12,6 +12,6 @@
 </script>
 
 <Text ca="Eliminar" es="Eliminar" en="Remove" />
-<ExpressionChip statExpression={effect.amount} />
+<ExpressionChip expression={effect.amount} />
 <Text ca="càrregues" es="cargas" en="charges" />
 <TargetChip relation="possessive" target={effect.target} />

@@ -16,7 +16,7 @@
 <div {...standardAttributes(attributes, 'attack-effect-chip')}>
 	<div class="attack-stats">
 		<Text ca="Atacar amb" es="Atacar con" en="Attack with" />
-		<StatExpressionChip statExpression={effect.expression} />
+		<StatExpressionChip expression={effect.expression} />
 		{#if effect.properties.length}
 			{', '}
 		{/if}

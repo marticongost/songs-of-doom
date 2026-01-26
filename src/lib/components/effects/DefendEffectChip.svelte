@@ -13,7 +13,7 @@
 
 <Text ca="Defensar amb" es="Defender con" en="Defend with" />
 
-<StatExpressionChip statExpression={effect.expression} />
+<StatExpressionChip expression={effect.expression} />
 
 {#if effect.properties.length}
 	{', '}

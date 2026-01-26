@@ -14,7 +14,7 @@
 </script>
 
 <Text ca="Descartar" es="Descartar" en="Discard" />
-<ExpressionChip statExpression={effect.amount} />
+<ExpressionChip expression={effect.amount} />
 
 {#if effect.selection === 'random'}
 	<Text
