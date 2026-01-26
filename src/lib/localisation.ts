@@ -71,11 +71,27 @@ export const translate = (localisedText: LocalisedText, locale: Locale): string 
 	return localisedText[locale] || '';
 };
 
+export const possessiveRelation = (text: string, locale: string): string => {
+	console.log(text, locale);
+	if (locale === 'ca') {
+		return caPossessive(text);
+	} else if (locale === 'es') {
+		return `de ${text}`;
+	} else if (locale === 'en') {
+		return `of ${text}`;
+	}
+	throw new Error(`Don't know how to put together the possive form of ${text} in ${locale}`);
+};
+
 export const caPossessive = (text: string): string => {
 	if (!text) return '';
 
+	if (text.startsWith('el ') || text.startsWith('els ')) {
+		return `d${text}`;
+	}
+
 	const firstChar = text[0].toLowerCase();
-	const vowels = ['a', 'e', 'i', 'o', 'u', 'à', 'è', 'é', 'í', 'ò', 'ó', 'ú'];
+	const vowels = ['h', 'a', 'e', 'i', 'o', 'u', 'à', 'è', 'é', 'í', 'ò', 'ó', 'ú'];
 
 	if (vowels.includes(firstChar)) {
 		return `d'${text}`;
