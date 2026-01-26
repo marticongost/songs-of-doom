@@ -7,14 +7,19 @@
 
 	interface Props extends StandardAttributeProps {
 		expression: ExpressionNode;
+		relative?: boolean;
 	}
 
-	const { expression: statExpression, ...attributes }: Props = $props();
+	const { expression: statExpression, relative = false, ...attributes }: Props = $props();
 </script>
 
 {#snippet expressionNodeSnippet(node: ExpressionNode)}
 	{#if typeof node === 'number'}
-		<span class="number">{node}</span>
+		{#if relative}
+			<span class="number">{node > 0 ? `+${node}` : node}</span>
+		{:else}
+			<span class="number">{node}</span>
+		{/if}
 	{:else if node === 'result'}
 		<InlineSvg src="dice/successes.svg" />
 	{:else if node instanceof Stat}
