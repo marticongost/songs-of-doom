@@ -1,3 +1,5 @@
+import { DiscardCardEffect, NegateDamageEffect } from '$lib/catalog/models/effects';
+import { Opportunity } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
 
 export default new Skill({
@@ -7,6 +9,15 @@ export default new Skill({
 		en: "It's only a scratch"
 	},
 	xpCost: 0,
-	discardReward: { strength: 1, will: 1 }
+	discardReward: { will: 1 },
+	capabilities: [
+		new Opportunity({
+			triggers: ['takingDamage'],
+			cost: {
+				will: 2
+			},
+			effects: [new NegateDamageEffect(), new DiscardCardEffect({ amount: 1 })]
+		})
+	]
 	// TODO: cost: pain X, draw X cards, draw X aptitudes
 });
