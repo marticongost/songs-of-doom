@@ -12,6 +12,7 @@
 		ModifyCapabilityCostEffect,
 		ModifyRollEffect,
 		ReceiveOpportunityAttacksEffect,
+		RepeatCapabilityEffect,
 		ResultsTableEffect,
 		TriggerAttackEffect,
 		WoundEffect,
@@ -33,6 +34,7 @@
 	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
 	import RechargeEffectChip from './RechargeEffectChip.svelte';
 	import ReceiveOpportunityAttacksEffectChip from './ReceiveOpportunityAttacksEffectChip.svelte';
+	import RepeatCapabilityEffectChip from './RepeatCapabilityEffectChip.svelte';
 	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
 	import TriggerAttackEffectChip from './TriggerAttackEffectChip.svelte';
 	import WoundEffectChip from './WoundEffectChip.svelte';
@@ -73,6 +75,8 @@
 		<TriggerAttackEffectChip {effect} />
 	{:else if effect instanceof ReceiveOpportunityAttacksEffect}
 		<ReceiveOpportunityAttacksEffectChip {effect} />
+	{:else if effect instanceof RepeatCapabilityEffect}
+		<RepeatCapabilityEffectChip {effect} />
 	{:else if effect instanceof ResultsTableEffect}
 		<ResultsTableEffectChip {effect} />
 	{:else if effect instanceof WoundEffect}
