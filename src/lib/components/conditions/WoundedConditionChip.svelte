@@ -16,18 +16,18 @@
 
 {#if condition.wounds.metric === 'received'}
 	{#if condition.wounds.operator === '>'}
-		<Text ca="més de {displayValue}" es="más de {displayValue}" en="more than {displayValue}" />
+		<Text ca="Més de {displayValue}" es="Más de {displayValue}" en="more than {displayValue}" />
 	{:else if condition.wounds.operator === '>='}
 		<Text ca="{displayValue} o més" es="{displayValue} o más" en="{displayValue} or more" />
 	{:else if condition.wounds.operator === '<'}
-		<Text ca="menys de {displayValue}" es="menos de {displayValue}" en="less than {displayValue}" />
+		<Text ca="Menys de {displayValue}" es="Menos de {displayValue}" en="Less than {displayValue}" />
 	{:else if condition.wounds.operator === '<='}
 		<Text ca="{displayValue} o menys" es="{displayValue} o menos" en="{displayValue} or fewer" />
 	{:else if condition.wounds.operator === '='}
 		<Text
-			ca="exactament {displayValue}"
-			es="exactamente {displayValue}"
-			en="exactly {displayValue}"
+			ca="Exactament {displayValue}"
+			es="Exactamente {displayValue}"
+			en="Exactly {displayValue}"
 		/>
 	{/if}
 	{#if condition.wounds.value == 1 && condition.wounds.operator !== '>=' && condition.wounds.operator !== '<='}
@@ -37,9 +37,9 @@
 	{/if}
 {:else if condition.wounds.operator === '>'}
 	<Text
-		ca="més de {displayValue} punts de vida restants"
-		es="más de {displayValue} puntos de vida restantes"
-		en="more than {displayValue} health points remaining"
+		ca="Més de {displayValue} punts de vida restants"
+		es="Más de {displayValue} puntos de vida restantes"
+		en="More than {displayValue} health points remaining"
 	/>
 {:else if condition.wounds.operator === '>='}
 	<Text
@@ -49,9 +49,9 @@
 	/>
 {:else if condition.wounds.operator === '<'}
 	<Text
-		ca="menys de {displayValue} punts de vida restants"
-		es="menos de {displayValue} puntos de vida restantes"
-		en="less than {displayValue} health points remaining"
+		ca="Menys de {displayValue} punts de vida restants"
+		es="Menos de {displayValue} puntos de vida restantes"
+		en="Less than {displayValue} health points remaining"
 	/>
 {:else if condition.wounds.operator === '<='}
 	<Text
@@ -61,8 +61,8 @@
 	/>
 {:else if condition.wounds.operator === '='}
 	<Text
-		ca="exactament {displayValue} punts de vida restants"
-		es="exactamente {displayValue} puntos de vida restantes"
-		en="exactly {displayValue} health points remaining"
+		ca="Exactament {displayValue} punts de vida restants"
+		es="Exactamente {displayValue} puntos de vida restantes"
+		en="Exactly {displayValue} health points remaining"
 	/>
 {/if}

@@ -29,7 +29,7 @@
 		/>
 	{/if}
 	{#if effect.modifiers.length}
-		{' i:'}
+		<Text ca="aplicant:" es="aplicando:" en="applying" />
 		<BlockQuote>
 			<EffectList effects={effect.modifiers} />
 		</BlockQuote>

@@ -10,7 +10,7 @@
 </script>
 
 {#if condition.status}
-	<Text ca="enfrontat" es="enfrentado" en="engaged" />
+	<Text ca="Enfrontat" es="Enfrentado" en="Engaged" />
 {:else}
-	<Text ca="no enfrontat" es="no enfrentado" en="not engaged" />
+	<Text ca="No enfrontat" es="No enfrentado" en="Not engaged" />
 {/if}

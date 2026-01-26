@@ -10,13 +10,13 @@
 </script>
 
 {#if condition.steps === 0}
-	<Text ca="a la mateixa ubicació" es="en la misma ubicación" en="at the same location" />
+	<Text ca="A la mateixa ubicació" es="En la misma ubicación" en="At the same location" />
 {:else if condition.steps === 1}
-	<Text ca="a una ubicació adjacent" es="en una ubicación adyacente" en="at an adjacent location" />
+	<Text ca="A una ubicació adjacent" es="En una ubicación adyacente" en="At an adjacent location" />
 {:else}
 	<Text
-		ca="a {condition.steps} passos o menys"
-		es="a {condition.steps} pasos o menos"
-		en="at {condition.steps} steps or less"
+		ca="A {condition.steps} passos o menys"
+		es="A {condition.steps} pasos o menos"
+		en="At {condition.steps} steps or less"
 	/>
 {/if}
