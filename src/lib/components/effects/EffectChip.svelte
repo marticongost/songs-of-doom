@@ -11,6 +11,7 @@
 		ModifyDamageEffect,
 		ModifyCapabilityCostEffect,
 		ModifyRollEffect,
+		NegateDamageEffect,
 		ReceiveOpportunityAttacksEffect,
 		RepeatCapabilityEffect,
 		ResultsTableEffect,
@@ -32,6 +33,7 @@
 	import ModifyDamageEffectChip from './ModifyDamageEffectChip.svelte';
 	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
 	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
+	import NegateDamageEffectChip from './NegateDamageEffectChip.svelte';
 	import RechargeEffectChip from './RechargeEffectChip.svelte';
 	import ReceiveOpportunityAttacksEffectChip from './ReceiveOpportunityAttacksEffectChip.svelte';
 	import RepeatCapabilityEffectChip from './RepeatCapabilityEffectChip.svelte';
@@ -69,6 +71,8 @@
 		<EphemeralPropertiesEffectChip {effect} />
 	{:else if effect instanceof ModifyDamageEffect}
 		<ModifyDamageEffectChip {effect} />
+	{:else if effect instanceof NegateDamageEffect}
+		<NegateDamageEffectChip {effect} />
 	{:else if effect instanceof ConditionalEffect}
 		<ConditionalEffectChip {effect} />
 	{:else if effect instanceof TriggerAttackEffect}

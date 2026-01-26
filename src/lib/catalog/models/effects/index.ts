@@ -8,6 +8,7 @@ export { EphemeralPropertiesEffect } from './ephemeralproperties';
 export { EngageEffect } from './engage';
 export { ModifyDamageEffect } from './modifydamage';
 export { ModifyCapabilityCostEffect } from './modifycapabilitycost';
+export { NegateDamageEffect } from './negatedamage';
 export { ModifyRollEffect } from './modifyroll';
 export { OneOfEffect } from './oneof';
 export { SequenceEffect } from './sequence';
