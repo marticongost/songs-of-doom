@@ -8,7 +8,8 @@ export type EventType =
 	| 'payingCapability'
 	| 'acquired'
 	| 'chapterStart'
-	| 'provoked';
+	| 'provoked'
+	| 'takingDamage';
 
 export type EventProps = { type: EventType; name: LocalisedText };
 
@@ -66,5 +67,9 @@ export const events: Record<EventType, Event> = {
 	provoked: new Event({
 		type: 'provoked',
 		name: { ca: 'En ser provocat', es: 'Al ser provocado', en: 'When provoked' }
+	}),
+	takingDamage: new Event({
+		type: 'takingDamage',
+		name: { ca: 'En rebre dany', es: 'Al recibir daño', en: 'When taking damage' }
 	})
 };
