@@ -1,4 +1,4 @@
-import { resolveExpression, type StatExpression, type StatExpressionNode } from '../expression';
+import { resolveExpression, type ExpressionNode, type StatExpression } from '../expression';
 import { parseResultString, type Result, type ResultRange, type ResultString } from '../results';
 import { Effect, type EffectProps } from './effect';
 
@@ -15,7 +15,7 @@ export interface DamageTableEntry {
 export type DamageTable = Array<DamageTableEntry>;
 
 export class AttackEffect extends Effect {
-	readonly expression: StatExpressionNode;
+	readonly expression: ExpressionNode;
 	readonly damage: DamageTable;
 
 	constructor({ expression, damage, properties }: FightEffectProps) {

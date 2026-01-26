@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { DefendEffect } from '$lib/catalog/models/effects';
 	import Text from '$lib/components/localisation/Text.svelte';
-	import StatExpressionChip from '../StatExpressionChip.svelte';
+	import StatExpressionChip from '../ExpressionChip.svelte';
 	import PropertyList from '../properties/PropertyList.svelte';
 
 	interface Props {

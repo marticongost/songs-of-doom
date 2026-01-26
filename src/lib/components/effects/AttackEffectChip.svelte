@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { AttackEffect } from '$lib/catalog/models/effects';
 	import Text from '$lib/components/localisation/Text.svelte';
-	import StatExpressionChip from '../StatExpressionChip.svelte';
+	import StatExpressionChip from '../ExpressionChip.svelte';
 	import DamageTable from '../damage/DamageTable.svelte';
 	import PropertyList from '../properties/PropertyList.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';

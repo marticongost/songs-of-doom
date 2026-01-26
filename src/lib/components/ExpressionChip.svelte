@@ -1,19 +1,22 @@
 <script lang="ts">
-	import type { StatExpressionNode } from '$lib/catalog/models/expression';
+	import type { ExpressionNode } from '$lib/catalog/models/expression';
 	import { Stat } from '$lib/catalog/models/stats';
+	import InlineSvg from './InlineSvg.svelte';
 	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
 	import StatIcon from './stats/StatIcon.svelte';
 
 	interface Props extends StandardAttributeProps {
-		statExpression: StatExpressionNode;
+		statExpression: ExpressionNode;
 	}
 
 	const { statExpression, ...attributes }: Props = $props();
 </script>
 
-{#snippet expressionNodeSnippet(node: StatExpressionNode)}
+{#snippet expressionNodeSnippet(node: ExpressionNode)}
 	{#if typeof node === 'number'}
 		<span class="number">{node}</span>
+	{:else if node === 'result'}
+		<InlineSvg src="dice/successes.svg" />
 	{:else if node instanceof Stat}
 		<StatIcon stat={node} />
 	{:else}
