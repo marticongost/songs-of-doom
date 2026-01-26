@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { WoundEffect } from '$lib/catalog/models/effects';
-	import ConditionList from '../conditions/ConditionList.svelte';
 	import DamageChip from '../damage/DamageChip.svelte';
 	import Text from '../localisation/Text.svelte';
 	import PropertyList from '../properties/PropertyList.svelte';
@@ -22,7 +21,3 @@
 
 <Text ca="a" es="a" en="to" />
 <TargetChip target={effect.target} />
-
-{#if effect.target.conditions.length}
-	<ConditionList conditions={effect.target.conditions} />
-{/if}
