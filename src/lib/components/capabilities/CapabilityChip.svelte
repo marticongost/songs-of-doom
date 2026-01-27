@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Action } from '$lib/catalog/models/action';
 	import type { Capability } from '$lib/catalog/models/capability';
-	import { Event } from '$lib/catalog/models/event';
 	import { Reaction } from '$lib/catalog/models/reaction';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import InlineSvg from '../InlineSvg.svelte';
@@ -27,10 +26,6 @@
 	};
 </script>
 
-{#snippet reactionTriggerSnippet(trigger: Event)}
-	<Text {...trigger.name} />
-{/snippet}
-
 <div {...standardAttributes(attributes, 'capability-chip')}>
 	<!-- Icon -->
 	<InlineSvg class="capability-icon" src={getIconSrc()} />
@@ -43,7 +38,11 @@
 					<Text ca="Acció" es="Acción" en="Action" />
 				{:else if capability instanceof Reaction}
 					{@const reaction = capability as Reaction}
-					<TextList type="commas" items={reaction.triggers} renderItem={reactionTriggerSnippet} />
+					<TextList type="commas" items={reaction.triggers}>
+						{#snippet entry(trigger)}
+							<Text {...trigger.name} />
+						{/snippet}
+					</TextList>
 				{/if}
 			</span><!--
 				-->{#if !capability.cost.isFree()}<!--

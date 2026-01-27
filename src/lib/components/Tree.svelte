@@ -58,16 +58,16 @@
 		root: T;
 		getChildren: (context: TreeContext<T>) => T[];
 		getItemKey?: (context: TreeContext<T>) => string;
-		itemSnippet: Snippet<[TreeContext<T>]>;
 		appearence?: 'bullets' | 'arrows';
+		itemSnippet: Snippet<[TreeContext<T>]>;
 	}
 
 	let {
 		root,
 		getChildren,
 		getItemKey = (context: TreeContext<T>) => context.key,
-		itemSnippet,
 		appearence = 'bullets',
+		itemSnippet,
 		...rest
 	}: Props = $props();
 </script>

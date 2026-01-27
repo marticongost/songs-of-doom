@@ -11,11 +11,13 @@
 	const { properties = [], ...attributes }: Props = $props();
 </script>
 
-{#snippet propertyChip(property: Property)}<PropertyChip {property} />{/snippet}
-
 {#if properties.length}
 	<div {...standardAttributes(attributes, 'property-list')}>
-		<TextList items={properties} type="commas" renderItem={propertyChip} />
+		<TextList items={properties} type="commas">
+			{#snippet entry(property)}
+				<PropertyChip {property} />
+			{/snippet}
+		</TextList>
 	</div>
 {/if}
 

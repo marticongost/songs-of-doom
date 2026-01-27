@@ -10,16 +10,11 @@
 	const { effects, ...attributes }: Props = $props();
 </script>
 
-{#snippet effectSnippet(effect: Effect)}
-	<EffectChip {effect} />
-{/snippet}
-
-<TextList
-	{...standardAttributes(attributes, 'effect-list')}
-	items={effects}
-	type="commas"
-	renderItem={effectSnippet}
-/>
+<TextList {...standardAttributes(attributes, 'effect-list')} items={effects} type="commas">
+	{#snippet entry(effect)}
+		<EffectChip {effect} />
+	{/snippet}
+</TextList>
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;

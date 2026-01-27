@@ -36,13 +36,11 @@
 
 	interface Props {
 		items: T[];
-		renderItem: Snippet<[T]>;
 		type?: TextListType;
+		entry: Snippet<[T]>;
 	}
 
-	const { items, renderItem, type = 'and' }: Props = $props();
+	const { items, type = 'and', entry }: Props = $props();
 </script>
-
-{#snippet entry(item: T)}{@render renderItem(item)}{/snippet}
 
 {#each items as item, index}{getSeparator(index, items.length, type)}{@render entry(item)}{/each}

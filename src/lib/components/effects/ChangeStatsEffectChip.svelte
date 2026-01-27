@@ -12,19 +12,28 @@
 	const { effect }: Props = $props();
 </script>
 
-{#snippet renderStatValue([stat, value]: [string, number])}
-	<span>
-		<StatChip stat={stat as StatType} />
-		<strong>
-			<Text ca=" en {value}" es=" en {value}" en=" by {value}" />
-		</strong>
-	</span>
-{/snippet}
-
 {#if effect.group().increase}
 	<Text ca="Augmentar " es="Aumentar " en="Increase " />
-	<TextList items={Object.entries(effect.group().increase!)} renderItem={renderStatValue} />
+	<TextList items={Object.entries(effect.group().increase!)}>
+		{#snippet entry([stat, value])}
+			<span>
+				<StatChip stat={stat as StatType} />
+				<strong>
+					<Text ca=" en {value}" es=" en {value}" en=" by {value}" />
+				</strong>
+			</span>
+		{/snippet}
+	</TextList>
 {:else if effect.group().decrease}
 	<Text ca="Reduir " es="Reducir " en="Decrease " />
-	<TextList items={Object.entries(effect.group().decrease!)} renderItem={renderStatValue} />
+	<TextList items={Object.entries(effect.group().decrease!)}>
+		{#snippet entry([stat, value])}
+			<span>
+				<StatChip stat={stat as StatType} />
+				<strong>
+					<Text ca=" en {value}" es=" en {value}" en=" by {value}" />
+				</strong>
+			</span>
+		{/snippet}
+	</TextList>
 {/if}
