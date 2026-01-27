@@ -1,5 +1,5 @@
-import { ChangeStatsEffect } from '$lib/catalog/models/effects';
-import { Obligation } from '$lib/catalog/models/reaction';
+import { TransformAptitudeEffect } from '$lib/catalog/models/effects';
+import { Opportunity } from '$lib/catalog/models/reaction';
 import { Trait } from '$lib/catalog/models/trait';
 
 export default new Trait({
@@ -10,12 +10,12 @@ export default new Trait({
 	},
 	xpCost: 5,
 	capabilities: [
-		new Obligation({
-			triggers: ['acquired'],
+		new Opportunity({
+			triggers: ['payingCapability'],
+			cost: { cardTransition: 'exhaust' },
 			effects: [
-				new ChangeStatsEffect({
-					strength: 1,
-					health: 2
+				new TransformAptitudeEffect({
+					target: 'strength'
 				})
 			]
 		})
