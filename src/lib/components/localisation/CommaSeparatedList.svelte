@@ -30,9 +30,9 @@
 	import { getLocale } from '$lib/context/locale';
 	import { translate } from '$lib/localisation';
 	import type { Snippet } from 'svelte';
-	import { standardAttributes } from '../standardattributes';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
-	interface Props {
+	interface Props extends StandardAttributeProps {
 		items: T[];
 		renderItem: Snippet<[T]>;
 		conjunction?: ConjunctionType;
