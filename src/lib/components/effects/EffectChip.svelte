@@ -17,6 +17,7 @@
 		RemoveChargesEffect,
 		RepeatCapabilityEffect,
 		ResultsTableEffect,
+		TransformAptitudeEffect,
 		TriggerAttackEffect,
 		WoundEffect,
 		type Effect
@@ -42,6 +43,7 @@
 	import RemoveChargesEffectChip from './RemoveChargesEffectChip.svelte';
 	import RepeatCapabilityEffectChip from './RepeatCapabilityEffectChip.svelte';
 	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
+	import TransformAptitudeEffectChip from './TransformAptitudeEffectChip.svelte';
 	import TriggerAttackEffectChip from './TriggerAttackEffectChip.svelte';
 	import WoundEffectChip from './WoundEffectChip.svelte';
 
@@ -91,6 +93,8 @@
 		<RemoveChargesEffectChip {effect} />
 	{:else if effect instanceof ResultsTableEffect}
 		<ResultsTableEffectChip {effect} />
+	{:else if effect instanceof TransformAptitudeEffect}
+		<TransformAptitudeEffectChip {effect} />
 	{:else if effect instanceof WoundEffect}
 		<WoundEffectChip {effect} />
 	{/if}

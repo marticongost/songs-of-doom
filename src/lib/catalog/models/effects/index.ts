@@ -20,3 +20,4 @@ export { ReceiveOpportunityAttacksEffect } from './receiveopportunityattacks';
 export { ResultsTableEffect, type ResultsTableEntry } from './resultstable';
 export { RepeatCapabilityEffect } from './repeatcapability';
 export { RemoveChargesEffect } from './removecharges';
+export { TransformAptitudeEffect } from './transformaptitude';
