@@ -1,3 +1,5 @@
+import { Action } from '$lib/catalog/models/action';
+import { fullyRechargeOnChapterStart } from '$lib/catalog/models/common';
 import { WOUNDED } from '$lib/catalog/models/conditions/wounded-condition';
 import { Creature } from '$lib/catalog/models/creature';
 import { AttackEffect, DefendEffect, ModifyRollEffect } from '$lib/catalog/models/effects';
@@ -17,9 +19,11 @@ export default new Creature({
 		will: 3,
 		health: 5
 	},
+	maxCharges: 3,
 	capabilities: [
-		new Obligation({
-			triggers: ['provoked'],
+		fullyRechargeOnChapterStart,
+		new Action({
+			cost: { charges: 1 },
 			effects: [
 				new AttackEffect({
 					expression: 'strength',

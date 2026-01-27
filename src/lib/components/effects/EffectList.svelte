@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Effect } from '$lib/catalog/models/effects';
+	import TextList from '../localisation/TextList.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import EffectChip from './EffectChip.svelte';
 
@@ -9,11 +10,16 @@
 	const { effects, ...attributes }: Props = $props();
 </script>
 
-<ul {...standardAttributes(attributes, 'effect-list')}>
-	{#each effects as effect}
-		<li class="effect"><EffectChip {effect} /></li>
-	{/each}
-</ul>
+{#snippet effectSnippet(effect: Effect)}
+	<EffectChip {effect} />
+{/snippet}
+
+<TextList
+	{...standardAttributes(attributes, 'effect-list')}
+	items={effects}
+	type="commas"
+	renderItem={effectSnippet}
+/>
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;

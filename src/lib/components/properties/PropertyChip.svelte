@@ -20,13 +20,17 @@
 	{...standardAttributes(attributes, 'property-chip')}
 	class:card-type={property instanceof CardType}
 	class:rule={property instanceof Rule}
+	><!--
+	--><Text
+		{...property.title}
+	/><!--
+	-->{#if property instanceof ParametricRuleInstance && property.rule instanceof ScalarRule}<!--
+		-->{@const instance =
+			property as ParametricRuleInstance<ScalarRuleParams>}<!--
+		-->({instance.params
+			.value})<!--
+	-->{/if}</span
 >
-	<Text {...property.title} />
-	{#if property instanceof ParametricRuleInstance && property.rule instanceof ScalarRule}
-		{@const instance = property as ParametricRuleInstance<ScalarRuleParams>}
-		({instance.params.value})
-	{/if}
-</span>
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;

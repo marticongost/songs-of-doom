@@ -9,8 +9,8 @@
 		DrawCardsEffect,
 		EngageEffect,
 		EphemeralPropertiesEffect,
-		ModifyDamageEffect,
 		ModifyCapabilityCostEffect,
+		ModifyDamageEffect,
 		ModifyRollEffect,
 		NegateDamageEffect,
 		ReceiveOpportunityAttacksEffect,
@@ -33,12 +33,12 @@
 	import DrawCardsEffectChip from './DrawCardsEffectChip.svelte';
 	import EngageEffectChip from './EngageEffectChip.svelte';
 	import EphemeralPropertiesEffectChip from './EphemeralPropertiesEffectChip.svelte';
-	import ModifyDamageEffectChip from './ModifyDamageEffectChip.svelte';
 	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
+	import ModifyDamageEffectChip from './ModifyDamageEffectChip.svelte';
 	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
 	import NegateDamageEffectChip from './NegateDamageEffectChip.svelte';
-	import RechargeEffectChip from './RechargeEffectChip.svelte';
 	import ReceiveOpportunityAttacksEffectChip from './ReceiveOpportunityAttacksEffectChip.svelte';
+	import RechargeEffectChip from './RechargeEffectChip.svelte';
 	import RemoveChargesEffectChip from './RemoveChargesEffectChip.svelte';
 	import RepeatCapabilityEffectChip from './RepeatCapabilityEffectChip.svelte';
 	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
@@ -52,7 +52,7 @@
 	const { effect, ...attributes }: Props = $props();
 </script>
 
-<div {...standardAttributes(attributes, 'effect-chip')}>
+<span {...standardAttributes(attributes, 'effect-chip')}>
 	{#if effect instanceof DrawCardsEffect}
 		<DrawCardsEffectChip {effect} />
 	{:else if effect instanceof DiscardCardEffect}
@@ -94,4 +94,4 @@
 	{:else if effect instanceof WoundEffect}
 		<WoundEffectChip {effect} />
 	{/if}
-</div>
+</span>

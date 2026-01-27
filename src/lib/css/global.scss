@@ -26,6 +26,7 @@ body {
 	$palette-cloud: rgb(207, 213, 219);
 	$palette-ash: #333;
 	$palette-cinder: #444;
+	$palette-dark-steel: #6c7878;
 	$palette-steel: #b0baba;
 	$palette-ivory: #f0f0e0;
 
@@ -48,6 +49,9 @@ body {
 	// Experience
 	--experience-foreground-color: #{$palette-somber};
 	--experience-background-color: #{$palette-ivory};
+
+	// Proficiency
+	--profiency-color: #{$palette-steel};
 
 	// Card types
 	--card-type-archetype-main-background: linear-gradient(45deg, #8b7b57, #231603);

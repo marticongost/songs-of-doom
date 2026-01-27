@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ConditionalEffect } from '$lib/catalog/models/effects';
-	import BlockQuote from '../BlockQuote.svelte';
+	import ArrowIcon from '../ArrowIcon.svelte';
 	import ConditionList from '../conditions/ConditionList.svelte';
 	import EffectList from './EffectList.svelte';
 
@@ -12,12 +12,9 @@
 </script>
 
 {#each effect.cases as conditionCase}
-	<div class="case">
-		<div class="condition">
-			<ConditionList conditions={[conditionCase.condition]} />
-		</div>
-		<BlockQuote>
-			<EffectList effects={conditionCase.effects} />
-		</BlockQuote>
-	</div>
+	<span class="case">
+		<ConditionList conditions={[conditionCase.condition]} />
+		<ArrowIcon />
+		<EffectList effects={conditionCase.effects} />
+	</span>
 {/each}

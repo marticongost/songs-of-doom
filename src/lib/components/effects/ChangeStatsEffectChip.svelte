@@ -2,7 +2,7 @@
 	import { ChangeStatsEffect } from '$lib/catalog/models/effects';
 	import { type StatType } from '$lib/catalog/models/stats';
 	import Text from '$lib/components/localisation/Text.svelte';
-	import CommaSeparatedList from '../localisation/CommaSeparatedList.svelte';
+	import TextList from '../localisation/TextList.svelte';
 	import StatChip from '../stats/StatChip.svelte';
 
 	interface Props {
@@ -23,14 +23,8 @@
 
 {#if effect.group().increase}
 	<Text ca="Augmentar " es="Aumentar " en="Increase " />
-	<CommaSeparatedList
-		items={Object.entries(effect.group().increase!)}
-		renderItem={renderStatValue}
-	/>
+	<TextList items={Object.entries(effect.group().increase!)} renderItem={renderStatValue} />
 {:else if effect.group().decrease}
 	<Text ca="Reduir " es="Reducir " en="Decrease " />
-	<CommaSeparatedList
-		items={Object.entries(effect.group().decrease!)}
-		renderItem={renderStatValue}
-	/>
+	<TextList items={Object.entries(effect.group().decrease!)} renderItem={renderStatValue} />
 {/if}

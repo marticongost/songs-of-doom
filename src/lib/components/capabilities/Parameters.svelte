@@ -18,19 +18,20 @@
 	const { symbolType = 'parens', children, ...attributes }: Props = $props();
 </script>
 
-<span {...standardAttributes(attributes, 'parameters')}>
-	<span class="symbol">{symbols[symbolType][0]}</span>
-	<span class="parameter-items">
+<span {...standardAttributes(attributes, 'parameters')}
+	><!--
+	--><span class="symbol">{symbols[symbolType][0]}</span><!--
+	--><span class="parameter-items">
 		{@render children()}
-	</span>
-	<span class="symbol">{symbols[symbolType][1]}</span>
+	</span><!--
+	--><span class="symbol">{symbols[symbolType][1]}</span>
 </span>
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
 
-	:global(.parameter-items > * + *) {
-		margin-left: rz.size(sm);
+	:global(.parameter-items > * + *:before) {
+		content: ' ';
 	}
 
 	.symbol {

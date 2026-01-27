@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { AttackEffect } from '$lib/catalog/models/effects';
-	import Text from '$lib/components/localisation/Text.svelte';
-	import StatExpressionChip from '../ExpressionChip.svelte';
+	import Parameters from '../capabilities/Parameters.svelte';
 	import DamageTable from '../damage/DamageTable.svelte';
+	import ExpressionChip from '../ExpressionChip.svelte';
 	import PropertyList from '../properties/PropertyList.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
@@ -13,26 +13,24 @@
 	const { effect, ...attributes }: Props = $props();
 </script>
 
-<div {...standardAttributes(attributes, 'attack-effect-chip')}>
-	<div class="attack-stats">
-		<Text ca="Atacar amb" es="Atacar con" en="Attack with" />
-		<StatExpressionChip expression={effect.expression} />
-		{#if effect.properties.length}
-			{', '}
-		{/if}
-		<PropertyList properties={effect.properties} />
-	</div>
+<span {...standardAttributes(attributes, 'attack-effect-chip')}>
+	Atacar
+	<Parameters
+		><!--
+		--><ExpressionChip expression={effect.expression} /><!--
+		--><PropertyList
+			properties={effect.properties}
+		/><!--
+		--></Parameters
+	>
 	<DamageTable damage={effect.damage} />
-</div>
+</span>
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
 
 	.attack-effect-chip {
-		@include rz.row;
-	}
-
-	.attack-stats {
-		margin-right: auto;
+		@include rz.row(sm);
+		display: inline-flex;
 	}
 </style>

@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { TriggerAttackEffect } from '$lib/catalog/models/effects';
 	import Text from '$lib/components/localisation/Text.svelte';
-	import BlockQuote from '../BlockQuote.svelte';
-	import PropertyList from '../properties/PropertyList.svelte';
+	import Parameters from '../capabilities/Parameters.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import EffectList from './EffectList.svelte';
 
@@ -13,25 +12,14 @@
 	const { effect, ...attributes }: Props = $props();
 </script>
 
-<div {...standardAttributes(attributes, 'trigger-attack-effect-chip')}>
-	{#if effect.properties.length}
-		<Text
-			ca="Activar una acció Atacar, amb "
-			es="Activar una acción Atacar, con "
-			en="Trigger an Attack action, with "
-		/>
-		<PropertyList properties={effect.properties} />
-	{:else}
-		<Text
-			ca="Activar una acció Atacar"
-			es="Activar una acción Atacar"
-			en="Trigger an Attack action"
-		/>
-	{/if}
-	{#if effect.modifiers.length}
-		<Text ca="aplicant:" es="aplicando:" en="applying" />
-		<BlockQuote>
-			<EffectList effects={effect.modifiers} />
-		</BlockQuote>
-	{/if}
-</div>
+<span {...standardAttributes(attributes, 'trigger-attack-effect-chip')}>
+	<Text
+		ca="Activar una acció Atacar"
+		es="Activar una acción Atacar"
+		en="Trigger an Attack action"
+	/><!--
+	-->{#if effect.modifiers.length}
+		{' '}<Parameters><EffectList effects={effect.modifiers} /></Parameters>
+	{/if}<!--
+--></span
+>

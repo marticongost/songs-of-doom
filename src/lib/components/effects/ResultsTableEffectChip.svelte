@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ResultsTableEffect } from '$lib/catalog/models/effects';
-	import InlineSvg from '../InlineSvg.svelte';
+	import ArrowIcon from '../ArrowIcon.svelte';
 	import ResultSelectorChip from '../ResultSelectorChip.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import EffectList from './EffectList.svelte';
@@ -12,43 +12,27 @@
 	const { effect, ...attributes }: Props = $props();
 </script>
 
-<div {...standardAttributes(attributes, 'result-table-effect-chip')}>
+<span {...standardAttributes(attributes, 'result-table-effect-chip')}>
 	{#each effect.entries as entry}
-		<div class="entry">
+		<span class="entry">
 			<ResultSelectorChip class="result" result={entry.result} />
-			<div>
-				<InlineSvg class="arrow" src="arrow.svg" />
-			</div>
+			<ArrowIcon class="arrow-icon" />
 			<EffectList class="effects" effects={entry.effects} />
-		</div>
+		</span>
 	{/each}
-</div>
+</span>
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
 
-	.result-table-effect-chip {
-		display: table;
-		table-layout: fixed;
-
-		:global(.arrow) {
-			color: var(--text-subtle-color);
-			width: 1em;
-			@include rz.hmargin(sm);
-		}
-	}
-
 	.entry {
-		display: table-row;
-
-		& > :global(*) {
-			display: table-cell;
-			vertical-align: top;
+		:global(.arrow-icon) {
+			@include rz.hmargin(xs);
 		}
 
-		& > :global(.arrow) {
-			position: relative;
-			top: 0.1em;
+		& + .entry:before {
+			content: ';';
+			margin-right: rz.size(xs);
 		}
 	}
 </style>

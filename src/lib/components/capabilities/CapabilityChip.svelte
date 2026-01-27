@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { Action } from '$lib/catalog/models/action';
 	import type { Capability } from '$lib/catalog/models/capability';
+	import { Event } from '$lib/catalog/models/event';
 	import { Reaction } from '$lib/catalog/models/reaction';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import InlineSvg from '../InlineSvg.svelte';
 	import EffectList from '../effects/EffectList.svelte';
+	import TextList from '../localisation/TextList.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import CapabilityCostList from './CapabilityCostList.svelte';
 	import Parameters from './Parameters.svelte';
@@ -14,73 +16,84 @@
 	}
 
 	const { capability, ...attributes }: Props = $props();
+	const getIconSrc = () => {
+		if (capability instanceof Action) {
+			return 'capabilities/action.svg';
+		} else if (capability instanceof Reaction) {
+			const reaction = capability as Reaction;
+			return `capabilities/${reaction.mandatory ? 'obligation' : 'opportunity'}.svg`;
+		}
+		return '';
+	};
 </script>
 
+{#snippet reactionTriggerSnippet(trigger: Event)}
+	<Text {...trigger.name} />
+{/snippet}
+
 <div {...standardAttributes(attributes, 'capability-chip')}>
-	<div class="capability-activation">
-		<!-- Capability type / triggers -->
-		<div class="moment">
-			{#if capability instanceof Action}
-				<InlineSvg class="capability-icon" src="capabilities/action.svg" />
-				<span class="trigger-label"><Text ca="Acció" es="Acción" en="Action" /></span>
-			{:else if capability instanceof Reaction}
-				{@const reaction = capability as Reaction}
-				<InlineSvg
-					class="capability-icon"
-					src="capabilities/{reaction.mandatory ? 'obligation' : 'opportunity'}.svg"
-				/>
-				<ul class="reaction-triggers">
-					{#each capability.triggers as trigger}
-						<li class="trigger-label"><Text {...trigger.name} /></li>
-					{/each}
-				</ul>
-			{/if}
-		</div>
+	<!-- Icon -->
+	<InlineSvg class="capability-icon" src={getIconSrc()} />
 
-		<!-- Cost -->
-		{#if !capability.cost.isFree()}
-			<Parameters>
-				<CapabilityCostList cost={capability.cost} />
-			</Parameters>
-		{/if}
+	<div class="capability-content">
+		<span class="capability-activation">
+			<!-- Moment -->
+			<span class="moment">
+				{#if capability instanceof Action}
+					<Text ca="Acció" es="Acción" en="Action" />
+				{:else if capability instanceof Reaction}
+					{@const reaction = capability as Reaction}
+					<TextList type="commas" items={reaction.triggers} renderItem={reactionTriggerSnippet} />
+				{/if}
+			</span><!--
+				-->{#if !capability.cost.isFree()}<!--
+					--><Parameters
+					class="capability-cost-parameters"
+					><!--
+						--><CapabilityCostList cost={capability.cost} /><!--
+					--></Parameters
+				><!--
+				-->{/if}<!--
+			--><span class="colon">:</span>
+		</span>
+
+		<!-- Effects -->
+		<EffectList style="flex: 1 1 auto; margin-left: 1.2em;" effects={capability.effects} />
 	</div>
-
-	<!-- Effects -->
-	<EffectList style="flex: 1 1 auto; margin-left: 1.2em;" effects={capability.effects} />
 </div>
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
 
 	.capability-chip {
-		@include rz.column(xs);
-		align-items: stretch;
+		@include rz.row(xs);
+		align-items: flex-start;
+
+		:global(.capability-icon) {
+			flex: 0 0 auto;
+			position: relative;
+			top: rz.size(xs);
+			color: var(--text-subtle-color);
+		}
+
+		:global(.capability-cost-parameters) {
+			margin-left: #{rz.size(xs)};
+		}
 	}
 
 	.capability-activation {
-		@include rz.row;
-
-		:global(.capability-icon) {
-			margin-right: #{rz.size(xs)};
-			color: var(--text-subtle-color);
-		}
-	}
-
-	.moment {
-		@include rz.row;
-		margin-right: #{rz.size(xs)};
-		color: var(--text-highlight);
-	}
-
-	.trigger-label {
 		font-weight: bold;
 	}
 
-	.reaction-triggers {
-		@include rz.row;
+	.moment {
+		color: var(--text-highlight);
+	}
 
-		li + li:before {
-			content: ', ';
-		}
+	.colon {
+		color: var(--text-subtle-color);
+	}
+
+	.capability-content {
+		line-height: 1.5em;
 	}
 </style>

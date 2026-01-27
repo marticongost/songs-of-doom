@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { type Property } from '$lib/catalog/models/properties';
-	import CommaSeparatedList from '../localisation/CommaSeparatedList.svelte';
+	import TextList from '../localisation/TextList.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import PropertyChip from './PropertyChip.svelte';
 
@@ -11,17 +11,12 @@
 	const { properties = [], ...attributes }: Props = $props();
 </script>
 
-{#snippet propertyChip(property: Property)}
-	<PropertyChip {property} />
-{/snippet}
+{#snippet propertyChip(property: Property)}<PropertyChip {property} />{/snippet}
 
 {#if properties.length}
-	<CommaSeparatedList
-		{...standardAttributes(attributes, 'property-list')}
-		items={properties}
-		conjunction="none"
-		renderItem={propertyChip}
-	/>
+	<div {...standardAttributes(attributes, 'property-list')}>
+		<TextList items={properties} type="commas" renderItem={propertyChip} />
+	</div>
 {/if}
 
 <style lang="scss">

@@ -1,21 +1,35 @@
 <script lang="ts">
 	import { DefendEffect } from '$lib/catalog/models/effects';
 	import Text from '$lib/components/localisation/Text.svelte';
-	import StatExpressionChip from '../ExpressionChip.svelte';
+	import Parameters from '../capabilities/Parameters.svelte';
+	import ExpressionChip from '../ExpressionChip.svelte';
 	import PropertyList from '../properties/PropertyList.svelte';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
-	interface Props {
+	interface Props extends StandardAttributeProps {
 		effect: DefendEffect;
 	}
 
-	const { effect }: Props = $props();
+	const { effect, ...attributes }: Props = $props();
 </script>
 
-<Text ca="Defensar amb" es="Defender con" en="Defend with" />
+<span {...standardAttributes(attributes, 'defend-effect-chip')}>
+	<Text ca="Defensar" es="Defender" en="Defend" />
+	<Parameters
+		><!--
+		--><ExpressionChip expression={effect.expression} /><!--
+		--><PropertyList
+			properties={effect.properties}
+		/><!--
+	--></Parameters
+	>
+</span>
 
-<StatExpressionChip expression={effect.expression} />
+<style lang="scss">
+	@use '@reguitzell/styles' as rz;
 
-{#if effect.properties.length}
-	{', '}
-{/if}
-<PropertyList properties={effect.properties} />
+	.defend-effect-chip {
+		@include rz.row(sm);
+		display: inline-flex;
+	}
+</style>

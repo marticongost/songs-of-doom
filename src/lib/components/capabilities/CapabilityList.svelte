@@ -22,7 +22,7 @@
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
 	.capability-list {
-		@include rz.column(md);
+		@include rz.column(sm);
 		align-items: stretch;
 	}
 </style>
