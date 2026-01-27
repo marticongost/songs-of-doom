@@ -5,7 +5,7 @@
 		ConditionalEffect,
 		DefendEffect,
 		DiscardCardEffect,
-		DrawAptitudeEffect,
+		DrawFocusEffect,
 		DrawCardsEffect,
 		EngageEffect,
 		EphemeralPropertiesEffect,
@@ -17,7 +17,7 @@
 		RemoveChargesEffect,
 		RepeatCapabilityEffect,
 		ResultsTableEffect,
-		TransformAptitudeEffect,
+		TransformFocusEffect,
 		TriggerAttackEffect,
 		WoundEffect,
 		type Effect
@@ -30,7 +30,7 @@
 	import ConditionalEffectChip from './ConditionalEffectChip.svelte';
 	import DefendEffectChip from './DefendEffectChip.svelte';
 	import DiscardCardEffectChip from './DiscardCardEffectChip.svelte';
-	import DrawAptitudeEffectChip from './DrawAptitudeEffectChip.svelte';
+	import DrawFocusEffectChip from './DrawFocusEffectChip.svelte';
 	import DrawCardsEffectChip from './DrawCardsEffectChip.svelte';
 	import EngageEffectChip from './EngageEffectChip.svelte';
 	import EphemeralPropertiesEffectChip from './EphemeralPropertiesEffectChip.svelte';
@@ -43,7 +43,7 @@
 	import RemoveChargesEffectChip from './RemoveChargesEffectChip.svelte';
 	import RepeatCapabilityEffectChip from './RepeatCapabilityEffectChip.svelte';
 	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
-	import TransformAptitudeEffectChip from './TransformAptitudeEffectChip.svelte';
+	import TransformFocusEffectChip from './TransformFocusEffectChip.svelte';
 	import TriggerAttackEffectChip from './TriggerAttackEffectChip.svelte';
 	import WoundEffectChip from './WoundEffectChip.svelte';
 
@@ -71,8 +71,8 @@
 		<RechargeEffectChip {effect} />
 	{:else if effect instanceof DefendEffect}
 		<DefendEffectChip {effect} />
-	{:else if effect instanceof DrawAptitudeEffect}
-		<DrawAptitudeEffectChip {effect} />
+	{:else if effect instanceof DrawFocusEffect}
+		<DrawFocusEffectChip {effect} />
 	{:else if effect instanceof EngageEffect}
 		<EngageEffectChip {effect} />
 	{:else if effect instanceof EphemeralPropertiesEffect}
@@ -93,8 +93,8 @@
 		<RemoveChargesEffectChip {effect} />
 	{:else if effect instanceof ResultsTableEffect}
 		<ResultsTableEffectChip {effect} />
-	{:else if effect instanceof TransformAptitudeEffect}
-		<TransformAptitudeEffectChip {effect} />
+	{:else if effect instanceof TransformFocusEffect}
+		<TransformFocusEffectChip {effect} />
 	{:else if effect instanceof WoundEffect}
 		<WoundEffectChip {effect} />
 	{/if}

@@ -1,4 +1,4 @@
-import { TransformAptitudeEffect } from '$lib/catalog/models/effects';
+import { TransformFocusEffect } from '$lib/catalog/models/effects';
 import { Opportunity } from '$lib/catalog/models/reaction';
 import { Trait } from '$lib/catalog/models/trait';
 
@@ -14,7 +14,7 @@ export default new Trait({
 			triggers: ['payingCapability'],
 			cost: { cardTransition: 'exhaust' },
 			effects: [
-				new TransformAptitudeEffect({
+				new TransformFocusEffect({
 					target: 'strength'
 				})
 			]

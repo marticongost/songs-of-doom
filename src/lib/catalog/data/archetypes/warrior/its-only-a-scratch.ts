@@ -19,5 +19,4 @@ export default new Skill({
 			effects: [new NegateDamageEffect(), new DiscardCardEffect({ amount: 1 })]
 		})
 	]
-	// TODO: cost: pain X, draw X cards, draw X aptitudes
 });

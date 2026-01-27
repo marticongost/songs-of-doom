@@ -2,24 +2,24 @@ import { Entity, type EntityProps, type EntityType } from '$lib/catalog/models/e
 import { finalise } from '$lib/modelling';
 import { getEntryMetadata } from '..';
 import skill from '../data/properties/skill';
-import { Aptitudes, type AptitudesProps } from './aptitude';
+import { Focuses, type FocusesProps } from './focus';
 import { type Property } from './properties';
 import { Trait } from './trait';
 
 export interface SkillProps extends EntityProps {
-	discardReward?: Aptitudes | AptitudesProps;
+	discardReward?: Focuses | FocusesProps;
 }
 
 const NOT_COMPUTED = Symbol('not computed');
 
 export class Skill extends Entity {
 	private _archetype: Trait | undefined | typeof NOT_COMPUTED;
-	readonly discardReward?: Aptitudes;
+	readonly discardReward?: Focuses;
 
 	constructor({ discardReward, ...baseProps }: SkillProps) {
 		super(baseProps);
 		this._archetype = NOT_COMPUTED;
-		this.discardReward = finalise(Aptitudes, discardReward);
+		this.discardReward = finalise(Focuses, discardReward);
 	}
 
 	override get type(): EntityType {

@@ -1,8 +1,8 @@
 import type { LocalisedText } from '$lib/localisation';
-import { aptitudeTypes, type AptitudesProps, type AptitudeType } from './aptitude';
+import { focusTypes, type FocusesProps, type FocusType } from './focus';
 import type { IndicatorType } from './stats';
 
-export type ScalarCapabilityCostType = AptitudeType | IndicatorType | 'charges';
+export type ScalarCapabilityCostType = FocusType | IndicatorType | 'charges';
 export type CapabilityCostType = ScalarCapabilityCostType | CardTransitionType;
 export type CardTransitionType = 'exhaust' | 'discard';
 
@@ -32,7 +32,7 @@ export const cardTransitions: Record<CardTransitionType, CardTransition> = {
 };
 
 export const scalarCapabilityCostTypes: Array<ScalarCapabilityCostType> = [
-	...aptitudeTypes,
+	...focusTypes,
 	'charges'
 ];
 export const capabilityCostTypes: Array<CapabilityCostType> = [
@@ -40,34 +40,34 @@ export const capabilityCostTypes: Array<CapabilityCostType> = [
 	...cardTransitionTypes
 ];
 
-export interface CapabilityCostProps extends AptitudesProps {
+export interface CapabilityCostProps extends FocusesProps {
 	health?: number;
 	sanity?: number;
 	charges?: number;
 	cardTransition?: CardTransitionType | CardTransition;
 }
 
-export class CapabilityCost implements Readonly<Record<AptitudeType, number>> {
+export class CapabilityCost implements Readonly<Record<FocusType, number>> {
 	readonly strength: number;
 	readonly agility: number;
 	readonly intelligence: number;
 	readonly charisma: number;
 	readonly will: number;
-	readonly focus: number;
+	readonly heroism: number;
 	readonly any: number;
 	readonly health: number;
 	readonly sanity: number;
 	readonly charges: number;
 	readonly cardTransition?: CardTransition;
 
-	constructor({ health, sanity, charges, cardTransition, ...aptitudes }: CapabilityCostProps) {
-		this.strength = aptitudes.strength ?? 0;
-		this.agility = aptitudes.agility ?? 0;
-		this.intelligence = aptitudes.intelligence ?? 0;
-		this.charisma = aptitudes.charisma ?? 0;
-		this.will = aptitudes.will ?? 0;
-		this.focus = aptitudes.focus ?? 0;
-		this.any = aptitudes.any ?? 0;
+	constructor({ health, sanity, charges, cardTransition, ...focuses }: CapabilityCostProps) {
+		this.strength = focuses.strength ?? 0;
+		this.agility = focuses.agility ?? 0;
+		this.intelligence = focuses.intelligence ?? 0;
+		this.charisma = focuses.charisma ?? 0;
+		this.will = focuses.will ?? 0;
+		this.heroism = focuses.heroism ?? 0;
+		this.any = focuses.any ?? 0;
 		this.health = health ?? 0;
 		this.sanity = sanity ?? 0;
 		this.charges = charges ?? 0;
@@ -86,7 +86,7 @@ export class CapabilityCost implements Readonly<Record<AptitudeType, number>> {
 			this.intelligence === 0 &&
 			this.charisma === 0 &&
 			this.will === 0 &&
-			this.focus === 0 &&
+			this.heroism === 0 &&
 			this.any === 0 &&
 			this.health === 0 &&
 			this.sanity === 0 &&

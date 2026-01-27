@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { aptitudeTypes, type AptitudeType } from '$lib/catalog/models/aptitude';
+	import { focusTypes, type FocusType } from '$lib/catalog/models/focus';
 	import type { CapabilityCostType } from '$lib/catalog/models/capabilitycost';
 	import { indicatorTypes, type StatType } from '$lib/catalog/models/stats';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
-	import AptitudeIcon from '../aptitudes/AptitudeIcon.svelte';
+	import FocusIcon from '../focuses/FocusIcon.svelte';
 	import InlineSvg from '../InlineSvg.svelte';
 	import StatChip from '../stats/StatChip.svelte';
 
@@ -18,8 +18,8 @@
 </script>
 
 <span {...standardAttributes(attributes, 'capability-cost-chip')} data-type={type}>
-	{#if (aptitudeTypes as Array<CapabilityCostType>).includes(type)}
-		<AptitudeIcon aptitude={type as AptitudeType} />
+	{#if (focusTypes as Array<CapabilityCostType>).includes(type)}
+		<FocusIcon focus={type as FocusType} />
 	{:else if (indicatorTypes as Array<CapabilityCostType>).includes(type)}
 		<StatChip stat={type as StatType} />
 	{:else if type === 'charges'}

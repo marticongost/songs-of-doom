@@ -32,20 +32,21 @@ body {
 
 	// === Color assignments ===
 
-	// Stats and aptitudes
+	// Stats and focuses
 	--stat-agility-color: #{$palette-green};
-	--aptitude-agility-color: #{$palette-green};
+	--focus-agility-color: #{$palette-green};
 	--stat-strength-color: #{$palette-brown};
-	--aptitude-strength-color: #{$palette-brown};
+	--focus-strength-color: #{$palette-brown};
 	--stat-intelligence-color: #{$palette-purple};
-	--aptitude-intelligence-color: #{$palette-purple};
+	--focus-intelligence-color: #{$palette-purple};
 	--stat-charisma-color: #{$palette-yellow};
-	--aptitude-charisma-color: #{$palette-yellow};
+	--focus-charisma-color: #{$palette-yellow};
 	--stat-will-color: #{$palette-violet};
-	--aptitude-will-color: #{$palette-violet};
+	--focus-will-color: #{$palette-violet};
 	--stat-health-color: #{$palette-red};
 	--stat-sanity-color: #{$palette-blue};
-	--aptitude-any-color: #{$palette-somber};
+	--focus-heroism-color: #{$palette-blue};
+	--focus-any-color: #{$palette-somber};
 
 	// Experience
 	--experience-foreground-color: #{$palette-somber};

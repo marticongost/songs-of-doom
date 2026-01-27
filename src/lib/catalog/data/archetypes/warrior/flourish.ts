@@ -1,5 +1,5 @@
 import { PropertyCondition } from '$lib/catalog/models/conditions';
-import { DrawAptitudeEffect, ResultsTableEffect } from '$lib/catalog/models/effects';
+import { DrawFocusEffect, ResultsTableEffect } from '$lib/catalog/models/effects';
 import { RechargeEffect } from '$lib/catalog/models/effects/recharge';
 import { Opportunity } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
@@ -30,7 +30,7 @@ export default new Skill({
 										conditions: [new PropertyCondition({ properties: [weapon] })]
 									}
 								}),
-								new DrawAptitudeEffect({ amount: 1 })
+								new DrawFocusEffect({ amount: 1 })
 							]
 						}
 					]

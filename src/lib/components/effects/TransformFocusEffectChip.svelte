@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { TransformAptitudeEffect } from '$lib/catalog/models/effects';
+	import { TransformFocusEffect } from '$lib/catalog/models/effects';
 	import Text from '$lib/components/localisation/Text.svelte';
-	import AptitudeIcon from '../aptitudes/AptitudeIcon.svelte';
+	import FocusIcon from '../focuses/FocusIcon.svelte';
 
 	interface Props {
-		effect: TransformAptitudeEffect;
+		effect: TransformFocusEffect;
 	}
 
 	const { effect }: Props = $props();
 </script>
 
 <Text ca="Transformar una" es="Transformar una" en="Transform one" />
-<AptitudeIcon aptitude={effect.source} />
+<FocusIcon focus={effect.source} />
 <Text ca=" en " es=" en " en=" into " />
-<AptitudeIcon aptitude={effect.target} />
+<FocusIcon focus={effect.target} />

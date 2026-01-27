@@ -1,5 +1,5 @@
 import { NearbyEnemiesCondition } from '$lib/catalog/models/conditions';
-import { DrawAptitudeEffect } from '$lib/catalog/models/effects';
+import { DrawFocusEffect } from '$lib/catalog/models/effects';
 import { Opportunity } from '$lib/catalog/models/reaction';
 import { Trait } from '$lib/catalog/models/trait';
 
@@ -15,7 +15,7 @@ export default new Trait({
 			triggers: ['chapterStart'],
 			effects: [
 				new NearbyEnemiesCondition({ minEnemies: 2, distance: 0 }).then(
-					new DrawAptitudeEffect({ amount: 1 })
+					new DrawFocusEffect({ amount: 1 })
 				)
 			]
 		})
