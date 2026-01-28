@@ -72,7 +72,6 @@ export const translate = (localisedText: LocalisedText, locale: Locale): string 
 };
 
 export const possessiveRelation = (text: string, locale: string): string => {
-	console.log(text, locale);
 	if (locale === 'ca') {
 		return caPossessive(text);
 	} else if (locale === 'es') {
