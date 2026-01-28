@@ -4,7 +4,7 @@ import { Skill } from '$lib/catalog/models/skill';
 
 export default new Skill({
 	title: {
-		ca: 'Cop de surt',
+		ca: 'Cop de sort',
 		es: 'Golpe de suerte',
 		en: 'Stroke of luck'
 	},
