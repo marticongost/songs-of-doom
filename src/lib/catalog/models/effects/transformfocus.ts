@@ -1,10 +1,10 @@
 import type { Focus, FocusType } from '../focus';
-import { Effect, type EffectProps } from './effect';
+import { Effect } from './effect';
 
 /**
  * Properties for creating a TransformFocusEffect.
  */
-export interface TransformFocusEffectProps extends EffectProps {
+export interface TransformFocusEffectProps {
 	/**
 	 * The source focus to transform from.
 	 * Can be either a Focus object or a FocusType string.
@@ -38,9 +38,9 @@ export class TransformFocusEffect extends Effect {
 	 */
 	readonly target: Focus | FocusType;
 
-	constructor(props: TransformFocusEffectProps) {
-		super(props);
-		this.source = props.source ?? 'any';
-		this.target = props.target;
+	constructor({ source, target }: TransformFocusEffectProps) {
+		super();
+		this.source = source ?? 'any';
+		this.target = target;
 	}
 }

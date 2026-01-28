@@ -16,7 +16,7 @@
 
 <span {...standardAttributes(attributes, 'ephemeral-properties-effect-chip')}>
 	<Text ca="Guanya temporalment" es="Gana temporalmente" en="Temporarily gain" />
-	<PropertyList properties={effect.grantedProperties} />
+	<PropertyList properties={effect.properties} />
 </span>
 
 <style lang="scss">

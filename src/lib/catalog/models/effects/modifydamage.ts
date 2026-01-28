@@ -1,9 +1,9 @@
-import { Effect, type EffectProps } from './effect';
+import { Effect } from './effect';
 
 /**
  * Props for configuring a ModifyDamageEffect.
  */
-export interface ModifyDamageEffectProps extends EffectProps {
+export interface ModifyDamageEffectProps {
 	/** The amount to modify the damage by. Positive values increase damage, negative values decrease it. */
 	amount: number;
 }
@@ -15,8 +15,8 @@ export class ModifyDamageEffect extends Effect {
 	/** The amount to modify the damage by. Positive values increase damage, negative values decrease it. */
 	readonly amount: number;
 
-	constructor({ amount, properties }: ModifyDamageEffectProps) {
-		super({ properties });
+	constructor({ amount }: ModifyDamageEffectProps) {
+		super();
 		this.amount = amount;
 	}
 }

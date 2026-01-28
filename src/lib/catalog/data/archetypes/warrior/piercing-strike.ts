@@ -19,7 +19,7 @@ export default new Skill({
 			cost: { agility: 1 },
 			effects: [
 				new EphemeralPropertiesEffect({
-					grantedProperties: [piercing.with({ value: 2 })]
+					properties: [piercing.with({ value: 2 })]
 				})
 			]
 		})

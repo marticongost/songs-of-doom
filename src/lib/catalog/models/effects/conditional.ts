@@ -1,7 +1,7 @@
 import type { Condition } from '../conditions';
-import { Effect, type EffectProps } from './effect';
+import { Effect } from './effect';
 
-export interface ConditionalEffectProps extends EffectProps {
+export interface ConditionalEffectProps {
 	cases: Case[];
 	default?: Effect;
 }
@@ -15,8 +15,8 @@ export class ConditionalEffect extends Effect {
 	readonly cases: Case[];
 	readonly default?: Effect;
 
-	constructor({ cases, default: defaultEffect, properties }: ConditionalEffectProps) {
-		super({ properties });
+	constructor({ cases, default: defaultEffect }: ConditionalEffectProps) {
+		super();
 		this.cases = cases;
 		this.default = defaultEffect;
 	}

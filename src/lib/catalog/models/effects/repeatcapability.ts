@@ -1,9 +1,7 @@
-import { Effect, type EffectProps } from './effect';
-
-export type RepeatCapabilityEffectProps = EffectProps;
+import { Effect } from './effect';
 
 export class RepeatCapabilityEffect extends Effect {
-	constructor({ properties }: RepeatCapabilityEffectProps = {}) {
-		super({ properties });
+	constructor() {
+		super();
 	}
 }

@@ -5,9 +5,9 @@ import {
 	type CapabilityCostProps,
 	type ScalarCapabilityCostType
 } from '../capabilitycost';
-import { Effect, type EffectProps } from './effect';
+import { Effect } from './effect';
 
-export interface ModifyCapabilityCostEffectProps extends EffectProps {
+export interface ModifyCapabilityCostEffectProps {
 	cost: CapabilityCost | CapabilityCostProps;
 }
 
@@ -19,8 +19,8 @@ export interface GrouppedCapabilityCosts {
 export class ModifyCapabilityCostEffect extends Effect {
 	readonly cost: CapabilityCost;
 
-	constructor({ cost, properties }: ModifyCapabilityCostEffectProps) {
-		super({ properties });
+	constructor({ cost }: ModifyCapabilityCostEffectProps) {
+		super();
 		this.cost = finalise(CapabilityCost, cost);
 	}
 

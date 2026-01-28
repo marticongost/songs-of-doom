@@ -1,9 +1,9 @@
-import { Effect, type EffectProps } from './effect';
+import { Effect } from './effect';
 
 /**
  * Properties for creating a TriggerAttackEffect.
  */
-export interface TriggerAttackEffectProps extends EffectProps {
+export interface TriggerAttackEffectProps {
 	/**
 	 * A list of modifier effects that will be applied to the triggered attack action.
 	 * These modifiers can alter damage, add properties, or change other aspects of the attack.
@@ -24,8 +24,8 @@ export class TriggerAttackEffect extends Effect {
 	 */
 	readonly modifiers: Array<Effect>;
 
-	constructor({ modifiers, properties }: TriggerAttackEffectProps = {}) {
-		super({ properties });
+	constructor({ modifiers }: TriggerAttackEffectProps = {}) {
+		super();
 		this.modifiers = modifiers ?? [];
 	}
 }

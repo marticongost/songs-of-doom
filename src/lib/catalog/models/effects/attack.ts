@@ -1,10 +1,12 @@
-import { resolveExpression, type ExpressionNode, type StatExpression } from '../expression';
+import { resolveExpression, type ExpressionNode, type Expression } from '../expression';
+import type { Property } from '../properties';
 import { parseResultString, type Result, type ResultRange, type ResultString } from '../results';
-import { Effect, type EffectProps } from './effect';
+import { Effect } from './effect';
 
-export interface FightEffectProps extends EffectProps {
-	expression: StatExpression;
+export interface FightEffectProps {
+	expression: Expression;
 	damage: DamageTable | Partial<Record<ResultString, number>>;
+	properties?: Array<Property>;
 }
 
 export interface DamageTableEntry {
@@ -17,9 +19,10 @@ export type DamageTable = Array<DamageTableEntry>;
 export class AttackEffect extends Effect {
 	readonly expression: ExpressionNode;
 	readonly damage: DamageTable;
+	readonly properties: Array<Property>;
 
 	constructor({ expression, damage, properties }: FightEffectProps) {
-		super({ properties });
+		super();
 		this.expression = resolveExpression(expression);
 		this.damage =
 			damage instanceof Array
@@ -28,5 +31,6 @@ export class AttackEffect extends Effect {
 						result: parseResultString(result as ResultString),
 						inflictedDamage
 					}));
+		this.properties = properties ?? [];
 	}
 }

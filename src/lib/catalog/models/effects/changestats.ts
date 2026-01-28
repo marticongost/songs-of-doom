@@ -1,7 +1,7 @@
 import { statTypes, type StatType } from '../stats';
-import { Effect, type EffectProps } from './effect';
+import { Effect } from './effect';
 
-export interface ChangeStatsEffectProps extends EffectProps {
+export interface ChangeStatsEffectProps {
 	strength?: number;
 	agility?: number;
 	intelligence?: number;
@@ -32,10 +32,9 @@ export class ChangeStatsEffect extends Effect {
 		charisma,
 		will,
 		health,
-		sanity,
-		properties
+		sanity
 	}: ChangeStatsEffectProps) {
-		super({ properties });
+		super();
 		this.strength = strength ?? 0;
 		this.agility = agility ?? 0;
 		this.intelligence = intelligence ?? 0;

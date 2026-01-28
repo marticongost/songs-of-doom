@@ -1,9 +1,9 @@
-import { Effect, type EffectProps } from './effect';
+import { Effect } from './effect';
 
 /**
  * Properties for creating a ReceiveOpportunityAttacksEffect.
  */
-export interface ReceiveOpportunityAttacksEffectProps extends EffectProps {
+export interface ReceiveOpportunityAttacksEffectProps {
 	/**
 	 * A list of effects that will be applied to the opportunity attacks.
 	 * These effects can alter damage, add properties, or change other aspects of the attacks.
@@ -24,8 +24,8 @@ export class ReceiveOpportunityAttacksEffect extends Effect {
 	 */
 	readonly effects: Array<Effect>;
 
-	constructor({ effects, properties }: ReceiveOpportunityAttacksEffectProps = {}) {
-		super({ properties });
+	constructor({ effects }: ReceiveOpportunityAttacksEffectProps = {}) {
+		super();
 		this.effects = effects ?? [];
 	}
 }

@@ -1,16 +1,16 @@
 import type { Property } from '../properties';
-import { Effect, type EffectProps } from './effect';
+import { Effect } from './effect';
 
 /**
  * Props for configuring an EphemeralPropertiesEffect.
  */
-export interface EphemeralPropertiesEffectProps extends EffectProps {
+export interface EphemeralPropertiesEffectProps {
 	/**
 	 * The properties that are temporarily granted while another effect is being resolved.
 	 * This can include Keywords or scalar rules (e.g., Piercing) that enhance the resolution
 	 * of the wrapped effect.
 	 */
-	grantedProperties: Array<Property>;
+	properties: Array<Property>;
 }
 
 /**
@@ -24,10 +24,10 @@ export class EphemeralPropertiesEffect extends Effect {
 	 * This can include Keywords or scalar rules (e.g., Piercing) that enhance the resolution
 	 * of the wrapped effect.
 	 */
-	readonly grantedProperties: Array<Property>;
+	readonly properties: Array<Property>;
 
-	constructor({ grantedProperties, properties }: EphemeralPropertiesEffectProps) {
-		super({ properties });
-		this.grantedProperties = grantedProperties;
+	constructor({ properties }: EphemeralPropertiesEffectProps) {
+		super();
+		this.properties = properties;
 	}
 }

@@ -1,7 +1,7 @@
 import { resolveResultExpression, type ResultSelector, type ResultString } from '../results';
-import { Effect, type EffectProps } from './effect';
+import { Effect } from './effect';
 
-export interface ResultsTableEffectProps extends EffectProps {
+export interface ResultsTableEffectProps {
 	entries: ResultsTableEntryProps[];
 }
 
@@ -18,8 +18,8 @@ export interface ResultsTableEntry {
 export class ResultsTableEffect extends Effect {
 	readonly entries: ResultsTableEntry[];
 
-	constructor({ entries, properties }: ResultsTableEffectProps) {
-		super({ properties });
+	constructor({ entries }: ResultsTableEffectProps) {
+		super();
 		this.entries = entries.map((entry) => ({
 			result: resolveResultExpression(entry.result),
 			effects: entry.effects

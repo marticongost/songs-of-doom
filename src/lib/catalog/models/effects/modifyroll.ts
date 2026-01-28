@@ -1,14 +1,14 @@
-import { Effect, type EffectProps } from './effect';
+import { Effect } from './effect';
 
-export interface ModifyRollEffectProps extends EffectProps {
+export interface ModifyRollEffectProps {
 	modifier: number;
 }
 
 export class ModifyRollEffect extends Effect {
 	readonly modifier: number;
 
-	constructor({ modifier, properties }: ModifyRollEffectProps) {
-		super({ properties });
+	constructor({ modifier }: ModifyRollEffectProps) {
+		super();
 		this.modifier = modifier;
 	}
 }

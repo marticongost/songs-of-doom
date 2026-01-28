@@ -1,14 +1,14 @@
 import { finalise } from '$lib/modelling';
 import { resolveExpression, type Expression, type ExpressionNode } from '../expression';
 import { Target, type TargetProps } from '../target';
-import { Effect, type EffectProps } from './effect';
+import { Effect } from './effect';
 
 export type DiscardCardSelection = 'owner' | 'random';
 
 /**
  * Props for configuring a DiscardCardEffect.
  */
-export interface DiscardCardEffectProps extends EffectProps {
+export interface DiscardCardEffectProps {
 	/**
 	 * Who is affected by the effect.
 	 * Defaults to "self".
@@ -36,8 +36,8 @@ export class DiscardCardEffect extends Effect {
 	readonly amount: ExpressionNode;
 	readonly selection: DiscardCardSelection;
 
-	constructor({ target, amount, selection, properties }: DiscardCardEffectProps) {
-		super({ properties });
+	constructor({ target, amount, selection }: DiscardCardEffectProps) {
+		super();
 		this.target = finalise(Target, target ?? 'self');
 		this.amount = resolveExpression(amount);
 		this.selection = selection ?? 'owner';
