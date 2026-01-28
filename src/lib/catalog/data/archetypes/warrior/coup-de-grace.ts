@@ -30,5 +30,4 @@ export default new Skill({
 			]
 		})
 	]
-	// TODO: Atac +2 against an enemy with wounds >= 50%, no charge cost, draw card if enemy killed by the attack
 });
