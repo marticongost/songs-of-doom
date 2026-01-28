@@ -2,6 +2,7 @@
 	import {
 		AttackEffect,
 		ChangeStatsEffect,
+		ChaseEffect,
 		ConditionalEffect,
 		DefendEffect,
 		DiscardCardEffect,
@@ -28,6 +29,7 @@
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import AttackEffectChip from './AttackEffectChip.svelte';
 	import ChangeStatsEffectChip from './ChangeStatsEffectChip.svelte';
+	import ChaseEffectChip from './ChaseEffectChip.svelte';
 	import ConditionalEffectChip from './ConditionalEffectChip.svelte';
 	import DefendEffectChip from './DefendEffectChip.svelte';
 	import DiscardCardEffectChip from './DiscardCardEffectChip.svelte';
@@ -67,6 +69,8 @@
 		<ModifyCapabilityCostEffectChip {effect} />
 	{:else if effect instanceof ChangeStatsEffect}
 		<ChangeStatsEffectChip {effect} />
+	{:else if effect instanceof ChaseEffect}
+		<ChaseEffectChip {effect} />
 	{:else if effect instanceof AttackEffect}
 		<AttackEffectChip {effect} />
 	{:else if effect instanceof RechargeEffect}
