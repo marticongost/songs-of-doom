@@ -12,6 +12,7 @@ export { ModifyCapabilityCostEffect } from './modifycapabilitycost';
 export { NegateDamageEffect } from './negatedamage';
 export { ModifyRollEffect } from './modifyroll';
 export { OneOfEffect } from './oneof';
+export { RedrawFateEffect } from './redrawfate';
 export { SequenceEffect } from './sequence';
 export { WoundEffect } from './wound';
 export { ConditionalEffect, type Case } from './conditional';
