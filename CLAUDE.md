@@ -76,6 +76,34 @@ Use helper functions from [src/lib/localisation.ts](src/lib/localisation.ts):
 Locale is selected via an URL component, defaulting to Catalan (`ca`) via a redirection
 at the root.
 
+#### Text Component
+
+The [Text](src/lib/components/localisation/Text.svelte) component renders localised strings with interpolation support. Use `%(name)` placeholders for dynamic content:
+
+```svelte
+<!-- Simple text -->
+<Text ca="Hola món" es="Hola mundo" en="Hello world" />
+
+<!-- Value interpolation (primitives) -->
+<Text
+  ca="La resposta és %(answer)"
+  es="La respuesta es %(answer)"
+  en="The answer is %(answer)"
+  answer={42}
+/>
+
+<!-- Snippet interpolation (components, HTML) -->
+<Text ca="Hola %(user)" es="Hola %(user)" en="Hello %(user)">
+  {#snippet user()}
+    <strong>{userName}</strong>
+  {/snippet}
+</Text>
+```
+
+- Use **props** for simple values (strings, numbers)
+- Use **snippets** for complex content (components, styled HTML)
+- Missing placeholders throw an error at render time
+
 ### Component Conventions
 
 Svelte 5 components follow these patterns:
@@ -88,6 +116,7 @@ Svelte 5 components follow these patterns:
 - **Styles**: Use SCSS with `@reguitzell/styles` (imported as `rz`)
 - **Svelte 5**: Use runes (`$props`, `$state`) not Svelte 4 syntax
 - **Path aliases**: `$lib` = `src/lib`, `$app` for SvelteKit internals
+- **Documentation**: Use `@component` HTML comments before the script tag for component docs, and JSDoc on Props for prop docs (see [Text.svelte](src/lib/components/localisation/Text.svelte) for an example)
 
 Use the `/svelte-component` skill when creating or updating components.
 

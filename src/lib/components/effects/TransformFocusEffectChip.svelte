@@ -10,7 +10,10 @@
 	const { effect }: Props = $props();
 </script>
 
-<Text ca="Transformar una" es="Transformar una" en="Transform one" />
-<FocusIcon focus={effect.source} />
-<Text ca=" en " es=" en " en=" into " />
-<FocusIcon focus={effect.target} />
+<Text
+	ca="Transformar una %(source) en %(target)"
+	es="Transformar una %(source) en %(target)"
+	en="Transform one %(source) into %(target)">
+	{#snippet source()}<FocusIcon focus={effect.source} />{/snippet}
+	{#snippet target()}<FocusIcon focus={effect.target} />{/snippet}
+</Text>

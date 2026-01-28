@@ -11,7 +11,13 @@
 	const { effect }: Props = $props();
 </script>
 
-<Text ca="Eliminar" es="Eliminar" en="Remove" />
-<ExpressionChip expression={effect.amount} />
-<Text ca="càrregues" es="cargas" en="charges" />
+<Text
+	ca="Eliminar %(expression) càrregues"
+	es="Eliminar %(expression) cargas"
+	en="Remove %(expression) charges">
+	{#snippet expression()}
+		<ExpressionChip expression={effect.amount} />
+	{/snippet}
+</Text>
+
 <TargetChip relation="possessive" target={effect.target} />

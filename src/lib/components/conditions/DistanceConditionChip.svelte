@@ -15,8 +15,9 @@
 	<Text ca="A una ubicació adjacent" es="En una ubicación adyacente" en="At an adjacent location" />
 {:else}
 	<Text
-		ca="A {condition.steps} passos o menys"
-		es="A {condition.steps} pasos o menos"
-		en="At {condition.steps} steps or less"
+		ca="A %(steps) passos o menys"
+		es="A %(steps) pasos o menos"
+		en="At %(steps) steps or less"
+		steps={condition.steps}
 	/>
 {/if}
