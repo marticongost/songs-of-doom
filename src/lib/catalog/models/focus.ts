@@ -1,5 +1,5 @@
 import type { LocalisedText } from '$lib/localisation';
-import { attributeTypes, stats, type AttributeType } from './stats';
+import { attributeTypes, stats, Stat, type AttributeType } from './stats';
 
 export type FocusType = AttributeType | 'heroism' | 'any';
 
@@ -8,10 +8,12 @@ export const focusTypes: FocusType[] = [...attributeTypes, 'heroism', 'any'];
 export class Focus {
 	readonly type: FocusType;
 	readonly title: LocalisedText;
+	readonly stat?: Stat;
 
-	constructor(type: FocusType, title: LocalisedText) {
+	constructor(type: FocusType, title: LocalisedText, stat: Stat | undefined = undefined) {
 		this.type = type;
 		this.title = title;
+		this.stat = stat;
 	}
 }
 
@@ -19,7 +21,7 @@ export const focuses: Record<FocusType, Focus> = Object.assign(
 	{ heroism: new Focus('heroism', { en: 'Heroism', es: 'Heroísmo', ca: 'Heroisme' }) },
 	{ any: new Focus('any', { en: 'Any', es: 'Cualquiera', ca: 'Qualsevol' }) },
 	...attributeTypes.map((type) => ({
-		[type]: new Focus(type, stats[type].name)
+		[type]: new Focus(type, stats[type].name, stats[type])
 	}))
 );
 
