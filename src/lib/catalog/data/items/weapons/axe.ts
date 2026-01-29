@@ -11,6 +11,7 @@ export default new Item({
 	slot: 'hand',
 	properties: [weapon],
 	maxCharges: 2,
+	goldCost: 4,
 	capabilities: [
 		fullyRechargeOnChapterStart,
 		new Action({

@@ -12,6 +12,7 @@ export default new Item({
 	},
 	slot: 'chest',
 	properties: [armor],
+	goldCost: 3,
 	capabilities: [
 		new Constant({
 			effects: [new ConferPropertiesEffect({ properties: [toughness.with({ value: 1 })] })]

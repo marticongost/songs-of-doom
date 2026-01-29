@@ -8,6 +8,7 @@ export default new Item({
 	title: { ca: 'Escut de fusta', es: 'Escudo de madera', en: 'Wooden Shield' },
 	slot: 'hand',
 	properties: [shield],
+	goldCost: 3,
 	maxCharges: 2,
 	capabilities: [
 		fullyRechargeOnChapterStart,

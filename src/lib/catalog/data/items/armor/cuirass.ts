@@ -6,16 +6,16 @@ import toughness from '../../properties/toughness';
 
 export default new Item({
 	title: {
-		ca: 'Cota de malla',
-		es: 'Cota de malla',
-		en: 'Chainmail'
+		ca: 'Cuirassa',
+		es: 'Coraza',
+		en: 'Cuirass'
 	},
 	slot: 'chest',
 	properties: [armor],
-	goldCost: 6,
+	goldCost: 12,
 	capabilities: [
 		new Constant({
-			effects: [new ConferPropertiesEffect({ properties: [toughness.with({ value: 2 })] })]
+			effects: [new ConferPropertiesEffect({ properties: [toughness.with({ value: 3 })] })]
 		})
 	]
 });
