@@ -1,4 +1,4 @@
-import { EphemeralPropertiesEffect } from '$lib/catalog/models/effects';
+import { ConferPropertiesEffect } from '$lib/catalog/models/effects';
 import { Opportunity } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
 import piercing from '../../properties/piercing';
@@ -18,7 +18,7 @@ export default new Skill({
 			triggers: ['attacking'],
 			cost: { agility: 1 },
 			effects: [
-				new EphemeralPropertiesEffect({
+				new ConferPropertiesEffect({
 					properties: [piercing.with({ value: 2 })]
 				})
 			]

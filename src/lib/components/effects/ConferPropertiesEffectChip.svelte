@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { EphemeralPropertiesEffect } from '$lib/catalog/models/effects';
+	import type { ConferPropertiesEffect } from '$lib/catalog/models/effects';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
@@ -8,14 +8,14 @@
 	import PropertyList from '../properties/PropertyList.svelte';
 
 	interface Props extends StandardAttributeProps {
-		effect: EphemeralPropertiesEffect;
+		effect: ConferPropertiesEffect;
 	}
 
 	const { effect, ...attributes }: Props = $props();
 </script>
 
-<span {...standardAttributes(attributes, 'ephemeral-properties-effect-chip')}>
-	<Text ca="Guanya temporalment" es="Gana temporalmente" en="Temporarily gain" />
+<span {...standardAttributes(attributes, 'confer-properties-effect-chip')}>
+	<Text ca="Proporciona" es="Proporciona" en="Gain" />
 	<PropertyList properties={effect.properties} />
 </span>
 

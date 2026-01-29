@@ -6,7 +6,7 @@ export { DiscardCardEffect } from './discardcard';
 export { DrawCardsEffect } from './drawcards';
 export { DrawFocusEffect } from './drawfocuseffect';
 export { Effect } from './effect';
-export { EphemeralPropertiesEffect } from './ephemeralproperties';
+export { ConferPropertiesEffect } from './conferproperties';
 export { EngageEffect } from './engage';
 export { ModifyDamageEffect } from './modifydamage';
 export { ModifyCapabilityCostEffect } from './modifycapabilitycost';
