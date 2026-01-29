@@ -19,6 +19,8 @@ body {
 	$palette-red: #a15555;
 	$palette-green: #55a155;
 	$palette-yellow: #a1a155;
+	$palette-worn-white: #e9e0cd;
+	$palette-gold: #8a6519;
 	$palette-blue: #5555a1;
 	$palette-purple: #7655a1;
 	$palette-violet: #a155a1;
@@ -51,6 +53,10 @@ body {
 	// Experience
 	--experience-foreground-color: #{$palette-somber};
 	--experience-background-color: #{$palette-ivory};
+
+	// Gold
+	--gold-foreground-color: #{$palette-worn-white};
+	--gold-background-color: #{$palette-gold};
 
 	// Proficiency
 	--profiency-color: #{$palette-steel};
