@@ -15,6 +15,7 @@
 	import ChargesChip from './capabilities/ChargesChip.svelte';
 	import CreatureStats from './CreatureStats.svelte';
 	import ExperienceChip from './ExperienceChip.svelte';
+	import GoldChip from './GoldChip.svelte';
 	import Image from './Image.svelte';
 	import InlineSvg from './InlineSvg.svelte';
 
@@ -51,7 +52,13 @@
 			{#if entity.xpCost !== undefined}
 				<ExperienceChip
 					amount={entity.xpCost}
-					style="font-size: 1.3em; margin-left: auto; align-self: center"
+					style="font-size: 1.3em; align-self: center"
+				/>
+			{/if}
+			{#if entity.goldCost !== undefined}
+				<GoldChip
+					amount={entity.goldCost}
+					style="font-size: 1.3em; align-self: center"
 				/>
 			{/if}
 		</div>

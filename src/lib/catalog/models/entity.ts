@@ -11,6 +11,7 @@ export interface EntityProps {
 	capabilities?: Array<Capability>;
 	maxCharges?: number;
 	xpCost?: number;
+	goldCost?: number;
 }
 
 export type EntityType = 'archetype' | 'trait' | 'skill' | 'ally' | 'item' | 'creature';
@@ -22,17 +23,27 @@ export abstract class Entity {
 	readonly capabilities: Array<Capability>;
 	readonly maxCharges: number;
 	readonly xpCost?: number;
+	readonly goldCost?: number;
 
 	abstract readonly type: EntityType;
 	abstract readonly archetype: Trait | undefined;
 
-	constructor({ title, description, properties, capabilities, maxCharges, xpCost }: EntityProps) {
+	constructor({
+		title,
+		description,
+		properties,
+		capabilities,
+		maxCharges,
+		xpCost,
+		goldCost
+	}: EntityProps) {
 		this.title = title;
 		this.description = description;
 		this.explicitProperties = properties ?? [];
 		this.capabilities = capabilities ?? [];
 		this.maxCharges = maxCharges ?? 0;
 		this.xpCost = xpCost;
+		this.goldCost = goldCost;
 	}
 
 	get id() {
