@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Action } from '$lib/catalog/models/action';
 	import type { Capability } from '$lib/catalog/models/capability';
+	import { Constant } from '$lib/catalog/models/constant';
 	import { Reaction } from '$lib/catalog/models/reaction';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import InlineSvg from '../InlineSvg.svelte';
@@ -18,6 +19,8 @@
 	const getIconSrc = () => {
 		if (capability instanceof Action) {
 			return 'capabilities/action.svg';
+		} else if (capability instanceof Constant) {
+			return 'capabilities/constant.svg';
 		} else if (capability instanceof Reaction) {
 			const reaction = capability as Reaction;
 			return `capabilities/${reaction.mandatory ? 'obligation' : 'opportunity'}.svg`;
@@ -36,6 +39,8 @@
 			<span class="moment">
 				{#if capability instanceof Action}
 					<Text ca="Acció" es="Acción" en="Action" />
+				{:else if capability instanceof Constant}
+					<Text ca="Constant" es="Constante" en="Constant" />
 				{:else if capability instanceof Reaction}
 					{@const reaction = capability as Reaction}
 					<TextList type="commas" items={reaction.triggers}>
