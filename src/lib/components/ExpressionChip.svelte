@@ -1,33 +1,37 @@
 <script lang="ts">
-	import type { ExpressionNode } from '$lib/catalog/models/expression';
+	import { Comparison, ScalarOperation, type Expression } from '$lib/catalog/models/expression';
 	import { Stat } from '$lib/catalog/models/stats';
 	import InlineSvg from './InlineSvg.svelte';
 	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
 	import StatIcon from './stats/StatIcon.svelte';
 
 	interface Props extends StandardAttributeProps {
-		expression: ExpressionNode;
+		expression: Expression;
 		relative?: boolean;
 	}
 
 	const { expression: statExpression, relative = false, ...attributes }: Props = $props();
 </script>
 
-{#snippet expressionNodeSnippet(node: ExpressionNode)}
-	{#if typeof node === 'number'}
+{#snippet expressionNodeSnippet(expr: Expression)}
+	{#if typeof expr === 'number'}
 		{#if relative}
-			<span class="number">{node > 0 ? `+${node}` : node}</span>
+			<span class="number">{expr > 0 ? `+${expr}` : expr}</span>
 		{:else}
-			<span class="number">{node}</span>
+			<span class="number">{expr}</span>
 		{/if}
-	{:else if node === 'result'}
+	{:else if expr === 'result'}
 		<InlineSvg src="dice/successes.svg" />
-	{:else if node instanceof Stat}
-		<StatIcon stat={node} />
-	{:else}
-		{@render expressionNodeSnippet(node[0])}
-		<span class="operator">{node[1]}</span>
-		{@render expressionNodeSnippet(node[2])}
+	{:else if expr instanceof Stat}
+		<StatIcon stat={expr} />
+	{:else if expr instanceof ScalarOperation}
+		{@render expressionNodeSnippet(expr.left)}
+		<span class="operator">{expr.operator}</span>
+		{@render expressionNodeSnippet(expr.right)}
+	{:else if expr instanceof Comparison}
+		{@render expressionNodeSnippet(expr.left)}
+		<span class="operator">{expr.operator}</span>
+		{@render expressionNodeSnippet(expr.right)}
 	{/if}
 {/snippet}
 

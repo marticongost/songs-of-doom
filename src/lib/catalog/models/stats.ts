@@ -37,16 +37,24 @@ export const attributeTypes: AttributeType[] = [
 export const indicatorTypes: IndicatorType[] = ['health', 'sanity'];
 export const statTypes: StatType[] = [...attributeTypes, ...indicatorTypes];
 
+export const agility = new Attribute('agility', { en: 'Agility', es: 'Agilidad', ca: 'Agilitat' });
+export const strength = new Attribute('strength', { en: 'Strength', es: 'Fuerza', ca: 'Força' });
+export const intelligence = new Attribute('intelligence', {
+	en: 'Intelligence',
+	es: 'Inteligencia',
+	ca: 'Intel·ligència'
+});
+export const charisma = new Attribute('charisma', { en: 'Charisma', es: 'Carisma', ca: 'Carisma' });
+export const will = new Attribute('will', { en: 'Will', es: 'Voluntad', ca: 'Voluntat' });
+export const health = new Indicator('health', { en: 'Health', es: 'Salud', ca: 'Salut' });
+export const sanity = new Indicator('sanity', { en: 'Sanity', es: 'Cordura', ca: 'Seny' });
+
 export const stats: Record<StatType, Stat> = {
-	agility: new Attribute('agility', { en: 'Agility', es: 'Agilidad', ca: 'Agilitat' }),
-	strength: new Attribute('strength', { en: 'Strength', es: 'Fuerza', ca: 'Força' }),
-	intelligence: new Attribute('intelligence', {
-		en: 'Intelligence',
-		es: 'Inteligencia',
-		ca: 'Intel·ligència'
-	}),
-	charisma: new Attribute('charisma', { en: 'Charisma', es: 'Carisma', ca: 'Carisma' }),
-	will: new Attribute('will', { en: 'Will', es: 'Voluntad', ca: 'Voluntat' }),
-	health: new Indicator('health', { en: 'Health', es: 'Salud', ca: 'Salut' }),
-	sanity: new Indicator('sanity', { en: 'Sanity', es: 'Cordura', ca: 'Seny' })
+	agility,
+	strength,
+	intelligence,
+	charisma,
+	will,
+	health,
+	sanity
 };

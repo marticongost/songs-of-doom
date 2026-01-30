@@ -1,4 +1,4 @@
-import { resolveExpression, type ExpressionNode, type Expression } from '../expression';
+import { type Expression } from '../expression';
 import type { Property } from '../properties';
 import { Effect } from './effect';
 
@@ -8,12 +8,12 @@ export interface DefendEffectProps {
 }
 
 export class DefendEffect extends Effect {
-	readonly expression: ExpressionNode;
+	readonly expression: Expression;
 	readonly properties: Array<Property>;
 
 	constructor({ expression, properties }: DefendEffectProps) {
 		super();
-		this.expression = resolveExpression(expression);
+		this.expression = expression;
 		this.properties = properties ?? [];
 	}
 }

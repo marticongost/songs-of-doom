@@ -1,5 +1,5 @@
 import { finalise } from '$lib/modelling';
-import { resolveExpression, type Expression, type ExpressionNode } from '../expression';
+import { type Expression } from '../expression';
 import { Target, type TargetProps } from '../target';
 import { Effect } from './effect';
 
@@ -33,13 +33,13 @@ export interface DiscardCardEffectProps {
  */
 export class DiscardCardEffect extends Effect {
 	readonly target: Target;
-	readonly amount: ExpressionNode;
+	readonly amount: Expression;
 	readonly selection: DiscardCardSelection;
 
 	constructor({ target, amount, selection }: DiscardCardEffectProps) {
 		super();
 		this.target = finalise(Target, target ?? 'self');
-		this.amount = resolveExpression(amount);
+		this.amount = amount;
 		this.selection = selection ?? 'owner';
 	}
 }

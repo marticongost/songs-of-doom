@@ -9,6 +9,7 @@ import {
 	ModifyRollEffect
 } from '$lib/catalog/models/effects';
 import { Obligation } from '$lib/catalog/models/reaction';
+import { agility, strength } from '$lib/catalog/models/stats';
 
 export default new Creature({
 	title: {
@@ -35,7 +36,7 @@ export default new Creature({
 			cost: { charges: 1 },
 			effects: [
 				new AttackEffect({
-					expression: 'strength',
+					expression: strength,
 					damage: {
 						'1': 1,
 						'2': 3,
@@ -52,7 +53,7 @@ export default new Creature({
 			triggers: ['receivingAttack'],
 			effects: [
 				new DefendEffect({
-					expression: 'agility'
+					expression: agility
 				})
 			]
 		})

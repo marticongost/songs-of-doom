@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ExpressionNode } from '$lib/catalog/models/expression';
+	import type { Expression } from '$lib/catalog/models/expression';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
@@ -8,7 +8,7 @@
 	import InlineSvg from './InlineSvg.svelte';
 
 	interface Props extends StandardAttributeProps {
-		expression: ExpressionNode;
+		expression: Expression;
 		relative?: boolean;
 	}
 

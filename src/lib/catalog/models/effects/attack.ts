@@ -1,4 +1,4 @@
-import { resolveExpression, type ExpressionNode, type Expression } from '../expression';
+import { type Expression } from '../expression';
 import type { Property } from '../properties';
 import { parseResultString, type Result, type ResultRange, type ResultString } from '../results';
 import { Effect } from './effect';
@@ -17,13 +17,13 @@ export interface DamageTableEntry {
 export type DamageTable = Array<DamageTableEntry>;
 
 export class AttackEffect extends Effect {
-	readonly expression: ExpressionNode;
+	readonly expression: Expression;
 	readonly damage: DamageTable;
 	readonly properties: Array<Property>;
 
 	constructor({ expression, damage, properties }: FightEffectProps) {
 		super();
-		this.expression = resolveExpression(expression);
+		this.expression = expression;
 		this.damage =
 			damage instanceof Array
 				? damage

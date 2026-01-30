@@ -1,8 +1,10 @@
 import { Action } from '$lib/catalog/models/action';
 import { fullyRechargeOnChapterStart } from '$lib/catalog/models/common';
 import { AttackEffect, DefendEffect } from '$lib/catalog/models/effects';
+import { plus } from '$lib/catalog/models/expression';
 import { Item } from '$lib/catalog/models/inventory';
 import { Opportunity } from '$lib/catalog/models/reaction';
+import { agility, strength } from '$lib/catalog/models/stats';
 import parry from '../../properties/parry';
 import weapon from '../../properties/weapon';
 
@@ -18,7 +20,7 @@ export default new Item({
 			cost: { strength: 1, charges: 1 },
 			effects: [
 				new AttackEffect({
-					expression: 'strength+1',
+					expression: plus(strength, 1),
 					damage: { 1: 2, 2: 3, 3: 5 }
 				})
 			]
@@ -29,7 +31,7 @@ export default new Item({
 			effects: [
 				new DefendEffect({
 					properties: [parry],
-					expression: 'agility+1'
+					expression: plus(agility, 1)
 				})
 			]
 		})
