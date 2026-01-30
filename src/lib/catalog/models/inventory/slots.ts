@@ -1,6 +1,6 @@
 import type { LocalisedText } from '$lib/localisation';
 
-export type SlotType = 'hand' | 'twoHands' | 'boots' | 'gloves' | 'head' | 'chest' | 'amulet';
+export type SlotType = 'hand' | 'two-hands' | 'boots' | 'gloves' | 'head' | 'chest' | 'amulet';
 
 export interface SlotProps {
 	type: SlotType;
@@ -19,8 +19,8 @@ export class Slot {
 
 export const slots: Record<SlotType, Slot> = {
 	hand: new Slot({ type: 'hand', title: { ca: 'Mà', es: 'Mano', en: 'Hand' } }),
-	twoHands: new Slot({
-		type: 'twoHands',
+	'two-hands': new Slot({
+		type: 'two-hands',
 		title: { ca: 'Dues mans', es: 'Dos manos', en: 'Two Hands' }
 	}),
 	boots: new Slot({ type: 'boots', title: { ca: 'Botes', es: 'Botas', en: 'Boots' } }),
