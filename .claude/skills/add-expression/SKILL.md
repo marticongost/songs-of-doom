@@ -26,11 +26,16 @@ There are two main categories of expressions:
 - **Constructor**: takes a single destructured props object when needed, calls `super()` first
 - **JSDoc**: add doc comments to the interface (if any), the class, and every field
 
+### The `translate()` method
+
+All expressions inherit from `Expression`, which defines a `translate()` method returning `LocalisedText | undefined`. Override this to provide a localised label for the expression. The `ExpressionChip` component checks `translate()` first and renders its result via `<Text>`, so **expressions that implement `translate()` do not need any changes to `ExpressionChip`**.
+
 ### Singleton pattern (for stateless expressions)
 
 Many expressions like `engaged` or `distance` don't need configuration. For these:
 
 ```typescript
+import type { LocalisedText } from '$lib/localisation';
 import { BooleanExpression } from './boolean-expression';
 
 /**
@@ -39,7 +44,15 @@ import { BooleanExpression } from './boolean-expression';
  *
  * To check for NOT engaged, use `not(engaged)` instead of a separate expression.
  */
-export class EngagedExpression extends BooleanExpression {}
+export class EngagedExpression extends BooleanExpression {
+	translate(): LocalisedText {
+		return {
+			ca: 'Enfrontat',
+			es: 'Enfrentado',
+			en: 'Engaged'
+		};
+	}
+}
 
 /**
  * Singleton instance representing the "engaged in combat" condition.
@@ -53,6 +66,7 @@ export const engaged = new EngagedExpression();
 When an expression needs configuration, define a props interface:
 
 ```typescript
+import type { LocalisedText } from '$lib/localisation';
 import { ScalarExpression } from './scalar-expression';
 
 /**
@@ -68,7 +82,7 @@ export interface NearbyEnemiesExpressionProps {
  * This is a scalar value that can be used in comparisons or arithmetic operations.
  *
  * Examples:
- * - `gte(new NearbyEnemiesExpression({ distance: 0 }), 2)` - at least 2 enemies at same location
+ * - `gte(new NearbyEnemiesExpression({ distance: 0 }), 2)` - at least 2 enemies at same location (normalizes to `gt(..., 1)`)
  * - `gt(new NearbyEnemiesExpression({ distance: 1 }), 0)` - at least 1 enemy within 1 step
  */
 export class NearbyEnemiesExpression extends ScalarExpression {
@@ -79,6 +93,14 @@ export class NearbyEnemiesExpression extends ScalarExpression {
 		super();
 		this.distance = distance;
 	}
+
+	translate(): LocalisedText {
+		return {
+			ca: `enemics a ${this.distance} passos`,
+			es: `enemigos a ${this.distance} pasos`,
+			en: `enemies at ${this.distance} steps`
+		};
+	}
 }
 ```
 
@@ -87,38 +109,41 @@ export class NearbyEnemiesExpression extends ScalarExpression {
 - Standalone interface, does **not** extend any base interface
 - Each property has a JSDoc comment
 
+### Comparison shorthands (scalar expressions)
+
+Scalar expressions can override `getComparisonShorthand(operator, value)` to provide localised text for specific comparison patterns. The `Comparison` class calls this automatically when rendering.
+
+```typescript
+export class DistanceExpression extends ScalarExpression {
+	translate(): LocalisedText {
+		return { ca: 'distància', es: 'distancia', en: 'distance' };
+	}
+
+	getComparisonShorthand(
+		operator: ComparisonOperator,
+		value: ScalarExpressionType
+	): LocalisedText | undefined {
+		if (operator === '=' && value === 0) {
+			return { ca: 'Mateixa ubicació', es: 'Misma ubicación', en: 'Same location' };
+		}
+		return undefined;
+	}
+}
+```
+
 ## Component integration
 
-All expressions are rendered through a single `ExpressionChip.svelte` component that uses type discrimination to handle different expression types.
+All expressions are rendered through a single `ExpressionChip.svelte` component. It checks `translate()` first, then falls back to type-specific branches for built-in types (numbers, stats, operations, comparisons, logical operators, properties).
 
-**Do not create separate chip components.** Instead, update `ExpressionChip.svelte` to handle the new expression type.
+**Do not create separate chip components.** Most new expressions only need to implement `translate()` and will be rendered automatically.
 
-### Adding rendering for new expressions
+### When ExpressionChip changes are needed
 
-In [src/lib/components/expressions/ExpressionChip.svelte](src/lib/components/expressions/ExpressionChip.svelte):
+Only update `ExpressionChip.svelte` if the expression requires **custom rendering beyond localised text** (e.g., icons, special formatting, child components). In that case:
 
 1. **Import** the new expression class at the top
 2. **Add a render branch** in the `expressionNodeSnippet` snippet using `{:else if expression instanceof YourExpression}`
 3. **Use `<Text>`** for all user-visible strings with `ca`/`es`/`en` props
-
-Example for a boolean expression with no props:
-
-```svelte
-{:else if expression instanceof EngagedExpression}
-	<Text ca="Enfrontat" es="Enfrentado" en="Engaged" />
-```
-
-Example for an expression with props that need interpolation:
-
-```svelte
-{:else if expression instanceof NearbyEnemiesExpression}
-	<Text
-		ca="enemics a %(distance) passos"
-		es="enemigos a %(distance) pasos"
-		en="enemies at %(distance) steps"
-		distance={expression.distance}
-	/>
-```
 
 ## Tasks
 
@@ -127,26 +152,26 @@ When the user requests a new expression:
 1. **Determine the expression type**: Ask the user or infer whether it should be a boolean or scalar expression
 2. **Determine if props are needed**: Does the expression need configuration, or is it stateless?
 3. **Create the model file** in `src/lib/catalog/models/expressions/`:
-   - If stateless: Create class extending `BooleanExpression`/`ScalarExpression` and export a singleton instance
-   - If configurable: Create a `{ClassName}Props` interface and class with constructor
+   - If stateless: Create class extending `BooleanExpression`/`ScalarExpression`, implement `translate()`, and export a singleton instance
+   - If configurable: Create a `{ClassName}Props` interface and class with constructor, implement `translate()`
+   - For scalar expressions with meaningful comparison shorthands, override `getComparisonShorthand()`
    - Add comprehensive JSDoc comments and usage examples
 4. **Barrel-export** the new class (and any companion types/functions) from `src/lib/catalog/models/expressions/index.ts`
-5. **Update ExpressionChip.svelte**:
+5. **Update ExpressionChip.svelte** (only if the expression needs custom rendering beyond localised text):
    - Import the new expression class
    - Add an `{:else if expression instanceof NewExpression}` branch in the `expressionNodeSnippet`
-   - Render localized text using `<Text>` with `ca`/`es`/`en` props
-
-Make sure to use the `/svelte-component` skill when updating `ExpressionChip.svelte` to follow project conventions.
+   - Use the `/svelte-component` skill when updating the component
 
 ## Examples of expression categories
 
 ### Boolean expressions (extend BooleanExpression)
-- State checks: `engaged`, `wounded`
-- Property checks: `Property` instances (properties themselves are boolean expressions)
-- Comparisons and logical operators are handled separately
+- State checks: `engaged` (singleton with `translate()`)
+- Property checks: `Property` instances (properties extend `BooleanExpression`)
+- Comparisons: `wounded` is `gte(receivedWounds, 1)` — a `Comparison`, not a custom class
+- Logical operators (`and`, `or`, `not`) are handled separately
 
 ### Scalar expressions (extend ScalarExpression)
-- Measurements: `distance`, `DistanceExpression`
-- Counts: `NearbyEnemiesExpression`
-- Wound tracking: `remainingWounds`, `receivedWounds`
+- Measurements: `distance` (singleton with `translate()` and `getComparisonShorthand()`)
+- Counts: `NearbyEnemiesExpression` (configurable with props)
+- Wound tracking: `remainingWounds`, `receivedWounds` (singletons with `translate()` and shorthands)
 - Stats and numeric primitives are handled separately

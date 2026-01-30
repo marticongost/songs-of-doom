@@ -53,9 +53,10 @@ Game effects and expressions follow a class-based polymorphic pattern:
   - Each has a corresponding Svelte component with `Chip` suffix in `src/lib/components/effects/`
   - The main `EffectChip` component uses type discrimination to render the appropriate specialized component
 - **Expressions** (`src/lib/catalog/models/expressions/`): Boolean (conditions/predicates) and scalar (numeric) values used in game logic
+  - All expressions inherit from a common `Expression` base class that provides a `translate()` method for self-localisation
   - Boolean expressions extend `BooleanExpression` (e.g., `engaged`, `Property` instances)
-  - Scalar expressions extend `ScalarExpression` (e.g., `distance`, `NearbyEnemiesExpression`)
-  - All expressions are rendered through a single `ExpressionChip` component that handles type discrimination
+  - Scalar expressions extend `ScalarExpression` (e.g., `distance`, `NearbyEnemiesExpression`) and can override `getComparisonShorthand()` for localised comparison text
+  - Rendering: `ExpressionChip` checks `translate()` first, then falls back to type-specific rendering for built-in types (numbers, stats, operations, comparisons, logical operators, properties)
 
 When adding new effects or expressions, use the `/add-effect` or `/add-expression` skills.
 
@@ -151,6 +152,7 @@ This project includes custom Claude Code skills:
 - `/svelte-component` - Create/update Svelte components following project conventions
 - `/add-effect` - Add new game effect types (TypeScript class + Svelte component)
 - `/add-expression` - Add new expression types (TypeScript class + ExpressionChip integration)
+- `/update-instructions` - Update CLAUDE.md and all skill files to reflect the current state of the project
 
 ## Important Conventions
 
