@@ -1,5 +1,5 @@
+import { Constant } from '$lib/catalog/models/constant';
 import { ChangeStatsEffect } from '$lib/catalog/models/effects';
-import { Obligation } from '$lib/catalog/models/reaction';
 import { Trait } from '$lib/catalog/models/trait';
 
 export default new Trait({
@@ -10,8 +10,7 @@ export default new Trait({
 	},
 	xpCost: 4,
 	capabilities: [
-		new Obligation({
-			triggers: ['acquired'],
+		new Constant({
 			effects: [new ChangeStatsEffect({ strength: 1 })]
 		})
 	]
