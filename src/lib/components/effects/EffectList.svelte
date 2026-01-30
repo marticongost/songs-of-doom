@@ -15,11 +15,3 @@
 		<EffectChip {effect} />
 	{/snippet}
 </TextList>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-	.effect-list {
-		@include rz.column(sm);
-		align-items: stretch;
-	}
-</style>

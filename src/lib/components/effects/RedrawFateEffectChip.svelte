@@ -6,8 +6,7 @@
 		effect: RedrawFateEffect;
 	}
 
-	const { effect }: Props = $props();
-	void effect;
+	const { effect: _effect }: Props = $props();
 </script>
 
 <Text

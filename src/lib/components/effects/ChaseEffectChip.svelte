@@ -6,8 +6,7 @@
 		effect: ChaseEffect;
 	}
 
-	const { effect }: Props = $props();
-	void effect;
+	const { effect: _effect }: Props = $props();
 </script>
 
 <Text ca="Perseguir" es="Perseguir" en="Chase" />

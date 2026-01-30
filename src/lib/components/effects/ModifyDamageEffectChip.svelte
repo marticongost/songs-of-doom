@@ -7,7 +7,7 @@
 	}
 
 	const { effect }: Props = $props();
-	const modifierText = effect.amount > 0 ? `+${effect.amount}` : effect.amount.toString();
+	const modifierText = $derived(effect.amount > 0 ? `+${effect.amount}` : effect.amount.toString());
 </script>
 
 <Text

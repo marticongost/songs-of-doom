@@ -126,16 +126,7 @@ Use the `/svelte-component` skill when creating or updating components.
 
 ### Testing
 
-Two test configurations in [vite.config.ts](vite.config.ts):
-
-1. **Client tests** (`*.svelte.{test,spec}.ts`): Run in Playwright browser
-   - Import from `vitest/browser`
-   - Use `render()` from `vitest-browser-svelte`
-
-2. **Server tests** (other `.{test,spec}.ts`): Run in Node environment
-   - Standard vitest imports
-
-All tests require assertions (`expect.requireAssertions: true`).
+Tests use vitest configured in [vite.config.ts](vite.config.ts) and run in Node environment. All tests require assertions (`expect.requireAssertions: true`).
 
 ### SVG Assets
 

@@ -6,7 +6,7 @@
 		effect: RepeatCapabilityEffect;
 	}
 
-	const { effect }: Props = $props();
+	const { effect: _effect }: Props = $props();
 </script>
 
 <Text ca="Repetir aquesta capacitat" es="Repetir esta capacidad" en="Repeat this capability" />

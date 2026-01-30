@@ -6,8 +6,7 @@
 		effect: EngageEffect;
 	}
 
-	const { effect }: Props = $props();
-	void effect;
+	const { effect: _effect }: Props = $props();
 </script>
 
 <Text ca="Enfrontar-se a un oponent" es="Enfrentarse a un oponente" en="Engage an opponent" />

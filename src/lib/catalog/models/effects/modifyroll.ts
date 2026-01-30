@@ -1,8 +1,8 @@
-import type { ScalarExpression, ScalarExpressionType } from '../expressions';
+import type { ScalarExpressionType } from '../expressions';
 import { Effect } from './effect';
 
 export interface ModifyRollEffectProps {
-	modifier: ScalarExpression;
+	modifier: ScalarExpressionType;
 }
 
 export class ModifyRollEffect extends Effect {

@@ -6,7 +6,7 @@
 		effect: NegateDamageEffect;
 	}
 
-	const { effect }: Props = $props();
+	const { effect: _effect }: Props = $props();
 </script>
 
 <Text ca="Negar tot el dany" es="Negar todo el daño" en="Negate all damage" />
