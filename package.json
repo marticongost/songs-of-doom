@@ -9,7 +9,7 @@
 		"build": "vite build",
 		"prebuild": "svgo -f src/lib/svg",
 		"preview": "vite preview",
-		"prepare": "svelte-kit sync || echo ''",
+		"prepare": "(svelte-kit sync || echo '') && husky",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
@@ -32,6 +32,8 @@
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.13.1",
 		"globals": "^16.5.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.2.7",
 		"npm-run-all": "^4.1.5",
 		"prettier": "^3.7.4",
 		"prettier-plugin-svelte": "^3.4.0",
@@ -42,6 +44,10 @@
 		"typescript-eslint": "^8.48.1",
 		"vite": "^7.2.6",
 		"vitest": "^4.0.15"
+	},
+	"lint-staged": {
+		"*.{ts,js,svelte,json,css,scss,md,html}": "prettier --check",
+		"*.{ts,js,svelte}": "eslint"
 	},
 	"dependencies": {
 		"fast-glob": "^3.3.3",
