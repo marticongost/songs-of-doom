@@ -1,4 +1,4 @@
-import type { Condition } from '../conditions';
+import type { BooleanExpressionType } from '../expressions';
 import { Effect } from './effect';
 
 export interface ConditionalEffectProps {
@@ -7,7 +7,7 @@ export interface ConditionalEffectProps {
 }
 
 export interface Case {
-	condition: Condition;
+	condition: BooleanExpressionType;
 	effects: Effect[];
 }
 

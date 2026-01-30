@@ -1,6 +1,6 @@
 import { fullyRechargeOnChapterStart } from '$lib/catalog/models/common';
 import { DefendEffect } from '$lib/catalog/models/effects';
-import { plus } from '$lib/catalog/models/expression';
+import { plus } from '$lib/catalog/models/expressions';
 import { Item } from '$lib/catalog/models/inventory';
 import { Opportunity } from '$lib/catalog/models/reaction';
 import { agility } from '$lib/catalog/models/stats';

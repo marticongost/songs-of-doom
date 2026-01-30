@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { DiscardCardEffect } from '$lib/catalog/models/effects';
-	import { expressionPlurality } from '$lib/catalog/models/expression';
+	import { expressionPlurality } from '$lib/catalog/models/expressions';
 	import { plural2 } from '$lib/localisation';
 	import ExpressionChip from '../ExpressionChip.svelte';
 	import Text from '../localisation/Text.svelte';

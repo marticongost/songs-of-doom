@@ -1,44 +1,117 @@
+<!--
+@component
+Renders any expression (scalar or boolean) with proper formatting.
+Handles primitives, operations, comparisons, logical operators, and custom expression types.
+-->
 <script lang="ts">
-	import { Comparison, ScalarOperation, type Expression } from '$lib/catalog/models/expression';
+	import {
+		And,
+		Comparison,
+		DistanceExpression,
+		EngagedExpression,
+		NearbyEnemiesExpression,
+		Not,
+		Or,
+		PropertyExpression,
+		ScalarOperation,
+		type BooleanExpressionType,
+		type ScalarExpressionType
+	} from '$lib/catalog/models/expressions';
+	import {
+		ReceivedWoundsExpression,
+		RemainingWoundsExpression
+	} from '$lib/catalog/models/expressions/wounded';
 	import { Stat } from '$lib/catalog/models/stats';
 	import InlineSvg from './InlineSvg.svelte';
+	import Text from './localisation/Text.svelte';
+	import PropertyList from './properties/PropertyList.svelte';
 	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
 	import StatIcon from './stats/StatIcon.svelte';
 
 	interface Props extends StandardAttributeProps {
-		expression: Expression;
+		expression?: ScalarExpressionType | BooleanExpressionType;
 		relative?: boolean;
 	}
 
-	const { expression: statExpression, relative = false, ...attributes }: Props = $props();
+	const { expression, relative = false, ...attributes }: Props = $props();
 </script>
 
-{#snippet expressionNodeSnippet(expr: Expression)}
-	{#if typeof expr === 'number'}
+{#snippet expressionNodeSnippet(expression: ScalarExpressionType | BooleanExpressionType)}
+	<!-- Primitives -->
+	{#if typeof expression === 'number'}
 		{#if relative}
-			<span class="number">{expr > 0 ? `+${expr}` : expr}</span>
+			<span class="number">{expression > 0 ? `+${expression}` : expression}</span>
 		{:else}
-			<span class="number">{expr}</span>
+			<span class="number">{expression}</span>
 		{/if}
-	{:else if expr === 'result'}
+	{:else if typeof expression === 'boolean'}
+		<span class="boolean">{expression ? 'true' : 'false'}</span>
+	{:else if expression === 'result'}
 		<InlineSvg src="dice/successes.svg" />
-	{:else if expr instanceof Stat}
-		<StatIcon stat={expr} />
-	{:else if expr instanceof ScalarOperation}
-		{@render expressionNodeSnippet(expr.left)}
-		<span class="operator">{expr.operator}</span>
-		{@render expressionNodeSnippet(expr.right)}
-	{:else if expr instanceof Comparison}
-		{@render expressionNodeSnippet(expr.left)}
-		<span class="operator">{expr.operator}</span>
-		{@render expressionNodeSnippet(expr.right)}
+	{:else if expression instanceof Stat}
+		<StatIcon stat={expression} />
+
+		<!-- Scalar arithmetic operations -->
+	{:else if expression instanceof ScalarOperation}
+		{@render expressionNodeSnippet(expression.left)}
+		<span class="operator">{expression.operator}</span>
+		{@render expressionNodeSnippet(expression.right)}
+
+		<!-- Comparisons -->
+	{:else if expression instanceof Comparison}
+		{@render expressionNodeSnippet(expression.left)}
+		<span class="operator">{expression.operator}</span>
+		{@render expressionNodeSnippet(expression.right)}
+
+		<!-- Logical operators -->
+	{:else if expression instanceof And}
+		{#each expression.operands as operand, index}
+			{#if index > 0}<span class="operator"><Text ca="I" es="Y" en="AND" /></span>{/if}
+			{@render expressionNodeSnippet(operand)}
+		{/each}
+	{:else if expression instanceof Or}
+		{#each expression.operands as operand, index}
+			{#if index > 0}<span class="operator"><Text ca="O" es="O" en="OR" /></span>{/if}
+			{@render expressionNodeSnippet(operand)}
+		{/each}
+	{:else if expression instanceof Not}
+		<span class="operator"><Text ca="NO" es="NO" en="NOT" /></span>
+		{@render expressionNodeSnippet(expression.operand)}
+
+		<!-- Boolean expressions -->
+	{:else if expression instanceof EngagedExpression}
+		<Text ca="Enfrontat" es="Enfrentado" en="Engaged" />
+	{:else if expression instanceof RemainingWoundsExpression}
+		<Text ca="Ferides restants" es="Heridas restantes" en="Remaining wounds" />
+	{:else if expression instanceof ReceivedWoundsExpression}
+		<Text ca="Ferides rebudes" es="Heridas recibidas" en="Received wounds" />
+	{:else if expression instanceof PropertyExpression}
+		<PropertyList properties={expression.properties} />
+
+		<!-- Scalar expressions -->
+	{:else if expression instanceof DistanceExpression}
+		<Text ca="distància" es="distancia" en="distance" />
+	{:else if expression instanceof NearbyEnemiesExpression}
+		<Text
+			ca="enemics a %(distance) passos"
+			es="enemigos a %(distance) pasos"
+			en="enemies at %(distance) steps"
+			distance={expression.distance}
+		/>
 	{/if}
 {/snippet}
 
-<span {...standardAttributes(attributes, 'stat-expression-chip')}>
-	{@render expressionNodeSnippet(statExpression)}
-</span>
+{#if expression !== undefined}
+	<span {...standardAttributes(attributes, 'expression-chip')}>
+		{@render expressionNodeSnippet(expression)}
+	</span>
+{/if}
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
+
+	.logical-operator {
+		font-weight: bold;
+		color: var(--text-subtle-color);
+	}
 </style>

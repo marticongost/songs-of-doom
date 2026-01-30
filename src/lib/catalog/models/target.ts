@@ -1,4 +1,4 @@
-import type { Condition } from './conditions';
+import type { BooleanExpressionType } from './expressions';
 
 export type TargetType =
 	| 'self'
@@ -17,20 +17,20 @@ export type TargetProps =
 	| TargetType
 	| {
 			type: TargetType;
-			conditions?: Array<Condition>;
+			condition?: BooleanExpressionType;
 	  };
 
 export class Target {
 	readonly type: TargetType;
-	readonly conditions: Array<Condition>;
+	readonly condition?: BooleanExpressionType;
 
 	constructor(props: TargetProps) {
 		if (typeof props === 'string') {
 			this.type = props;
-			this.conditions = [];
+			this.condition = undefined;
 		} else {
 			this.type = props.type;
-			this.conditions = props.conditions ?? [];
+			this.condition = props.condition;
 		}
 	}
 }

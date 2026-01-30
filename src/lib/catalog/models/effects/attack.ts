@@ -1,4 +1,4 @@
-import { type Expression } from '../expression';
+import { type Expression } from '../expressions';
 import type { Property } from '../properties';
 import { parseResultString, type Result, type ResultRange, type ResultString } from '../results';
 import { Effect } from './effect';

@@ -1,7 +1,7 @@
 import { Action } from '$lib/catalog/models/action';
 import { fullyRechargeOnChapterStart } from '$lib/catalog/models/common';
 import { AttackEffect, DefendEffect } from '$lib/catalog/models/effects';
-import { plus } from '$lib/catalog/models/expression';
+import { plus } from '$lib/catalog/models/expressions';
 import { Item } from '$lib/catalog/models/inventory';
 import { Opportunity } from '$lib/catalog/models/reaction';
 import { agility, strength } from '$lib/catalog/models/stats';

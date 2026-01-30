@@ -2,7 +2,7 @@
 	import type { Target } from '$lib/catalog/models/target';
 	import { getLocale } from '$lib/context/locale';
 	import { possessiveRelation, translate, type LocalisedText } from '$lib/localisation';
-	import ConditionList from '../conditions/ConditionList.svelte';
+	import ExpressionChip from '../ExpressionChip.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
 	interface Props extends StandardAttributeProps {
@@ -23,7 +23,7 @@
 	{/if}
 {/snippet}
 
-{#if !ellideSelf || target.type !== 'self' || target.conditions.length}
+{#if !ellideSelf || target.type !== 'self' || target.condition}
 	<span {...standardAttributes(attributes, 'target-chip')}>
 		{#if target.type === 'self'}
 			{@render text({ ca: 'tu mateix', es: 'ti mismo', en: 'yourself' })}
@@ -52,6 +52,6 @@
 				en: 'all owned objects'
 			})}
 		{/if}
-		<ConditionList conditions={target.conditions} />
+		<ExpressionChip expression={target.condition} />
 	</span>
 {/if}

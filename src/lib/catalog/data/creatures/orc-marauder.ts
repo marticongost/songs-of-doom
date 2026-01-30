@@ -1,6 +1,5 @@
 import { Action } from '$lib/catalog/models/action';
 import { fullyRechargeOnChapterStart } from '$lib/catalog/models/common';
-import { WOUNDED } from '$lib/catalog/models/conditions/wounded-condition';
 import { Creature } from '$lib/catalog/models/creature';
 import {
 	AttackEffect,
@@ -8,6 +7,7 @@ import {
 	DefendEffect,
 	ModifyRollEffect
 } from '$lib/catalog/models/effects';
+import { wounded } from '$lib/catalog/models/expressions';
 import { Obligation } from '$lib/catalog/models/reaction';
 import { agility, strength } from '$lib/catalog/models/stats';
 
@@ -47,7 +47,7 @@ export default new Creature({
 		}),
 		new Obligation({
 			triggers: ['attacking'],
-			effects: [WOUNDED.then(new ModifyRollEffect({ modifier: 1 }))]
+			effects: [wounded.then(new ModifyRollEffect({ modifier: 1 }))]
 		}),
 		new Obligation({
 			triggers: ['receivingAttack'],

@@ -1,5 +1,5 @@
 import { finalise } from '$lib/modelling';
-import type { Expression } from '../expression';
+import type { Expression } from '../expressions';
 import { Target, type TargetProps } from '../target';
 import { Effect } from './effect';
 

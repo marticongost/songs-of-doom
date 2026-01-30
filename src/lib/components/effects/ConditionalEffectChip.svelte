@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ConditionalEffect } from '$lib/catalog/models/effects';
 	import ArrowIcon from '../ArrowIcon.svelte';
-	import ConditionList from '../conditions/ConditionList.svelte';
+	import ExpressionChip from '../ExpressionChip.svelte';
 	import EffectList from './EffectList.svelte';
 
 	interface Props {
@@ -13,7 +13,7 @@
 
 {#each effect.cases as conditionCase}
 	<span class="case">
-		<ConditionList conditions={[conditionCase.condition]} />
+		<ExpressionChip expression={conditionCase.condition} />
 		<ArrowIcon />
 		<EffectList effects={conditionCase.effects} />
 	</span>

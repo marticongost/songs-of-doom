@@ -1,7 +1,7 @@
 import { Action } from '$lib/catalog/models/action';
-import { WoundedCondition } from '$lib/catalog/models/conditions';
-import { SAME_LOCATION } from '$lib/catalog/models/conditions/distance-condition';
 import { WoundEffect } from '$lib/catalog/models/effects';
+import { and, distance, eq, lte } from '$lib/catalog/models/expressions';
+import { remainingWounds } from '$lib/catalog/models/expressions/wounded';
 import { Skill } from '$lib/catalog/models/skill';
 import piercing from '../../properties/piercing';
 
@@ -19,10 +19,7 @@ export default new Skill({
 				new WoundEffect({
 					target: {
 						type: 'enemy',
-						conditions: [
-							SAME_LOCATION,
-							new WoundedCondition({ wounds: { metric: 'remaining', operator: '<=', value: 2 } })
-						]
+						condition: and(eq(distance, 0), lte(remainingWounds, 2))
 					},
 					damage: 2,
 					properties: [piercing.with({ value: 4 })]

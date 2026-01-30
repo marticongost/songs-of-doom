@@ -1,4 +1,4 @@
-import { type Expression } from '../expression';
+import { type Expression } from '../expressions';
 import type { Property } from '../properties';
 import { Effect } from './effect';
 
