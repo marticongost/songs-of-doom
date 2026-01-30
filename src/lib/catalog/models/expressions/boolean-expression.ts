@@ -1,5 +1,5 @@
-import type { Effect } from '../effects';
-import { ConditionalEffect } from '../effects';
+import type { Effect } from '../effects/effect';
+import { ConditionalEffect } from '../effects/conditional';
 import { Expression } from './expression';
 
 /**

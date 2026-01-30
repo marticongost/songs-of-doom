@@ -36,7 +36,7 @@ export { distance, DistanceExpression } from './distance';
 export { NearbyEnemiesExpression, type NearbyEnemiesExpressionProps } from './nearby-enemies';
 
 // Type guards
-import { Property } from '../properties';
+import { Property } from '../properties/property';
 import { Stat } from '../stats';
 import { BooleanExpression } from './boolean-expression';
 import { Comparison } from './comparison';
