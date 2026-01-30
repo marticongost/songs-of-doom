@@ -110,7 +110,7 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
 
-	.logical-operator {
+	.operator {
 		font-weight: bold;
 		color: var(--text-subtle-color);
 	}
