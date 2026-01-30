@@ -60,12 +60,14 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 
 		<!-- Logical operators -->
 	{:else if expression instanceof And}
-		{#each expression.operands as operand, index}
-			{#if index > 0}<span class="operator"><Text ca="I" es="Y" en="AND" /></span>{/if}
+		{#each expression.operands as operand, index (index)}
+			{#if index > 0}
+				<span class="operator">&</span>
+			{/if}
 			{@render expressionNodeSnippet(operand)}
 		{/each}
 	{:else if expression instanceof Or}
-		{#each expression.operands as operand, index}
+		{#each expression.operands as operand, index (index)}
 			{#if index > 0}<span class="operator"><Text ca="O" es="O" en="OR" /></span>{/if}
 			{@render expressionNodeSnippet(operand)}
 		{/each}
