@@ -50,11 +50,14 @@ export default new Trait({
 Game effects and expressions follow a class-based polymorphic pattern:
 
 - **Effects** (`src/lib/catalog/models/effects/`): Actions that happen in the game (attack, defend, change stats, etc.)
-- **Expressions** (`src/lib/catalog/models/conditions/`): Scalar or boolean expressions that determine when effects trigger or their intensity
-- Effects have a corresponding Svelte component with `Chip` suffix in `src/lib/components/effects/`
-- The main `EffectChip` component uses type discrimination to render the appropriate specialized component
+  - Each has a corresponding Svelte component with `Chip` suffix in `src/lib/components/effects/`
+  - The main `EffectChip` component uses type discrimination to render the appropriate specialized component
+- **Expressions** (`src/lib/catalog/models/expressions/`): Boolean (conditions/predicates) and scalar (numeric) values used in game logic
+  - Boolean expressions extend `BooleanExpression` (e.g., `engaged`, `PropertyExpression`)
+  - Scalar expressions extend `ScalarExpression` (e.g., `distance`, `NearbyEnemiesExpression`)
+  - All expressions are rendered through a single `ExpressionChip` component that handles type discrimination
 
-When adding new effects or conditions, use the `/add-effect` or `/add-condition` skills.
+When adding new effects or expressions, use the `/add-effect` or `/add-expression` skills.
 
 ### Localization
 
@@ -147,7 +150,7 @@ This project includes custom Claude Code skills:
 
 - `/svelte-component` - Create/update Svelte components following project conventions
 - `/add-effect` - Add new game effect types (TypeScript class + Svelte component)
-- `/add-expression` - Add new expression types (TypeScript class + Svelte component)
+- `/add-expression` - Add new expression types (TypeScript class + ExpressionChip integration)
 
 ## Important Conventions
 
