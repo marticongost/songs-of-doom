@@ -4,6 +4,7 @@ import {
 	ResultsTableEffect,
 	TriggerAttackEffect
 } from '$lib/catalog/models/effects';
+import { effectiveDefense, gte } from '$lib/catalog/models/expressions';
 import { Opportunity } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
 
@@ -17,27 +18,29 @@ export default new Skill({
 	discardReward: { agility: 1 },
 	capabilities: [
 		new Opportunity({
-			triggers: ['afterDefending'],
+			triggers: ['afterReceivedAttackResolved'],
 			cost: { agility: 1 },
 			effects: [
 				new ResultsTableEffect({
 					entries: [
 						{
-							result: '2+',
+							result: 0,
 							effects: [
-								new TriggerAttackEffect({
-									modifiers: [
-										new ModifyRollEffect({
-											modifier: 1
-										}),
-										new ModifyCapabilityCostEffect({
-											cost: {
-												strength: -1,
-												charges: -1
-											}
-										})
-									]
-								})
+								gte(effectiveDefense, 1).then(
+									new TriggerAttackEffect({
+										modifiers: [
+											new ModifyRollEffect({
+												modifier: effectiveDefense
+											}),
+											new ModifyCapabilityCostEffect({
+												cost: {
+													strength: -1,
+													charges: -1
+												}
+											})
+										]
+									})
+								)
 							]
 						}
 					]
