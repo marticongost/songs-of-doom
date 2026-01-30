@@ -10,12 +10,7 @@ export type ScalarOperator = '+' | '-' | '*' | '/';
  * A type union representing all possible scalar expressions.
  * Includes primitives (number, Stat, 'result') and complex expressions (ScalarOperation).
  */
-export type ScalarExpressionType =
-	| Stat
-	| number
-	| 'result'
-	| ScalarOperation
-	| ScalarExpression;
+export type ScalarExpressionType = Stat | number | 'result' | ScalarOperation | ScalarExpression;
 
 /**
  * An arithmetic operation between two scalar expressions.

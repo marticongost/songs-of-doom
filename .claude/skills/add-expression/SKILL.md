@@ -105,6 +105,7 @@ export class NearbyEnemiesExpression extends ScalarExpression {
 ```
 
 **Props interface conventions:**
+
 - Named `{ClassName}Props`
 - Standalone interface, does **not** extend any base interface
 - Each property has a JSDoc comment
@@ -165,12 +166,14 @@ When the user requests a new expression:
 ## Examples of expression categories
 
 ### Boolean expressions (extend BooleanExpression)
+
 - State checks: `engaged` (singleton with `translate()`)
 - Property checks: `Property` instances (properties extend `BooleanExpression`)
 - Comparisons: `wounded` is `gte(receivedWounds, 1)` — a `Comparison`, not a custom class
 - Logical operators (`and`, `or`, `not`) are handled separately
 
 ### Scalar expressions (extend ScalarExpression)
+
 - Measurements: `distance` (singleton with `translate()` and `getComparisonShorthand()`)
 - Counts: `NearbyEnemiesExpression` (configurable with props)
 - Wound tracking: `remainingWounds`, `receivedWounds` (singletons with `translate()` and shorthands)

@@ -9,8 +9,4 @@
 	const { effect }: Props = $props();
 </script>
 
-<Text
-	ca="Repetir aquesta capacitat"
-	es="Repetir esta capacidad"
-	en="Repeat this capability"
-/>
+<Text ca="Repetir aquesta capacitat" es="Repetir esta capacidad" en="Repeat this capability" />

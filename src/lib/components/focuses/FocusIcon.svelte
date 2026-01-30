@@ -18,7 +18,7 @@
 <InlineSvg
 	{...standardAttributes(attributes, 'focus-icon')}
 	data-focus={focusObject.type}
-	src={`${focusObject.stat ? "stats" : "focuses"}/${focusObject.type}.svg`}
+	src={`${focusObject.stat ? 'stats' : 'focuses'}/${focusObject.type}.svg`}
 />
 
 <style lang="scss">

@@ -13,7 +13,8 @@
 <Text
 	ca="Transformar una %(source) en %(target)"
 	es="Transformar una %(source) en %(target)"
-	en="Transform one %(source) into %(target)">
+	en="Transform one %(source) into %(target)"
+>
 	{#snippet source()}<FocusIcon focus={effect.source} />{/snippet}
 	{#snippet target()}<FocusIcon focus={effect.target} />{/snippet}
 </Text>

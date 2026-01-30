@@ -29,7 +29,11 @@ export class Comparison extends BooleanExpression {
 	 */
 	right: ScalarExpressionType;
 
-	constructor(left: ScalarExpressionType, operator: ComparisonOperator, right: ScalarExpressionType) {
+	constructor(
+		left: ScalarExpressionType,
+		operator: ComparisonOperator,
+		right: ScalarExpressionType
+	) {
 		super();
 		this.operator = operator;
 		this.left = left;

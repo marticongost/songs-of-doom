@@ -50,16 +50,10 @@
 				</div>
 			{/if}
 			{#if entity.xpCost !== undefined}
-				<ExperienceChip
-					amount={entity.xpCost}
-					style="font-size: 1.3em; align-self: center"
-				/>
+				<ExperienceChip amount={entity.xpCost} style="font-size: 1.3em; align-self: center" />
 			{/if}
 			{#if entity.goldCost !== undefined}
-				<GoldChip
-					amount={entity.goldCost}
-					style="font-size: 1.3em; align-self: center"
-				/>
+				<GoldChip amount={entity.goldCost} style="font-size: 1.3em; align-self: center" />
 			{/if}
 		</div>
 	</div>

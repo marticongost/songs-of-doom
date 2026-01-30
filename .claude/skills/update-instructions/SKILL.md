@@ -17,13 +17,13 @@ changed conventions, etc.).
 
 The following files comprise the full set of agent instructions:
 
-| File | Purpose |
-|------|---------|
-| `CLAUDE.md` | Top-level project guidance: overview, commands, architecture, conventions |
-| `.claude/skills/svelte-component/SKILL.md` | Conventions for creating/updating Svelte components |
-| `.claude/skills/add-effect/SKILL.md` | Steps and conventions for adding a new game effect |
-| `.claude/skills/add-expression/SKILL.md` | Steps and conventions for adding a new expression |
-| `.claude/skills/update-instructions/SKILL.md` | This skill (update its file list if new skills are added) |
+| File                                          | Purpose                                                                   |
+| --------------------------------------------- | ------------------------------------------------------------------------- |
+| `CLAUDE.md`                                   | Top-level project guidance: overview, commands, architecture, conventions |
+| `.claude/skills/svelte-component/SKILL.md`    | Conventions for creating/updating Svelte components                       |
+| `.claude/skills/add-effect/SKILL.md`          | Steps and conventions for adding a new game effect                        |
+| `.claude/skills/add-expression/SKILL.md`      | Steps and conventions for adding a new expression                         |
+| `.claude/skills/update-instructions/SKILL.md` | This skill (update its file list if new skills are added)                 |
 
 ## Process
 
@@ -44,6 +44,7 @@ If the conversation does **not** provide enough context (e.g. the user invoked t
 at the start of a fresh conversation without prior work), ask the user:
 
 > What changes should the instructions reflect? For example:
+>
 > - A specific feature or refactor from a recent session
 > - A list of areas that need updating
 > - A full review of all instructions against the codebase

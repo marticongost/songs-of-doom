@@ -96,10 +96,16 @@ Placeholders use the syntax `%(name)` where `name` matches a prop or snippet.
 	-->{#if segment.type === 'text'}<!--
 		-->{segment.value}<!--
 	-->{:else if typeof values[segment.name] === 'function'}<!--
-		-->{@render (values[segment.name] as Snippet<[]>)()}<!--
+		-->{@render (
+			values[segment.name] as Snippet<[]>
+		)()}<!--
 	-->{:else if segment.name in values}<!--
-		-->{values[segment.name]}<!--
+		-->{values[
+			segment.name
+		]}<!--
 	-->{:else}<!--
-		-->{(() => { throw new Error(`Missing value for placeholder: %(${segment.name})`); })()}<!--
+		-->{(() => {
+			throw new Error(`Missing value for placeholder: %(${segment.name})`);
+		})()}<!--
 	-->{/if}<!--
 -->{/each}
