@@ -53,7 +53,7 @@ Game effects and expressions follow a class-based polymorphic pattern:
   - Each has a corresponding Svelte component with `Chip` suffix in `src/lib/components/effects/`
   - The main `EffectChip` component uses type discrimination to render the appropriate specialized component
 - **Expressions** (`src/lib/catalog/models/expressions/`): Boolean (conditions/predicates) and scalar (numeric) values used in game logic
-  - Boolean expressions extend `BooleanExpression` (e.g., `engaged`, `PropertyExpression`)
+  - Boolean expressions extend `BooleanExpression` (e.g., `engaged`, `Property` instances)
   - Scalar expressions extend `ScalarExpression` (e.g., `distance`, `NearbyEnemiesExpression`)
   - All expressions are rendered through a single `ExpressionChip` component that handles type discrimination
 

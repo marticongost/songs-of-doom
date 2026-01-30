@@ -1,12 +1,14 @@
 import { BooleanExpression } from './boolean-expression';
 import type { Comparison } from './comparison';
+import type { Property } from '../properties';
 
 /**
  * A type union representing all possible boolean expressions.
- * Includes primitives (boolean), comparisons, logical operators, and custom boolean expressions.
+ * Includes primitives (boolean), comparisons, logical operators, properties, and custom boolean expressions.
  */
 export type BooleanExpressionType =
 	| boolean
+	| Property
 	| Comparison
 	| And
 	| Or

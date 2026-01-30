@@ -1,6 +1,5 @@
 import { DrawFocusEffect, ResultsTableEffect } from '$lib/catalog/models/effects';
 import { RechargeEffect } from '$lib/catalog/models/effects/recharge';
-import { PropertyExpression } from '$lib/catalog/models/expressions';
 import { Opportunity } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
 import weapon from '../../properties/weapon';
@@ -27,7 +26,7 @@ export default new Skill({
 									amount: 1,
 									target: {
 										type: 'ownedObject',
-										condition: new PropertyExpression({ properties: [weapon] })
+										condition: weapon
 									}
 								}),
 								new DrawFocusEffect({ amount: 1 })

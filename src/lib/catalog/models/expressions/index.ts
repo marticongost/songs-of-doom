@@ -22,7 +22,6 @@ export { And, and, Not, not, Or, or, type BooleanExpressionType } from './logica
 
 // Boolean expressions
 export { engaged, EngagedExpression } from './engaged';
-export { PropertyExpression, type PropertyExpressionProps } from './property';
 export {
 	receivedWounds,
 	ReceivedWoundsExpression,
@@ -36,6 +35,7 @@ export { distance, DistanceExpression } from './distance';
 export { NearbyEnemiesExpression, type NearbyEnemiesExpressionProps } from './nearby-enemies';
 
 // Type guards
+import { Property } from '../properties';
 import { Stat } from '../stats';
 import { BooleanExpression } from './boolean-expression';
 import { Comparison } from './comparison';
@@ -66,7 +66,10 @@ export const isScalarExpression = (
 export const isBooleanExpression = (
 	value: ScalarExpressionType | BooleanExpressionType
 ): value is BooleanExpressionType =>
-	typeof value === 'boolean' || value instanceof Comparison || value instanceof BooleanExpression;
+	typeof value === 'boolean' ||
+	value instanceof Property ||
+	value instanceof Comparison ||
+	value instanceof BooleanExpression;
 
 /**
  * Returns 1 if the expression is guaranteed to be singular (the number 1),

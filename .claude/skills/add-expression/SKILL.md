@@ -142,7 +142,7 @@ Make sure to use the `/svelte-component` skill when updating `ExpressionChip.sve
 
 ### Boolean expressions (extend BooleanExpression)
 - State checks: `engaged`, `wounded`
-- Property checks: `PropertyExpression`
+- Property checks: `Property` instances (properties themselves are boolean expressions)
 - Comparisons and logical operators are handled separately
 
 ### Scalar expressions (extend ScalarExpression)

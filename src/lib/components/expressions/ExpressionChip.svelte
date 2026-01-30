@@ -12,7 +12,6 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		NearbyEnemiesExpression,
 		Not,
 		Or,
-		PropertyExpression,
 		ScalarOperation,
 		type BooleanExpressionType,
 		type ScalarExpressionType
@@ -21,10 +20,11 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		ReceivedWoundsExpression,
 		RemainingWoundsExpression
 	} from '$lib/catalog/models/expressions/wounded';
+	import { Property } from '$lib/catalog/models/properties';
 	import { Stat } from '$lib/catalog/models/stats';
 	import InlineSvg from '../InlineSvg.svelte';
 	import Text from '../localisation/Text.svelte';
-	import PropertyList from '../properties/PropertyList.svelte';
+	import PropertyChip from '../properties/PropertyChip.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import StatIcon from '../stats/StatIcon.svelte';
 
@@ -77,14 +77,14 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		{@render expressionNodeSnippet(expression.operand)}
 
 		<!-- Boolean expressions -->
+	{:else if expression instanceof Property}
+		<PropertyChip property={expression} />
 	{:else if expression instanceof EngagedExpression}
 		<Text ca="Enfrontat" es="Enfrentado" en="Engaged" />
 	{:else if expression instanceof RemainingWoundsExpression}
 		<Text ca="Ferides restants" es="Heridas restantes" en="Remaining wounds" />
 	{:else if expression instanceof ReceivedWoundsExpression}
 		<Text ca="Ferides rebudes" es="Heridas recibidas" en="Received wounds" />
-	{:else if expression instanceof PropertyExpression}
-		<PropertyList properties={expression.properties} />
 
 		<!-- Scalar expressions -->
 	{:else if expression instanceof DistanceExpression}
