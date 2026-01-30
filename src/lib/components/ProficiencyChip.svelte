@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { Expression } from '$lib/catalog/models/expression';
+	import type { Expression } from '$lib/catalog/models/expressions';
+	import ExpressionChip from '$lib/components/expressions/ExpressionChip.svelte';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
-	import ExpressionChip from './ExpressionChip.svelte';
 	import InlineSvg from './InlineSvg.svelte';
 
 	interface Props extends StandardAttributeProps {

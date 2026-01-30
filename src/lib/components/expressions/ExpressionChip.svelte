@@ -22,11 +22,11 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		RemainingWoundsExpression
 	} from '$lib/catalog/models/expressions/wounded';
 	import { Stat } from '$lib/catalog/models/stats';
-	import InlineSvg from './InlineSvg.svelte';
-	import Text from './localisation/Text.svelte';
-	import PropertyList from './properties/PropertyList.svelte';
-	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
-	import StatIcon from './stats/StatIcon.svelte';
+	import InlineSvg from '../InlineSvg.svelte';
+	import Text from '../localisation/Text.svelte';
+	import PropertyList from '../properties/PropertyList.svelte';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
+	import StatIcon from '../stats/StatIcon.svelte';
 
 	interface Props extends StandardAttributeProps {
 		expression?: ScalarExpressionType | BooleanExpressionType;
@@ -44,8 +44,6 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		{:else}
 			<span class="number">{expression}</span>
 		{/if}
-	{:else if typeof expression === 'boolean'}
-		<span class="boolean">{expression ? 'true' : 'false'}</span>
 	{:else if expression === 'result'}
 		<InlineSvg src="dice/successes.svg" />
 	{:else if expression instanceof Stat}

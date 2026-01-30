@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { RemoveChargesEffect } from '$lib/catalog/models/effects';
-	import ExpressionChip from '../ExpressionChip.svelte';
+	import ExpressionChip from '$lib/components/expressions/ExpressionChip.svelte';
 	import Text from '../localisation/Text.svelte';
 	import TargetChip from '../targets/TargetChip.svelte';
 
@@ -14,7 +14,8 @@
 <Text
 	ca="Eliminar %(expression) càrregues"
 	es="Eliminar %(expression) cargas"
-	en="Remove %(expression) charges">
+	en="Remove %(expression) charges"
+>
 	{#snippet expression()}
 		<ExpressionChip expression={effect.amount} />
 	{/snippet}

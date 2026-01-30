@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { AttackEffect } from '$lib/catalog/models/effects';
+	import ExpressionChip from '$lib/components/expressions/ExpressionChip.svelte';
 	import Parameters from '../capabilities/Parameters.svelte';
 	import DamageTable from '../damage/DamageTable.svelte';
-	import ExpressionChip from '../ExpressionChip.svelte';
 	import PropertyList from '../properties/PropertyList.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
