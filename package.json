@@ -7,7 +7,7 @@
 		"dev": "npm-run-all -p watch:svg dev:svelte",
 		"dev:svelte": "vite dev",
 		"build": "vite build",
-		"prebuild": "svgo -f src/lib/svg",
+		"prebuild": "svgo -f src/lib/assets/svg",
 		"preview": "vite preview",
 		"prepare": "(svelte-kit sync || echo '') && husky",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -16,7 +16,7 @@
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest",
 		"test": "npm run test:unit -- --run",
-		"watch:svg": "chokidar 'src/lib/svg/**/*.svg' -c 'node scripts/optimize-svg.mjs {path}'"
+		"watch:svg": "chokidar 'src/lib/assets/svg/**/*.svg' -c 'node scripts/optimize-svg.mjs {path}'"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
