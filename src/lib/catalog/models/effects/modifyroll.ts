@@ -1,11 +1,12 @@
+import type { ScalarExpression } from '../expressions';
 import { Effect } from './effect';
 
 export interface ModifyRollEffectProps {
-	modifier: number;
+	modifier: ScalarExpression;
 }
 
 export class ModifyRollEffect extends Effect {
-	readonly modifier: number;
+	readonly modifier: ScalarExpression;
 
 	constructor({ modifier }: ModifyRollEffectProps) {
 		super();
