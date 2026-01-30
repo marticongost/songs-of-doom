@@ -45,14 +45,14 @@ export default new Trait({
 });
 ```
 
-### Effect and Condition System
+### Effect and Expression System
 
-Game effects and conditions follow a class-based polymorphic pattern:
+Game effects and expressions follow a class-based polymorphic pattern:
 
 - **Effects** (`src/lib/catalog/models/effects/`): Actions that happen in the game (attack, defend, change stats, etc.)
-- **Conditions** (`src/lib/catalog/models/conditions/`): Predicates that determine when effects trigger
-- Each has a corresponding Svelte component with `Chip` suffix in `src/lib/components/effects/` and `src/lib/components/conditions/`
-- The main `EffectChip` and `ConditionChip` components use type discrimination to render the appropriate specialized component
+- **Expressions** (`src/lib/catalog/models/conditions/`): Scalar or boolean expressions that determine when effects trigger or their intensity
+- Effects have a corresponding Svelte component with `Chip` suffix in `src/lib/components/effects/`
+- The main `EffectChip` component uses type discrimination to render the appropriate specialized component
 
 When adding new effects or conditions, use the `/add-effect` or `/add-condition` skills.
 
@@ -86,17 +86,17 @@ The [Text](src/lib/components/localisation/Text.svelte) component renders locali
 
 <!-- Value interpolation (primitives) -->
 <Text
-  ca="La resposta és %(answer)"
-  es="La respuesta es %(answer)"
-  en="The answer is %(answer)"
-  answer={42}
+	ca="La resposta és %(answer)"
+	es="La respuesta es %(answer)"
+	en="The answer is %(answer)"
+	answer={42}
 />
 
 <!-- Snippet interpolation (components, HTML) -->
 <Text ca="Hola %(user)" es="Hola %(user)" en="Hello %(user)">
-  {#snippet user()}
-    <strong>{userName}</strong>
-  {/snippet}
+	{#snippet user()}
+		<strong>{userName}</strong>
+	{/snippet}
 </Text>
 ```
 
@@ -147,7 +147,7 @@ This project includes custom Claude Code skills:
 
 - `/svelte-component` - Create/update Svelte components following project conventions
 - `/add-effect` - Add new game effect types (TypeScript class + Svelte component)
-- `/add-condition` - Add new condition types (TypeScript class + Svelte component)
+- `/add-expression` - Add new expression types (TypeScript class + Svelte component)
 
 ## Important Conventions
 
