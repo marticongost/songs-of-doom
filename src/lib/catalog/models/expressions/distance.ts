@@ -9,8 +9,8 @@ import type { ScalarExpressionType } from './scalar-operation';
  *
  * Examples:
  * - `eq(distance, 0)` - at the same location
- * - `lte(distance, 1)` - adjacent or same location
- * - `lte(distance, 2)` - within 2 steps
+ * - `lte(distance, 1)` - adjacent or same location (normalizes to `lt(distance, 2)`)
+ * - `lte(distance, 2)` - within 2 steps (normalizes to `lt(distance, 3)`)
  */
 export class DistanceExpression extends ScalarExpression {
 	translate(): LocalisedText {

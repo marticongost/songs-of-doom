@@ -14,7 +14,7 @@ export interface NearbyEnemiesExpressionProps {
  * This is a scalar value that can be used in comparisons or arithmetic operations.
  *
  * Examples:
- * - `gte(new NearbyEnemiesExpression({ distance: 0 }), 2)` - at least 2 enemies at same location
+ * - `gte(new NearbyEnemiesExpression({ distance: 0 }), 2)` - at least 2 enemies at same location (normalizes to `gt(..., 1)`)
  * - `gt(new NearbyEnemiesExpression({ distance: 1 }), 0)` - at least 1 enemy within 1 step
  */
 export class NearbyEnemiesExpression extends ScalarExpression {

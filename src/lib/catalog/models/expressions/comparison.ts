@@ -1,12 +1,13 @@
 import type { LocalisedText } from '$lib/localisation';
 import { BooleanExpression } from './boolean-expression';
 import { ScalarExpression } from './scalar-expression';
-import type { ScalarExpressionType } from './scalar-operation';
+import { ScalarOperation, type ScalarExpressionType } from './scalar-operation';
 
 /**
  * A comparison operator between two scalar values.
+ * Note: gte() and lte() helpers normalize to > and < for integer comparisons.
  */
-export type ComparisonOperator = '>' | '>=' | '=' | '!=' | '<' | '<=';
+export type ComparisonOperator = '>' | '=' | '!=' | '<';
 
 /**
  * A comparison operation between two scalar values.
@@ -54,9 +55,23 @@ export const neq = (a: ScalarExpressionType, b: ScalarExpressionType): Compariso
 	new Comparison(a, '!=', b);
 export const gt = (a: ScalarExpressionType, b: ScalarExpressionType): Comparison =>
 	new Comparison(a, '>', b);
-export const gte = (a: ScalarExpressionType, b: ScalarExpressionType): Comparison =>
-	new Comparison(a, '>=', b);
 export const lt = (a: ScalarExpressionType, b: ScalarExpressionType): Comparison =>
 	new Comparison(a, '<', b);
-export const lte = (a: ScalarExpressionType, b: ScalarExpressionType): Comparison =>
-	new Comparison(a, '<=', b);
+
+/**
+ * Greater-than-or-equal comparison helper.
+ * Normalizes to `>` operator: `gte(a, b)` becomes `a > (b - 1)`.
+ */
+export const gte = (a: ScalarExpressionType, b: ScalarExpressionType): Comparison => {
+	const normalizedB = typeof b === 'number' ? b - 1 : new ScalarOperation(b, '-', 1);
+	return new Comparison(a, '>', normalizedB);
+};
+
+/**
+ * Less-than-or-equal comparison helper.
+ * Normalizes to `<` operator: `lte(a, b)` becomes `a < (b + 1)`.
+ */
+export const lte = (a: ScalarExpressionType, b: ScalarExpressionType): Comparison => {
+	const normalizedB = typeof b === 'number' ? b + 1 : new ScalarOperation(b, '+', 1);
+	return new Comparison(a, '<', normalizedB);
+};

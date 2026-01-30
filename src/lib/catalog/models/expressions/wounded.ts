@@ -32,13 +32,13 @@ export class ReceivedWoundsExpression extends ScalarExpression {
 		operator: ComparisonOperator,
 		value: ScalarExpressionType
 	): LocalisedText | undefined {
-		if ((operator === '>' && value === 0) || (operator === '>=' && value === 1)) {
+		if (operator === '>' && value === 0) {
 			return {
 				ca: 'Ferit',
 				es: 'Herido',
 				en: 'Wounded'
 			};
-		} else if ((operator === '=' && value === 0) || (operator === '<' && value === 1)) {
+		} else if (operator === '=' && value === 0) {
 			return {
 				ca: 'Il·lès',
 				es: 'Ileso',
