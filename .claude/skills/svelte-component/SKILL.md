@@ -72,3 +72,7 @@ Use absolute imports, take advantage of the `$lib` alias.
 
 When creating a new component, use the provided `NewComponentTemplate.svelte` template
 file.
+
+## Formatting
+
+After creating or modifying components, run `npm run format` to ensure consistent formatting via Prettier.

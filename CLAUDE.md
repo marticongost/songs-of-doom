@@ -152,3 +152,4 @@ This project includes custom Claude Code skills:
 - **Strict TypeScript**: All strict flags enabled, no implicit any
 - **Import order**: External deps, then $lib imports, then relative imports
 - **File organization**: Components in `src/lib/components/{category}/`, models in `src/lib/catalog/models/{category}/`
+- **Formatting**: Run `npm run format` after editing files to ensure consistent formatting via Prettier

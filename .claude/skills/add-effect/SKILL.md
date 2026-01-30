@@ -90,3 +90,5 @@ If a field requires transformation (e.g. resolving an expression), perform the c
 
 Make sure to use the /svelte-component skill to follow project conventions when creating
 or updating Svelte files.
+
+After completing all changes, run `npm run format` to ensure consistent formatting via Prettier.

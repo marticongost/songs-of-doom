@@ -178,3 +178,7 @@ When the user requests a new expression:
 - Counts: `NearbyEnemiesExpression` (configurable with props)
 - Wound tracking: `remainingWounds`, `receivedWounds` (singletons with `translate()` and shorthands)
 - Stats and numeric primitives are handled separately
+
+## Formatting
+
+After completing all changes, run `npm run format` to ensure consistent formatting via Prettier.
