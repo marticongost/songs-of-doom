@@ -31,6 +31,7 @@ export {
 } from './wounded';
 
 // Scalar expressions
+export { effectiveDefense, EffectiveDefenseExpression } from './effective-defense';
 export { distance, DistanceExpression } from './distance';
 export { NearbyEnemiesExpression, type NearbyEnemiesExpressionProps } from './nearby-enemies';
 
