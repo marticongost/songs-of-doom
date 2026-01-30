@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Expression } from '$lib/catalog/models/expressions';
+	import type { ScalarExpressionType } from '$lib/catalog/models/expressions';
 	import ExpressionChip from '$lib/components/expressions/ExpressionChip.svelte';
 	import {
 		standardAttributes,
@@ -8,7 +8,7 @@
 	import InlineSvg from './InlineSvg.svelte';
 
 	interface Props extends StandardAttributeProps {
-		expression: Expression;
+		expression: ScalarExpressionType;
 		relative?: boolean;
 	}
 

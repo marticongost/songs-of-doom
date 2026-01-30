@@ -1,14 +1,14 @@
-import { type Expression } from '../expressions';
+import { type ScalarExpressionType } from '../expressions';
 import type { Property } from '../properties';
 import { Effect } from './effect';
 
 export interface DefendEffectProps {
-	expression: Expression;
+	expression: ScalarExpressionType;
 	properties?: Array<Property>;
 }
 
 export class DefendEffect extends Effect {
-	readonly expression: Expression;
+	readonly expression: ScalarExpressionType;
 	readonly properties: Array<Property>;
 
 	constructor({ expression, properties }: DefendEffectProps) {

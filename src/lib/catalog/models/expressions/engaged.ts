@@ -1,3 +1,4 @@
+import type { LocalisedText } from '$lib/localisation';
 import { BooleanExpression } from './boolean-expression';
 
 /**
@@ -6,7 +7,15 @@ import { BooleanExpression } from './boolean-expression';
  *
  * To check for NOT engaged, use `not(engaged)` instead of a separate expression.
  */
-export class EngagedExpression extends BooleanExpression {}
+export class EngagedExpression extends BooleanExpression {
+	translate(): LocalisedText {
+		return {
+			ca: 'Enfrontat',
+			es: 'Enfrentado',
+			en: 'Engaged'
+		};
+	}
+}
 
 /**
  * Singleton instance representing the "engaged in combat" condition.

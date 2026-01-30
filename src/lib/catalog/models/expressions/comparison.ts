@@ -1,4 +1,6 @@
+import type { LocalisedText } from '$lib/localisation';
 import { BooleanExpression } from './boolean-expression';
+import { ScalarExpression } from './scalar-expression';
 import type { ScalarExpressionType } from './scalar-operation';
 
 /**
@@ -31,6 +33,17 @@ export class Comparison extends BooleanExpression {
 		this.operator = operator;
 		this.left = left;
 		this.right = right;
+	}
+
+	/**
+	 * Returns a localized shorthand text if the left operand provides one for this comparison.
+	 * Delegates to the left operand's getComparisonShorthand method.
+	 */
+	translate(): LocalisedText | undefined {
+		if (this.left instanceof ScalarExpression) {
+			return this.left.getComparisonShorthand(this.operator, this.right);
+		}
+		return undefined;
 	}
 }
 

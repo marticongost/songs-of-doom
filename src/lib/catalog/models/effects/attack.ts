@@ -1,10 +1,10 @@
-import { type Expression } from '../expressions';
+import { type ScalarExpressionType } from '../expressions';
 import type { Property } from '../properties';
 import { parseResultString, type Result, type ResultRange, type ResultString } from '../results';
 import { Effect } from './effect';
 
 export interface FightEffectProps {
-	expression: Expression;
+	expression: ScalarExpressionType;
 	damage: DamageTable | Partial<Record<ResultString, number>>;
 	properties?: Array<Property>;
 }
@@ -17,7 +17,7 @@ export interface DamageTableEntry {
 export type DamageTable = Array<DamageTableEntry>;
 
 export class AttackEffect extends Effect {
-	readonly expression: Expression;
+	readonly expression: ScalarExpressionType;
 	readonly damage: DamageTable;
 	readonly properties: Array<Property>;
 

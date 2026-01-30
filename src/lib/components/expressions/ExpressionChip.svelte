@@ -7,19 +7,13 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 	import {
 		And,
 		Comparison,
-		DistanceExpression,
-		EngagedExpression,
-		NearbyEnemiesExpression,
+		Expression,
 		Not,
 		Or,
 		ScalarOperation,
 		type BooleanExpressionType,
 		type ScalarExpressionType
 	} from '$lib/catalog/models/expressions';
-	import {
-		ReceivedWoundsExpression,
-		RemainingWoundsExpression
-	} from '$lib/catalog/models/expressions/wounded';
 	import { Property } from '$lib/catalog/models/properties';
 	import { Stat } from '$lib/catalog/models/stats';
 	import InlineSvg from '../InlineSvg.svelte';
@@ -37,8 +31,11 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 </script>
 
 {#snippet expressionNodeSnippet(expression: ScalarExpressionType | BooleanExpressionType)}
-	<!-- Primitives -->
-	{#if typeof expression === 'number'}
+	<!-- Check for custom translations first -->
+	{@const translation = expression instanceof Expression ? expression.translate() : undefined}
+	{#if translation !== undefined}
+		<Text {...translation} />
+	{:else if typeof expression === 'number'}
 		{#if relative}
 			<span class="number">{expression > 0 ? `+${expression}` : expression}</span>
 		{:else}
@@ -79,23 +76,6 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		<!-- Boolean expressions -->
 	{:else if expression instanceof Property}
 		<PropertyChip property={expression} />
-	{:else if expression instanceof EngagedExpression}
-		<Text ca="Enfrontat" es="Enfrentado" en="Engaged" />
-	{:else if expression instanceof RemainingWoundsExpression}
-		<Text ca="Ferides restants" es="Heridas restantes" en="Remaining wounds" />
-	{:else if expression instanceof ReceivedWoundsExpression}
-		<Text ca="Ferides rebudes" es="Heridas recibidas" en="Received wounds" />
-
-		<!-- Scalar expressions -->
-	{:else if expression instanceof DistanceExpression}
-		<Text ca="distància" es="distancia" en="distance" />
-	{:else if expression instanceof NearbyEnemiesExpression}
-		<Text
-			ca="enemics a %(distance) passos"
-			es="enemigos a %(distance) pasos"
-			en="enemies at %(distance) steps"
-			distance={expression.distance}
-		/>
 	{/if}
 {/snippet}
 

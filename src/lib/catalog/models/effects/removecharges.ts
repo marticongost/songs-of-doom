@@ -1,5 +1,5 @@
 import { finalise } from '$lib/modelling';
-import type { Expression } from '../expressions';
+import type { ScalarExpressionType } from '../expressions';
 import { Target, type TargetProps } from '../target';
 import { Effect } from './effect';
 
@@ -7,7 +7,7 @@ import { Effect } from './effect';
  * Props for configuring a RemoveChargesEffect.
  */
 export interface RemoveChargesEffectProps {
-	amount: Expression;
+	amount: ScalarExpressionType;
 	target: Target | TargetProps;
 }
 
@@ -15,7 +15,7 @@ export interface RemoveChargesEffectProps {
  * An effect that removes charges from a target.
  */
 export class RemoveChargesEffect extends Effect {
-	readonly amount: Expression;
+	readonly amount: ScalarExpressionType;
 	readonly target: Target;
 
 	constructor({ amount, target }: RemoveChargesEffectProps) {

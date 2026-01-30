@@ -1,5 +1,5 @@
 import { finalise } from '$lib/modelling';
-import { type Expression } from '../expressions';
+import { type ScalarExpressionType } from '../expressions';
 import { Target, type TargetProps } from '../target';
 import { Effect } from './effect';
 
@@ -18,14 +18,15 @@ export interface DiscardCardEffectProps {
 	/**
 	 * How many cards to discard from the target's hand.
 	 */
-	amount: Expression;
+	amount: ScalarExpressionType;
 
 	/**
 	 * Who chooses which cards to discard.
 	 * - "owner": The owner of the affected character chooses which cards to discard.
 	 * - "random": Cards are chosen randomly from the hand.
+	 * Defaults to "owner".
 	 */
-	selection: DiscardCardSelection;
+	selection?: DiscardCardSelection;
 }
 
 /**
@@ -33,7 +34,7 @@ export interface DiscardCardEffectProps {
  */
 export class DiscardCardEffect extends Effect {
 	readonly target: Target;
-	readonly amount: Expression;
+	readonly amount: ScalarExpressionType;
 	readonly selection: DiscardCardSelection;
 
 	constructor({ target, amount, selection }: DiscardCardEffectProps) {

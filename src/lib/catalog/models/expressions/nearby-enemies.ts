@@ -1,3 +1,4 @@
+import type { LocalisedText } from '$lib/localisation';
 import { ScalarExpression } from './scalar-expression';
 
 /**
@@ -23,5 +24,13 @@ export class NearbyEnemiesExpression extends ScalarExpression {
 	constructor({ distance }: NearbyEnemiesExpressionProps) {
 		super();
 		this.distance = distance;
+	}
+
+	translate(): LocalisedText {
+		return {
+			ca: `enemics a ${this.distance} passos`,
+			es: `enemigos a ${this.distance} pasos`,
+			en: `enemies at ${this.distance} steps`
+		};
 	}
 }
