@@ -4,6 +4,7 @@ export type EventType =
 	| 'attacking'
 	| 'receivingAttack'
 	| 'afterDefending'
+	| 'afterReceivedAttackResolved'
 	| 'enemyDefeated'
 	| 'payingCapability'
 	| 'acquired'
@@ -32,6 +33,14 @@ export const events: Record<EventType, Event> = {
 	receivingAttack: new Event({
 		type: 'receivingAttack',
 		name: { ca: 'En rebre un atac', es: 'Al recibir un ataque', en: 'When attacked' }
+	}),
+	afterReceivedAttackResolved: new Event({
+		type: 'afterReceivedAttackResolved',
+		name: {
+			ca: 'Després de resoldre un atac rebut',
+			es: 'Tras resolver un ataque recibido',
+			en: 'After resolving a received attack'
+		}
 	}),
 	afterDefending: new Event({
 		type: 'afterDefending',
