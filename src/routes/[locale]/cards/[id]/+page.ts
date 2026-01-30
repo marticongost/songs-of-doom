@@ -1,4 +1,4 @@
-import { entities } from '$lib/catalog';
+import { entities } from '$lib/catalog/entities';
 import { error } from '@sveltejs/kit';
 import { translate, type Locale } from '$lib/localisation';
 

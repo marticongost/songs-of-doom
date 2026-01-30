@@ -1,9 +1,3 @@
-import type { Creature } from './models/creature';
-import { Entity } from './models/entity';
-import type { Item } from './models/inventory';
-import type { Skill } from './models/skill';
-import type { Trait } from './models/trait';
-
 export interface EntryMetadata<T = unknown> {
 	id: string;
 	path: Array<string>;
@@ -84,18 +78,3 @@ const getEntryPathFromFileName = (fileName: string): Array<string> => {
 
 	return parts.slice(2); // Remove the initial 'data' and category folder
 };
-
-export const entities = new Catalog<Entity>(
-	import.meta.glob<Trait | Skill>(`./data/archetypes/**/*.ts`, {
-		eager: true,
-		import: 'default'
-	}),
-	import.meta.glob<Item>(`./data/items/**/*.ts`, {
-		eager: true,
-		import: 'default'
-	}),
-	import.meta.glob<Creature>(`./data/creatures/**/*.ts`, {
-		eager: true,
-		import: 'default'
-	})
-);

@@ -1,4 +1,4 @@
-import { entities } from '$lib/catalog';
+import { entities } from '$lib/catalog/entities';
 import type { Entity } from '$lib/catalog/models/entity';
 import { translate, type Locale } from '$lib/localisation';
 
