@@ -1,6 +1,7 @@
 import type { LocalisedText } from '$lib/localisation';
 
 export type EventType =
+	| 'beforeEnemyEngagesWithSelf'
 	| 'attacking'
 	| 'receivingAttack'
 	| 'afterDefending'
@@ -26,6 +27,14 @@ export class Event {
 }
 
 export const events: Record<EventType, Event> = {
+	beforeEnemyEngagesWithSelf: new Event({
+		type: 'beforeEnemyEngagesWithSelf',
+		name: {
+			ca: 'Abans de ser enfrontat per un enemic',
+			es: 'Antes de ser enfrentado por un enemigo',
+			en: 'Before being engaged by an enemy'
+		}
+	}),
 	attacking: new Event({
 		type: 'attacking',
 		name: { ca: 'En atacar', es: 'Al atacar', en: 'When attacking' }
