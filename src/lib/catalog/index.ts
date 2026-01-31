@@ -1,30 +1,38 @@
-export interface EntryMetadata<T = unknown> {
+import type { Entity } from './models/entity';
+
+export interface EntryMetadata {
 	id: string;
+	variantId: string;
 	path: Array<string>;
-	catalog: Catalog<T>;
+	catalog: EntityCatalog;
 }
 
 const metadataCache = new WeakMap<object, EntryMetadata>();
 
-export class Catalog<T> {
-	private readonly entries: Record<string, T>;
+export class EntityCatalog {
+	private readonly entries: Record<string, Entity>;
 
-	constructor(...entrySets: Array<Record<string, T>>) {
+	constructor(...entrySets: Array<Record<string, Entity>>) {
 		this.entries = {};
 		for (const entrySet of entrySets) {
 			Object.entries(entrySet).forEach(([key, entry]) => {
-				const metadata = {
-					id: getEntryIdFromFileName(key),
-					path: getEntryPathFromFileName(key),
-					catalog: this
-				};
-				metadataCache.set(entry as object, metadata);
-				this.entries[metadata.id] = entry;
+				const id = getEntryIdFromFileName(key);
+				const path = getEntryPathFromFileName(key);
+				for (const variant of entry.variants) {
+					const variantMetadata = {
+						id,
+						variantId: entry.variants.length > 1 ? `${id}-${variant.level}` : id,
+						path: path,
+						catalog: this
+					};
+					metadataCache.set(variant as object, variantMetadata);
+					this.entries[variantMetadata.variantId] = variant;
+				}
 			});
 		}
 	}
 
-	require(id: string): T {
+	require(id: string): Entity {
 		const entry = this.entries[id];
 		if (!entry) {
 			throw new Error(`Catalog entry '${id}' not found`);
@@ -32,7 +40,7 @@ export class Catalog<T> {
 		return entry;
 	}
 
-	get(id: string): T | undefined {
+	get(id: string): Entity | undefined {
 		return this.entries[id];
 	}
 
@@ -40,17 +48,17 @@ export class Catalog<T> {
 		return id in this.entries;
 	}
 
-	all(): Array<T> {
+	all(): Array<Entity> {
 		return Object.values(this.entries);
 	}
 }
 
-export const getEntryMetadata = <T>(entry: T): EntryMetadata<T> => {
+export const getEntryMetadata = (entry: Entity): EntryMetadata => {
 	const metadata = metadataCache.get(entry as object);
 	if (!metadata) {
-		throw new Error('No metadata found for the given entry');
+		throw new Error(`No metadata found for entry '${entry.title.en}'`);
 	}
-	return metadata as EntryMetadata<T>;
+	return metadata as EntryMetadata;
 };
 
 const getEntryIdFromFileName = (fileName: string): string => {

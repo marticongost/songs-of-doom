@@ -6,7 +6,7 @@ import { Focuses, type FocusesProps } from './focus';
 import { type Property } from './properties';
 import { Trait } from './trait';
 
-export interface SkillProps extends EntityProps {
+export interface SkillProps extends EntityProps<Skill> {
 	discardReward?: Focuses | FocusesProps;
 }
 

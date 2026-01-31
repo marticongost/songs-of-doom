@@ -2,10 +2,9 @@ import type { Creature } from './models/creature';
 import type { Item } from './models/inventory';
 import type { Skill } from './models/skill';
 import type { Trait } from './models/trait';
-import { Entity } from './models/entity';
-import { Catalog } from '.';
+import { EntityCatalog } from '.';
 
-export const entities = new Catalog<Entity>(
+export const entities = new EntityCatalog(
 	import.meta.glob<Trait | Skill>(`./data/archetypes/**/*.ts`, {
 		eager: true,
 		import: 'default'

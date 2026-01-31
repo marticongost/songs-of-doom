@@ -4,7 +4,7 @@ import type { Property } from '../properties';
 import type { Trait } from '../trait';
 import { slots, type Slot, type SlotType } from './slots';
 
-export interface ItemProps extends EntityProps {
+export interface ItemProps extends EntityProps<Item> {
 	slot: Slot | SlotType;
 }
 

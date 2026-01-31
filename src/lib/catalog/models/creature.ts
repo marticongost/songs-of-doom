@@ -7,7 +7,7 @@ import type { Trait } from './trait';
 export type CreatureStatType = AttributeType | 'health';
 
 // TODO: Hostility
-export interface CreatureProps extends EntityProps {
+export interface CreatureProps extends EntityProps<Creature> {
 	stats: Record<CreatureStatType, number>;
 }
 
