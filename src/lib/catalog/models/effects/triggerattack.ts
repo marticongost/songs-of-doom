@@ -1,5 +1,7 @@
 import { Effect } from './effect';
 
+export type TriggerAttackCard = 'any' | 'this';
+
 /**
  * Properties for creating a TriggerAttackEffect.
  */
@@ -9,6 +11,11 @@ export interface TriggerAttackEffectProps {
 	 * These modifiers can alter damage, add properties, or change other aspects of the attack.
 	 */
 	modifiers?: Array<Effect>;
+
+	/**
+	 * Specifies which cards are eligible for the triggered attack action.
+	 */
+	card?: TriggerAttackCard;
 }
 
 /**
@@ -24,8 +31,14 @@ export class TriggerAttackEffect extends Effect {
 	 */
 	readonly modifiers: Array<Effect>;
 
-	constructor({ modifiers }: TriggerAttackEffectProps = {}) {
+	/**
+	 * Specifies which cards are eligible for the triggered attack action.
+	 */
+	readonly card: TriggerAttackCard;
+
+	constructor({ modifiers, card }: TriggerAttackEffectProps = {}) {
 		super();
 		this.modifiers = modifiers ?? [];
+		this.card = card ?? 'any';
 	}
 }
