@@ -1,5 +1,5 @@
 import { Action } from '$lib/catalog/models/action';
-import { fullyRechargeOnChapterStart } from '$lib/catalog/models/common';
+import { fullyRechargeOnChapterStart, shootBeforeEngaged } from '$lib/catalog/models/common';
 import { AttackEffect } from '$lib/catalog/models/effects';
 import { plus } from '$lib/catalog/models/expressions';
 import { Item } from '$lib/catalog/models/inventory';
@@ -19,6 +19,7 @@ export default new Item({
 	maxCharges: 3,
 	capabilities: [
 		fullyRechargeOnChapterStart,
+		shootBeforeEngaged,
 		new Action({
 			cost: { agility: 1, charges: 1 },
 			effects: [
