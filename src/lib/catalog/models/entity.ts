@@ -1,8 +1,9 @@
 import type { LocalisedText } from '$lib/localisation';
 import { getEntryMetadata } from '..';
 import type { Capability } from './capability';
+import type { EntityType } from './properties/entitytypes';
 import type { Property } from './properties';
-import type { Trait } from './trait';
+import type { Archetype } from './archetype';
 
 export interface EntityProps<T> {
 	title: LocalisedText;
@@ -26,8 +27,6 @@ export interface EntityProps<T> {
 	variants?: Array<T>;
 }
 
-export type EntityType = 'archetype' | 'trait' | 'skill' | 'ally' | 'item' | 'creature';
-
 export abstract class Entity {
 	readonly title: LocalisedText;
 	readonly description?: LocalisedText;
@@ -50,7 +49,7 @@ export abstract class Entity {
 	readonly variants: Array<this>;
 
 	abstract readonly type: EntityType;
-	abstract readonly archetype: Trait | undefined;
+	abstract readonly archetype: Archetype | undefined;
 
 	constructor({
 		title,
@@ -82,16 +81,8 @@ export abstract class Entity {
 		return getEntryMetadata(this).variantId;
 	}
 
-	get isArchetype(): boolean {
-		return false;
-	}
-
 	get properties(): Array<Property> {
-		return [...this.getImplicitProperties(), ...this.explicitProperties];
-	}
-
-	protected getImplicitProperties(): Array<Property> {
-		return [];
+		return [this.type, ...this.explicitProperties];
 	}
 
 	/**

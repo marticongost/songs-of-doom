@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Archetype } from '$lib/catalog/models/archetype';
 	import { Creature } from '$lib/catalog/models/creature';
 	import type { Entity } from '$lib/catalog/models/entity';
 	import { Item } from '$lib/catalog/models/inventory';
@@ -27,7 +28,7 @@
 
 	const { entity, linked = true, ...rest }: Props = $props();
 
-	const archetype = $derived(entity.isArchetype ? entity : entity.archetype);
+	const archetype = $derived(entity instanceof Archetype ? entity : entity.archetype);
 	const discardReward = $derived(entity instanceof Skill ? entity.discardReward : undefined);
 </script>
 
@@ -35,7 +36,7 @@
 	this={linked ? 'a' : 'div'}
 	href={linked ? `/${getLocale()}/cards/${entity.variantId}` : undefined}
 	{...standardAttributes(rest, 'card')}
-	data-type={entity.type}
+	data-type={entity.type.id}
 >
 	<div class="header">
 		{#if archetype}

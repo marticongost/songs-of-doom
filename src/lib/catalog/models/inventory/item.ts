@@ -1,7 +1,6 @@
-import item from '$lib/catalog/data/properties/item';
-import { Entity, type EntityProps, type EntityType } from '../entity';
-import type { Property } from '../properties';
-import type { Trait } from '../trait';
+import type { Archetype } from '../archetype';
+import { Entity, type EntityProps } from '../entity';
+import { item, type EntityType } from '../properties';
 import { slots, type Slot, type SlotType } from './slots';
 
 export interface ItemProps extends EntityProps<Item> {
@@ -10,7 +9,9 @@ export interface ItemProps extends EntityProps<Item> {
 
 export class Item extends Entity {
 	readonly slot: Slot;
-	readonly archetype: Trait | undefined = undefined;
+	readonly archetype: Archetype | undefined = undefined;
+
+	override readonly type: EntityType = item;
 
 	constructor({ title, slot, properties, capabilities, maxCharges, goldCost }: ItemProps) {
 		super({
@@ -22,13 +23,5 @@ export class Item extends Entity {
 			goldCost: goldCost ?? 0
 		});
 		this.slot = typeof slot === 'string' ? slots[slot] : slot;
-	}
-
-	override get type(): EntityType {
-		return 'item';
-	}
-
-	override getImplicitProperties(): Array<Property> {
-		return [item];
 	}
 }

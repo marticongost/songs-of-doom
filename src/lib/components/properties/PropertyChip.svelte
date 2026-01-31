@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CardType, type Property } from '$lib/catalog/models/properties';
+	import { EntityType, type Property } from '$lib/catalog/models/properties';
 	import {
 		ParametricRuleInstance,
 		ScalarRule,
@@ -18,7 +18,7 @@
 
 <span
 	{...standardAttributes(attributes, 'property-chip')}
-	class:card-type={property instanceof CardType}
+	class:type={property instanceof EntityType}
 	class:rule={property instanceof Rule}
 	><!--
 	--><Text
@@ -38,7 +38,7 @@
 		white-space: nowrap;
 		font-style: italic;
 	}
-	.card-type {
+	.type {
 		font-weight: bold;
 	}
 	.rule {

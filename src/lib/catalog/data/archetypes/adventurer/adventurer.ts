@@ -1,12 +1,12 @@
 import { Action } from '$lib/catalog/models/action';
+import { Archetype } from '$lib/catalog/models/archetype';
 import { AttackEffect, DefendEffect } from '$lib/catalog/models/effects';
 import { minus } from '$lib/catalog/models/expressions';
 import { Opportunity } from '$lib/catalog/models/reaction';
 import { agility, strength } from '$lib/catalog/models/stats';
-import { Trait } from '$lib/catalog/models/trait';
 import standard from '../../properties/standard';
 
-export default new Trait({
+export default new Archetype({
 	title: {
 		ca: 'Aventurer',
 		es: 'Aventurero',

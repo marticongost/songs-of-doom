@@ -16,7 +16,7 @@
 
 <a
 	{...standardAttributes(attributes, 'card-button')}
-	data-type={entity.type}
+	data-type={entity.type.id}
 	href={resolve('/[locale]/cards/[id]', { locale: getLocale(), id: entity.variantId })}
 >
 	<div class="title"><Text {...entity.title} /></div>

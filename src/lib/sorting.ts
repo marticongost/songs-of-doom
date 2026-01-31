@@ -1,5 +1,4 @@
 import type { Entity } from '$lib/catalog/models/entity';
-import { CardType } from '$lib/catalog/models/properties/cardtype';
 import { requireLocalisedField, type Locale, type LocalisedText } from '$lib/localisation';
 
 export type SortCriteriaType = 'alpha' | 'type' | 'xp-asc' | 'xp-desc' | 'gold-asc' | 'gold-desc';
@@ -35,15 +34,11 @@ function compareByTitle(
 	return aTitle.localeCompare(bTitle, locale);
 }
 
-class CardTypeSort extends SortCriteria {
+class EntityTypeSort extends SortCriteria {
 	sort(entities: Array<Entity>, locale: Locale): Array<Entity> {
-		return entities
-			.filter((e) => e.properties.some((p) => p instanceof CardType))
-			.sort((a, b) => {
-				const aType = a.properties.find((p) => p instanceof CardType)!;
-				const bType = b.properties.find((p) => p instanceof CardType)!;
-				return compareByTitle(aType, bType, locale) || compareByTitle(a, b, locale);
-			});
+		return entities.sort((a, b) => {
+			return compareByTitle(a.type, b.type, locale) || compareByTitle(a, b, locale);
+		});
 	}
 }
 
@@ -75,7 +70,7 @@ class NumericCostSort extends SortCriteria {
 
 export const sortCriteria: Record<SortCriteriaType, SortCriteria> = {
 	alpha: new AlphabeticalSort({ ca: 'Alfabètic', es: 'Alfabético', en: 'Alphabetical' }),
-	type: new CardTypeSort({ ca: 'Tipus', es: 'Tipo', en: 'Type' }),
+	type: new EntityTypeSort({ ca: 'Tipus', es: 'Tipo', en: 'Type' }),
 	'xp-asc': new NumericCostSort(
 		{ ca: 'Experiència (ascendent)', es: 'Experiencia (ascendente)', en: 'Experience (ascending)' },
 		'xpCost',

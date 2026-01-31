@@ -1,8 +1,7 @@
-import creature from '../data/properties/creature';
-import { Entity, type EntityProps, type EntityType } from './entity';
-import type { Property } from './properties';
+import { creature, type EntityType } from '../models/properties/';
+import type { Archetype } from './archetype';
+import { Entity, type EntityProps } from './entity';
 import type { AttributeType } from './stats';
-import type { Trait } from './trait';
 
 export type CreatureStatType = AttributeType | 'health';
 
@@ -12,16 +11,12 @@ export interface CreatureProps extends EntityProps<Creature> {
 }
 
 export class Creature extends Entity {
-	override readonly type: EntityType = 'creature';
-	override readonly archetype: Trait | undefined = undefined;
+	override readonly type: EntityType = creature;
+	override readonly archetype: Archetype | undefined = undefined;
 	readonly stats: Record<CreatureStatType, number>;
 
 	constructor({ stats, ...baseProps }: CreatureProps) {
 		super(baseProps);
 		this.stats = stats;
-	}
-
-	protected override getImplicitProperties(): Array<Property> {
-		return [creature, ...super.getImplicitProperties()];
 	}
 }

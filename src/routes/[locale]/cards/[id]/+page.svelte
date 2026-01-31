@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { Archetype } from '$lib/catalog/models/archetype';
 	import { Entity } from '$lib/catalog/models/entity';
-	import { Trait } from '$lib/catalog/models/trait';
+	import { entityTypes } from '$lib/catalog/models/properties';
 	import Card from '$lib/components/Card.svelte';
 	import CardButton from '$lib/components/CardButton.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
@@ -33,23 +34,23 @@
 				data.entity.archetype
 			])}
 		{/if}
-		{#if data.entity.isArchetype}
-			{@const archetype = data.entity as Trait}
+		{#if data.entity instanceof Archetype}
+			{@const archetype = data.entity as Archetype}
 			{@render cardSet(
 				{ ca: 'Subarquetips', es: 'Subarquetipo', en: 'Subarchetypes' },
-				archetype.getChildrenOfType('archetype')
+				archetype.getChildrenOfType(entityTypes.archetype)
 			)}
 			{@render cardSet(
 				{ ca: 'Trets', es: 'Rasgos', en: 'Traits' },
-				archetype.getChildrenOfType('trait')
+				archetype.getChildrenOfType(entityTypes.trait)
 			)}
 			{@render cardSet(
 				{ ca: 'Habilitats', es: 'Habilidades', en: 'Skills' },
-				archetype.getChildrenOfType('skill')
+				archetype.getChildrenOfType(entityTypes.skill)
 			)}
 			{@render cardSet(
 				{ ca: 'Aliats', es: 'Aliados', en: 'Allies' },
-				archetype.getChildrenOfType('ally')
+				archetype.getChildrenOfType(entityTypes.ally)
 			)}
 		{/if}
 		{#if data.entity.variants.length > 1}

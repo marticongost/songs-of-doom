@@ -1,8 +1,8 @@
+import { Archetype } from '$lib/catalog/models/archetype';
 import { TransformFocusEffect } from '$lib/catalog/models/effects';
 import { Opportunity } from '$lib/catalog/models/reaction';
-import { Trait } from '$lib/catalog/models/trait';
 
-export default new Trait({
+export default new Archetype({
 	title: {
 		ca: 'Guerrer',
 		es: 'Guerrero',
