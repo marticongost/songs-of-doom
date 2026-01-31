@@ -1,6 +1,8 @@
 import { BooleanExpression } from './boolean-expression';
 import type { Comparison } from './comparison';
 import type { Property } from '../properties';
+import type { LocalisedText } from '$lib/localisation';
+import { Expression } from './expression';
 
 /**
  * A type union representing all possible boolean expressions.
@@ -60,6 +62,22 @@ export class Not extends BooleanExpression {
 	constructor(operand: BooleanExpressionType) {
 		super();
 		this.operand = operand;
+	}
+
+	translate(): LocalisedText | undefined {
+		const text = this.operand instanceof Expression ? this.operand.translate() : undefined;
+		if (text) {
+			const negatedText: LocalisedText = {};
+			for (const [locale, value] of Object.entries(text)) {
+				if (locale === 'ca' || locale === 'es') {
+					negatedText[locale] = `No ${value.toLowerCase()}`;
+				} else if (locale === 'en') {
+					negatedText[locale] = `Not ${value.toLowerCase()}`;
+				}
+			}
+			return negatedText;
+		}
+		return undefined;
 	}
 }
 
