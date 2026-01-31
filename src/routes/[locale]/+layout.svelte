@@ -23,7 +23,14 @@
 </header>
 
 <main>
-	<h1 class="page-title">{page.data.title}</h1>
+	<div class="page-heading">
+		{#if page.data.heading}
+			{@const Heading = page.data.heading}
+			<Heading />
+		{:else}
+			<h1 class="page-title">{page.data.title}</h1>
+		{/if}
+	</div>
 	{@render children()}
 </main>
 
@@ -55,10 +62,15 @@
 		background-color: var(--page-background-color);
 	}
 
-	.page-title {
+	.page-heading {
+		@include rz.row(md);
+		align-items: center;
+		margin-bottom: rz.size(lg);
+	}
+
+	:global(.page-title) {
 		font-family: var(--heading-font);
 		font-size: 3rem;
-		margin-bottom: rz.size(lg);
 		color: var(--text-heading-color);
 	}
 </style>

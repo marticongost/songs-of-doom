@@ -1,6 +1,7 @@
 import { entities } from '$lib/catalog/entities';
 import { error } from '@sveltejs/kit';
 import { translate, type Locale } from '$lib/localisation';
+import CardDetailHeading from './CardDetailHeading.svelte';
 
 export const load = ({ params }: { params: { id: string; locale: Locale } }) => {
 	const entity = entities.get(params.id);
@@ -9,6 +10,7 @@ export const load = ({ params }: { params: { id: string; locale: Locale } }) => 
 	}
 	return {
 		title: translate(entity.title, params.locale),
+		heading: CardDetailHeading,
 		entity
 	};
 };
