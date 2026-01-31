@@ -10,7 +10,7 @@ body {
 	--heading-font: 'Amarante', serif;
 	--text-font: 'Rosario', sans-serif;
 	font-family: var(--text-font);
-	background-color: black;
+	background-color: var(--page-background-color);
 	color: white;
 	@include rz.define-grid;
 

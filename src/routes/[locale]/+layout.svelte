@@ -59,7 +59,6 @@
 	main {
 		@include rz.hpadding(var(--page-hpadding));
 		padding-top: rz.size(md);
-		background-color: var(--page-background-color);
 	}
 
 	.page-heading {
