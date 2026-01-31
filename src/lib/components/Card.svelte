@@ -13,6 +13,7 @@
 	import { getLocale } from '$lib/context/locale';
 	import CapabilityCostList from './capabilities/CapabilityCostList.svelte';
 	import ChargesChip from './capabilities/ChargesChip.svelte';
+	import CardLevel from './CardLevel.svelte';
 	import CreatureStats from './CreatureStats.svelte';
 	import ExperienceChip from './ExperienceChip.svelte';
 	import GoldChip from './GoldChip.svelte';
@@ -32,7 +33,7 @@
 
 <svelte:element
 	this={linked ? 'a' : 'div'}
-	href={linked ? `/${getLocale()}/cards/${entity.id}` : undefined}
+	href={linked ? `/${getLocale()}/cards/${entity.variantId}` : undefined}
 	{...standardAttributes(rest, 'card')}
 	data-type={entity.type}
 >
@@ -43,6 +44,7 @@
 			</div>
 		{/if}
 		<div class="title"><Text {...entity.title} /></div>
+		<CardLevel {entity} />
 		<div class="acquisition">
 			{#if entity.archetype}
 				<div class="required-archetype">

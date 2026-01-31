@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { Entity } from '$lib/catalog/models/entity';
+	import { resolve } from '$app/paths';
 	import { getLocale } from '$lib/context/locale';
+	import CardLevel from './CardLevel.svelte';
 	import ExperienceChip from './ExperienceChip.svelte';
 	import Text from './localisation/Text.svelte';
 	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
@@ -15,9 +17,10 @@
 <a
 	{...standardAttributes(attributes, 'card-button')}
 	data-type={entity.type}
-	href="/{getLocale()}/cards/{entity.id}"
+	href={resolve('/[locale]/cards/[id]', { locale: getLocale(), id: entity.variantId })}
 >
 	<div class="title"><Text {...entity.title} /></div>
+	<CardLevel {entity} />
 	<ExperienceChip amount={entity.xpCost ?? 0} />
 </a>
 
