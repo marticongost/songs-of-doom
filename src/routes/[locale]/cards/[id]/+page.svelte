@@ -16,7 +16,7 @@
 			<p><Text ca="Cap." es="Nada" en="None" /></p>
 		{:else}
 			<div class="card-set-grid">
-				{#each entities as entity}
+				{#each entities as entity (entity.variantId)}
 					<CardButton {entity} />
 				{/each}
 			</div>
@@ -50,6 +50,12 @@
 			{@render cardSet(
 				{ ca: 'Aliats', es: 'Aliados', en: 'Allies' },
 				archetype.getChildrenOfType('ally')
+			)}
+		{/if}
+		{#if data.entity.variants.length > 1}
+			{@render cardSet(
+				{ ca: 'Altres variants', es: 'Otras variantes', en: 'Other variants' },
+				data.entity.variants.filter((e) => e.variantId !== data.entity.variantId)
 			)}
 		{/if}
 	</aside>
