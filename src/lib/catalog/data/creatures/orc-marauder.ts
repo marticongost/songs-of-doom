@@ -7,7 +7,7 @@ import {
 	DefendEffect,
 	ModifyRollEffect
 } from '$lib/catalog/models/effects';
-import { wounded } from '$lib/catalog/models/expressions';
+import { plus, wounded } from '$lib/catalog/models/expressions';
 import { Obligation } from '$lib/catalog/models/reaction';
 import { agility, strength } from '$lib/catalog/models/stats';
 
@@ -53,7 +53,7 @@ export default new Creature({
 			triggers: ['receivingAttack'],
 			effects: [
 				new DefendEffect({
-					expression: agility
+					expression: plus(agility, 2)
 				})
 			]
 		})
