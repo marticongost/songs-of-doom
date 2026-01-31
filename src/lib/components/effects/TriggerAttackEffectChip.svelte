@@ -18,7 +18,7 @@
 		es="Activar una acción Atacar"
 		en="Trigger an Attack action"
 	/>{#if effect.card === 'this'}
-		<Text ca="d'aquesta carta" es="de esta carta" en="of this card" />
+		<Text ca=" d'aquesta carta" es=" de esta carta" en=" of this card" />
 	{/if}<!--
 	-->{#if effect.modifiers.length}
 		<Parameters><EffectList effects={effect.modifiers} /></Parameters>{/if}<!--
