@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { getLocale } from '$lib/context/locale';
 	import type { PathMatch, Section } from '$lib/navigation';
 	import InlineSvg from './InlineSvg.svelte';
@@ -32,7 +33,7 @@
 		{#if includeRoot && parent === root}
 			{@render sectionEntry(root, level + 1, false)}
 		{/if}
-		{#each parent.children as section}
+		{#each parent.children as section (section.path)}
 			{@render sectionEntry(section, level + 1, true)}
 		{/each}
 	</ul>
@@ -42,7 +43,7 @@
 	{@const match = getMatch(section)}
 	<li data-match={match} data-level={level} data-path={section.path}>
 		<a
-			href="/{locale}{section.path}"
+			href={resolve(('/[locale]' + section.path) as '/[locale]', { locale })}
 			data-match={match}
 			data-level={level}
 			data-path={section.path}
@@ -72,26 +73,29 @@
 	a[data-level='1'] {
 		@include rz.column(sm);
 		@include rz.padding(md);
+		color: var(--text-color);
 
 		:global(svg) {
+			opacity: 0.3;
 			height: 3em;
-			color: var(--text-muted-color);
 		}
 
 		.label {
+			opacity: 0.5;
 			font-weight: bold;
 			font-family: var(--heading-font);
 			font-size: 1.5em;
-			color: var(--text-subtle-color);
 		}
 
 		&[data-match='selected'],
 		&[data-match='ancestor']:not([data-path='/']) {
 			:global(svg) {
-				color: var(--text-highlight);
+				color: var(--nav-selected-icon-color);
+				opacity: 1;
 			}
 
 			.label {
+				opacity: 1;
 				color: var(--text-heading-color);
 			}
 		}

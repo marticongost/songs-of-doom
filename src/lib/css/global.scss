@@ -15,8 +15,11 @@ body {
 	@include rz.define-grid;
 
 	// === Palete ===
+	$palette-black: #000;
+	$palette-white: #fff;
 	$palette-brown: #a17a55;
 	$palette-red: #a15555;
+	$palette-thatch: #bd9898;
 	$palette-green: #55a155;
 	$palette-yellow: #a1a155;
 	$palette-worn-white: #e9e0cd;
@@ -31,6 +34,8 @@ body {
 	$palette-dark-steel: #6c7878;
 	$palette-steel: #b0baba;
 	$palette-ivory: #f0f0e0;
+	$palette-cedar: #330f1b;
+	$palette-cocoa-brown: rgb(21, 15, 18);
 
 	// === Color assignments ===
 
@@ -73,13 +78,18 @@ body {
 	--card-type-creature-main-background: linear-gradient(45deg, rgb(152 80 63), #1d0f02);
 	--card-type-creature-secondary-background: linear-gradient(45deg, rgb(63 38 28), #090909);
 
+	// Page
+	--header-background-color: #{$palette-cedar};
+	--page-background-color: #{$palette-cocoa-brown};
+	--nav-selected-icon-color: #{$palette-thatch};
+
 	// Panels
 	--panel-background-color: #{$palette-somber};
 	--panel-border: 2px solid #{$palette-ash};
 	--panel-separator: 1px solid #{$palette-ash};
 
 	// Text
-	--text-color: white;
+	--text-color: $palette-white;
 	--text-subtle-color: #888;
 	--text-muted-color: #{$palette-cinder};
 	--text-highlight: #{$palette-steel};
