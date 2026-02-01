@@ -21,15 +21,22 @@ See <RuleLink slug="weapon" /> for details.
 		/** The slug of the rule to link to */
 		slug: string;
 		label?: string;
+		transform?: 'lowercase';
 	}
 
-	const { slug, label }: Props = $props();
+	const { slug, label, transform }: Props = $props();
 	const locale = getLocale();
 	const entry = $derived(getRuleEntry(slug));
-	const linkLabel = $derived(label ?? (entry ? translate(entry.title, locale) : slug));
+	const getLinkLabel = $derived(() => {
+		let linkLabel = label ?? (entry ? translate(entry.title, locale) : slug);
+		if (transform === 'lowercase') {
+			linkLabel = linkLabel.toLocaleLowerCase();
+		}
+		return linkLabel;
+	});
 </script>
 
-<a href="#{slug}" class="rule-link">{linkLabel}</a>
+<a href="#{slug}" class="rule-link">{getLinkLabel()}</a>
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
