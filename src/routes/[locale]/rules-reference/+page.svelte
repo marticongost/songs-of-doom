@@ -42,20 +42,34 @@
 	});
 </script>
 
-<RuleSearch entries={data.entries} {bodyTexts} onFilter={handleFilter} />
+<div class="rules-reference">
+	<RuleSearch entries={data.entries} {bodyTexts} onFilter={handleFilter} />
 
-<div class="rules-container" bind:this={container}>
-	{#each visibleEntries as entry (entry.slug)}
-		<RuleEntryComponent {entry} />
-	{/each}
+	<div class="rules-container" bind:this={container}>
+		{#each visibleEntries as entry (entry.slug)}
+			<RuleEntryComponent {entry} />
+		{/each}
 
-	{#if visibleEntries.length === 0}
-		<p class="no-results">
-			{#if data.entries.length === 0}
-				<!-- No entries at all -->
-			{:else}
-				<!-- Search returned no results -->
-			{/if}
-		</p>
-	{/if}
+		{#if visibleEntries.length === 0}
+			<p class="no-results">
+				{#if data.entries.length === 0}
+					<!-- No entries at all -->
+				{:else}
+					<!-- Search returned no results -->
+				{/if}
+			</p>
+		{/if}
+	</div>
 </div>
+
+<style lang="scss">
+	@use '@reguitzell/styles' as rz;
+
+	.rules-reference {
+		width: 50em;
+	}
+
+	.rules-container {
+		@include rz.column(md);
+	}
+</style>

@@ -46,12 +46,9 @@ Renders a single rule entry with a heading anchor and localised SVX body.
 	@use '@reguitzell/styles' as rz;
 
 	.rule-entry {
-		scroll-margin-top: 4rem;
-		padding-block: 1rem;
-
-		&:not(:last-child) {
-			border-bottom: var(--panel-separator);
-		}
+		scroll-margin-top: rz.size(xl);
+		background-color: var(--panel-background-color);
+		@include rz.padding(md);
 
 		:global(p) {
 			@include rz.vmargin(sm);
