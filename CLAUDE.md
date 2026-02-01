@@ -60,9 +60,29 @@ Game effects and expressions follow a class-based polymorphic pattern:
 
 When adding new effects or expressions, use the `/add-effect` or `/add-expression` skills.
 
+### Rules Reference System
+
+The rules reference (`/[locale]/rules-reference/`) provides an alphabetical, searchable glossary of game concepts. It uses mdsvex (`.svx` files) for localised content.
+
+- **Module**: [src/lib/rules-reference/](src/lib/rules-reference/) — types, SVX loading via `import.meta.glob`, model-source mapping, index and sorting
+- **SVX content**: `src/lib/rules-reference/entries/{slug}/{locale}.svx` — one directory per concept, one file per locale
+- **Components**: `src/lib/components/rules-reference/` — `RuleEntry`, `RuleLink`, `RuleSearch`
+- **Route**: `src/routes/[locale]/rules-reference/`
+
+**Two types of entries:**
+
+1. **Model-sourced**: Title comes from an existing model's `title`/`name` field (Stat, EntityType, Focus, Rule). The [model-sources.ts](src/lib/rules-reference/model-sources.ts) module auto-derives these from the `stats`, `entityTypes`, and `focuses` records, and auto-discovers `Rule` instances via `import.meta.glob` with `instanceof Rule` filtering (excludes Keywords).
+2. **Ad-hoc**: Title comes from SVX front matter. Used for game concepts without a dedicated model class.
+
+**Adding a new rules entry:**
+
+1. Create `src/lib/rules-reference/entries/{slug}/` with `ca.svx`, `es.svx`, `en.svx`
+2. For ad-hoc entries, include `title` in front matter; for model-sourced entries, omit it (title auto-resolved)
+3. Cross-link via markdown `[Title](#slug)` or `<RuleLink slug="..." />` (auto-resolves localised title)
+
 ### Localization
 
-Multi-language content uses `LocalisedText = Record<'ca' | 'es' | 'en', string>`:
+Multi-language content uses `LocalisedText = Partial<Record<'ca' | 'es' | 'en', string>>`:
 
 ```typescript
 title: {
@@ -74,8 +94,9 @@ title: {
 
 Use helper functions from [src/lib/localisation.ts](src/lib/localisation.ts):
 
-- `requireLocalisedField()` for required fields
-- `getLocalisedField()` for optional fields
+- `translate()` for simple text lookup from a `LocalisedText` object
+- `requireLocalisedField()` for required fields on an object
+- `getLocalisedField()` for optional fields on an object
 
 Locale is selected via an URL component, defaulting to Catalan (`ca`) via a redirection
 at the root.
@@ -151,5 +172,5 @@ This project includes custom Claude Code skills:
 - **No extensions in imports**: Import TypeScript as `./file` not `./file.ts`
 - **Strict TypeScript**: All strict flags enabled, no implicit any
 - **Import order**: External deps, then $lib imports, then relative imports
-- **File organization**: Components in `src/lib/components/{category}/`, models in `src/lib/catalog/models/{category}/`
+- **File organization**: Components in `src/lib/components/{category}/`, models in `src/lib/catalog/models/{category}/`, rules reference content in `src/lib/rules-reference/entries/{slug}/`
 - **Formatting**: Run `npm run format` after editing files to ensure consistent formatting via Prettier

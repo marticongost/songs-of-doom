@@ -97,6 +97,14 @@ export const siteTree = new Section({
 				es: 'Cartas',
 				en: 'Cards'
 			}
+		},
+		{
+			name: 'rules-reference',
+			title: {
+				ca: 'Regles',
+				es: 'Reglas',
+				en: 'Rules'
+			}
 		}
 	]
 });

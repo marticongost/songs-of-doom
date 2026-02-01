@@ -95,6 +95,10 @@ body {
 	--text-highlight: #{$palette-steel};
 	--text-heading-color: #{$palette-cloud};
 	--positive-color: #{$palette-green};
+
+	// Links
+	--link-color: #{$palette-red};
+	--link-hover-color: #{$palette-thatch};
 }
 
 @include rz.reset-elements;

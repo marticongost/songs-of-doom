@@ -1,0 +1,4 @@
+---
+title: Capability
+---
+Each of the actions, reactions or passive rules into which a card is divided.

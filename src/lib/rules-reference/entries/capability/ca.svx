@@ -1,0 +1,4 @@
+---
+title: Capacitat
+---
+Cada una de les accions, reaccions o regles passives en que es divideix una carta.
