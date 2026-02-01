@@ -12,5 +12,5 @@ situacions del joc, durant i fora del seu torn.
 Segons la seva obligatorietat, les reaccions es classifiquen en dos grups:
 - <RuleLink slug="opportunity" label="Oportunitats"/>: s'executen només si el seu
    propietari ho vol
-- <RuleLink slug="obligation" label="Obligation"/>: s'executen sempre, de forma
+- <RuleLink slug="obligation" label="Obligacions"/>: s'executen sempre, de forma
    obligatòria
