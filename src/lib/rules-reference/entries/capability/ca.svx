@@ -1,4 +1,14 @@
 ---
 title: Capacitat
 ---
+<script type="scss">
+    import RuleLink from "$lib/components/rules-reference/RuleLink.svelte"
+</script>
+
 Cada una de les accions, reaccions o regles passives en que es divideix una carta.
+
+Es divideixen en els següents tipus:
+
+- <RuleLink slug="action" label="Accions" />
+- <RuleLink slug="reaction" label="Reaccions"/>
+- <RuleLink slug="constant" label="Constants"/>

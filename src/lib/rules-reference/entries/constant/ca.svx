@@ -1,0 +1,10 @@
+---
+title: Constant
+---
+<script type="scss">
+    import RuleLink from "$lib/components/rules-reference/RuleLink.svelte"
+</script>
+
+Una <RuleLink slug="capability" transform="lowercase"/> que descriu un seguit d'efectes
+que s'apliquen en tot moment, de forma passiva, sense necessitat que un jugador els
+activi expressament.
