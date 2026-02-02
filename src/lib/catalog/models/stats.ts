@@ -49,12 +49,17 @@ export const will = new Attribute('will', { en: 'Will', es: 'Voluntad', ca: 'Vol
 export const health = new Indicator('health', { en: 'Health', es: 'Salud', ca: 'Salut' });
 export const sanity = new Indicator('sanity', { en: 'Sanity', es: 'Cordura', ca: 'Seny' });
 
-export const stats: Record<StatType, Stat> = {
+export const attributes: Record<AttributeType, Attribute> = {
 	agility,
 	strength,
 	intelligence,
 	charisma,
-	will,
+	will
+};
+
+export const indicators: Record<IndicatorType, Indicator> = {
 	health,
 	sanity
 };
+
+export const stats: Record<StatType, Stat> = { ...attributes, ...indicators };
