@@ -16,6 +16,7 @@ See <RuleLink slug="weapon" /> for details.
 	import { getLocale } from '$lib/context/locale';
 	import { getRuleEntry } from '$lib/rules-reference';
 	import { translate } from '$lib/localisation';
+	import Link from '$lib/components/Link.svelte';
 
 	interface Props {
 		/** The slug of the rule to link to */
@@ -36,17 +37,4 @@ See <RuleLink slug="weapon" /> for details.
 	});
 </script>
 
-<a href="#{slug}" class="rule-link">{getLinkLabel()}</a>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.rule-link {
-		text-decoration: underline;
-		color: var(--link-color);
-
-		&:hover {
-			color: var(--link-hover-color);
-		}
-	}
-</style>
+<Link href="#{slug}">{getLinkLabel()}</Link>
