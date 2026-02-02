@@ -26,7 +26,7 @@ function buildModelSources(): Record<string, LocalisedText> {
 	// Focuses — skip attribute-based (they duplicate stats)
 	for (const [key, focus] of Object.entries(focuses)) {
 		if (!(attributeTypes as readonly string[]).includes(key)) {
-			sources[key] = focus.title;
+			sources[`${key}-focus`] = focus.title;
 		}
 	}
 

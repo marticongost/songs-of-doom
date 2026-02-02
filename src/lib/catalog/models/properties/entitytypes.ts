@@ -17,7 +17,7 @@ export const archetype = new EntityType('archetype', {
 	es: 'Arquetipo',
 	en: 'Archetype'
 });
-export const trait = new EntityType('trait', { ca: 'Treta', es: 'Rasgo', en: 'Trait' });
+export const trait = new EntityType('trait', { ca: 'Tret', es: 'Rasgo', en: 'Trait' });
 export const skill = new EntityType('skill', { ca: 'Habilitat', es: 'Habilidad', en: 'Skill' });
 export const item = new EntityType('item', { ca: 'Objecte', es: 'Objeto', en: 'Item' });
 export const creature = new EntityType('creature', {
