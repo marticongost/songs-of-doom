@@ -1,7 +1,7 @@
 ---
 title: Reacció
 ---
-<script type="scss">
+<script lang="scss">
     import RuleLink from "$lib/components/rules-reference/RuleLink.svelte"
 </script>
 
