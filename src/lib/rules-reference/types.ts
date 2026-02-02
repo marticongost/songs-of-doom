@@ -7,10 +7,10 @@ export interface SvxFrontMatter {
 	[key: string]: unknown;
 }
 
-/** A compiled mdsvex module (default export + front matter metadata) */
+/** A compiled entry module — .svx (with metadata from front matter) or .svelte (metadata optional) */
 export interface SvxModule {
 	default: Component;
-	metadata: SvxFrontMatter;
+	metadata?: SvxFrontMatter;
 }
 
 /** A fully resolved rule entry ready for rendering */

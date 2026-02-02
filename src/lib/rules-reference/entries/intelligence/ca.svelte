@@ -1,0 +1,1 @@
+<p>Una mesura de la capacitat de deducció, raonament, percepció i coneixements del personatge.</p>

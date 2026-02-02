@@ -3,11 +3,11 @@ import { locales, translate, type Locale, type LocalisedText } from '$lib/locali
 import type { RuleEntry, SvxModule } from './types';
 import { modelSources } from './model-sources';
 
-const svxModules = import.meta.glob<SvxModule>('./entries/**/*.svx', { eager: true });
+const entryModules = import.meta.glob<SvxModule>('./entries/**/*.{svx,svelte}', { eager: true });
 
 /** Extract slug and locale from a glob key like './entries/weapon/ca.svx' */
-function parseSvxPath(path: string): { slug: string; locale: Locale } | undefined {
-	const match = path.match(/^\.\/entries\/([^/]+)\/(\w+)\.svx$/);
+function parseEntryPath(path: string): { slug: string; locale: Locale } | undefined {
+	const match = path.match(/^\.\/entries\/([^/]+)\/(\w+)\.(svx|svelte)$/);
 	if (!match) return undefined;
 	const [, slug, localePart] = match;
 	if (!locales.includes(localePart as Locale)) return undefined;
@@ -15,7 +15,7 @@ function parseSvxPath(path: string): { slug: string; locale: Locale } | undefine
 }
 
 function buildIndex(): RuleEntry[] {
-	// Group SVX modules by slug
+	// Group entry modules by slug
 	const slugMap = new Map<
 		string,
 		{
@@ -23,8 +23,8 @@ function buildIndex(): RuleEntry[] {
 		}
 	>();
 
-	for (const [path, module] of Object.entries(svxModules)) {
-		const parsed = parseSvxPath(path);
+	for (const [path, module] of Object.entries(entryModules)) {
+		const parsed = parseEntryPath(path);
 		if (!parsed) continue;
 
 		if (!slugMap.has(parsed.slug)) {

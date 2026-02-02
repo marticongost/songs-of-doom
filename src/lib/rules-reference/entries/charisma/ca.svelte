@@ -1,0 +1,4 @@
+<p>
+	Un reflex de l'atractiu, la presència i la força de personalitat d'un personatge. Utilitzat per
+	negociar, persuadir, liderar o enganyar als demés.
+</p>

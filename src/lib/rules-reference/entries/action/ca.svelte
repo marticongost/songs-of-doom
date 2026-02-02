@@ -1,0 +1,13 @@
+<script module lang="ts">
+	export const metadata = { title: 'Acció' };
+</script>
+
+<script lang="ts">
+	import RuleLink from '$lib/components/rules-reference/RuleLink.svelte';
+</script>
+
+<p>
+	Una <RuleLink slug="capability" transform="lowercase" /> que descriu l'activitat principal que el jugador
+	durà a terme durant el seu torn. En circumstàncies normals, les accions són iniciades pel seu propietari,
+	de forma explícita i deliberada. Durant el seu torn, cada jugador executa una única acció.
+</p>

@@ -1,3 +1,0 @@
-Un indicador numèric que medeix la capacitat d'un personatge per resistir ferides o
-malalties. Els personatges acumulen danys quan pateixen ferides i altres afliccions
-físiques. Si el dany acumulat supera la salut del personatge, aquest és derrotat.

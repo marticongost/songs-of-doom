@@ -1,0 +1,1 @@
+<p>Reflecteix la destresa, velocitat, equilibri i reflexos del personatge.</p>

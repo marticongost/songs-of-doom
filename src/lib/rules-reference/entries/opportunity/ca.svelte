@@ -1,0 +1,14 @@
+<script module lang="ts">
+	export const metadata = { title: 'Oportunitat' };
+</script>
+
+<script lang="ts">
+	import RuleLink from '$lib/components/rules-reference/RuleLink.svelte';
+</script>
+
+<p>
+	Una <RuleLink slug="reaction" transform="lowercase" /> que s'executa de forma opcional. Quan l'esdeveniment
+	que activa la reacció es produeix, l'oportunitat només s'executa si el seu propietari així ho decideix.
+	Si l'oportunitat té un cost, només caldrà pagar-lo en cas que el jugador decideixi executar-la. Si no
+	s'executa l'oportunitat, s'ignoren tots i cada un dels seus efectes.
+</p>

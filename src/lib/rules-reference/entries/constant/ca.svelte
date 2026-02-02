@@ -1,0 +1,12 @@
+<script module lang="ts">
+	export const metadata = { title: 'Constant' };
+</script>
+
+<script lang="ts">
+	import RuleLink from '$lib/components/rules-reference/RuleLink.svelte';
+</script>
+
+<p>
+	Una <RuleLink slug="capability" transform="lowercase" /> que descriu un seguit d'efectes que s'apliquen
+	en tot moment, de forma passiva, sense necessitat que un jugador els activi expressament.
+</p>

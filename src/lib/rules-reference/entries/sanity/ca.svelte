@@ -1,0 +1,5 @@
+<p>
+	Un indicador que medeix la capacitat del personatge d'absorvir danys a la seva fortalesa mental.
+	Quan un personatge s'enfronta a situacions estressants, perilloses o terrorífiques, rep danys
+	mentals. Si el dany mental acumulat supera el seny del personatge, aquest embogeix i és derrotat.
+</p>

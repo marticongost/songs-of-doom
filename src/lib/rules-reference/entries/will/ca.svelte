@@ -1,0 +1,4 @@
+<p>
+	Capacitat del personatge per controlar la seva força de voluntat. Utilitzada per llançar
+	sortilegis i resistir afliccions.
+</p>

@@ -1,0 +1,13 @@
+<script module lang="ts">
+	export const metadata = { title: 'Obligació' };
+</script>
+
+<script lang="ts">
+	import RuleLink from '$lib/components/rules-reference/RuleLink.svelte';
+</script>
+
+<p>
+	Una <RuleLink slug="reaction" transform="lowercase" /> que s'executa de forma obligatòria. Quan l'esdeveniment
+	que activa la reacció es produeix, l'obligació ha de ser executada, fins i tot si el seu propietari
+	preferiria no fer-ho: no pot negar-s'hi. Les obligacions no tenen mai un cost d'execució.
+</p>
