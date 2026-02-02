@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { DefendEffect } from '$lib/catalog/models/effects';
 	import ExpressionChip from '$lib/components/expressions/ExpressionChip.svelte';
-	import Text from '$lib/components/localisation/Text.svelte';
 	import Parameters from '../capabilities/Parameters.svelte';
+	import InlineSvg from '../InlineSvg.svelte';
 	import PropertyList from '../properties/PropertyList.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
@@ -14,22 +14,13 @@
 </script>
 
 <span {...standardAttributes(attributes, 'defend-effect-chip')}>
-	<Text ca="Defensar" es="Defender" en="Defend" />
-	<Parameters
-		><!--
-		--><ExpressionChip expression={effect.expression} /><!--
-		--><PropertyList
-			properties={effect.properties}
-		/><!--
-	--></Parameters
-	>
+	<InlineSvg src="effects/defense.svg" />
+	<ExpressionChip expression={effect.expression} relative={true} />
+	{#if effect.properties.length}<Parameters
+			><PropertyList properties={effect.properties} /></Parameters
+		>{/if}
 </span>
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
-
-	.defend-effect-chip {
-		@include rz.row(sm);
-		display: inline-flex;
-	}
 </style>

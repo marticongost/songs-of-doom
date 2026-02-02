@@ -4,7 +4,7 @@ import { AttackEffect, DefendEffect } from '$lib/catalog/models/effects';
 import { plus } from '$lib/catalog/models/expressions';
 import { Item } from '$lib/catalog/models/inventory/item';
 import { Opportunity } from '$lib/catalog/models/reaction';
-import { agility, strength } from '$lib/catalog/models/stats';
+import { strength } from '$lib/catalog/models/stats';
 import parry from '../../properties/parry';
 import weapon from '../../properties/weapon';
 
@@ -35,12 +35,12 @@ export default new Item({
 			]
 		}),
 		new Opportunity({
-			cost: { agility: 1, charges: 1 },
+			cost: { charges: 1 },
 			triggers: ['receivingAttack'],
 			effects: [
 				new DefendEffect({
 					properties: [parry],
-					expression: plus(agility, 2)
+					expression: 2
 				})
 			]
 		})

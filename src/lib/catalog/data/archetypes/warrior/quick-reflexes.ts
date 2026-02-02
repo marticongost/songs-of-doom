@@ -1,5 +1,6 @@
 import { Constant } from '$lib/catalog/models/constant';
-import { ChangeStatsEffect } from '$lib/catalog/models/effects';
+import { ChangeStatsEffect, DefendEffect } from '$lib/catalog/models/effects';
+import { Opportunity } from '$lib/catalog/models/reaction';
 import { Trait } from '$lib/catalog/models/trait';
 
 export default new Trait({
@@ -14,6 +15,15 @@ export default new Trait({
 			effects: [
 				new ChangeStatsEffect({
 					agility: 1
+				})
+			]
+		}),
+		new Opportunity({
+			triggers: ['receivingAttack'],
+			cost: { agility: 1 },
+			effects: [
+				new DefendEffect({
+					expression: 1
 				})
 			]
 		})

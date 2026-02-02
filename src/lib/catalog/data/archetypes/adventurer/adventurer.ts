@@ -1,9 +1,7 @@
 import { Action } from '$lib/catalog/models/action';
 import { Archetype } from '$lib/catalog/models/archetype';
-import { AttackEffect, DefendEffect } from '$lib/catalog/models/effects';
-import { minus } from '$lib/catalog/models/expressions';
-import { Opportunity } from '$lib/catalog/models/reaction';
-import { agility, strength } from '$lib/catalog/models/stats';
+import { AttackEffect } from '$lib/catalog/models/effects';
+import { strength } from '$lib/catalog/models/stats';
 import standard from '../../properties/standard';
 
 export default new Archetype({
@@ -22,14 +20,6 @@ export default new Archetype({
 				new AttackEffect({
 					expression: strength,
 					damage: { 1: 1, 2: 2, 3: 3 }
-				})
-			]
-		}),
-		new Opportunity({
-			triggers: ['receivingAttack'],
-			effects: [
-				new DefendEffect({
-					expression: minus(agility, 1)
 				})
 			]
 		})

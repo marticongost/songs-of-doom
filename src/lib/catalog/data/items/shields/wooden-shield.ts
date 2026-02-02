@@ -1,9 +1,7 @@
 import { fullyRechargeOnChapterStart } from '$lib/catalog/models/common';
 import { DefendEffect } from '$lib/catalog/models/effects';
-import { plus } from '$lib/catalog/models/expressions';
 import { Item } from '$lib/catalog/models/inventory';
 import { Opportunity } from '$lib/catalog/models/reaction';
-import { agility } from '$lib/catalog/models/stats';
 import shield from '../../properties/shield';
 
 export default new Item({
@@ -19,7 +17,7 @@ export default new Item({
 			cost: { charges: 1, agility: 1 },
 			effects: [
 				new DefendEffect({
-					expression: plus(agility, 2)
+					expression: 2
 				})
 			]
 		})
