@@ -17,13 +17,14 @@ changed conventions, etc.).
 
 The following files comprise the full set of agent instructions:
 
-| File                                          | Purpose                                                                   |
-| --------------------------------------------- | ------------------------------------------------------------------------- |
-| `CLAUDE.md`                                   | Top-level project guidance: overview, commands, architecture, conventions |
-| `.claude/skills/svelte-component/SKILL.md`    | Conventions for creating/updating Svelte components                       |
-| `.claude/skills/add-effect/SKILL.md`          | Steps and conventions for adding a new game effect                        |
-| `.claude/skills/add-expression/SKILL.md`      | Steps and conventions for adding a new expression                         |
-| `.claude/skills/update-instructions/SKILL.md` | This skill (update its file list if new skills are added)                 |
+| File                                             | Purpose                                                                   |
+| ------------------------------------------------ | ------------------------------------------------------------------------- |
+| `CLAUDE.md`                                      | Top-level project guidance: overview, commands, architecture, conventions |
+| `.claude/skills/svelte-component/SKILL.md`       | Conventions for creating/updating Svelte components                       |
+| `.claude/skills/add-effect/SKILL.md`             | Steps and conventions for adding a new game effect                        |
+| `.claude/skills/add-expression/SKILL.md`         | Steps and conventions for adding a new expression                         |
+| `.claude/skills/update-rules-reference/SKILL.md` | Creating/updating rules reference entries; understanding game concepts    |
+| `.claude/skills/update-instructions/SKILL.md`    | This skill (update its file list if new skills are added)                 |
 
 ## Process
 
@@ -76,7 +77,16 @@ For each file that needs changes:
    that are already accurate
 4. When adding new sections, follow the formatting conventions of the surrounding content
 
-### 5. Verify consistency
+### 5. Consider skill-related redundancy
+
+When a new skill is added or an existing skill is updated:
+
+- Check if the skill provides comprehensive guidance on a topic that is also covered in CLAUDE.md
+- If the skill is now the authoritative source, trim redundant content from CLAUDE.md and add a brief pointer to the skill instead
+- Example: When the `/update-rules-reference` skill was added, the detailed "Adding a new rules entry" section in CLAUDE.md was replaced with "See the `/update-rules-reference` skill for detailed guidance..."
+- This keeps CLAUDE.md concise and ensures there's a single source of truth for each topic
+
+### 6. Verify consistency
 
 After editing, re-read all updated files and confirm:
 
@@ -85,6 +95,7 @@ After editing, re-read all updated files and confirm:
 - File paths referenced in instructions point to files that exist
 - The Custom Skills list in CLAUDE.md includes all skills present in `.claude/skills/`
 - The file list in this skill's own SKILL.md is up to date
+- No redundant content remains in CLAUDE.md that is now covered by a skill
 
 ## Important guidelines
 

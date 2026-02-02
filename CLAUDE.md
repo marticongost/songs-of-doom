@@ -62,23 +62,7 @@ When adding new effects or expressions, use the `/add-effect` or `/add-expressio
 
 ### Rules Reference System
 
-The rules reference (`/[locale]/rules-reference/`) provides an alphabetical, searchable glossary of game concepts. It uses mdsvex (`.svx` files) for localised content.
-
-- **Module**: [src/lib/rules-reference/](src/lib/rules-reference/) — types, SVX loading via `import.meta.glob`, model-source mapping, index and sorting
-- **SVX content**: `src/lib/rules-reference/entries/{slug}/{locale}.svx` — one directory per concept, one file per locale
-- **Components**: `src/lib/components/rules-reference/` — `RuleEntry`, `RuleLink`, `RuleSearch`
-- **Route**: `src/routes/[locale]/rules-reference/`
-
-**Two types of entries:**
-
-1. **Model-sourced**: Title comes from an existing model's `title`/`name` field (Stat, EntityType, Focus, Rule). The [model-sources.ts](src/lib/rules-reference/model-sources.ts) module auto-derives these from the `stats`, `entityTypes`, and `focuses` records, and auto-discovers `Rule` instances via `import.meta.glob` with `instanceof Rule` filtering (excludes Keywords).
-2. **Ad-hoc**: Title comes from SVX front matter. Used for game concepts without a dedicated model class.
-
-**Adding a new rules entry:**
-
-1. Create `src/lib/rules-reference/entries/{slug}/` with `ca.svx`, `es.svx`, `en.svx`
-2. For ad-hoc entries, include `title` in front matter; for model-sourced entries, omit it (title auto-resolved)
-3. Cross-link via markdown `[Title](#slug)` or `<RuleLink slug="..." />` (auto-resolves localised title)
+The rules reference (`/[locale]/rules-reference/`) provides an alphabetical, searchable glossary of game concepts. See the `/update-rules-reference` skill for detailed guidance on creating and updating entries, or use it to understand game concepts and terminology.
 
 ### Localization
 
@@ -164,6 +148,7 @@ This project includes custom Claude Code skills:
 - `/svelte-component` - Create/update Svelte components following project conventions
 - `/add-effect` - Add new game effect types (TypeScript class + Svelte component)
 - `/add-expression` - Add new expression types (TypeScript class + ExpressionChip integration)
+- `/update-rules-reference` - Create/update rules reference entries; use to understand game concepts
 - `/update-instructions` - Update CLAUDE.md and all skill files to reflect the current state of the project
 
 ## Important Conventions
