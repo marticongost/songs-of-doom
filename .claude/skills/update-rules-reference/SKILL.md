@@ -23,7 +23,7 @@ The rules reference (`/[locale]/rules-reference/`) is an alphabetical, searchabl
   - [index.ts](src/lib/rules-reference/index.ts) — loads entry files (`.svelte` and `.svx`) via `import.meta.glob`, builds the entry index
   - [model-sources.ts](src/lib/rules-reference/model-sources.ts) — maps slugs to existing model instances (Stats, EntityTypes, Focuses, Rules)
   - [types.ts](src/lib/rules-reference/types.ts) — TypeScript types for entries and entry modules
-- **Content**: `src/lib/rules-reference/entries/{slug}/{locale}.svelte` — one directory per concept, one `.svelte` file per locale (ca, es, en). Legacy `.svx` files are also supported.
+- **Content**: `src/lib/rules-reference/entries/{slug}/{slug}-{locale}.svelte` — one directory per concept, one `.svelte` file per locale (ca, es, en). Legacy `.svx` files are also supported.
 - **Components**: `src/lib/components/rules-reference/`
   - `RuleEntry.svelte` — displays a single entry on the rules reference page
   - `RuleLink.svelte` — cross-reference link component (auto-resolves localised titles)
@@ -46,7 +46,7 @@ Title comes from an existing model instance's `title` or `name` field. The [mode
 For model-sourced entries:
 
 - **Do not** include a title (it's auto-resolved from the model)
-- Create entry files at `src/lib/rules-reference/entries/{slug}/{locale}.svelte` where `slug` matches the model's key
+- Create entry files at `src/lib/rules-reference/entries/{slug}/{slug}-{locale}.svelte` where `slug` matches the model's key
 - The entry file only contains the body content (explanation, examples, cross-links)
 
 ### 2. Ad-hoc entries
@@ -56,7 +56,7 @@ Used for game concepts without a dedicated model class (e.g., "capability", "opp
 For ad-hoc entries:
 
 - **Export** `metadata` with a `title` field via `<script module lang="ts">`
-- Create entry files at `src/lib/rules-reference/entries/{slug}/{locale}.svelte` where `slug` is your chosen URL-friendly identifier
+- Create entry files at `src/lib/rules-reference/entries/{slug}/{slug}-{locale}.svelte` where `slug` is your chosen URL-friendly identifier
 
 ## Creating a new entry
 
@@ -71,9 +71,9 @@ Follow these steps:
 
 Create `src/lib/rules-reference/entries/{slug}/` with three `.svelte` files:
 
-- `ca.svelte` (Catalan)
-- `es.svelte` (Spanish)
-- `en.svelte` (English)
+- `{slug}-ca.svelte` (Catalan)
+- `{slug}-es.svelte` (Spanish)
+- `{slug}-en.svelte` (English)
 
 ### 3. Add content
 

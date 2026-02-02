@@ -5,9 +5,9 @@ import { modelSources } from './model-sources';
 
 const entryModules = import.meta.glob<SvxModule>('./entries/**/*.{svx,svelte}', { eager: true });
 
-/** Extract slug and locale from a glob key like './entries/weapon/ca.svx' */
+/** Extract slug and locale from a glob key like './entries/weapon/weapon-ca.svx' */
 function parseEntryPath(path: string): { slug: string; locale: Locale } | undefined {
-	const match = path.match(/^\.\/entries\/([^/]+)\/(\w+)\.(svx|svelte)$/);
+	const match = path.match(/^\.\/entries\/([^/]+)\/\1-(\w+)\.(svx|svelte)$/);
 	if (!match) return undefined;
 	const [, slug, localePart] = match;
 	if (!locales.includes(localePart as Locale)) return undefined;
