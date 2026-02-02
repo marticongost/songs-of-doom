@@ -1,8 +1,13 @@
+---
+title: Capacitat
+--- 
 <script lang="ts">
 	import RuleLink from '$lib/components/rules-reference/RuleLink.svelte';
 </script>
 
---- title: Capacitat --- Cada una de les accions, reaccions o regles passives en que es divideix una
-carta. Es divideixen en els següents tipus: - <RuleLink slug="action" label="Accions" />
+Cada una de les accions, reaccions o regles passives en que es divideix una
+carta. Es divideixen en els següents tipus:
+
+- <RuleLink slug="action" label="Accions" />
 - <RuleLink slug="reaction" label="Reaccions" />
 - <RuleLink slug="constant" label="Constants" />
