@@ -19,7 +19,7 @@ export class Focus {
 
 export const focuses: Record<FocusType, Focus> = Object.assign(
 	{ heroism: new Focus('heroism', { en: 'Heroism', es: 'Heroísmo', ca: 'Heroisme' }) },
-	{ any: new Focus('any', { en: 'Any', es: 'Cualquiera', ca: 'Qualsevol' }) },
+	{ any: new Focus('any', { en: 'Any focus', es: 'Foco cualquiera', ca: 'Focus qualsevol' }) },
 	...attributeTypes.map((type) => ({
 		[type]: new Focus(type, stats[type].name, stats[type])
 	}))
