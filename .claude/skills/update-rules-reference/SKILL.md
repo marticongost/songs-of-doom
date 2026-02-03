@@ -101,7 +101,21 @@ Create `src/lib/rules-reference/entries/{slug}/` with three `.svelte` files:
 <p>[Explanation of the concept in the target language]</p>
 ```
 
-### 4. Cross-link related entries
+### 4. Add examples
+
+Use the `Example` component to illustrate concepts with concrete examples:
+
+```svelte
+<script lang="ts">
+	import Example from '$lib/components/Example.svelte';
+</script>
+
+<p>An action is one of the things a character can do during their turn.</p>
+
+<Example>A warrior uses their action to attack an adjacent enemy.</Example>
+```
+
+### 5. Cross-link related entries
 
 Use the `RuleLink` component for cross-references between entries:
 
@@ -112,7 +126,7 @@ See <RuleLink slug="capability" label="Capabilities" /> for details.
 
 The `RuleLink` component auto-resolves the localised title from the slug. You can override with `label` or transform with `transform="lowercase"`.
 
-### 5. Verify in browser
+### 6. Verify in browser
 
 Run `npm run dev` and navigate to `/ca/rules-reference` (or `/es/rules-reference`, `/en/rules-reference`) to verify your new entry appears and renders correctly.
 
