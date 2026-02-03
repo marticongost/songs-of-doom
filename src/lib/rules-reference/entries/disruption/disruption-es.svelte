@@ -2,11 +2,14 @@
 	import disruption from '$lib/catalog/data/properties/disruption';
 	import Example from '$lib/components/Example.svelte';
 	import PropertyChip from '$lib/components/properties/PropertyChip.svelte';
+	import RuleLink from '$lib/components/rules-reference/RuleLink.svelte';
 </script>
 
 <p>
-	Los ataques con esta propiedad hacen que el oponente reduzca su defensa en X puntos, hasta un
-	mínimo de 0.
+	Los ataques con esta propiedad hacen que el oponente reduzca su <RuleLink
+		slug="defense"
+		transform="lowercase"
+	/> en X puntos, hasta un mínimo de 0.
 </p>
 
 <Example>
