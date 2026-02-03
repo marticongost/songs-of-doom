@@ -148,6 +148,7 @@ This project includes custom Claude Code skills:
 - `/svelte-component` - Create/update Svelte components following project conventions
 - `/add-effect` - Add new game effect types (TypeScript class + Svelte component)
 - `/add-expression` - Add new expression types (TypeScript class + ExpressionChip integration)
+- `/add-property` - Add new property types (Keyword, Rule, ScalarRule) with optional rules reference entry
 - `/update-rules-reference` - Create/update rules reference entries; use to understand game concepts
 - `/update-instructions` - Update CLAUDE.md and all skill files to reflect the current state of the project
 
