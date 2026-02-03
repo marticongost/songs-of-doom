@@ -8,10 +8,10 @@ Renders a single rule entry with a heading anchor and localised SVX body.
 ```
 -->
 <script lang="ts">
-	import type { RuleEntry } from '$lib/rules-reference/types';
+	import Text from '$lib/components/localisation/Text.svelte';
 	import { getLocale } from '$lib/context/locale';
 	import { translate } from '$lib/localisation';
-	import Text from '$lib/components/localisation/Text.svelte';
+	import type { RuleEntry } from '$lib/rules-reference/types';
 
 	interface Props {
 		entry: RuleEntry;
@@ -48,10 +48,11 @@ Renders a single rule entry with a heading anchor and localised SVX body.
 	.rule-entry {
 		scroll-margin-top: rz.size(xl);
 		background-color: var(--panel-background-color);
+		line-height: 1.5em;
 		@include rz.padding(md);
 
 		:global(p) {
-			@include rz.vmargin(sm);
+			@include rz.vmargin(md);
 		}
 
 		:global(ul) {
