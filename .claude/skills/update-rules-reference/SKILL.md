@@ -126,7 +126,18 @@ See <RuleLink slug="capability" label="Capabilities" /> for details.
 
 The `RuleLink` component auto-resolves the localised title from the slug. You can override with `label` or transform with `transform="lowercase"`.
 
-### 6. Verify in browser
+### 6. Convert existing plain text references to links
+
+After creating the new entry, search all other rules reference entries for plain text mentions of the new concept that should become `RuleLink` components. For example, if you just created a `toughness` entry, search for the word "toughness" (and its translations) across all existing entry files in `src/lib/rules-reference/entries/`.
+
+- Search for the concept name in each locale (e.g., "duresa", "dureza", "toughness") across existing `.svelte` entry files
+- Replace plain text occurrences with `<RuleLink slug="{slug}" />`, using `label` or `transform="lowercase"` as needed to preserve the original text's grammar and casing
+- Add the `RuleLink` import to any file that doesn't already have it
+- Do **not** convert references that appear inside the entry's own files (self-links)
+- Only link the **first occurrence** of each concept per entry file — if a rule mentions the same concept multiple times, convert only the first reference and leave the rest as plain text
+- Use judgement: only convert references that clearly refer to the game concept, not incidental uses of the word
+
+### 7. Verify in browser
 
 Run `npm run dev` and navigate to `/ca/rules-reference` (or `/es/rules-reference`, `/en/rules-reference`) to verify your new entry appears and renders correctly.
 
