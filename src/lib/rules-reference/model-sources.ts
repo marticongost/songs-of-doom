@@ -1,9 +1,9 @@
-import type { LocalisedText } from '$lib/localisation';
-import { stats } from '$lib/catalog/models/stats';
-import { attributeTypes } from '$lib/catalog/models/stats';
-import { entityTypes } from '$lib/catalog/models/properties/entitytypes';
 import { focuses } from '$lib/catalog/models/focus';
+import { ScalarRule } from '$lib/catalog/models/properties';
+import { entityTypes } from '$lib/catalog/models/properties/entitytypes';
 import { Rule } from '$lib/catalog/models/properties/rule';
+import { attributeTypes, stats } from '$lib/catalog/models/stats';
+import type { Locale, LocalisedText } from '$lib/localisation';
 
 /**
  * Maps rule slugs to LocalisedText titles from existing model instances.
@@ -39,8 +39,14 @@ function buildModelSources(): Record<string, LocalisedText> {
 		const instance = mod.default;
 		if (instance instanceof Rule) {
 			const slug = path.match(/\/([^/]+)\.ts$/)?.[1];
+			const title: LocalisedText = { ...instance.title };
+			if (instance instanceof ScalarRule) {
+				for (const [key, value] of Object.entries(title)) {
+					title[key as Locale] = `${value} (X)`;
+				}
+			}
 			if (slug) {
-				sources[slug] = instance.title;
+				sources[slug] = title;
 			}
 		}
 	}
