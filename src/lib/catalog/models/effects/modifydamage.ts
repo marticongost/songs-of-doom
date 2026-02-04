@@ -1,3 +1,4 @@
+import type { ScalarExpressionType } from '../expressions';
 import { Effect } from './effect';
 
 /**
@@ -5,7 +6,7 @@ import { Effect } from './effect';
  */
 export interface ModifyDamageEffectProps {
 	/** The amount to modify the damage by. Positive values increase damage, negative values decrease it. */
-	amount: number;
+	amount: ScalarExpressionType;
 }
 
 /**
@@ -13,7 +14,7 @@ export interface ModifyDamageEffectProps {
  */
 export class ModifyDamageEffect extends Effect {
 	/** The amount to modify the damage by. Positive values increase damage, negative values decrease it. */
-	readonly amount: number;
+	readonly amount: ScalarExpressionType;
 
 	constructor({ amount }: ModifyDamageEffectProps) {
 		super();

@@ -1,17 +1,27 @@
 <script lang="ts">
 	import { ModifyDamageEffect } from '$lib/catalog/models/effects';
-	import Text from '$lib/components/localisation/Text.svelte';
+	import ExpressionChip from '../expressions/ExpressionChip.svelte';
+	import InlineSvg from '../InlineSvg.svelte';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
-	interface Props {
+	interface Props extends StandardAttributeProps {
 		effect: ModifyDamageEffect;
 	}
 
-	const { effect }: Props = $props();
-	const modifierText = $derived(effect.amount > 0 ? `+${effect.amount}` : effect.amount.toString());
+	const { effect, ...attributes }: Props = $props();
 </script>
 
-<Text
-	ca="Modificar el dany en {modifierText}"
-	es="Modificar el daño en {modifierText}"
-	en="Modify damage by {modifierText}"
-/>
+<span {...standardAttributes(attributes, 'modify-damage-effect-chip')}>
+	<InlineSvg class="damage-icon" src="effects/damage.svg" />
+	<ExpressionChip expression={effect.amount} relative={true} />
+</span>
+
+<style lang="scss">
+	.modify-damage-effect-chip {
+		& > :global(.damage-icon) {
+			width: 1.25em;
+			height: 1.25em;
+			color: var(--stat-health-color);
+		}
+	}
+</style>
