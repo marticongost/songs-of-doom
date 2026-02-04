@@ -1,7 +1,7 @@
 import type { LocalisedText } from '$lib/localisation';
+import type { Stat } from '../stats';
 import type { ComparisonOperator } from './comparison';
 import { Expression } from './expression';
-import type { ScalarExpressionType } from './scalar-operation';
 
 /**
  * Base class for expressions that produce numeric (scalar) values.
@@ -23,3 +23,9 @@ export abstract class ScalarExpression extends Expression {
 		return undefined;
 	}
 }
+
+/**
+ * A type union representing all possible scalar expressions.
+ * Includes primitives (number, Stat) and complex expressions (ScalarExpression).
+ */
+export type ScalarExpressionType = Stat | number | ScalarExpression;

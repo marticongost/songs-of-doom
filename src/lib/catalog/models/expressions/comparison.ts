@@ -1,7 +1,8 @@
 import type { LocalisedText } from '$lib/localisation';
 import { BooleanExpression } from './boolean-expression';
 import { ScalarExpression } from './scalar-expression';
-import { ScalarOperation, type ScalarExpressionType } from './scalar-operation';
+import { type ScalarExpressionType } from './scalar-expression';
+import { ScalarOperation } from './scalar-operation';
 
 /**
  * A comparison operator between two scalar values.
@@ -13,7 +14,7 @@ export type ComparisonOperator = '>' | '=' | '!=' | '<';
  * A comparison operation between two scalar values.
  * Produces a boolean result based on the comparison operator.
  */
-export class Comparison extends BooleanExpression {
+export class ComparisonExpression extends BooleanExpression {
 	/**
 	 * The comparison operator to apply to the two operands.
 	 */
@@ -53,29 +54,29 @@ export class Comparison extends BooleanExpression {
 }
 
 // Helper functions for creating comparisons
-export const eq = (a: ScalarExpressionType, b: ScalarExpressionType): Comparison =>
-	new Comparison(a, '=', b);
-export const neq = (a: ScalarExpressionType, b: ScalarExpressionType): Comparison =>
-	new Comparison(a, '!=', b);
-export const gt = (a: ScalarExpressionType, b: ScalarExpressionType): Comparison =>
-	new Comparison(a, '>', b);
-export const lt = (a: ScalarExpressionType, b: ScalarExpressionType): Comparison =>
-	new Comparison(a, '<', b);
+export const eq = (a: ScalarExpressionType, b: ScalarExpressionType): ComparisonExpression =>
+	new ComparisonExpression(a, '=', b);
+export const neq = (a: ScalarExpressionType, b: ScalarExpressionType): ComparisonExpression =>
+	new ComparisonExpression(a, '!=', b);
+export const gt = (a: ScalarExpressionType, b: ScalarExpressionType): ComparisonExpression =>
+	new ComparisonExpression(a, '>', b);
+export const lt = (a: ScalarExpressionType, b: ScalarExpressionType): ComparisonExpression =>
+	new ComparisonExpression(a, '<', b);
 
 /**
  * Greater-than-or-equal comparison helper.
  * Normalizes to `>` operator: `gte(a, b)` becomes `a > (b - 1)`.
  */
-export const gte = (a: ScalarExpressionType, b: ScalarExpressionType): Comparison => {
+export const gte = (a: ScalarExpressionType, b: ScalarExpressionType): ComparisonExpression => {
 	const normalizedB = typeof b === 'number' ? b - 1 : new ScalarOperation(b, '-', 1);
-	return new Comparison(a, '>', normalizedB);
+	return new ComparisonExpression(a, '>', normalizedB);
 };
 
 /**
  * Less-than-or-equal comparison helper.
  * Normalizes to `<` operator: `lte(a, b)` becomes `a < (b + 1)`.
  */
-export const lte = (a: ScalarExpressionType, b: ScalarExpressionType): Comparison => {
+export const lte = (a: ScalarExpressionType, b: ScalarExpressionType): ComparisonExpression => {
 	const normalizedB = typeof b === 'number' ? b + 1 : new ScalarOperation(b, '+', 1);
-	return new Comparison(a, '<', normalizedB);
+	return new ComparisonExpression(a, '<', normalizedB);
 };

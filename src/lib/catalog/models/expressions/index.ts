@@ -1,24 +1,28 @@
 // Base classes
-export { BooleanExpression } from './boolean-expression';
+import { type BooleanExpressionType } from './boolean-expression';
+import { type ScalarExpressionType } from './scalar-expression';
+export { BooleanExpression, type BooleanExpressionType } from './boolean-expression';
 export { Expression } from './expression';
-export { ScalarExpression } from './scalar-expression';
+export { ScalarExpression, type ScalarExpressionType } from './scalar-expression';
 
 // Scalar operations
-export {
-	div,
-	minus,
-	mult,
-	plus,
-	ScalarOperation,
-	type ScalarExpressionType,
-	type ScalarOperator
-} from './scalar-operation';
+export { result, ResultExpression } from './result-expression';
+export { div, minus, mult, plus, ScalarOperation, type ScalarOperator } from './scalar-operation';
 
 // Comparisons
-export { Comparison, eq, gt, gte, lt, lte, neq, type ComparisonOperator } from './comparison';
+export {
+	ComparisonExpression,
+	eq,
+	gt,
+	gte,
+	lt,
+	lte,
+	neq,
+	type ComparisonOperator
+} from './comparison';
 
 // Logical operators
-export { And, and, Not, not, Or, or, type BooleanExpressionType } from './logical';
+export { and, AndExpression, not, NotExpression, or, OrExpression } from './logical';
 
 // Boolean expressions
 export { engaged, EngagedExpression } from './engaged';
@@ -31,46 +35,9 @@ export {
 } from './wounded';
 
 // Scalar expressions
-export { effectiveDefense, EffectiveDefenseExpression } from './effective-defense';
 export { distance, DistanceExpression } from './distance';
+export { effectiveDefense, EffectiveDefenseExpression } from './effective-defense';
 export { NearbyEnemiesExpression, type NearbyEnemiesExpressionProps } from './nearby-enemies';
-
-// Type guards
-import { Property } from '../properties/property';
-import { Stat } from '../stats';
-import { BooleanExpression } from './boolean-expression';
-import { Comparison } from './comparison';
-import type { BooleanExpressionType } from './logical';
-import { ScalarExpression } from './scalar-expression';
-import type { ScalarExpressionType } from './scalar-operation';
-import { ScalarOperation } from './scalar-operation';
-
-/**
- * Establishes if the given expression produces scalar values.
- * @param value The expression to evaluate.
- * @returns True if the expression produces a scalar value, false otherwise.
- */
-export const isScalarExpression = (
-	value: ScalarExpressionType | BooleanExpressionType
-): value is ScalarExpressionType =>
-	typeof value === 'number' ||
-	value instanceof Stat ||
-	value === 'result' ||
-	value instanceof ScalarOperation ||
-	value instanceof ScalarExpression;
-
-/**
- * Establishes if the given expression produces boolean values.
- * @param value The expression to evaluate.
- * @returns True if the expression produces a boolean value, false otherwise.
- */
-export const isBooleanExpression = (
-	value: ScalarExpressionType | BooleanExpressionType
-): value is BooleanExpressionType =>
-	typeof value === 'boolean' ||
-	value instanceof Property ||
-	value instanceof Comparison ||
-	value instanceof BooleanExpression;
 
 /**
  * Returns 1 if the expression is guaranteed to be singular (the number 1),
@@ -82,6 +49,3 @@ export const isBooleanExpression = (
 export const expressionPlurality = (expr: ScalarExpressionType | BooleanExpressionType): 1 | 2 => {
 	return expr === 1 ? 1 : 2;
 };
-
-// Legacy type union for backward compatibility
-export type ExpressionType = ScalarExpressionType | BooleanExpressionType;

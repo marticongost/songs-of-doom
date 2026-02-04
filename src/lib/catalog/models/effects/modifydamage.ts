@@ -1,4 +1,4 @@
-import type { ScalarExpressionType } from '../expressions';
+import type { ScalarExpressionType } from '$lib/catalog/models/expressions';
 import { Effect } from './effect';
 
 /**

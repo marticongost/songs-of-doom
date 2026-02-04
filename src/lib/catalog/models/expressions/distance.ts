@@ -1,7 +1,6 @@
 import type { LocalisedText } from '$lib/localisation';
 import type { ComparisonOperator } from './comparison';
-import { ScalarExpression } from './scalar-expression';
-import type { ScalarExpressionType } from './scalar-operation';
+import { ScalarExpression, type ScalarExpressionType } from './scalar-expression';
 
 /**
  * A scalar expression that returns the distance (in steps) to a target.

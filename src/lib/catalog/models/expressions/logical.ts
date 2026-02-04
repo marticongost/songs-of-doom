@@ -1,27 +1,12 @@
-import { BooleanExpression } from './boolean-expression';
-import type { Comparison } from './comparison';
-import type { Property } from '../properties';
 import type { LocalisedText } from '$lib/localisation';
+import { BooleanExpression, type BooleanExpressionType } from './boolean-expression';
 import { Expression } from './expression';
-
-/**
- * A type union representing all possible boolean expressions.
- * Includes primitives (boolean), comparisons, logical operators, properties, and custom boolean expressions.
- */
-export type BooleanExpressionType =
-	| boolean
-	| Property
-	| Comparison
-	| And
-	| Or
-	| Not
-	| BooleanExpression;
 
 /**
  * Logical AND operation between two or more boolean expressions.
  * Evaluates to true only if all operands are true.
  */
-export class And extends BooleanExpression {
+export class AndExpression extends BooleanExpression {
 	/**
 	 * The boolean expressions to combine with AND logic.
 	 */
@@ -37,7 +22,7 @@ export class And extends BooleanExpression {
  * Logical OR operation between two or more boolean expressions.
  * Evaluates to true if at least one operand is true.
  */
-export class Or extends BooleanExpression {
+export class OrExpression extends BooleanExpression {
 	/**
 	 * The boolean expressions to combine with OR logic.
 	 */
@@ -53,7 +38,7 @@ export class Or extends BooleanExpression {
  * Logical NOT operation (negation) of a boolean expression.
  * Evaluates to true if the operand is false, and vice versa.
  */
-export class Not extends BooleanExpression {
+export class NotExpression extends BooleanExpression {
 	/**
 	 * The boolean expression to negate.
 	 */
@@ -82,6 +67,8 @@ export class Not extends BooleanExpression {
 }
 
 // Helper functions for creating logical operations
-export const and = (...operands: Array<BooleanExpressionType>): And => new And(...operands);
-export const or = (...operands: Array<BooleanExpressionType>): Or => new Or(...operands);
-export const not = (operand: BooleanExpressionType): Not => new Not(operand);
+export const and = (...operands: Array<BooleanExpressionType>): AndExpression =>
+	new AndExpression(...operands);
+export const or = (...operands: Array<BooleanExpressionType>): OrExpression =>
+	new OrExpression(...operands);
+export const not = (operand: BooleanExpressionType): NotExpression => new NotExpression(operand);

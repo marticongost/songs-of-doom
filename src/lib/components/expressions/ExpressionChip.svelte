@@ -5,15 +5,16 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 -->
 <script lang="ts">
 	import {
-		And,
-		Comparison,
+		AndExpression,
+		ComparisonExpression,
 		Expression,
-		Not,
-		Or,
+		NotExpression,
+		OrExpression,
+		result,
 		ScalarOperation,
-		type BooleanExpressionType,
-		type ScalarExpressionType
+		type BooleanExpressionType
 	} from '$lib/catalog/models/expressions';
+	import type { ScalarExpressionType } from '$lib/catalog/models/expressions/scalar-expression';
 	import { Property } from '$lib/catalog/models/properties';
 	import { Stat } from '$lib/catalog/models/stats';
 	import InlineSvg from '../InlineSvg.svelte';
@@ -38,7 +39,7 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		<Text {...translation} />
 	{:else if typeof expression === 'number'}
 		<span class="number">{expression}</span>
-	{:else if expression === 'result'}
+	{:else if expression === result}
 		<InlineSvg src="dice/successes.svg" />
 	{:else if expression instanceof Stat}
 		<StatIcon stat={expression} />
@@ -50,25 +51,25 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		{@render expressionNodeSnippet(expression.right)}
 
 		<!-- Comparisons -->
-	{:else if expression instanceof Comparison}
+	{:else if expression instanceof ComparisonExpression}
 		{@render expressionNodeSnippet(expression.left)}
 		<span class="operator">{expression.operator}</span>
 		{@render expressionNodeSnippet(expression.right)}
 
 		<!-- Logical operators -->
-	{:else if expression instanceof And}
+	{:else if expression instanceof AndExpression}
 		{#each expression.operands as operand, index (index)}
 			{#if index > 0}
 				<span class="operator">&</span>
 			{/if}
 			{@render expressionNodeSnippet(operand)}
 		{/each}
-	{:else if expression instanceof Or}
+	{:else if expression instanceof OrExpression}
 		{#each expression.operands as operand, index (index)}
 			{#if index > 0}<span class="operator"><Text ca="O" es="O" en="OR" /></span>{/if}
 			{@render expressionNodeSnippet(operand)}
 		{/each}
-	{:else if expression instanceof Not}
+	{:else if expression instanceof NotExpression}
 		<span class="operator"><Text ca="NO" es="NO" en="NOT" /></span>
 		{@render expressionNodeSnippet(expression.operand)}
 

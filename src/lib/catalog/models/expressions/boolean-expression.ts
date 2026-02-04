@@ -1,5 +1,6 @@
-import type { Effect } from '../effects/effect';
 import { ConditionalEffect } from '../effects/conditional';
+import type { Effect } from '../effects/effect';
+import type { Property } from '../properties';
 import { Expression } from './expression';
 
 /**
@@ -24,3 +25,9 @@ export abstract class BooleanExpression extends Expression {
 		});
 	}
 }
+
+/**
+ * A type union representing all possible boolean expressions.
+ * Includes primitives (boolean), comparisons, logical operators, properties, and custom boolean expressions.
+ */
+export type BooleanExpressionType = boolean | Property | BooleanExpression;

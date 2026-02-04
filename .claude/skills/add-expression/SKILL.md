@@ -112,7 +112,7 @@ export class NearbyEnemiesExpression extends ScalarExpression {
 
 ### Comparison shorthands (scalar expressions)
 
-Scalar expressions can override `getComparisonShorthand(operator, value)` to provide localised text for specific comparison patterns. The `Comparison` class calls this automatically when rendering.
+Scalar expressions can override `getComparisonShorthand(operator, value)` to provide localised text for specific comparison patterns. The `ComparisonExpression` class calls this automatically when rendering.
 
 ```typescript
 export class DistanceExpression extends ScalarExpression {
@@ -169,7 +169,7 @@ When the user requests a new expression:
 
 - State checks: `engaged` (singleton with `translate()`)
 - Property checks: `Property` instances (properties extend `BooleanExpression`)
-- Comparisons: `wounded` is `gte(receivedWounds, 1)` — a `Comparison`, not a custom class
+- Comparisons: `wounded` is `gte(receivedWounds, 1)` — a `ComparisonExpression`, not a custom class
 - Logical operators (`and`, `or`, `not`) are handled separately
 
 ### Scalar expressions (extend ScalarExpression)

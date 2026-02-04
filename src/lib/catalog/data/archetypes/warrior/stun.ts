@@ -1,4 +1,5 @@
 import { NegateDamageEffect, RemoveChargesEffect } from '$lib/catalog/models/effects';
+import { result } from '$lib/catalog/models/expressions';
 import { Opportunity } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
 
@@ -18,9 +19,8 @@ export default new Skill({
 			},
 			effects: [
 				new NegateDamageEffect(),
-				new RemoveChargesEffect({ target: 'defender', amount: 'result' })
+				new RemoveChargesEffect({ target: 'defender', amount: result })
 			]
 		})
 	]
-	// TODO: Opportunity, remove charges from enemy if attack was successful
 });

@@ -1,8 +1,7 @@
 import type { LocalisedText } from '$lib/localisation';
 import type { ComparisonOperator } from './comparison';
 import { gte } from './comparison';
-import { ScalarExpression } from './scalar-expression';
-import type { ScalarExpressionType } from './scalar-operation';
+import { ScalarExpression, type ScalarExpressionType } from './scalar-expression';
 
 export class RemainingWoundsExpression extends ScalarExpression {
 	translate(): LocalisedText {
