@@ -33,14 +33,11 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 {#snippet expressionNodeSnippet(expression: ScalarExpressionType | BooleanExpressionType)}
 	<!-- Check for custom translations first -->
 	{@const translation = expression instanceof Expression ? expression.translate() : undefined}
+	{#if relative && !(typeof expression === 'number' && expression < 0)}+{/if}
 	{#if translation !== undefined}
 		<Text {...translation} />
 	{:else if typeof expression === 'number'}
-		{#if relative}
-			<span class="number">{expression > 0 ? `+${expression}` : expression}</span>
-		{:else}
-			<span class="number">{expression}</span>
-		{/if}
+		<span class="number">{expression}</span>
 	{:else if expression === 'result'}
 		<InlineSvg src="dice/successes.svg" />
 	{:else if expression instanceof Stat}
