@@ -3,25 +3,24 @@ import { Opportunity } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
 import { upgradable } from '$lib/catalog/models/upgrades';
 
-export default upgradable(Skill, 2, (level: number) => ({
+export default upgradable(Skill, 2, (variants) => ({
 	title: {
 		ca: 'Cop de sort',
 		es: 'Golpe de suerte',
 		en: 'Stroke of luck'
 	},
 	discardReward: {
-		intelligence: level
+		intelligence: variants.level
 	},
-	xpCost: level === 1 ? 0 : 1,
+	xpCost: variants.values(0, 1),
 	capabilities: [
 		new Opportunity({
 			triggers: ['fateDrawn'],
 			cost: { any: 1 },
-			effects: [
-				level === 1
-					? new ResultsTableEffect({ entries: [{ result: 0, effects: [new RedrawFateEffect()] }] })
-					: new RedrawFateEffect()
-			]
+			effects: variants.values(
+				[new ResultsTableEffect({ entries: [{ result: 0, effects: [new RedrawFateEffect()] }] })],
+				[variants.ifMatches(2, new RedrawFateEffect())]
+			)
 		})
 	]
 }));
