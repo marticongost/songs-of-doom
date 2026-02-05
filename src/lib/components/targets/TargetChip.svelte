@@ -3,12 +3,13 @@
 	import ExpressionChip from '$lib/components/expressions/ExpressionChip.svelte';
 	import { getLocale } from '$lib/context/locale';
 	import { possessiveRelation, translate, type LocalisedText } from '$lib/localisation';
+	import Text from '../localisation/Text.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
 	interface Props extends StandardAttributeProps {
 		target: Target;
 		ellideSelf?: boolean;
-		relation?: 'possessive';
+		relation?: 'possessive' | 'to';
 	}
 
 	const { target, ellideSelf = false, relation, ...attributes }: Props = $props();
@@ -18,6 +19,8 @@
 {#snippet text(localisedText: LocalisedText)}
 	{#if relation === 'possessive'}
 		{possessiveRelation(translate(localisedText, locale), locale)}
+	{:else if relation === 'to'}
+		<Text ca="a" es="a" en="to" />
 	{:else}
 		{translate(localisedText, locale)}
 	{/if}
