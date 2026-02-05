@@ -10,6 +10,7 @@
 		DrawCardsEffect,
 		DrawFocusEffect,
 		EngageEffect,
+		HealEffect,
 		ModifyCapabilityCostEffect,
 		ModifyDamageEffect,
 		ModifyRollEffect,
@@ -38,6 +39,7 @@
 	import DrawCardsEffectChip from './DrawCardsEffectChip.svelte';
 	import DrawFocusEffectChip from './DrawFocusEffectChip.svelte';
 	import EngageEffectChip from './EngageEffectChip.svelte';
+	import HealEffectChip from './HealEffectChip.svelte';
 	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
 	import ModifyDamageEffectChip from './ModifyDamageEffectChip.svelte';
 	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
@@ -81,6 +83,8 @@
 		<DrawFocusEffectChip {effect} />
 	{:else if effect instanceof EngageEffect}
 		<EngageEffectChip {effect} />
+	{:else if effect instanceof HealEffect}
+		<HealEffectChip {effect} />
 	{:else if effect instanceof ConferPropertiesEffect}
 		<ConferPropertiesEffectChip {effect} />
 	{:else if effect instanceof ModifyDamageEffect}
