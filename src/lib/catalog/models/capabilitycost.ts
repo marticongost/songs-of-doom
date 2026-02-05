@@ -1,5 +1,6 @@
 import type { LocalisedText } from '$lib/localisation';
-import { focusTypes, type FocusesProps, type FocusType } from './focus';
+import type { ScalarExpressionType } from './expressions/scalar-expression';
+import { focusTypes, type FocusType } from './focus';
 import type { IndicatorType } from './stats';
 
 export type ScalarCapabilityCostType = FocusType | IndicatorType | 'charges';
@@ -40,21 +41,23 @@ export const capabilityCostTypes: Array<CapabilityCostType> = [
 	...cardTransitionTypes
 ];
 
-export interface CapabilityCostProps extends FocusesProps {
+export type CapabilityCostFocusesProps = Partial<Record<FocusType, ScalarExpressionType>>;
+
+export interface CapabilityCostProps extends CapabilityCostFocusesProps {
 	health?: number;
 	sanity?: number;
 	charges?: number;
 	cardTransition?: CardTransitionType | CardTransition;
 }
 
-export class CapabilityCost implements Readonly<Record<FocusType, number>> {
-	readonly strength: number;
-	readonly agility: number;
-	readonly intelligence: number;
-	readonly charisma: number;
-	readonly will: number;
-	readonly heroism: number;
-	readonly any: number;
+export class CapabilityCost {
+	readonly strength: ScalarExpressionType;
+	readonly agility: ScalarExpressionType;
+	readonly intelligence: ScalarExpressionType;
+	readonly charisma: ScalarExpressionType;
+	readonly will: ScalarExpressionType;
+	readonly heroism: ScalarExpressionType;
+	readonly any: ScalarExpressionType;
 	readonly health: number;
 	readonly sanity: number;
 	readonly charges: number;
@@ -75,8 +78,8 @@ export class CapabilityCost implements Readonly<Record<FocusType, number>> {
 			typeof cardTransition === 'string' ? cardTransitions[cardTransition] : cardTransition;
 	}
 
-	get(costType: ScalarCapabilityCostType): number {
-		return this[costType];
+	getCostForType(type: ScalarCapabilityCostType): ScalarExpressionType {
+		return this[type];
 	}
 
 	isFree(): boolean {

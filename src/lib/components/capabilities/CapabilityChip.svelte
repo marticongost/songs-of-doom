@@ -85,7 +85,7 @@
 		}
 	}
 
-	.capability-activation {
+	.moment {
 		font-weight: bold;
 	}
 

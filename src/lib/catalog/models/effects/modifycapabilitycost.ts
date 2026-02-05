@@ -25,7 +25,7 @@ export class ModifyCapabilityCostEffect extends Effect {
 	}
 
 	get(attribute: ScalarCapabilityCostType): number {
-		return this.cost[attribute];
+		return this.cost[attribute] as number;
 	}
 
 	group(): GrouppedCapabilityCosts {

@@ -66,7 +66,7 @@
 		{/if}
 		<Image class="image" src="cards/{entity.id}.jpg" />
 		{#if discardReward && !discardReward.empty()}
-			<CapabilityCostList class="discard-reward" cost={discardReward} />
+			<CapabilityCostList class="discard-reward" cost={discardReward} layout="column" />
 		{/if}
 	</div>
 	<div class="details">
@@ -117,7 +117,6 @@
 		}
 
 		:global(.discard-reward) {
-			@include rz.column(xs);
 			position: absolute;
 			top: rz.size(sm);
 			left: rz.size(sm);

@@ -1,24 +1,41 @@
+<!--
+@component
+Renders a capability cost for a given type.
+
+- Focus types with a numeric amount: repeats the focus icon N times
+- Focus types with a non-numeric expression: renders `<focus icon> = <ExpressionChip>`
+- Other types (exhaust, discard, charges, indicators): renders a single icon
+-->
 <script lang="ts">
-	import { focusTypes, type FocusType } from '$lib/catalog/models/focus';
 	import type { CapabilityCostType } from '$lib/catalog/models/capabilitycost';
+	import type { ScalarExpressionType } from '$lib/catalog/models/expressions/scalar-expression';
+	import { focusTypes, type FocusType } from '$lib/catalog/models/focus';
 	import { indicatorTypes, type StatType } from '$lib/catalog/models/stats';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
+	import ExpressionChip from '../expressions/ExpressionChip.svelte';
 	import FocusIcon from '../focuses/FocusIcon.svelte';
 	import InlineSvg from '../InlineSvg.svelte';
 	import StatChip from '../stats/StatChip.svelte';
 
 	interface Props extends StandardAttributeProps {
 		type: CapabilityCostType;
+		/** The cost amount. For focus types, can be a number (repeated icons) or an expression. */
+		amount?: ScalarExpressionType;
 	}
 
-	const { type, ...attributes }: Props = $props();
+	const { type, amount, ...attributes }: Props = $props();
+	const isFocusType = $derived((focusTypes as Array<CapabilityCostType>).includes(type));
 </script>
 
 <span {...standardAttributes(attributes, 'capability-cost-chip')} data-type={type}>
-	{#if (focusTypes as Array<CapabilityCostType>).includes(type)}
+	{#if isFocusType && amount !== undefined}
+		<FocusIcon focus={type as FocusType} />
+		<span class="operator">=</span>
+		<ExpressionChip expression={amount} />
+	{:else if isFocusType}
 		<FocusIcon focus={type as FocusType} />
 	{:else if (indicatorTypes as Array<CapabilityCostType>).includes(type)}
 		<StatChip stat={type as StatType} />
@@ -33,6 +50,11 @@
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
+
+	.operator {
+		font-weight: bold;
+		color: var(--text-subtle-color);
+	}
 
 	.stat-chip {
 		@include rz.row(xs);
