@@ -1,3 +1,4 @@
+import type { BooleanExpressionType } from '../expressions';
 import { Effect } from './effect';
 
 export type TriggerAttackCard = 'any' | 'this';
@@ -11,6 +12,13 @@ export interface TriggerAttackEffectProps {
 	 * These modifiers can alter damage, add properties, or change other aspects of the attack.
 	 */
 	modifiers?: Array<Effect>;
+
+	/**
+	 * An optional condition that must be satisfied for the triggered attack action to be available.
+	 * This allows for conditional triggering based on game state, such as only triggering if the
+	 * defender has a certain property or if the attack meets specific criteria.
+	 */
+	condition?: BooleanExpressionType;
 
 	/**
 	 * Specifies which cards are eligible for the triggered attack action.
@@ -32,13 +40,21 @@ export class TriggerAttackEffect extends Effect {
 	readonly modifiers: Array<Effect>;
 
 	/**
+	 * An optional condition that must be satisfied for the triggered attack action to be available.
+	 * This allows for conditional triggering based on game state, such as only triggering if the
+	 * defender has a certain property or if the attack meets specific criteria.
+	 */
+	condition?: BooleanExpressionType;
+
+	/**
 	 * Specifies which cards are eligible for the triggered attack action.
 	 */
 	readonly card: TriggerAttackCard;
 
-	constructor({ modifiers, card }: TriggerAttackEffectProps = {}) {
+	constructor({ modifiers, condition, card }: TriggerAttackEffectProps = {}) {
 		super();
 		this.modifiers = modifiers ?? [];
+		this.condition = condition;
 		this.card = card ?? 'any';
 	}
 }

@@ -8,8 +8,10 @@ import {
 	ResultsTableEffect,
 	TriggerAttackEffect
 } from '$lib/catalog/models/effects';
+import { not } from '$lib/catalog/models/expressions';
 import { Skill } from '$lib/catalog/models/skill';
 import { upgradable } from '$lib/catalog/models/upgrades';
+import projectile from '../../properties/projectile';
 
 export default upgradable(Skill, 2, (variants) => ({
 	title: {
@@ -26,6 +28,7 @@ export default upgradable(Skill, 2, (variants) => ({
 			},
 			effects: [
 				new TriggerAttackEffect({
+					condition: not(projectile),
 					modifiers: [
 						new ModifyCapabilityCostEffect({ cost: { agility: -variants.level } }),
 						new ResultsTableEffect({
