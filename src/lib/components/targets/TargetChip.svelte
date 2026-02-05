@@ -2,8 +2,7 @@
 	import type { Target } from '$lib/catalog/models/target';
 	import ExpressionChip from '$lib/components/expressions/ExpressionChip.svelte';
 	import { getLocale } from '$lib/context/locale';
-	import { possessiveRelation, translate, type LocalisedText } from '$lib/localisation';
-	import Text from '../localisation/Text.svelte';
+	import { possessiveRelation, toRelation, translate, type LocalisedText } from '$lib/localisation';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
 	interface Props extends StandardAttributeProps {
@@ -17,13 +16,13 @@
 </script>
 
 {#snippet text(localisedText: LocalisedText)}
+	{@const localisedTarget = translate(localisedText, locale)}
 	{#if relation === 'possessive'}
-		{possessiveRelation(translate(localisedText, locale), locale)}
+		{possessiveRelation(localisedTarget, locale)}
+	{:else if relation === 'to'}
+		{toRelation(localisedTarget, locale)}
 	{:else}
-		{#if relation === 'to'}
-			<Text ca="a" es="a" en="to" />
-		{/if}
-		{translate(localisedText, locale)}
+		{localisedTarget}
 	{/if}
 {/snippet}
 

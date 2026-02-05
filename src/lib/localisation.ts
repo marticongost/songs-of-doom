@@ -82,6 +82,17 @@ export const possessiveRelation = (text: string, locale: string): string => {
 	throw new Error(`Don't know how to put together the possive form of ${text} in ${locale}`);
 };
 
+export const toRelation = (text: string, locale: string): string => {
+	if (locale === 'ca') {
+		return caTo(text);
+	} else if (locale === 'es') {
+		return `a ${text}`;
+	} else if (locale === 'en') {
+		return `to ${text}`;
+	}
+	throw new Error(`Don't know how to put together a "to" relation for ${text} in ${locale}`);
+};
+
 export const caPossessive = (text: string): string => {
 	if (!text) return '';
 
@@ -97,4 +108,13 @@ export const caPossessive = (text: string): string => {
 	}
 
 	return `de ${text}`;
+};
+
+export const caTo = (text: string): string => {
+	if (text.startsWith('el ')) {
+		return `al ${text.substring(3)}`;
+	} else if (text.startsWith('els ')) {
+		return `als ${text.substring(4)}`;
+	}
+	return `a ${text}`;
 };
