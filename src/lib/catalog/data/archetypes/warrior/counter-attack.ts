@@ -1,5 +1,6 @@
 import {
 	ModifyCapabilityCostEffect,
+	ModifyDamageEffect,
 	ModifyRollEffect,
 	ResultsTableEffect,
 	TriggerAttackEffect
@@ -7,15 +8,16 @@ import {
 import { effectiveDefense, gte } from '$lib/catalog/models/expressions';
 import { Opportunity } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
+import { upgradable } from '$lib/catalog/models/upgrades';
 
-export default new Skill({
+export default upgradable(Skill, 2, (variants) => ({
 	title: {
 		ca: 'Contraatac',
 		es: 'Contraataque',
 		en: 'Counter Attack'
 	},
-	xpCost: 0,
-	discardReward: { agility: 1 },
+	xpCost: variants.values(0, 2),
+	discardReward: { agility: 1, strength: variants.values(0, 1) },
 	capabilities: [
 		new Opportunity({
 			triggers: ['afterReceivedAttackResolved'],
@@ -32,6 +34,10 @@ export default new Skill({
 											new ModifyRollEffect({
 												modifier: effectiveDefense
 											}),
+											...variants.ifMatches(
+												2,
+												new ModifyDamageEffect({ amount: effectiveDefense })
+											),
 											new ModifyCapabilityCostEffect({
 												cost: {
 													strength: -1,
@@ -48,4 +54,4 @@ export default new Skill({
 			]
 		})
 	]
-});
+}));

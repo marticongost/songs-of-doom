@@ -1,16 +1,17 @@
 import { ModifyDamageEffect, ResultsTableEffect } from '$lib/catalog/models/effects';
 import { Opportunity } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
+import { upgradable } from '$lib/catalog/models/upgrades';
 
-export default new Skill({
+export default upgradable(Skill, 2, (variants) => ({
 	title: {
 		ca: 'Impacte brutal',
 		es: 'Impacto brutal',
 		en: 'Brutal hit'
 	},
-	xpCost: 0,
+	xpCost: variants.values(0, 1),
 	discardReward: {
-		strength: 2
+		strength: variants.values(2, 3)
 	},
 	capabilities: [
 		new Opportunity({
@@ -18,10 +19,11 @@ export default new Skill({
 			cost: { strength: 1 },
 			effects: [
 				new ResultsTableEffect({
-					entries: [{ result: '2+', effects: [new ModifyDamageEffect({ amount: 1 })] }]
+					entries: [
+						{ result: '2+', effects: [new ModifyDamageEffect({ amount: variants.values(1, 2) })] }
+					]
 				})
 			]
 		})
 	]
-	// TODO: Test 2+ -> +1 damage
-});
+}));

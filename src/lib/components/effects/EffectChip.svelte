@@ -4,12 +4,12 @@
 		ChangeStatsEffect,
 		ChaseEffect,
 		ConditionalEffect,
+		ConferPropertiesEffect,
 		DefendEffect,
 		DiscardCardEffect,
-		DrawFocusEffect,
 		DrawCardsEffect,
+		DrawFocusEffect,
 		EngageEffect,
-		ConferPropertiesEffect,
 		ModifyCapabilityCostEffect,
 		ModifyDamageEffect,
 		ModifyRollEffect,
@@ -24,25 +24,25 @@
 		WoundEffect,
 		type Effect
 	} from '$lib/catalog/models/effects';
-	import { RechargeEffect } from '$lib/catalog/models/effects/recharge';
+	import { AddChargesEffect } from '$lib/catalog/models/effects/recharge';
 
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
+	import AddChargeEffectChip from './AddChargeEffectChip.svelte';
 	import AttackEffectChip from './AttackEffectChip.svelte';
 	import ChangeStatsEffectChip from './ChangeStatsEffectChip.svelte';
 	import ChaseEffectChip from './ChaseEffectChip.svelte';
 	import ConditionalEffectChip from './ConditionalEffectChip.svelte';
+	import ConferPropertiesEffectChip from './ConferPropertiesEffectChip.svelte';
 	import DefendEffectChip from './DefendEffectChip.svelte';
 	import DiscardCardEffectChip from './DiscardCardEffectChip.svelte';
-	import DrawFocusEffectChip from './DrawFocusEffectChip.svelte';
 	import DrawCardsEffectChip from './DrawCardsEffectChip.svelte';
+	import DrawFocusEffectChip from './DrawFocusEffectChip.svelte';
 	import EngageEffectChip from './EngageEffectChip.svelte';
-	import ConferPropertiesEffectChip from './ConferPropertiesEffectChip.svelte';
 	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
 	import ModifyDamageEffectChip from './ModifyDamageEffectChip.svelte';
 	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
 	import NegateDamageEffectChip from './NegateDamageEffectChip.svelte';
 	import ReceiveOpportunityAttacksEffectChip from './ReceiveOpportunityAttacksEffectChip.svelte';
-	import RechargeEffectChip from './RechargeEffectChip.svelte';
 	import RedrawFateEffectChip from './RedrawFateEffectChip.svelte';
 	import RemoveChargesEffectChip from './RemoveChargesEffectChip.svelte';
 	import RepeatCapabilityEffectChip from './RepeatCapabilityEffectChip.svelte';
@@ -73,8 +73,8 @@
 		<ChaseEffectChip {effect} />
 	{:else if effect instanceof AttackEffect}
 		<AttackEffectChip {effect} />
-	{:else if effect instanceof RechargeEffect}
-		<RechargeEffectChip {effect} />
+	{:else if effect instanceof AddChargesEffect}
+		<AddChargeEffectChip {effect} />
 	{:else if effect instanceof DefendEffect}
 		<DefendEffectChip {effect} />
 	{:else if effect instanceof DrawFocusEffect}

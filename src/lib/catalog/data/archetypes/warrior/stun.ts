@@ -1,16 +1,18 @@
 import { NegateDamageEffect, RemoveChargesEffect } from '$lib/catalog/models/effects';
 import { result } from '$lib/catalog/models/expressions';
+import type { ScalarExpressionType } from '$lib/catalog/models/expressions/scalar-expression';
 import { Opportunity } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
+import { upgradable } from '$lib/catalog/models/upgrades';
 
-export default new Skill({
+export default upgradable(Skill, 2, (variants) => ({
 	title: {
 		ca: 'Estabornir',
 		es: 'Aturdir',
 		en: 'Stun'
 	},
-	xpCost: 0,
-	discardReward: { strength: 1 },
+	xpCost: variants.values(0, 1),
+	discardReward: { strength: variants.level },
 	capabilities: [
 		new Opportunity({
 			triggers: ['attacking'],
@@ -19,8 +21,11 @@ export default new Skill({
 			},
 			effects: [
 				new NegateDamageEffect(),
-				new RemoveChargesEffect({ target: 'defender', amount: result })
+				new RemoveChargesEffect({
+					target: 'defender',
+					amount: variants.values(1 as ScalarExpressionType, result)
+				})
 			]
 		})
 	]
-});
+}));

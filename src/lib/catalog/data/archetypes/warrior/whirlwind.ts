@@ -1,22 +1,29 @@
 import { Action } from '$lib/catalog/models/action';
 import {
+	RemoveChargesEffect,
 	RepeatCapabilityEffect,
 	ResultsTableEffect,
 	TriggerAttackEffect
 } from '$lib/catalog/models/effects';
+import { AddChargesEffect } from '$lib/catalog/models/effects/recharge';
+import type { ResultsTableEntryProps } from '$lib/catalog/models/effects/resultstable';
+import { charges } from '$lib/catalog/models/expressions';
+import { plus } from '$lib/catalog/models/expressions/scalar-operation';
+import { Obligation } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
+import { upgradable } from '$lib/catalog/models/upgrades';
 
-export default new Skill({
+export default upgradable(Skill, 2, (variants) => ({
 	title: {
 		ca: "Remolí d'atacs",
 		es: 'Remolino de ataques',
 		en: 'Whirlwind'
 	},
-	xpCost: 2,
-	discardReward: { agility: 2 },
+	xpCost: variants.values(2, 3),
+	discardReward: { agility: variants.values(2, 3) },
 	capabilities: [
 		new Action({
-			cost: { strength: 2, agility: 2 },
+			cost: { agility: plus(1, charges) },
 			effects: [
 				new TriggerAttackEffect({
 					modifiers: [
@@ -24,13 +31,21 @@ export default new Skill({
 							entries: [
 								{
 									result: '1+',
+									effects: [new AddChargesEffect({ amount: 1 }), new RepeatCapabilityEffect()]
+								},
+								...variants.ifMatches(2, {
+									result: 3,
 									effects: [new RepeatCapabilityEffect()]
-								}
+								} as ResultsTableEntryProps)
 							]
 						})
 					]
 				})
 			]
+		}),
+		new Obligation({
+			triggers: ['chapterEnd'],
+			effects: [new RemoveChargesEffect({})]
 		})
 	]
-});
+}));

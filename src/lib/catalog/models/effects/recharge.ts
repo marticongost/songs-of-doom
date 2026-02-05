@@ -9,7 +9,7 @@ export interface RechargeEffectProps {
 	target?: Target | TargetProps;
 }
 
-export class RechargeEffect extends Effect {
+export class AddChargesEffect extends Effect {
 	readonly amount: RechargeAmount;
 	readonly target: Target;
 

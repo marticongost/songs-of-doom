@@ -17,8 +17,12 @@
 	en="Remove %(expression) charges"
 >
 	{#snippet expression()}
-		<ExpressionChip expression={effect.amount} />
+		{#if effect.amount === undefined}
+			<Text ca="totes les" es="todas las" en="all" />
+		{:else}
+			<ExpressionChip expression={effect.amount} />
+		{/if}
 	{/snippet}
 </Text>
 
-<TargetChip relation="possessive" target={effect.target} />
+<TargetChip relation="possessive" target={effect.target} ellideSelf={true} />
