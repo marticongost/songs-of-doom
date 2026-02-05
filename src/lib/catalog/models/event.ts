@@ -10,6 +10,7 @@ export type EventType =
 	| 'payingCapability'
 	| 'acquired'
 	| 'chapterStart'
+	| 'chapterEnd'
 	| 'provoked'
 	| 'takingDamage'
 	| 'fateDrawn';
@@ -82,6 +83,10 @@ export const events: Record<EventType, Event> = {
 	chapterStart: new Event({
 		type: 'chapterStart',
 		name: { ca: 'En començar el capítol', es: 'Al empezar el capítulo', en: 'Start of chapter' }
+	}),
+	chapterEnd: new Event({
+		type: 'chapterEnd',
+		name: { ca: 'En acabar el capítol', es: 'Al terminar el capítulo', en: 'End of chapter' }
 	}),
 	provoked: new Event({
 		type: 'provoked',
