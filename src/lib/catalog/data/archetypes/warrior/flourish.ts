@@ -1,6 +1,6 @@
+import { Opportunity } from '$lib/catalog/models/capabilities';
 import { DrawCardsEffect, DrawFocusEffect, ResultsTableEffect } from '$lib/catalog/models/effects';
 import { AddChargesEffect } from '$lib/catalog/models/effects/recharge';
-import { Opportunity } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
 import { upgradable } from '$lib/catalog/models/upgrades';
 import weapon from '../../properties/weapon';

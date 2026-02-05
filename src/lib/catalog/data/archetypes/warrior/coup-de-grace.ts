@@ -1,4 +1,4 @@
-import { Action } from '$lib/catalog/models/action';
+import { Action } from '$lib/catalog/models/capabilities';
 import { DrawCardsEffect, WoundEffect } from '$lib/catalog/models/effects';
 import { and, distance, eq, lte } from '$lib/catalog/models/expressions';
 import { remainingWounds } from '$lib/catalog/models/expressions/wounded';

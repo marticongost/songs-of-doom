@@ -1,6 +1,6 @@
 import { Archetype } from '$lib/catalog/models/archetype';
+import { Opportunity } from '$lib/catalog/models/capabilities';
 import { TransformFocusEffect } from '$lib/catalog/models/effects';
-import { Opportunity } from '$lib/catalog/models/reaction';
 
 export default new Archetype({
 	title: {

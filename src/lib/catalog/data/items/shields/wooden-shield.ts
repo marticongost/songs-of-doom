@@ -1,7 +1,7 @@
+import { Opportunity } from '$lib/catalog/models/capabilities';
 import { fullyRechargeOnChapterStart } from '$lib/catalog/models/common';
 import { DefendEffect } from '$lib/catalog/models/effects';
 import { Item } from '$lib/catalog/models/inventory';
-import { Opportunity } from '$lib/catalog/models/reaction';
 import shield from '../../properties/shield';
 
 export default new Item({

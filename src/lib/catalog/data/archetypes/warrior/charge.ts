@@ -1,4 +1,4 @@
-import { Action } from '$lib/catalog/models/action';
+import { Action } from '$lib/catalog/models/capabilities';
 import {
 	EngageEffect,
 	ModifyCapabilityCostEffect,

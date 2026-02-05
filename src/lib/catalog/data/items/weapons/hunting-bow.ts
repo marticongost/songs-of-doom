@@ -1,4 +1,4 @@
-import { Action } from '$lib/catalog/models/action';
+import { Action } from '$lib/catalog/models/capabilities';
 import { fullyRechargeOnChapterStart, shootBeforeEngaged } from '$lib/catalog/models/common';
 import { AttackEffect } from '$lib/catalog/models/effects';
 import { plus } from '$lib/catalog/models/expressions';

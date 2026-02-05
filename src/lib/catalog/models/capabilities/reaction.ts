@@ -1,5 +1,5 @@
-import { Capability, type CapabilityProps } from './capability';
-import { Event, type EventType, events } from './event';
+import { Capability, type CapabilityProps } from '../capability';
+import { Event, type EventType, events } from '../event';
 
 export interface ReactionProps extends CapabilityProps {
 	/** The events that can trigger this reaction. */

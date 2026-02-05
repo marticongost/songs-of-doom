@@ -1,5 +1,5 @@
+import { Opportunity } from '$lib/catalog/models/capabilities';
 import { DrawCardsEffect } from '$lib/catalog/models/effects';
-import { Opportunity } from '$lib/catalog/models/reaction';
 import { Trait } from '$lib/catalog/models/trait';
 
 export default new Trait({

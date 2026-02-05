@@ -1,4 +1,4 @@
-import { Constant } from '$lib/catalog/models/constant';
+import { Constant } from '$lib/catalog/models/capabilities';
 import { ChangeStatsEffect } from '$lib/catalog/models/effects';
 import { Trait } from '$lib/catalog/models/trait';
 

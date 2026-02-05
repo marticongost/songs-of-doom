@@ -1,6 +1,6 @@
 import { Archetype } from '$lib/catalog/models/archetype';
+import { Obligation } from '$lib/catalog/models/capabilities';
 import { ModifyRollEffect } from '$lib/catalog/models/effects';
-import { Obligation } from '$lib/catalog/models/reaction';
 
 export default new Archetype({
 	title: {

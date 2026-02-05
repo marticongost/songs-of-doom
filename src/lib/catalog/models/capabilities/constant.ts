@@ -1,3 +1,3 @@
-import { Capability } from './capability';
+import { Capability } from '../capability';
 
 export class Constant extends Capability {}

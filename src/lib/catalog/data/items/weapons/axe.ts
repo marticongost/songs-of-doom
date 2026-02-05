@@ -1,9 +1,8 @@
-import { Action } from '$lib/catalog/models/action';
+import { Action, Opportunity } from '$lib/catalog/models/capabilities';
 import { fullyRechargeOnChapterStart } from '$lib/catalog/models/common';
 import { AttackEffect, DefendEffect } from '$lib/catalog/models/effects';
 import { plus } from '$lib/catalog/models/expressions';
 import { Item } from '$lib/catalog/models/inventory';
-import { Opportunity } from '$lib/catalog/models/reaction';
 import { strength } from '$lib/catalog/models/stats';
 import parry from '../../properties/parry';
 import weapon from '../../properties/weapon';

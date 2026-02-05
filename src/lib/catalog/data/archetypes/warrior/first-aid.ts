@@ -1,4 +1,4 @@
-import { Action } from '$lib/catalog/models/action';
+import { Action } from '$lib/catalog/models/capabilities';
 import { HealEffect } from '$lib/catalog/models/effects';
 import { Skill } from '$lib/catalog/models/skill';
 import { upgradable } from '$lib/catalog/models/upgrades';

@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { Action } from '$lib/catalog/models/action';
+	import { Action, Constant, Reaction } from '$lib/catalog/models/capabilities';
 	import type { Capability } from '$lib/catalog/models/capability';
-	import { Constant } from '$lib/catalog/models/constant';
-	import { Reaction } from '$lib/catalog/models/reaction';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import InlineSvg from '../InlineSvg.svelte';
 	import EffectList from '../effects/EffectList.svelte';

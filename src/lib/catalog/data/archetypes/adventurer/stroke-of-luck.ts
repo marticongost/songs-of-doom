@@ -1,5 +1,5 @@
+import { Opportunity } from '$lib/catalog/models/capabilities';
 import { RedrawFateEffect, ResultsTableEffect } from '$lib/catalog/models/effects';
-import { Opportunity } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
 import { upgradable } from '$lib/catalog/models/upgrades';
 

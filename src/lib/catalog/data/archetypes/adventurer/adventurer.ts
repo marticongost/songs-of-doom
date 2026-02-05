@@ -1,5 +1,5 @@
-import { Action } from '$lib/catalog/models/action';
 import { Archetype } from '$lib/catalog/models/archetype';
+import { Action } from '$lib/catalog/models/capabilities';
 import { AttackEffect } from '$lib/catalog/models/effects';
 import { strength } from '$lib/catalog/models/stats';
 import standard from '../../properties/standard';

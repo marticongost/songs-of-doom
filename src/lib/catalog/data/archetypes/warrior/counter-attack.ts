@@ -1,3 +1,4 @@
+import { Opportunity } from '$lib/catalog/models/capabilities';
 import {
 	ModifyCapabilityCostEffect,
 	ModifyDamageEffect,
@@ -6,7 +7,6 @@ import {
 	TriggerAttackEffect
 } from '$lib/catalog/models/effects';
 import { effectiveDefense, gte } from '$lib/catalog/models/expressions';
-import { Opportunity } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
 import { upgradable } from '$lib/catalog/models/upgrades';
 

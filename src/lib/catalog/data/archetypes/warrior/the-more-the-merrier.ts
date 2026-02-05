@@ -1,6 +1,6 @@
+import { Opportunity } from '$lib/catalog/models/capabilities';
 import { DrawFocusEffect } from '$lib/catalog/models/effects';
 import { gte, NearbyEnemiesExpression } from '$lib/catalog/models/expressions';
-import { Opportunity } from '$lib/catalog/models/reaction';
 import { Trait } from '$lib/catalog/models/trait';
 
 export default new Trait({

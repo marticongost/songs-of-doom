@@ -1,6 +1,6 @@
+import { Obligation, Opportunity } from './capabilities';
 import { TriggerAttackEffect } from './effects';
 import { AddChargesEffect } from './effects/recharge';
-import { Obligation, Opportunity } from './reaction';
 
 export const fullyRechargeOnChapterStart = new Obligation({
 	triggers: ['chapterStart'],

@@ -1,4 +1,4 @@
-import { Action } from '$lib/catalog/models/action';
+import { Action, Obligation } from '$lib/catalog/models/capabilities';
 import {
 	RemoveChargesEffect,
 	RepeatCapabilityEffect,
@@ -9,7 +9,6 @@ import { AddChargesEffect } from '$lib/catalog/models/effects/recharge';
 import type { ResultsTableEntryProps } from '$lib/catalog/models/effects/resultstable';
 import { charges } from '$lib/catalog/models/expressions';
 import { plus } from '$lib/catalog/models/expressions/scalar-operation';
-import { Obligation } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
 import { upgradable } from '$lib/catalog/models/upgrades';
 

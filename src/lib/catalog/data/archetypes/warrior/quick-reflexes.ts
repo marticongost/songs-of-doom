@@ -1,6 +1,5 @@
-import { Constant } from '$lib/catalog/models/constant';
+import { Constant, Opportunity } from '$lib/catalog/models/capabilities';
 import { ChangeStatsEffect, DefendEffect } from '$lib/catalog/models/effects';
-import { Opportunity } from '$lib/catalog/models/reaction';
 import { Trait } from '$lib/catalog/models/trait';
 
 export default new Trait({

@@ -1,4 +1,4 @@
-import { Constant } from '$lib/catalog/models/constant';
+import { Constant } from '$lib/catalog/models/capabilities';
 import { ConferPropertiesEffect } from '$lib/catalog/models/effects';
 import { Item } from '$lib/catalog/models/inventory';
 import armor from '../../properties/armor';

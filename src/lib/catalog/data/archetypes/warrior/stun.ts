@@ -1,7 +1,7 @@
+import { Opportunity } from '$lib/catalog/models/capabilities';
 import { NegateDamageEffect, RemoveChargesEffect } from '$lib/catalog/models/effects';
 import { result } from '$lib/catalog/models/expressions';
 import type { ScalarExpressionType } from '$lib/catalog/models/expressions/scalar-expression';
-import { Opportunity } from '$lib/catalog/models/reaction';
 import { Skill } from '$lib/catalog/models/skill';
 import { upgradable } from '$lib/catalog/models/upgrades';
 
