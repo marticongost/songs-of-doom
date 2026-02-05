@@ -1,15 +1,16 @@
 import type { LocalisedText } from '$lib/localisation';
 import { getEntryMetadata } from '..';
-import type { Capability } from './capability';
-import type { EntityType } from './properties/entitytypes';
-import type { Property } from './properties';
 import type { Archetype } from './archetype';
+import type { Capability } from './capability';
+import type { Property } from './properties';
+import type { EntityType } from './properties/entitytypes';
 
 export interface EntityProps<T> {
 	title: LocalisedText;
 	description?: LocalisedText;
 	properties?: Array<Property>;
 	capabilities?: Array<Capability>;
+	attachmentCapabilities?: Array<Capability>;
 	maxCharges?: number;
 	xpCost?: number;
 	goldCost?: number;
@@ -32,6 +33,7 @@ export abstract class Entity {
 	readonly description?: LocalisedText;
 	protected readonly explicitProperties: Array<Property>;
 	readonly capabilities: Array<Capability>;
+	readonly attachmentCapabilities: Array<Capability>;
 	readonly maxCharges: number;
 	readonly xpCost?: number;
 	readonly goldCost?: number;
@@ -56,6 +58,7 @@ export abstract class Entity {
 		description,
 		properties,
 		capabilities,
+		attachmentCapabilities,
 		maxCharges,
 		xpCost,
 		goldCost,
@@ -66,6 +69,7 @@ export abstract class Entity {
 		this.description = description;
 		this.explicitProperties = properties ?? [];
 		this.capabilities = capabilities ?? [];
+		this.attachmentCapabilities = attachmentCapabilities ?? [];
 		this.maxCharges = maxCharges ?? 0;
 		this.xpCost = xpCost;
 		this.goldCost = goldCost;

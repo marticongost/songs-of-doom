@@ -1,3 +1,4 @@
+export { AttachEffect } from './attach';
 export { AttackEffect } from './attack';
 export { ChangeStatsEffect } from './changestats';
 export { ChaseEffect } from './chase';

@@ -81,6 +81,14 @@
 	<div class="body">
 		<div class="description">{entity.description}</div>
 		<CapabilityList capabilities={entity.capabilities} />
+		{#if entity.attachmentCapabilities.length > 0}
+			<div class="attachment">
+				<div class="attachment-title">
+					<Text ca="Mentre estigui vinculada" es="Mientras esté vinculada" en="While attached" />
+				</div>
+				<CapabilityList capabilities={entity.attachmentCapabilities} />
+			</div>
+		{/if}
 	</div>
 </svelte:element>
 
@@ -197,5 +205,17 @@
 	.body {
 		@include rz.column(sm);
 		@include rz.padding(sm);
+	}
+
+	.attachment {
+		@include rz.padding(sm);
+		background-color: rgba(black, 0.2);
+	}
+
+	.attachment-title {
+		font-weight: bold;
+		font-family: var(--heading-font);
+		color: var(--text-heading-color);
+		margin-bottom: rz.size(sm);
 	}
 </style>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		AttachEffect,
 		AttackEffect,
 		ChangeStatsEffect,
 		ChaseEffect,
@@ -29,6 +30,7 @@
 
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import AddChargeEffectChip from './AddChargeEffectChip.svelte';
+	import AttachEffectChip from './AttachEffectChip.svelte';
 	import AttackEffectChip from './AttackEffectChip.svelte';
 	import ChangeStatsEffectChip from './ChangeStatsEffectChip.svelte';
 	import ChaseEffectChip from './ChaseEffectChip.svelte';
@@ -77,6 +79,8 @@
 		<AttackEffectChip {effect} />
 	{:else if effect instanceof AddChargesEffect}
 		<AddChargeEffectChip {effect} />
+	{:else if effect instanceof AttachEffect}
+		<AttachEffectChip {effect} />
 	{:else if effect instanceof DefendEffect}
 		<DefendEffectChip {effect} />
 	{:else if effect instanceof DrawFocusEffect}

@@ -19,9 +19,10 @@
 {#snippet text(localisedText: LocalisedText)}
 	{#if relation === 'possessive'}
 		{possessiveRelation(translate(localisedText, locale), locale)}
-	{:else if relation === 'to'}
-		<Text ca="a" es="a" en="to" />
 	{:else}
+		{#if relation === 'to'}
+			<Text ca="a" es="a" en="to" />
+		{/if}
 		{translate(localisedText, locale)}
 	{/if}
 {/snippet}
