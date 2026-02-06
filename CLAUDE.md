@@ -152,6 +152,20 @@ This project includes custom Claude Code skills:
 - `/update-rules-reference` - Create/update rules reference entries; use to understand game concepts
 - `/update-instructions` - Update CLAUDE.md and all skill files to reflect the current state of the project
 
+## Post-Implementation Validation
+
+After implementing changes, validate the project by running:
+
+```bash
+npm run lint      # Check formatting and lint rules
+npm run check     # TypeScript type checking
+npm run test      # Run tests
+```
+
+If any command fails, fix the errors and re-run validation until all commands pass.
+
+Don't suppress linting errors! If that seems to be the only way of fixing an issue, suggest it to the user, but do NOT do it silently!
+
 ## Important Conventions
 
 - **ESM**: Use `import.meta.dirname` not `__dirname`
