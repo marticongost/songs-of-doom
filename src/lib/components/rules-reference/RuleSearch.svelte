@@ -8,9 +8,11 @@ Search input that filters rule entries by title and body content.
 ```
 -->
 <script lang="ts">
+	import SearchInput from '$lib/components/forms/SearchInput.svelte';
 	import { getLocale } from '$lib/context/locale';
 	import { translate } from '$lib/localisation';
 	import type { RuleEntry } from '$lib/rules-reference/types';
+	import { matchesAllTerms, parseSearchQuery } from '$lib/search';
 
 	interface Props {
 		/** All rule entries to search through */
@@ -27,13 +29,13 @@ Search input that filters rule entries by title and body content.
 	let query = $state('');
 
 	const filtered = $derived.by(() => {
-		const q = query.trim().toLowerCase();
-		if (!q) return entries;
+		const terms = parseSearchQuery(query);
+		if (terms.length === 0) return entries;
 
 		return entries.filter((entry) => {
-			const title = translate(entry.title, locale).toLowerCase();
-			const body = (bodyTexts[entry.slug] ?? '').toLowerCase();
-			return title.includes(q) || body.includes(q);
+			const title = translate(entry.title, locale);
+			const body = bodyTexts[entry.slug] ?? '';
+			return matchesAllTerms(title, terms) || matchesAllTerms(body, terms);
 		});
 	});
 
@@ -43,13 +45,9 @@ Search input that filters rule entries by title and body content.
 </script>
 
 <div class="rule-search">
-	<input
-		type="search"
-		placeholder={translate(
-			{ ca: 'Cercar regles...', es: 'Buscar reglas...', en: 'Search rules...' },
-			locale
-		)}
+	<SearchInput
 		bind:value={query}
+		placeholder={{ ca: 'Cercar regles...', es: 'Buscar reglas...', en: 'Search rules...' }}
 	/>
 </div>
 
@@ -58,20 +56,9 @@ Search input that filters rule entries by title and body content.
 
 	.rule-search {
 		margin-bottom: rz.size(lg);
-	}
 
-	input[type='search'] {
-		width: 100%;
-		padding: rz.size(sm) rz.size(md);
-		font-size: inherit;
-		border: var(--panel-separator);
-		border-radius: rz.size(xs);
-		background: var(--panel-background-color);
-		color: inherit;
-
-		&:focus {
-			outline: 2px solid var(--text-highlight);
-			outline-offset: 1px;
+		:global(.input-wrapper) {
+			width: 100%;
 		}
 	}
 </style>
