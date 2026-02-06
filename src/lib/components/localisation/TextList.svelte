@@ -43,4 +43,6 @@
 	const { items, type = 'and', entry }: Props = $props();
 </script>
 
-{#each items as item, index}{getSeparator(index, items.length, type)}{@render entry(item)}{/each}
+{#each items as item, index (index)}{getSeparator(index, items.length, type)}{@render entry(
+		item
+	)}{/each}

@@ -18,7 +18,7 @@
 	{#if typeof result === 'number'}
 		{@render resultSnippet(result)}
 	{:else if result.min && result.max}
-		{#each Array.from({ length: result.max - result.min + 1 }, (_, i) => i + result.min!) as r}
+		{#each Array.from({ length: result.max - result.min + 1 }, (_, i) => i + result.min!) as r (r)}
 			{@render resultSnippet(r as Result)}
 		{/each}
 	{:else if result.min}

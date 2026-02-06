@@ -92,7 +92,7 @@ Placeholders use the syntax `%(name)` where `name` matches a prop or snippet.
 	const segments = $derived(parseTemplate(text));
 </script>
 
-{#each segments as segment}<!--
+{#each segments as segment, i (i)}<!--
 	-->{#if segment.type === 'text'}<!--
 		-->{segment.value}<!--
 	-->{:else if typeof values[segment.name] === 'function'}<!--

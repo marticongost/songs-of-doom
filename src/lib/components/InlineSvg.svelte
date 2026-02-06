@@ -12,7 +12,7 @@
 	let { src, ...attributes }: Props = $props();
 
 	// Inject attributes into the <svg> tag
-	function decorate(raw: string, attrs: Record<string, any>): string {
+	function decorate(raw: string, attrs: Record<string, unknown>): string {
 		const attrString = Object.entries(attrs)
 			.map(([k, v]) => `${k}="${v}"`)
 			.join(' ');
@@ -28,6 +28,7 @@
 </script>
 
 {#if svg}
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -- Rendering trusted SVG from internal asset map -->
 	{@html svg}
 {:else}
 	<span class="inline-svg missing" data-src={src}></span>

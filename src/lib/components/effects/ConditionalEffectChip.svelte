@@ -11,7 +11,7 @@
 	const { effect }: Props = $props();
 </script>
 
-{#each effect.cases as conditionCase}
+{#each effect.cases as conditionCase, i (i)}
 	<span class="case">
 		<ExpressionChip expression={conditionCase.condition} />
 		<ArrowIcon />

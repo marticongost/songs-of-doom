@@ -13,7 +13,7 @@
 </script>
 
 <span {...standardAttributes(attributes, 'result-table-effect-chip')}>
-	{#each effect.entries as entry}
+	{#each effect.entries as entry, i (i)}
 		<span class="entry">
 			<ResultSelectorChip class="result" result={entry.result} />
 			<ArrowIcon class="arrow-icon" />

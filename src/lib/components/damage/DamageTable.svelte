@@ -20,7 +20,7 @@
 </script>
 
 <span {...standardAttributes(attributes, 'damage-table')}>
-	{#each sortedDamageEntries as entry}
+	{#each sortedDamageEntries as entry, i (i)}
 		<span class="entry">
 			<ResultSelectorChip result={entry.result} />
 			<DamageChip amount={entry.inflictedDamage} />

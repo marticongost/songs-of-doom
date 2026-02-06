@@ -11,7 +11,7 @@
 
 {#if capabilities.length > 0}
 	<ul class="capability-list">
-		{#each capabilities as capability}
+		{#each capabilities as capability, i (i)}
 			<li>
 				<CapabilityChip {capability} />
 			</li>

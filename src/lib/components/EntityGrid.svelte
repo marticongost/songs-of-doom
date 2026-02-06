@@ -14,7 +14,7 @@
 
 {#if entities.length > 0}
 	<div {...standardAttributes(attributes, 'entity-grid')}>
-		{#each entities as entity}
+		{#each entities as entity (entity.variantId)}
 			<EntityComponent {entity} />
 		{/each}
 	</div>

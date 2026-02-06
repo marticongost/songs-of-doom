@@ -11,7 +11,7 @@
 </script>
 
 <div {...standardAttributes(attributes, 'creature-stats')}>
-	{#each Object.entries(stats) as [stat, value]}
+	{#each Object.entries(stats) as [stat, value] (stat)}
 		<span class="creature-stat" data-stat={stat}>
 			<StatIcon stat={stat as CreatureStatType} />
 			<span class="creature-stat-value">{value}</span>
