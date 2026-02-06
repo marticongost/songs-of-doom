@@ -14,13 +14,13 @@ Use this skill when the user needs to define a new type of expression—either a
 There are two main categories of expressions:
 
 1. **Boolean expressions** extend `BooleanExpression` and represent conditions or predicates (e.g., "is engaged", "has property X")
-2. **Scalar expressions** extend `ScalarExpression` and represent numeric values (e.g., "distance to target", "number of nearby enemies")
+2. **Scalar expressions** extend `ScalarExpression` and represent numeric values (e.g., "distance to target", "count of targets")
 
 ## Model conventions
 
 ### Basic structure
 
-- **File name**: kebab-case (e.g. `engaged.ts`, `distance.ts`, `nearby-enemies.ts`), placed in `src/lib/catalog/models/expressions/`
+- **File name**: kebab-case (e.g. `engaged.ts`, `distance.ts`, `count.ts`), placed in `src/lib/catalog/models/expressions/`
 - **Class**: extends either `BooleanExpression` or `ScalarExpression` (imported from their respective files)
 - **Fields**: all `readonly`, assigned in the constructor
 - **Constructor**: takes a single destructured props object when needed, calls `super()` first
@@ -66,41 +66,43 @@ export const engaged = new EngagedExpression();
 When an expression needs configuration, define a props interface:
 
 ```typescript
-import type { LocalisedText } from '$lib/localisation';
+import { Target, type TargetProps } from '../target';
 import { ScalarExpression } from './scalar-expression';
 
 /**
- * Props for creating a NearbyEnemiesExpression.
+ * Props for creating a CountExpression.
  */
-export interface NearbyEnemiesExpressionProps {
-	/** The maximum distance (in steps) within which to count enemies. */
-	distance: number;
+export interface CountExpressionProps {
+	/** The target to count. Can be a TargetProps shorthand or a Target instance. */
+	target: TargetProps | Target;
 }
 
 /**
- * A scalar expression that returns the count of enemies within a specified distance.
+ * A scalar expression that returns the count of targets matching the specified criteria.
  * This is a scalar value that can be used in comparisons or arithmetic operations.
  *
+ * The target can include a condition to further filter what is counted.
+ *
  * Examples:
- * - `gte(new NearbyEnemiesExpression({ distance: 0 }), 2)` - at least 2 enemies at same location (normalizes to `gt(..., 1)`)
- * - `gt(new NearbyEnemiesExpression({ distance: 1 }), 0)` - at least 1 enemy within 1 step
+ * - `count('allEnemies')` - count all enemies
+ * - `count({ type: 'allEnemies', condition: lte(distance, 2) })` - count enemies within 2 steps
+ * - `gte(count('allEnemies'), 2)` - at least 2 enemies exist
  */
-export class NearbyEnemiesExpression extends ScalarExpression {
-	/** The maximum distance (in steps) within which to count enemies. */
-	readonly distance: number;
+export class CountExpression extends ScalarExpression {
+	/** The target to count. */
+	readonly target: Target;
 
-	constructor({ distance }: NearbyEnemiesExpressionProps) {
+	constructor({ target }: CountExpressionProps) {
 		super();
-		this.distance = distance;
+		this.target = target instanceof Target ? target : new Target(target);
 	}
+}
 
-	translate(): LocalisedText {
-		return {
-			ca: `enemics a ${this.distance} passos`,
-			es: `enemigos a ${this.distance} pasos`,
-			en: `enemies at ${this.distance} steps`
-		};
-	}
+/**
+ * Creates a CountExpression that counts the specified targets.
+ */
+export function count(target: TargetProps | Target): CountExpression {
+	return new CountExpression({ target });
 }
 ```
 
@@ -175,7 +177,7 @@ When the user requests a new expression:
 ### Scalar expressions (extend ScalarExpression)
 
 - Measurements: `distance` (singleton with `translate()` and `getComparisonShorthand()`)
-- Counts: `NearbyEnemiesExpression` (configurable with props)
+- Counts: `CountExpression` (configurable with target props, requires custom ExpressionChip rendering)
 - Wound tracking: `remainingWounds`, `receivedWounds` (singletons with `translate()` and shorthands)
 - Stats and numeric primitives are handled separately
 

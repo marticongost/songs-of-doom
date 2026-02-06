@@ -36,9 +36,9 @@ export {
 
 // Scalar expressions
 export { charges, ChargesExpression, type ChargesExpressionProps } from './charges';
+export { count, CountExpression, type CountExpressionProps } from './count';
 export { distance, DistanceExpression } from './distance';
 export { effectiveDefense, EffectiveDefenseExpression } from './effective-defense';
-export { NearbyEnemiesExpression, type NearbyEnemiesExpressionProps } from './nearby-enemies';
 
 /**
  * Returns 1 if the expression is guaranteed to be singular (the number 1),

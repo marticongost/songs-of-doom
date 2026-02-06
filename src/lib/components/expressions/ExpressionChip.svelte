@@ -7,6 +7,7 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 	import {
 		AndExpression,
 		ComparisonExpression,
+		CountExpression,
 		Expression,
 		NotExpression,
 		OrExpression,
@@ -22,6 +23,7 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 	import PropertyChip from '../properties/PropertyChip.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import StatIcon from '../stats/StatIcon.svelte';
+	import TargetChip from '../targets/TargetChip.svelte';
 
 	interface Props extends StandardAttributeProps {
 		expression?: ScalarExpressionType | BooleanExpressionType;
@@ -76,6 +78,11 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		<!-- Boolean expressions -->
 	{:else if expression instanceof Property}
 		<PropertyChip property={expression} />
+
+		<!-- Count expression -->
+	{:else if expression instanceof CountExpression}
+		<Text ca="Número de" es="Número de" en="Number of" />
+		<TargetChip target={expression.target} />
 	{/if}
 {/snippet}
 

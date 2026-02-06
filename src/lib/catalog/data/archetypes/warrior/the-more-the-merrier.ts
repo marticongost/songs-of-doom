@@ -1,6 +1,6 @@
 import { Opportunity } from '$lib/catalog/models/capabilities';
 import { DrawFocusEffect } from '$lib/catalog/models/effects';
-import { gte, NearbyEnemiesExpression } from '$lib/catalog/models/expressions';
+import { count, distance, eq, gte } from '$lib/catalog/models/expressions';
 import { Trait } from '$lib/catalog/models/trait';
 
 export default new Trait({
@@ -14,7 +14,7 @@ export default new Trait({
 		new Opportunity({
 			triggers: ['chapterStart'],
 			effects: [
-				gte(new NearbyEnemiesExpression({ distance: 0 }), 2).then(
+				gte(count({ type: 'allEnemies', condition: eq(distance, 0) }), 2).then(
 					new DrawFocusEffect({ amount: 1 })
 				)
 			]
