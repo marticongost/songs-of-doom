@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { KeyboardNavigation } from '$lib/attachments/keyboard-nav';
 	import { entityTypes, type EntityTypeId } from '$lib/catalog/models/properties/entitytypes';
 	import EntityGrid from '$lib/components/EntityGrid.svelte';
 	import Dropdown from '$lib/components/forms/Dropdown.svelte';
@@ -17,6 +18,8 @@
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
+
+	const nav = new KeyboardNavigation({ mode: 'grid' });
 
 	// URL parameter names
 	const sortParam = 'sort';
@@ -123,6 +126,7 @@
 
 <div class="toolbar">
 	<SearchInput
+		{@attach nav.searchInputAttachment()}
 		value={currentSearch}
 		oninput={onSearchInput}
 		autofocus
@@ -132,7 +136,7 @@
 	<SortDropdown options={sortOptions} value={currentSort} onChange={onSortChange} />
 </div>
 
-<EntityGrid entities={sorted} />
+<EntityGrid entities={sorted} keyboardNav={nav} />
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { KeyboardNavigation } from '$lib/attachments/keyboard-nav';
 	import type { Entity } from '$lib/catalog/models/entity';
 	import Card from '$lib/components/Card.svelte';
 	import type { Component } from 'svelte';
@@ -7,13 +8,18 @@
 	interface Props extends StandardAttributeProps {
 		entities: Entity[];
 		EntityComponent?: Component<{ entity: Entity }>;
+		/** Optional keyboard navigation handler */
+		keyboardNav?: KeyboardNavigation;
 	}
 
-	const { entities, EntityComponent = Card, ...attributes }: Props = $props();
+	const { entities, EntityComponent = Card, keyboardNav, ...attributes }: Props = $props();
 </script>
 
 {#if entities.length > 0}
-	<div {...standardAttributes(attributes, 'entity-grid')}>
+	<div
+		{...standardAttributes(attributes, 'entity-grid')}
+		{@attach keyboardNav?.resultsAttachment()}
+	>
 		{#each entities as entity (entity.variantId)}
 			<EntityComponent {entity} />
 		{/each}
