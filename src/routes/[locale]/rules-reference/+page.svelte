@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { onMount, tick } from 'svelte';
+	import { KeyboardNavigation } from '$lib/attachments/keyboard-nav';
 	import RuleEntryComponent from '$lib/components/rules-reference/RuleEntry.svelte';
 	import RuleSearch from '$lib/components/rules-reference/RuleSearch.svelte';
 	import type { RuleEntry } from '$lib/rules-reference/types';
+	import { onMount, tick } from 'svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -11,6 +12,11 @@
 	const visibleEntries = $derived(filteredEntries ?? data.entries);
 	let bodyTexts = $state<Record<string, string>>({});
 	let container: HTMLElement;
+
+	const nav = new KeyboardNavigation({
+		mode: 'column',
+		itemSelector: '.rule-entry'
+	});
 
 	function handleFilter(filtered: Array<RuleEntry>) {
 		filteredEntries = filtered;
@@ -43,9 +49,14 @@
 </script>
 
 <div class="rules-reference">
-	<RuleSearch entries={data.entries} {bodyTexts} onFilter={handleFilter} />
+	<RuleSearch
+		{@attach nav.searchInputAttachment()}
+		entries={data.entries}
+		{bodyTexts}
+		onFilter={handleFilter}
+	/>
 
-	<div class="rules-container" bind:this={container}>
+	<div class="rules-container" bind:this={container} {@attach nav.resultsAttachment()}>
 		{#each visibleEntries as entry (entry.slug)}
 			<RuleEntryComponent {entry} />
 		{/each}

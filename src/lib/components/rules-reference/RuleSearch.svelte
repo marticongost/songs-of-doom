@@ -9,12 +9,16 @@ Search input that filters rule entries by title and body content.
 -->
 <script lang="ts">
 	import SearchInput from '$lib/components/forms/SearchInput.svelte';
+	import {
+		standardAttributes,
+		type StandardAttributeProps
+	} from '$lib/components/standardattributes';
 	import { getLocale } from '$lib/context/locale';
 	import { translate } from '$lib/localisation';
 	import type { RuleEntry } from '$lib/rules-reference/types';
 	import { matchesAllTerms, parseSearchQuery } from '$lib/search';
 
-	interface Props {
+	interface Props extends StandardAttributeProps {
 		/** All rule entries to search through */
 		entries: Array<RuleEntry>;
 		/** Body text by slug, extracted from DOM after mount */
@@ -23,7 +27,7 @@ Search input that filters rule entries by title and body content.
 		onFilter: (filtered: Array<RuleEntry>) => void;
 	}
 
-	const { entries, bodyTexts, onFilter }: Props = $props();
+	const { entries, bodyTexts, onFilter, ...attributes }: Props = $props();
 	const locale = getLocale();
 
 	let query = $state('');
@@ -46,6 +50,7 @@ Search input that filters rule entries by title and body content.
 
 <div class="rule-search">
 	<SearchInput
+		{...standardAttributes(attributes)}
 		bind:value={query}
 		autofocus={true}
 		placeholder={{ ca: 'Cercar regles...', es: 'Buscar reglas...', en: 'Search rules...' }}
