@@ -14,7 +14,7 @@ export default new Trait({
 		new Opportunity({
 			triggers: ['chapterStart'],
 			effects: [
-				gte(count({ type: 'allEnemies', condition: eq(distance, 0) }), 2).then(
+				gte(count({ type: 'enemy', condition: eq(distance, 0) }), 2).then(
 					new DrawFocusEffect({ amount: 1 })
 				)
 			]

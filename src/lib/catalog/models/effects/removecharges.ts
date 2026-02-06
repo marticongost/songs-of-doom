@@ -1,6 +1,6 @@
 import { finalise } from '$lib/modelling';
 import type { ScalarExpressionType } from '../expressions';
-import { Target, type TargetProps } from '../target';
+import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
 /**
@@ -8,7 +8,7 @@ import { Effect } from './effect';
  */
 export interface RemoveChargesEffectProps {
 	amount?: ScalarExpressionType;
-	target?: Target | TargetProps;
+	target?: TargetSpec;
 }
 
 /**

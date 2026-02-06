@@ -1,11 +1,11 @@
 import { finalise } from '$lib/modelling';
 import type { Property } from '../properties';
-import { Target, type TargetProps } from '../target';
+import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
 export interface WoundEffectProps {
 	damage: number;
-	target: TargetProps | Target;
+	target: TargetSpec;
 	properties?: Array<Property>;
 }
 

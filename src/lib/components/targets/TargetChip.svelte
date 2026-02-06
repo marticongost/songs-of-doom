@@ -1,18 +1,23 @@
 <script lang="ts">
-	import type { Target } from '$lib/catalog/models/target';
+	import type { Target, TargetCardinality, TargetDiscriminator } from '$lib/catalog/models/target';
 	import ExpressionChip from '$lib/components/expressions/ExpressionChip.svelte';
 	import { getLocale } from '$lib/context/locale';
 	import { possessiveRelation, toRelation, translate, type LocalisedText } from '$lib/localisation';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
 	interface Props extends StandardAttributeProps {
-		target: Target;
+		target: Target | TargetDiscriminator;
 		ellideSelf?: boolean;
 		relation?: 'possessive' | 'to';
+		cardinality?: TargetCardinality;
 	}
 
-	const { target, ellideSelf = false, relation, ...attributes }: Props = $props();
+	const { target, ellideSelf = false, relation, cardinality, ...attributes }: Props = $props();
 	const locale = getLocale();
+
+	const isPlural = $derived(
+		(cardinality ?? ('cardinality' in target && target.cardinality)) === 'multiple'
+	);
 </script>
 
 {#snippet text(localisedText: LocalisedText)}
@@ -35,25 +40,23 @@
 		{:else if target.type === 'defender'}
 			{@render text({ ca: 'el defensor', es: 'el defensor', en: 'the defender' })}
 		{:else if target.type === 'enemy'}
-			{@render text({ ca: 'un enemic', es: 'un enemigo', en: 'an enemy' })}
-		{:else if target.type === 'allEnemies'}
-			{@render text({ ca: 'tots els enemics', es: 'todos los enemigos', en: 'all enemies' })}
+			{#if isPlural}
+				{@render text({ ca: 'enemics', es: 'enemigos', en: 'enemies' })}
+			{:else}
+				{@render text({ ca: 'un enemic', es: 'un enemigo', en: 'an enemy' })}
+			{/if}
 		{:else if target.type === 'ally'}
-			{@render text({ ca: 'un aliat', es: 'un aliado', en: 'an ally' })}
-		{:else if target.type === 'allAllies'}
-			{@render text({ ca: 'tots els aliats', es: 'todos los aliados', en: 'all allies' })}
+			{#if isPlural}
+				{@render text({ ca: 'aliats', es: 'aliados', en: 'allies' })}
+			{:else}
+				{@render text({ ca: 'un aliat', es: 'un aliado', en: 'an ally' })}
+			{/if}
 		{:else if target.type === 'object'}
-			{@render text({ ca: 'un objecte', es: 'un objeto', en: 'an object' })}
-		{:else if target.type === 'allObjects'}
-			{@render text({ ca: 'tots els objectes', es: 'todos los objetos', en: 'all objects' })}
-		{:else if target.type === 'ownedObject'}
-			{@render text({ ca: 'un objecte propi', es: 'un objeto propio', en: 'an owned object' })}
-		{:else if target.type === 'allOwnedObjects'}
-			{@render text({
-				ca: 'tots els objectes propis',
-				es: 'todos los objetos propios',
-				en: 'all owned objects'
-			})}
+			{#if isPlural}
+				{@render text({ ca: 'objectes', es: 'objetos', en: 'objects' })}
+			{:else}
+				{@render text({ ca: 'un objecte', es: 'un objeto', en: 'an object' })}
+			{/if}
 		{/if}
 		<ExpressionChip expression={target.condition} />
 	</span>

@@ -26,6 +26,7 @@ export { and, AndExpression, not, NotExpression, or, OrExpression } from './logi
 
 // Boolean expressions
 export { engaged, EngagedExpression } from './engaged';
+export { owned, OwnedExpression } from './owned';
 export {
 	receivedWounds,
 	ReceivedWoundsExpression,

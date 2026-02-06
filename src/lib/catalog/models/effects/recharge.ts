@@ -1,12 +1,12 @@
 import { finalise } from '$lib/modelling';
-import { Target, type TargetProps } from '../target';
+import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
 export type RechargeAmount = number | 'max';
 
 export interface RechargeEffectProps {
 	amount: RechargeAmount;
-	target?: Target | TargetProps;
+	target?: TargetSpec;
 }
 
 export class AddChargesEffect extends Effect {

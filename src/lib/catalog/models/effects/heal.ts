@@ -1,6 +1,6 @@
 import type { ScalarExpressionType } from '$lib/catalog/models/expressions';
 import { finalise } from '$lib/modelling';
-import { Target, type TargetProps } from '../target';
+import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
 /**
@@ -10,7 +10,7 @@ export interface HealEffectProps {
 	/** The amount of damage to remove from the target. */
 	amount: ScalarExpressionType;
 	/** Who benefits from the healing. Defaults to self. */
-	target?: Target | TargetProps;
+	target?: TargetSpec;
 }
 
 /**

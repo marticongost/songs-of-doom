@@ -1,6 +1,6 @@
 import { finalise } from '$lib/modelling';
 import { type ScalarExpressionType } from '../expressions';
-import { Target, type TargetProps } from '../target';
+import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
 export type DiscardCardSelection = 'owner' | 'random';
@@ -13,7 +13,7 @@ export interface DiscardCardEffectProps {
 	 * Who is affected by the effect.
 	 * Defaults to "self".
 	 */
-	target?: Target | TargetProps;
+	target?: TargetSpec;
 
 	/**
 	 * How many cards to discard from the target's hand.

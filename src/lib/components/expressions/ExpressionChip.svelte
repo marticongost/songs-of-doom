@@ -81,8 +81,8 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 
 		<!-- Count expression -->
 	{:else if expression instanceof CountExpression}
-		<Text ca="Número de" es="Número de" en="Number of" />
-		<TargetChip target={expression.target} />
+		<Text ca="Número" es="Número" en="Number" />
+		<TargetChip target={expression.target} cardinality="multiple" relation="possessive" />
 	{/if}
 {/snippet}
 

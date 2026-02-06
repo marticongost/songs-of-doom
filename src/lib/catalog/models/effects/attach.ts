@@ -1,5 +1,5 @@
 import { finalise } from '$lib/modelling';
-import { Target, type TargetProps } from '../target';
+import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
 /**
@@ -7,7 +7,7 @@ import { Effect } from './effect';
  */
 export interface AttachEffectProps {
 	/** The card to attach to. */
-	target: Target | TargetProps;
+	target: TargetSpec;
 }
 
 /**

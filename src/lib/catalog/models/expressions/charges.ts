@@ -1,6 +1,6 @@
 import type { LocalisedText } from '$lib/localisation';
 import { finalise } from '$lib/modelling';
-import { Target } from '../target';
+import { TargetDiscriminator, type TargetDiscriminatorSpec } from '../target';
 import { ScalarExpression } from './scalar-expression';
 
 /**
@@ -8,7 +8,7 @@ import { ScalarExpression } from './scalar-expression';
  */
 export interface ChargesExpressionProps {
 	/** The target card whose charges are to be counted. */
-	target?: Target;
+	target?: TargetDiscriminator | TargetDiscriminatorSpec;
 }
 
 /**
@@ -16,16 +16,16 @@ export interface ChargesExpressionProps {
  * This is a scalar value that can be used in comparisons or arithmetic operations.
  *
  * Examples:
- * - `gt(new ChargesExpression({ target: new Target('self') }), 0)` - has at least 1 charge
- * - `gte(new ChargesExpression({ target: new Target('ownedObject') }), 3)` - owned object has at least 3 charges
+ * - `gt(new ChargesExpression({ target: new TargetDiscriminator('self') }), 0)` - has at least 1 charge
+ * - `gte(new ChargesExpression({ target: { type: 'object', condition: owned } }), 3)` - owned object has at least 3 charges
  */
 export class ChargesExpression extends ScalarExpression {
 	/** The target card whose charges are to be counted. */
-	readonly target: Target;
+	readonly target: TargetDiscriminator;
 
 	constructor({ target }: ChargesExpressionProps) {
 		super();
-		this.target = finalise(Target, target ?? 'self');
+		this.target = finalise(TargetDiscriminator, target ?? 'self');
 	}
 
 	translate(): LocalisedText {
