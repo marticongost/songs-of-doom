@@ -29,7 +29,7 @@ export default upgradable(Skill, 2, (variants) => ({
 						new ResultsTableEffect({
 							entries: [
 								{
-									result: '1+',
+									result: '1-2',
 									effects: [new AddChargesEffect({ amount: 1 }), new RepeatCapabilityEffect()]
 								},
 								...variants.ifMatches(2, {
