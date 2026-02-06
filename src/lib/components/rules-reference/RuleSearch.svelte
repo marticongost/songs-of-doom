@@ -47,6 +47,7 @@ Search input that filters rule entries by title and body content.
 <div class="rule-search">
 	<SearchInput
 		bind:value={query}
+		autofocus={true}
 		placeholder={{ ca: 'Cercar regles...', es: 'Buscar reglas...', en: 'Search rules...' }}
 	/>
 </div>
