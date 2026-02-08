@@ -22,8 +22,9 @@ body {
 	$palette-red: #a15555;
 	$palette-thatch: #bd9898;
 	$palette-green: #55a155;
-	$palette-yellow: #a1a155;
+	$palette-old-gold: #d2b532;
 	$palette-worn-white: #e9e0cd;
+	$palette-brandy-punch: #d6902d;
 	$palette-gold: #8a6519;
 	$palette-blue: #5555a1;
 	$palette-purple: #7655a1;
@@ -45,10 +46,10 @@ body {
 	--focus-agility-color: #{$palette-green};
 	--stat-strength-color: #{$palette-brown};
 	--focus-strength-color: #{$palette-brown};
-	--stat-intelligence-color: #{$palette-purple};
-	--focus-intelligence-color: #{$palette-purple};
-	--stat-charisma-color: #{$palette-yellow};
-	--focus-charisma-color: #{$palette-yellow};
+	--stat-intelligence-color: #{$palette-brandy-punch};
+	--focus-intelligence-color: #{$palette-brandy-punch};
+	--stat-charisma-color: #{$palette-old-gold};
+	--focus-charisma-color: #{$palette-old-gold};
 	--stat-will-color: #{$palette-violet};
 	--focus-will-color: #{$palette-violet};
 	--stat-health-color: #{$palette-red};
