@@ -11,11 +11,15 @@
 </script>
 
 {#snippet resultSnippet(result: Result)}
-	<InlineSvg class="die" src="dice/success-{result}.svg" />
+	<InlineSvg
+		class="die"
+		data-result={result}
+		src="dice/{result === 'CF' ? 'critical-failure' : `success-${result}`}.svg"
+	/>
 {/snippet}
 
 <span {...standardAttributes(attributes, 'result-selector-chip')}>
-	{#if typeof result === 'number'}
+	{#if typeof result === 'number' || result === 'CF'}
 		{@render resultSnippet(result)}
 	{:else if result.min && result.max}
 		{#each Array.from({ length: result.max - result.min + 1 }, (_, i) => i + result.min!) as r (r)}
@@ -33,6 +37,11 @@
 	.result-selector-chip {
 		position: relative;
 		white-space: nowrap;
+		font-size: 1.2em;
+
+		:global(.die[data-result='CF']) {
+			color: var(--critical-failure-color);
+		}
 
 		:global(.die + .die) {
 			margin-left: rz.size(xs);
