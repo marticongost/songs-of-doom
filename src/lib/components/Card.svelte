@@ -18,11 +18,11 @@
 	import ChargesChip from './capabilities/ChargesChip.svelte';
 	import CardLevel from './CardLevel.svelte';
 	import Image from './Image.svelte';
-	import InlineSvg from './InlineSvg.svelte';
 	import ExperienceIndicator from './indicators/ExperienceIndicator.svelte';
 	import GoldIndicator from './indicators/GoldIndicator.svelte';
 	import HealthIndicator from './indicators/HealthIndicator.svelte';
 	import SanityIndicator from './indicators/SanityIndicator.svelte';
+	import InlineSvg from './InlineSvg.svelte';
 
 	interface Props extends StandardAttributeProps {
 		entity: Entity;
@@ -56,10 +56,10 @@
 				</div>
 			{/if}
 			{#if entity.xpCost !== undefined}
-				<ExperienceIndicator amount={entity.xpCost} style="font-size: 1.3em; align-self: center" />
+				<ExperienceIndicator amount={entity.xpCost} style="font-size: 1.1em; align-self: center" />
 			{/if}
 			{#if entity.goldCost !== undefined}
-				<GoldIndicator amount={entity.goldCost} style="font-size: 1.3em; align-self: center" />
+				<GoldIndicator amount={entity.goldCost} style="font-size: 1.1em; align-self: center" />
 			{/if}
 		</div>
 	</div>

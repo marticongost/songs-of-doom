@@ -39,7 +39,7 @@ Customize appearance via CSS custom properties:
 
 <style lang="scss">
 	.indicator-icon {
-		--icon-size: var(--indicator-icon-size, 1.4em);
+		--icon-size: var(--indicator-icon-size, 1.5em);
 		--color: var(--indicator-color, currentColor);
 		--icon-y-offset: var(--indicator-icon-y-offset, 0);
 		--value-y-offset: var(--indicator-value-y-offset, 0);
@@ -73,6 +73,7 @@ Customize appearance via CSS custom properties:
 		top: var(--value-y-offset);
 		z-index: 1;
 		font-weight: var(--value-font-weight);
+		font-family: var(--number-font);
 		color: var(--value-color);
 		text-shadow: var(--value-text-shadow);
 	}

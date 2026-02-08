@@ -48,5 +48,6 @@
 	.attribute-value {
 		font-weight: bold;
 		font-size: 1.5em;
+		font-family: var(--number-font);
 	}
 </style>

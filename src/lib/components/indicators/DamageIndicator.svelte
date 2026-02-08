@@ -19,7 +19,7 @@
 	:global(.damage-indicator) {
 		--indicator-icon-size: 1.5em;
 		--indicator-color: var(--stat-health-color);
-		--indicator-icon-y-offset: 0.1em;
+		--indicator-value-y-offset: 0.1em;
 		--indicator-value-font-weight: normal;
 		--indicator-value-text-shadow: none;
 	}

@@ -20,6 +20,5 @@
 <style lang="scss">
 	:global(.health-indicator) {
 		--indicator-color: var(--stat-health-color);
-		--indicator-value-y-offset: -0.2em;
 	}
 </style>

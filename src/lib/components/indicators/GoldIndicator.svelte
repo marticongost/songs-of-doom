@@ -13,9 +13,7 @@
 
 <style lang="scss">
 	:global(.gold-indicator) {
-		--indicator-icon-size: 1.2em;
 		--indicator-color: var(--gold-background-color);
-		--indicator-value-y-offset: -0.1em;
 		--indicator-value-color: var(--gold-foreground-color);
 		--indicator-value-text-shadow: 0 0 0.2em black;
 	}

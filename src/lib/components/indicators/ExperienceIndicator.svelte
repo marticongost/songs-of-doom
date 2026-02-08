@@ -17,9 +17,7 @@
 
 <style lang="scss">
 	:global(.experience-indicator) {
-		--indicator-icon-size: 1.2em;
 		--indicator-color: var(--experience-background-color);
-		--indicator-value-y-offset: -0.1em;
 		--indicator-value-color: var(--experience-foreground-color);
 		--indicator-value-text-shadow: none;
 	}

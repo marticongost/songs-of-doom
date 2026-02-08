@@ -20,6 +20,5 @@
 <style lang="scss">
 	:global(.sanity-indicator) {
 		--indicator-color: var(--stat-sanity-color);
-		--indicator-icon-y-offset: 0.1em;
 	}
 </style>
