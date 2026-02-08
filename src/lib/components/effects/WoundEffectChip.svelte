@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WoundEffect } from '$lib/catalog/models/effects';
-	import DamageChip from '../damage/DamageChip.svelte';
+	import DamageIndicator from '../indicators/DamageIndicator.svelte';
 	import Text from '../localisation/Text.svelte';
 	import PropertyList from '../properties/PropertyList.svelte';
 	import TargetChip from '../targets/TargetChip.svelte';
@@ -12,7 +12,7 @@
 	const { effect }: Props = $props();
 </script>
 
-<DamageChip amount={effect.damage} />
+<DamageIndicator amount={effect.damage} />
 
 {#if effect.properties.length}
 	<Text ca="amb" es="con" en="with" />

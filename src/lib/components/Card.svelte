@@ -17,12 +17,12 @@
 	import CapabilityCostList from './capabilities/CapabilityCostList.svelte';
 	import ChargesChip from './capabilities/ChargesChip.svelte';
 	import CardLevel from './CardLevel.svelte';
-	import ExperienceChip from './ExperienceChip.svelte';
-	import GoldChip from './GoldChip.svelte';
 	import Image from './Image.svelte';
 	import InlineSvg from './InlineSvg.svelte';
-	import HealthChip from './stats/HealthChip.svelte';
-	import SanityChip from './stats/SanityChip.svelte';
+	import ExperienceIndicator from './indicators/ExperienceIndicator.svelte';
+	import GoldIndicator from './indicators/GoldIndicator.svelte';
+	import HealthIndicator from './indicators/HealthIndicator.svelte';
+	import SanityIndicator from './indicators/SanityIndicator.svelte';
 
 	interface Props extends StandardAttributeProps {
 		entity: Entity;
@@ -56,10 +56,10 @@
 				</div>
 			{/if}
 			{#if entity.xpCost !== undefined}
-				<ExperienceChip amount={entity.xpCost} style="font-size: 1.3em; align-self: center" />
+				<ExperienceIndicator amount={entity.xpCost} style="font-size: 1.3em; align-self: center" />
 			{/if}
 			{#if entity.goldCost !== undefined}
-				<GoldChip amount={entity.goldCost} style="font-size: 1.3em; align-self: center" />
+				<GoldIndicator amount={entity.goldCost} style="font-size: 1.3em; align-self: center" />
 			{/if}
 		</div>
 	</div>
@@ -67,9 +67,9 @@
 		{#if entity instanceof Creature || entity instanceof Ally}
 			<AttributesSheet attributes={entity.stats} />
 			<div class="indicators">
-				<HealthChip amount={entity.stats.health} contrast={true} />
+				<HealthIndicator amount={entity.stats.health} contrast={true} />
 				{#if entity instanceof Ally}
-					<SanityChip amount={entity.stats.sanity} contrast={true} />
+					<SanityIndicator amount={entity.stats.sanity} contrast={true} />
 				{/if}
 			</div>
 		{/if}

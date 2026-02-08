@@ -3,7 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { getLocale } from '$lib/context/locale';
 	import CardLevel from './CardLevel.svelte';
-	import ExperienceChip from './ExperienceChip.svelte';
+	import ExperienceIndicator from './indicators/ExperienceIndicator.svelte';
 	import Text from './localisation/Text.svelte';
 	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
 
@@ -21,7 +21,7 @@
 >
 	<div class="title"><Text {...entity.title} /></div>
 	<CardLevel {entity} />
-	<ExperienceChip amount={entity.xpCost ?? 0} />
+	<ExperienceIndicator amount={entity.xpCost ?? 0} />
 </a>
 
 <style lang="scss">

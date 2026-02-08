@@ -2,7 +2,7 @@
 	import type { DamageTable } from '$lib/catalog/models/effects/attack';
 	import ResultSelectorChip from '../ResultSelectorChip.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
-	import DamageChip from './DamageChip.svelte';
+	import DamageIndicator from '../indicators/DamageIndicator.svelte';
 
 	interface Props extends StandardAttributeProps {
 		damage: DamageTable;
@@ -23,7 +23,7 @@
 	{#each sortedDamageEntries as entry, i (i)}
 		<span class="entry">
 			<ResultSelectorChip result={entry.result} />
-			<DamageChip amount={entry.inflictedDamage} />
+			<DamageIndicator amount={entry.inflictedDamage} />
 		</span>
 	{/each}
 </span>
