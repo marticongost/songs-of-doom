@@ -35,6 +35,7 @@ body {
 	$palette-cinder: #444;
 	$palette-dark-steel: #6c7878;
 	$palette-steel: #b0baba;
+	$palette-chatelle: #b4a8bb;
 	$palette-ivory: #f0f0e0;
 	$palette-cedar: #330f1b;
 	$palette-cocoa-brown: rgb(21, 15, 18);
@@ -99,6 +100,9 @@ body {
 	--text-highlight: #{$palette-steel};
 	--text-heading-color: #{$palette-cloud};
 	--positive-color: #{$palette-green};
+
+	// Dice
+	--critical-failure-color: #{$palette-chatelle};
 
 	// Links
 	--link-color: #{$palette-red};
