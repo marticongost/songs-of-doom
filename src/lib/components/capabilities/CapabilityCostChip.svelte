@@ -39,6 +39,8 @@ Renders a capability cost for a given type.
 		<FocusIcon focus={type as FocusType} />
 	{:else if (indicatorTypes as Array<CapabilityCostType>).includes(type)}
 		<StatChip stat={type as StatType} />
+	{:else if type === 'gold'}
+		<InlineSvg class="icon" src="gold.svg" style="color: var(--gold-background-color)" />
 	{:else if type === 'charges'}
 		<InlineSvg class="icon" src="capabilities/charge.svg" />
 	{:else if type === 'exhaust'}

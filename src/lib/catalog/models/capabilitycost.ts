@@ -3,7 +3,7 @@ import type { ScalarExpressionType } from './expressions/scalar-expression';
 import { focusTypes, type FocusType } from './focus';
 import type { IndicatorType } from './stats';
 
-export type ScalarCapabilityCostType = FocusType | IndicatorType | 'charges';
+export type ScalarCapabilityCostType = FocusType | IndicatorType | 'gold' | 'charges';
 export type CapabilityCostType = ScalarCapabilityCostType | CardTransitionType;
 export type CardTransitionType = 'exhaust' | 'discard';
 
@@ -34,6 +34,7 @@ export const cardTransitions: Record<CardTransitionType, CardTransition> = {
 
 export const scalarCapabilityCostTypes: Array<ScalarCapabilityCostType> = [
 	...focusTypes,
+	'gold',
 	'charges'
 ];
 export const capabilityCostTypes: Array<CapabilityCostType> = [
@@ -46,6 +47,7 @@ export type CapabilityCostFocusesProps = Partial<Record<FocusType, ScalarExpress
 export interface CapabilityCostProps extends CapabilityCostFocusesProps {
 	health?: number;
 	sanity?: number;
+	gold?: number;
 	charges?: number;
 	cardTransition?: CardTransitionType | CardTransition;
 }
@@ -60,10 +62,11 @@ export class CapabilityCost {
 	readonly any: ScalarExpressionType;
 	readonly health: number;
 	readonly sanity: number;
+	readonly gold: number;
 	readonly charges: number;
 	readonly cardTransition?: CardTransition;
 
-	constructor({ health, sanity, charges, cardTransition, ...focuses }: CapabilityCostProps) {
+	constructor({ health, sanity, gold, charges, cardTransition, ...focuses }: CapabilityCostProps) {
 		this.strength = focuses.strength ?? 0;
 		this.agility = focuses.agility ?? 0;
 		this.intelligence = focuses.intelligence ?? 0;
@@ -73,6 +76,7 @@ export class CapabilityCost {
 		this.any = focuses.any ?? 0;
 		this.health = health ?? 0;
 		this.sanity = sanity ?? 0;
+		this.gold = gold ?? 0;
 		this.charges = charges ?? 0;
 		this.cardTransition =
 			typeof cardTransition === 'string' ? cardTransitions[cardTransition] : cardTransition;
