@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Ally } from '$lib/catalog/models/ally';
 	import { Archetype } from '$lib/catalog/models/archetype';
 	import { Creature } from '$lib/catalog/models/creature';
 	import type { Entity } from '$lib/catalog/models/entity';
@@ -12,14 +13,16 @@
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
 	import { getLocale } from '$lib/context/locale';
+	import AttributesSheet from './AttributesSheet.svelte';
 	import CapabilityCostList from './capabilities/CapabilityCostList.svelte';
 	import ChargesChip from './capabilities/ChargesChip.svelte';
 	import CardLevel from './CardLevel.svelte';
-	import CreatureStats from './CreatureStats.svelte';
 	import ExperienceChip from './ExperienceChip.svelte';
 	import GoldChip from './GoldChip.svelte';
 	import Image from './Image.svelte';
 	import InlineSvg from './InlineSvg.svelte';
+	import HealthChip from './stats/HealthChip.svelte';
+	import SanityChip from './stats/SanityChip.svelte';
 
 	interface Props extends StandardAttributeProps {
 		entity: Entity;
@@ -61,8 +64,14 @@
 		</div>
 	</div>
 	<div class="image-row">
-		{#if entity instanceof Creature}
-			<CreatureStats stats={entity.stats} />
+		{#if entity instanceof Creature || entity instanceof Ally}
+			<AttributesSheet attributes={entity.stats} />
+			<div class="indicators">
+				<HealthChip amount={entity.stats.health} contrast={true} />
+				{#if entity instanceof Ally}
+					<SanityChip amount={entity.stats.sanity} contrast={true} />
+				{/if}
+			</div>
 		{/if}
 		<Image class="image" src="cards/{entity.id}.jpg" />
 		{#if discardReward && !discardReward.empty()}
@@ -192,6 +201,14 @@
 	.required-archetype {
 		font-size: 0.9em;
 		opacity: 0.7;
+	}
+
+	.indicators {
+		@include rz.row(xs);
+		position: absolute;
+		bottom: rz.size(xs);
+		right: rz.size(xs);
+		font-size: 1.5em;
 	}
 
 	.details {
