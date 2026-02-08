@@ -2,35 +2,40 @@ import { type ScalarExpressionType } from '../expressions';
 import type { Property } from '../properties';
 import { parseResultString, type Result, type ResultRange, type ResultString } from '../results';
 import { Effect } from './effect';
+import { ResultsTableEffect } from './resultstable';
+import { WoundEffect } from './wound';
 
 export interface FightEffectProps {
 	expression: ScalarExpressionType;
-	damage: DamageTable | Partial<Record<ResultString, number>>;
+	results: ResultsTableEffect | Partial<Record<ResultString, number | Array<Effect>>>;
 	properties?: Array<Property>;
 }
 
-export interface DamageTableEntry {
+export interface AttackResult {
 	result: Result | ResultRange;
-	inflictedDamage: number;
+	effects: Array<Effect>;
 }
-
-export type DamageTable = Array<DamageTableEntry>;
 
 export class AttackEffect extends Effect {
 	readonly expression: ScalarExpressionType;
-	readonly damage: DamageTable;
+	readonly results: ResultsTableEffect;
 	readonly properties: Array<Property>;
 
-	constructor({ expression, damage, properties }: FightEffectProps) {
+	constructor({ expression, results, properties }: FightEffectProps) {
 		super();
 		this.expression = expression;
-		this.damage =
-			damage instanceof Array
-				? damage
-				: Object.entries(damage).map(([result, inflictedDamage]) => ({
-						result: parseResultString(result as ResultString),
-						inflictedDamage
-					}));
+		this.results =
+			results instanceof ResultsTableEffect
+				? results
+				: new ResultsTableEffect({
+						entries: Object.entries(results).map(([result, outcome]) => ({
+							result: parseResultString(result as ResultString),
+							effects:
+								typeof outcome === 'number'
+									? [new WoundEffect({ damage: outcome, target: 'defender' })]
+									: outcome
+						}))
+					});
 		this.properties = properties ?? [];
 	}
 }

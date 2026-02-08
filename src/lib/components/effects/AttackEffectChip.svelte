@@ -2,9 +2,10 @@
 	import { AttackEffect } from '$lib/catalog/models/effects';
 	import ExpressionChip from '$lib/components/expressions/ExpressionChip.svelte';
 	import Parameters from '../capabilities/Parameters.svelte';
-	import DamageTable from '../damage/DamageTable.svelte';
+	import Text from '../localisation/Text.svelte';
 	import PropertyList from '../properties/PropertyList.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
+	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
 
 	interface Props extends StandardAttributeProps {
 		effect: AttackEffect;
@@ -14,23 +15,23 @@
 </script>
 
 <span {...standardAttributes(attributes, 'attack-effect-chip')}>
-	Atacar
+	<Text ca="Atacar" es="Atacar" en="Attack" />
 	<Parameters
 		><!--
 		--><ExpressionChip expression={effect.expression} /><!--
-		--><PropertyList
+			--><PropertyList
 			properties={effect.properties}
 		/><!--
-		--></Parameters
+				--></Parameters
 	>
-	<DamageTable damage={effect.damage} />
+	<ResultsTableEffectChip class="attack-results" effect={effect.results} />
 </span>
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
-
 	.attack-effect-chip {
-		@include rz.row(sm);
-		display: inline-flex;
+		:global(.attack-results) {
+			margin-left: rz.size(sm);
+		}
 	}
 </style>

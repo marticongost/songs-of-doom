@@ -19,7 +19,7 @@ export default new Archetype({
 			effects: [
 				new AttackEffect({
 					expression: strength,
-					damage: { 1: 1, 2: 2, 3: 3 }
+					results: { 1: 1, 2: 2, 3: 3 }
 				})
 			]
 		})

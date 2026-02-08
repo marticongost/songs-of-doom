@@ -26,7 +26,7 @@ export default new Item({
 			effects: [
 				new AttackEffect({
 					expression: plus(agility, 2),
-					damage: { 1: 3, 2: 4, 3: 5 },
+					results: { 1: 3, 2: 4, 3: 5 },
 					properties: [piercing.with({ value: 2 })]
 				})
 			]

@@ -19,5 +19,6 @@
 	<PropertyList properties={effect.properties} />
 {/if}
 
-<Text ca="a" es="a" en="to" />
-<TargetChip target={effect.target} />
+{#if effect.target.type !== 'defender'}
+	<TargetChip target={effect.target} relation="to" />
+{/if}

@@ -36,7 +36,7 @@ export default new Creature({
 			effects: [
 				new AttackEffect({
 					expression: strength,
-					damage: {
+					results: {
 						'1': 1,
 						'2': 3,
 						'3': 4

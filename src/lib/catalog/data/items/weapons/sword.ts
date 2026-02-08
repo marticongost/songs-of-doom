@@ -20,7 +20,7 @@ export default new Item({
 			effects: [
 				new AttackEffect({
 					expression: plus(strength, 1),
-					damage: { 1: 1, 2: 3, 3: 4 }
+					results: { 1: 1, 2: 3, 3: 4 }
 				})
 			]
 		}),
@@ -29,7 +29,7 @@ export default new Item({
 			effects: [
 				new AttackEffect({
 					expression: plus(strength, 2),
-					damage: { 1: 2, 2: 4, 3: 5 }
+					results: { 1: 2, 2: 4, 3: 5 }
 				})
 			]
 		}),

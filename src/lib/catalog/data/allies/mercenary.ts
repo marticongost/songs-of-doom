@@ -33,11 +33,11 @@ export default new Ally({
 			effects: [
 				new AttackEffect({
 					expression: strength,
-					damage: [
-						{ result: 1, inflictedDamage: 2 },
-						{ result: 2, inflictedDamage: 3 },
-						{ result: 3, inflictedDamage: 4 }
-					]
+					results: {
+						1: 2,
+						2: 3,
+						3: 4
+					}
 				})
 			]
 		}),
