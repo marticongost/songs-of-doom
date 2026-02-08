@@ -25,14 +25,7 @@
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
 
-	.entry {
-		:global(.arrow-icon) {
-			@include rz.hmargin(xs);
-		}
-
-		& + .entry:before {
-			content: ';';
-			margin-right: rz.size(xs);
-		}
+	.entry + .entry {
+		margin-left: rz.size(sm);
 	}
 </style>
