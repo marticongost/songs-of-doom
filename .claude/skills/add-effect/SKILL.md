@@ -77,6 +77,9 @@ If a field requires transformation (e.g. resolving an expression), perform the c
 
 ## Tasks
 
+Follow the process below exactly. Do NOT inspect the codebase for other examples unless
+specifically instructed to do so.
+
 1. **Create the model file** in `src/lib/catalog/models/effects/`, exporting:
    - A `{ClassName}Props` interface with the properties described by the user
    - A class extending `Effect` with readonly fields, a destructured constructor, and JSDoc
