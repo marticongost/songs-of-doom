@@ -27,6 +27,11 @@
 		@include rz.column;
 		background-image: linear-gradient(to right, transparent, rgba(black, 0.1));
 		border-right: var(--panel-separator);
+
+		:global(.attribute-icon) {
+			color: var(--text-subtle-color);
+			filter: drop-shadow(0 0 0.5em black);
+		}
 	}
 
 	.attribute {
