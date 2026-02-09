@@ -7,6 +7,7 @@ export { DiscardCardEffect } from './discardcard';
 export { DrawCardsEffect } from './drawcards';
 export { DrawFocusEffect } from './drawfocuseffect';
 export { Effect } from './effect';
+export { EquipEffect } from './equip';
 export { HealEffect } from './heal';
 export { ConferPropertiesEffect } from './conferproperties';
 export { EngageEffect } from './engage';
