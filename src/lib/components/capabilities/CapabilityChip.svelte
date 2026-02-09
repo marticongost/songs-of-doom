@@ -16,7 +16,7 @@
 	const { capability, ...attributes }: Props = $props();
 	const getIconSrc = () => {
 		if (capability instanceof Action) {
-			return 'capabilities/action.svg';
+			return capability.fast ? 'capabilities/fast-action.svg' : 'capabilities/action.svg';
 		} else if (capability instanceof Constant) {
 			return 'capabilities/constant.svg';
 		} else if (capability instanceof Reaction) {
@@ -36,7 +36,11 @@
 			<!-- Moment -->
 			<span class="moment">
 				{#if capability instanceof Action}
-					<Text ca="Acció" es="Acción" en="Action" />
+					{#if capability.fast}
+						<Text ca="Acció ràpida" es="Acción rápida" en="Fast action" />
+					{:else}
+						<Text ca="Acció" es="Acción" en="Action" />
+					{/if}
 				{:else if capability instanceof Constant}
 					<Text ca="Constant" es="Constante" en="Constant" />
 				{:else if capability instanceof Reaction}
