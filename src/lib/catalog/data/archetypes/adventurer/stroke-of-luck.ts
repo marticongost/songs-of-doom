@@ -19,7 +19,7 @@ export default upgradable(Skill, 2, (variants) => ({
 			cost: { any: 1 },
 			effects: variants.values(
 				[new ResultsTableEffect({ entries: [{ result: 0, effects: [new RedrawFateEffect()] }] })],
-				[variants.ifMatches(2, new RedrawFateEffect())]
+				[...variants.ifMatches(2, new RedrawFateEffect())]
 			)
 		})
 	]
