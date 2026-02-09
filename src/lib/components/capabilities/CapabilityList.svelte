@@ -1,16 +1,17 @@
 <script lang="ts">
 	import type { Capability } from '$lib/catalog/models/capability';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import CapabilityChip from './CapabilityChip.svelte';
 
-	interface Props {
+	interface Props extends StandardAttributeProps {
 		capabilities: Array<Capability>;
 	}
 
-	const { capabilities }: Props = $props();
+	const { capabilities, ...rest }: Props = $props();
 </script>
 
 {#if capabilities.length > 0}
-	<ul class="capability-list">
+	<ul {...standardAttributes(rest, 'capability-list')}>
 		{#each capabilities as capability, i (i)}
 			<li>
 				<CapabilityChip {capability} />

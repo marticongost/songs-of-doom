@@ -88,8 +88,10 @@
 		{/if}
 	</div>
 	<div class="body">
-		<div class="description">{entity.description}</div>
-		<CapabilityList capabilities={entity.capabilities} />
+		{#if entity.description}
+			<div class="description">{entity.description}</div>
+		{/if}
+		<CapabilityList class="capabilities" capabilities={entity.capabilities} />
 		{#if entity.attachmentCapabilities.length > 0}
 			<div class="attachment">
 				<div class="attachment-title">
@@ -221,12 +223,18 @@
 
 	.body {
 		@include rz.column(sm);
-		@include rz.padding(sm);
+		flex: 1 1 auto;
+
+		:global(.capabilities) {
+			@include rz.padding(sm);
+			flex: 1 1 auto;
+		}
 	}
 
 	.attachment {
 		@include rz.padding(sm);
 		background-color: rgba(black, 0.2);
+		flex: 0 0 auto;
 	}
 
 	.attachment-title {
