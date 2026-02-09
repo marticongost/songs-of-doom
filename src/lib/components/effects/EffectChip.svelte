@@ -14,6 +14,7 @@
 		EquipEffect,
 		HealEffect,
 		ModifyCapabilityCostEffect,
+		ModifyCarryingCapacityEffect,
 		ModifyDamageEffect,
 		ModifyRollEffect,
 		NegateDamageEffect,
@@ -45,6 +46,7 @@
 	import EquipEffectChip from './EquipEffectChip.svelte';
 	import HealEffectChip from './HealEffectChip.svelte';
 	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
+	import ModifyCarryingCapacityEffectChip from './ModifyCarryingCapacityEffectChip.svelte';
 	import ModifyDamageEffectChip from './ModifyDamageEffectChip.svelte';
 	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
 	import NegateDamageEffectChip from './NegateDamageEffectChip.svelte';
@@ -73,6 +75,8 @@
 		<ModifyRollEffectChip {effect} />
 	{:else if effect instanceof ModifyCapabilityCostEffect}
 		<ModifyCapabilityCostEffectChip {effect} />
+	{:else if effect instanceof ModifyCarryingCapacityEffect}
+		<ModifyCarryingCapacityEffectChip {effect} />
 	{:else if effect instanceof ChangeStatsEffect}
 		<ChangeStatsEffectChip {effect} />
 	{:else if effect instanceof ChaseEffect}

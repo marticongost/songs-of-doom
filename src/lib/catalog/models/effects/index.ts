@@ -13,6 +13,7 @@ export { ConferPropertiesEffect } from './conferproperties';
 export { EngageEffect } from './engage';
 export { ModifyDamageEffect } from './modifydamage';
 export { ModifyCapabilityCostEffect } from './modifycapabilitycost';
+export { ModifyCarryingCapacityEffect } from './modifycarryingcapacity';
 export { NegateDamageEffect } from './negatedamage';
 export { ModifyRollEffect } from './modifyroll';
 export { RedrawFateEffect } from './redrawfate';
