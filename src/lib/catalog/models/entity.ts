@@ -1,6 +1,6 @@
 import type { LocalisedText } from '$lib/localisation';
 import { getEntryMetadata } from '..';
-import type { Archetype } from './archetype';
+import { Archetype } from './archetype';
 import type { Capability } from './capability';
 import type { Property } from './properties';
 import type { EntityType } from './properties/entitytypes';
@@ -50,8 +50,8 @@ export abstract class Entity {
 	 */
 	readonly variants: Array<this>;
 
+	abstract readonly set: ParentEntity | undefined;
 	abstract readonly type: EntityType;
-	abstract readonly archetype: Archetype | undefined;
 
 	constructor({
 		title,
@@ -108,5 +108,76 @@ export abstract class Entity {
 	 */
 	get previousVariant(): this | undefined {
 		return this.level > 1 ? this.variants[this.level - 2] : undefined;
+	}
+
+	/** An archetype that must be possessed in order to acquire this entity. */
+	get requiredArchetype(): Archetype | undefined {
+		return undefined;
+	}
+}
+
+const NOT_COMPUTED = Symbol('not computed');
+
+export abstract class ChildEntity<C extends ParentEntity> extends Entity {
+	private _parent: C | typeof NOT_COMPUTED = NOT_COMPUTED;
+
+	override get set(): C {
+		return this.parent;
+	}
+
+	override get requiredArchetype(): Archetype | undefined {
+		const parent = this.parent;
+		return parent instanceof Archetype ? parent : parent?.requiredArchetype;
+	}
+
+	get parent(): C {
+		if (this._parent === NOT_COMPUTED) {
+			const metadata = getEntryMetadata(this);
+			if (metadata.path.length >= 2) {
+				const archetypeId = metadata.path[metadata.path.length - 2];
+				return (this._parent = metadata.catalog.require(archetypeId) as C);
+			}
+			throw new Error(`${this.constructor.name} ${this.id} is not inside a parent`);
+		}
+		return this._parent;
+	}
+}
+
+export abstract class ParentEntity extends Entity {
+	private _parent: this | undefined | typeof NOT_COMPUTED = NOT_COMPUTED;
+	private _children: Array<ChildEntity<this>> | undefined = undefined;
+
+	constructor(props: EntityProps<ParentEntity>) {
+		super(props);
+		this._children = undefined;
+	}
+
+	override get set(): this {
+		return this;
+	}
+
+	get parent(): this | undefined {
+		if (this._parent === NOT_COMPUTED) {
+			const metadata = getEntryMetadata(this);
+			if (metadata.path.length >= 3) {
+				const archetypeId = metadata.path[metadata.path.length - 3];
+				return (this._parent = metadata.catalog.require(archetypeId) as this);
+			}
+			return (this._parent = undefined);
+		}
+		return this._parent;
+	}
+
+	get children(): Array<ChildEntity<this>> {
+		if (this._children === undefined) {
+			this._children = getEntryMetadata(this)
+				.catalog.all()
+				.filter((entity) => entity.requiredArchetype === this) as Array<ChildEntity<this>>;
+		}
+		return this._children;
+	}
+
+	getChildrenOfType(type: EntityType): Array<Entity> {
+		return this.children.filter((child) => child.type === type);
 	}
 }

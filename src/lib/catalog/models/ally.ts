@@ -8,7 +8,7 @@ export interface AllyProps extends EntityProps<Ally> {
 
 export class Ally extends Entity {
 	override readonly type = ally;
-	override readonly archetype = undefined;
+	override readonly set = undefined;
 
 	readonly stats: Record<StatType, number>;
 

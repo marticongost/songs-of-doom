@@ -1,9 +1,20 @@
+<script lang="ts" module>
+	const getSetIcon = (set: Archetype | Module): string => {
+		if (set instanceof Archetype) {
+			return `archetypes/${set.id}.svg`;
+		} else {
+			return `modules/${set.id}.svg`;
+		}
+	};
+</script>
+
 <script lang="ts">
 	import { Ally } from '$lib/catalog/models/ally';
 	import { Archetype } from '$lib/catalog/models/archetype';
 	import { Creature } from '$lib/catalog/models/creature';
 	import type { Entity } from '$lib/catalog/models/entity';
 	import { Item } from '$lib/catalog/models/inventory';
+	import type { Module } from '$lib/catalog/models/module';
 	import { Skill } from '$lib/catalog/models/skill';
 	import CapabilityList from '$lib/components/capabilities/CapabilityList.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
@@ -30,8 +41,6 @@
 	}
 
 	const { entity, linked = true, ...rest }: Props = $props();
-
-	const archetype = $derived(entity instanceof Archetype ? entity : entity.archetype);
 	const discardReward = $derived(entity instanceof Skill ? entity.discardReward : undefined);
 </script>
 
@@ -42,17 +51,17 @@
 	data-type={entity.type.id}
 >
 	<div class="header">
-		{#if archetype}
-			<div class="archetype-frame">
-				<InlineSvg class="archetype-icon" src="archetypes/{archetype.id}.svg" />
+		{#if entity.set}
+			<div class="set-frame">
+				<InlineSvg class="set-icon" src={getSetIcon(entity.set)} />
 			</div>
 		{/if}
 		<div class="title"><Text {...entity.title} /></div>
 		<CardLevel {entity} />
 		<div class="acquisition">
-			{#if entity.archetype}
+			{#if entity.requiredArchetype}
 				<div class="required-archetype">
-					<Text {...entity.archetype.title} />
+					<Text {...entity.requiredArchetype.title} />
 				</div>
 			{/if}
 			{#if entity.xpCost !== undefined}
@@ -124,7 +133,7 @@
 		height: #{math.div($card-print-height, $card-content-scale)}em;
 		overflow: hidden;
 
-		@each $type in archetype, trait, skill, ally, item, creature {
+		@each $type in archetype, trait, skill, ally, item, creature, encounter {
 			&[data-type='#{$type}'] {
 				--main-background: var(--card-type-#{$type}-main-background);
 				--secondary-background: var(--card-type-#{$type}-secondary-background);
@@ -177,7 +186,7 @@
 		text-shadow: 0 0 0.5em rgba(0, 0, 0, 0.8);
 	}
 
-	.archetype-frame {
+	.set-frame {
 		background-color: rgba(black, 0.2);
 		border-right: 1px solid rgba(black, 0.1);
 		width: 3em;
@@ -187,7 +196,7 @@
 		align-items: center;
 		justify-content: center;
 
-		:global(.archetype-icon) {
+		:global(.set-icon) {
 			height: 2.1em;
 			filter: drop-shadow(0 0 0.8rem black);
 			color: rgba(white, 0.7);

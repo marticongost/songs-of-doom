@@ -29,9 +29,9 @@
 	<Card entity={data.entity} linked={false} />
 
 	<aside>
-		{#if data.entity.archetype}
+		{#if data.entity.requiredArchetype}
 			{@render cardSet({ ca: 'Arquetip', es: 'Arquetipo', en: 'Archetype' }, [
-				data.entity.archetype
+				data.entity.requiredArchetype
 			])}
 		{/if}
 		{#if data.entity instanceof Archetype}

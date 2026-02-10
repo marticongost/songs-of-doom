@@ -1,7 +1,15 @@
 import type { LocalisedText } from '$lib/localisation';
 import { Property } from './property';
 
-export type EntityTypeId = 'archetype' | 'trait' | 'skill' | 'item' | 'creature' | 'ally';
+export type EntityTypeId =
+	| 'module'
+	| 'archetype'
+	| 'trait'
+	| 'skill'
+	| 'item'
+	| 'creature'
+	| 'ally'
+	| 'encounter';
 
 export class EntityType extends Property {
 	readonly id: EntityTypeId;
@@ -14,6 +22,11 @@ export class EntityType extends Property {
 	}
 }
 
+export const module = new EntityType(
+	'module',
+	{ ca: 'Mòdul', es: 'Módulo', en: 'Module' },
+	{ ca: 'Mòduls', es: 'Módulos', en: 'Modules' }
+);
 export const archetype = new EntityType(
 	'archetype',
 	{ ca: 'Arquetip', es: 'Arquetipo', en: 'Archetype' },
@@ -44,12 +57,19 @@ export const ally = new EntityType(
 	{ ca: 'Aliat', es: 'Aliado', en: 'Ally' },
 	{ ca: 'Aliats', es: 'Aliados', en: 'Allies' }
 );
+export const encounter = new EntityType(
+	'encounter',
+	{ ca: 'Encontre', es: 'Encuentro', en: 'Encounter' },
+	{ ca: 'Encontres', es: 'Encuentros', en: 'Encounters' }
+);
 
 export const entityTypes: Record<EntityTypeId, EntityType> = {
+	module,
 	archetype,
 	trait,
 	skill,
 	item,
 	creature,
-	ally
+	ally,
+	encounter
 };

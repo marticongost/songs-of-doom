@@ -1,5 +1,4 @@
 import { creature, type EntityType } from '../models/properties/';
-import type { Archetype } from './archetype';
 import { Entity, type EntityProps } from './entity';
 import type { AttributeType } from './stats';
 
@@ -12,7 +11,7 @@ export interface CreatureProps extends EntityProps<Creature> {
 
 export class Creature extends Entity {
 	override readonly type: EntityType = creature;
-	override readonly archetype: Archetype | undefined = undefined;
+	override readonly set = undefined;
 	readonly stats: Record<CreatureStatType, number>;
 
 	constructor({ stats, ...baseProps }: CreatureProps) {
