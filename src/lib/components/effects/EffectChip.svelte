@@ -23,6 +23,8 @@
 		RedrawFateEffect,
 		RemoveChargesEffect,
 		RepeatCapabilityEffect,
+		ReplaceEncounterEffect,
+		ResolveEncounterEffect,
 		ResultsTableEffect,
 		TransformFocusEffect,
 		TriggerAttackEffect,
@@ -56,6 +58,8 @@
 	import RedrawFateEffectChip from './RedrawFateEffectChip.svelte';
 	import RemoveChargesEffectChip from './RemoveChargesEffectChip.svelte';
 	import RepeatCapabilityEffectChip from './RepeatCapabilityEffectChip.svelte';
+	import ReplaceEncounterEffectChip from './ReplaceEncounterEffectChip.svelte';
+	import ResolveEncounterEffectChip from './ResolveEncounterEffectChip.svelte';
 	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
 	import TransformFocusEffectChip from './TransformFocusEffectChip.svelte';
 	import TriggerAttackEffectChip from './TriggerAttackEffectChip.svelte';
@@ -119,6 +123,10 @@
 		<RedrawFateEffectChip {effect} />
 	{:else if effect instanceof RemoveChargesEffect}
 		<RemoveChargesEffectChip {effect} />
+	{:else if effect instanceof ReplaceEncounterEffect}
+		<ReplaceEncounterEffectChip {effect} />
+	{:else if effect instanceof ResolveEncounterEffect}
+		<ResolveEncounterEffectChip {effect} />
 	{:else if effect instanceof ResultsTableEffect}
 		<ResultsTableEffectChip {effect} />
 	{:else if effect instanceof TransformFocusEffect}
