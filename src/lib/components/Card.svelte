@@ -242,6 +242,7 @@
 
 	.attachment {
 		@include rz.padding(sm);
+		margin-top: auto;
 		background-color: rgba(black, 0.2);
 		flex: 0 0 auto;
 	}
