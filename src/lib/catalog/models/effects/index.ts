@@ -3,7 +3,7 @@ export { AttackEffect } from './attack';
 export { ChangeStatsEffect } from './changestats';
 export { ChaseEffect } from './chase';
 export { DefendEffect } from './defend';
-export { DiscardCardEffect } from './discardcard';
+export { DiscardFromHandEffect } from './discardfromhand';
 export { DrawCardsEffect } from './drawcards';
 export { DrawFocusEffect } from './drawfocuseffect';
 export { Effect } from './effect';

@@ -3,22 +3,22 @@ import { type ScalarExpressionType } from '../expressions';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
-export type DiscardCardSelection = 'owner' | 'random';
+export type DiscardFromHandSelection = 'owner' | 'random';
 
 /**
- * Props for configuring a DiscardCardEffect.
+ * Props for configuring a DiscardFromHandEffect.
  */
-export interface DiscardCardEffectProps {
+export interface DiscardFromHandEffectProps {
 	/**
 	 * Who is affected by the effect.
-	 * Defaults to "self".
+	 * Defaults to "self" (the card triggering the effect).
 	 */
 	target?: TargetSpec;
 
 	/**
-	 * How many cards to discard from the target's hand.
+	 * How many cards to discard.
 	 */
-	amount: ScalarExpressionType;
+	amount?: ScalarExpressionType;
 
 	/**
 	 * Who chooses which cards to discard.
@@ -26,21 +26,26 @@ export interface DiscardCardEffectProps {
 	 * - "random": Cards are chosen randomly from the hand.
 	 * Defaults to "owner".
 	 */
-	selection?: DiscardCardSelection;
+	selection?: DiscardFromHandSelection;
 }
 
 /**
  * An effect that discards cards from the hand of the target.
  */
-export class DiscardCardEffect extends Effect {
+export class DiscardFromHandEffect extends Effect {
+	/** Who is affected by the effect. */
 	readonly target: Target;
-	readonly amount: ScalarExpressionType;
-	readonly selection: DiscardCardSelection;
 
-	constructor({ target, amount, selection }: DiscardCardEffectProps) {
+	/** How many cards to discard. */
+	readonly amount: ScalarExpressionType;
+
+	/** Who chooses which cards to discard. */
+	readonly selection: DiscardFromHandSelection;
+
+	constructor({ target, amount, selection }: DiscardFromHandEffectProps) {
 		super();
 		this.target = finalise(Target, target ?? 'self');
-		this.amount = amount;
+		this.amount = amount ?? 1;
 		this.selection = selection ?? 'owner';
 	}
 }

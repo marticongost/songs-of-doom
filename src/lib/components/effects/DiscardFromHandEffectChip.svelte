@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DiscardCardEffect } from '$lib/catalog/models/effects';
+	import type { DiscardFromHandEffect } from '$lib/catalog/models/effects';
 	import { expressionPlurality } from '$lib/catalog/models/expressions';
 	import ExpressionChip from '$lib/components/expressions/ExpressionChip.svelte';
 	import { plural2 } from '$lib/localisation';
@@ -7,7 +7,7 @@
 	import TargetChip from '../targets/TargetChip.svelte';
 
 	interface Props {
-		effect: DiscardCardEffect;
+		effect: DiscardFromHandEffect;
 	}
 
 	const { effect }: Props = $props();
