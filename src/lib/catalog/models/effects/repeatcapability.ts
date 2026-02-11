@@ -1,7 +1,11 @@
 import { Effect } from './effect';
 
-export class RepeatCapabilityEffect extends Effect {
-	constructor() {
-		super();
-	}
-}
+/**
+ * An effect that allows repeating a capability.
+ */
+export class RepeatCapabilityEffect extends Effect {}
+
+/**
+ * Singleton instance for repeating a capability.
+ */
+export const repeatCapability = new RepeatCapabilityEffect();

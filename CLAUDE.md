@@ -52,6 +52,7 @@ Game effects and expressions follow a class-based polymorphic pattern:
 - **Effects** (`src/lib/catalog/models/effects/`): Actions that happen in the game (attack, defend, change stats, etc.)
   - Each has a corresponding Svelte component with `Chip` suffix in `src/lib/components/effects/`
   - The main `EffectChip` component uses type discrimination to render the appropriate specialized component
+  - Parameterless effects use singleton instances (e.g., `engage`, `chase`, `negateDamage`) instead of `new EffectClass()`
 - **Expressions** (`src/lib/catalog/models/expressions/`): Boolean (conditions/predicates) and scalar (numeric) values used in game logic
   - All expressions inherit from a common `Expression` base class that provides a `translate()` method for self-localisation
   - Boolean expressions extend `BooleanExpression` (e.g., `engaged`, `Property` instances)

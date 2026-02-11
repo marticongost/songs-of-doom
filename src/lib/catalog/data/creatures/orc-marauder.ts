@@ -1,12 +1,7 @@
 import { Action, Obligation } from '$lib/catalog/models/capabilities';
 import { fullyRechargeOnChapterStart } from '$lib/catalog/models/common';
 import { Creature } from '$lib/catalog/models/creature';
-import {
-	AttackEffect,
-	ChaseEffect,
-	DefendEffect,
-	ModifyRollEffect
-} from '$lib/catalog/models/effects';
+import { AttackEffect, chase, DefendEffect, ModifyRollEffect } from '$lib/catalog/models/effects';
 import { wounded } from '$lib/catalog/models/expressions';
 import { strength } from '$lib/catalog/models/stats';
 
@@ -29,7 +24,7 @@ export default new Creature({
 		fullyRechargeOnChapterStart,
 		new Action({
 			cost: { charges: 1 },
-			effects: [new ChaseEffect()]
+			effects: [chase]
 		}),
 		new Action({
 			cost: { charges: 1 },

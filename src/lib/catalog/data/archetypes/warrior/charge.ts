@@ -1,6 +1,6 @@
 import { Action } from '$lib/catalog/models/capabilities';
 import {
-	EngageEffect,
+	engage,
 	ModifyCapabilityCostEffect,
 	ModifyDamageEffect,
 	ModifyRollEffect,
@@ -19,7 +19,7 @@ export default upgradable(Skill, 2, (variants) => ({
 			cost: { strength: 2 },
 			effects: [
 				not(engaged).then(
-					new EngageEffect(),
+					engage,
 					new TriggerAttackEffect({
 						modifiers: [
 							new ModifyRollEffect({ modifier: 2 }),

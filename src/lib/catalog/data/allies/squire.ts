@@ -4,7 +4,7 @@ import { fullyRechargeOnChapterStart } from '$lib/catalog/models/common';
 import {
 	AttackEffect,
 	DefendEffect,
-	EquipEffect,
+	equip,
 	ModifyCarryingCapacityEffect
 } from '$lib/catalog/models/effects';
 import { strength } from '$lib/catalog/models/stats';
@@ -59,7 +59,7 @@ export default new Ally({
 		new Action({
 			cost: { charges: 1 },
 			fast: true,
-			effects: [new EquipEffect()]
+			effects: [equip]
 		})
 	]
 });

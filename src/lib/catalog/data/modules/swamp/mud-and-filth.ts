@@ -1,6 +1,6 @@
 import { Action, Constant } from '$lib/catalog/models/capabilities';
 import { attachOrReplaceWithNewEncounterWhenRevealed } from '$lib/catalog/models/common';
-import { ChangeStatsEffect, DiscardEffect } from '$lib/catalog/models/effects';
+import { ChangeStatsEffect, discard } from '$lib/catalog/models/effects';
 import { Encounter } from '$lib/catalog/models/encounter';
 
 export default new Encounter({
@@ -20,7 +20,7 @@ export default new Encounter({
 		}),
 		new Action({
 			cost: { strength: 1 },
-			effects: [new DiscardEffect({})]
+			effects: [discard]
 		})
 	]
 });

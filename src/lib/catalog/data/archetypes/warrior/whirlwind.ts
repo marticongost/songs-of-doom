@@ -1,7 +1,7 @@
 import { Action, Obligation } from '$lib/catalog/models/capabilities';
 import {
 	RemoveChargesEffect,
-	RepeatCapabilityEffect,
+	repeatCapability,
 	ResultsTableEffect,
 	TriggerAttackEffect
 } from '$lib/catalog/models/effects';
@@ -30,11 +30,11 @@ export default upgradable(Skill, 2, (variants) => ({
 							entries: [
 								{
 									result: '1-2',
-									effects: [new AddChargesEffect({ amount: 1 }), new RepeatCapabilityEffect()]
+									effects: [new AddChargesEffect({ amount: 1 }), repeatCapability]
 								},
 								...variants.ifMatches(2, {
 									result: 3,
-									effects: [new RepeatCapabilityEffect()]
+									effects: [repeatCapability]
 								} as ResultsTableEntryProps)
 							]
 						})

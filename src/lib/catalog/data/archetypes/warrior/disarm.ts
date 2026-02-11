@@ -4,7 +4,7 @@ import {
 	ModifyCapabilityCostEffect,
 	ModifyDamageEffect,
 	ModifyRollEffect,
-	NegateDamageEffect,
+	negateDamage,
 	ResultsTableEffect,
 	TriggerAttackEffect
 } from '$lib/catalog/models/effects';
@@ -36,7 +36,7 @@ export default upgradable(Skill, 2, (variants) => ({
 								{
 									result: variants.values('2+', '1+'),
 									effects: [
-										new NegateDamageEffect(),
+										negateDamage,
 										new AttachEffect({
 											target: {
 												type: 'defender'

@@ -1,5 +1,5 @@
 import { Obligation, Opportunity } from './capabilities';
-import { AttachEffect, ReplaceEncounterEffect, TriggerAttackEffect } from './effects';
+import { AttachEffect, replaceEncounter, TriggerAttackEffect } from './effects';
 import { AddChargesEffect } from './effects/recharge';
 import { copyAlreadyAttached } from './expressions';
 
@@ -19,5 +19,5 @@ export const shootBeforeEngaged = new Opportunity({
 
 export const attachOrReplaceWithNewEncounterWhenRevealed = new Obligation({
 	triggers: ['revealed'],
-	effects: [copyAlreadyAttached.then(new ReplaceEncounterEffect()).orElse(new AttachEffect({}))]
+	effects: [copyAlreadyAttached.then(replaceEncounter).orElse(new AttachEffect({}))]
 });

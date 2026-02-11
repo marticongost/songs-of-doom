@@ -5,3 +5,8 @@ import { Effect } from './effect';
  * This lets the player swap their currently equipped items during play.
  */
 export class EquipEffect extends Effect {}
+
+/**
+ * Singleton instance for changing active equipment.
+ */
+export const equip = new EquipEffect();

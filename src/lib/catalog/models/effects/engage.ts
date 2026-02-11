@@ -5,3 +5,8 @@ import { Effect } from './effect';
  * into melee range within the player's threat zone.
  */
 export class EngageEffect extends Effect {}
+
+/**
+ * Singleton instance for engaging an opponent.
+ */
+export const engage = new EngageEffect();

@@ -6,3 +6,8 @@ import { Effect } from './effect';
  * a chance to potentially get a better result.
  */
 export class RedrawFateEffect extends Effect {}
+
+/**
+ * Singleton instance for redrawing fate.
+ */
+export const redrawFate = new RedrawFateEffect();

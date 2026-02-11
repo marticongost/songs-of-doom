@@ -6,3 +6,8 @@ import { Effect } from './effect';
  * If already at the same location as the prey, the creature engages it instead.
  */
 export class ChaseEffect extends Effect {}
+
+/**
+ * Singleton instance for chasing the prey.
+ */
+export const chase = new ChaseEffect();
