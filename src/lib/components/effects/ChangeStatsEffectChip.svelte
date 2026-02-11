@@ -12,28 +12,21 @@
 	const { effect }: Props = $props();
 </script>
 
+{#snippet statsList(stats: Partial<Record<StatType, number>>)}
+	<TextList items={Object.entries(stats)}>
+		{#snippet entry([stat, value])}
+			<span>
+				<StatChip stat={stat as StatType} />
+				<Text ca=" en {value}" es=" en {value}" en=" by {value}" />
+			</span>
+		{/snippet}
+	</TextList>
+{/snippet}
+
 {#if effect.group().increase}
 	<Text ca="Augmentar " es="Aumentar " en="Increase " />
-	<TextList items={Object.entries(effect.group().increase!)}>
-		{#snippet entry([stat, value])}
-			<span>
-				<StatChip stat={stat as StatType} />
-				<strong>
-					<Text ca=" en {value}" es=" en {value}" en=" by {value}" />
-				</strong>
-			</span>
-		{/snippet}
-	</TextList>
+	{@render statsList(effect.group().increase!)}
 {:else if effect.group().decrease}
 	<Text ca="Reduir " es="Reducir " en="Decrease " />
-	<TextList items={Object.entries(effect.group().decrease!)}>
-		{#snippet entry([stat, value])}
-			<span>
-				<StatChip stat={stat as StatType} />
-				<strong>
-					<Text ca=" en {value}" es=" en {value}" en=" by {value}" />
-				</strong>
-			</span>
-		{/snippet}
-	</TextList>
+	{@render statsList(effect.group().decrease!)}
 {/if}
