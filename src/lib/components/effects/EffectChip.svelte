@@ -26,6 +26,7 @@
 		ReplaceEncounterEffect,
 		ResolveEncounterEffect,
 		ResultsTableEffect,
+		SanityLossEffect,
 		TransformFocusEffect,
 		TriggerAttackEffect,
 		WoundEffect,
@@ -61,6 +62,7 @@
 	import ReplaceEncounterEffectChip from './ReplaceEncounterEffectChip.svelte';
 	import ResolveEncounterEffectChip from './ResolveEncounterEffectChip.svelte';
 	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
+	import SanityLossEffectChip from './SanityLossEffectChip.svelte';
 	import TransformFocusEffectChip from './TransformFocusEffectChip.svelte';
 	import TriggerAttackEffectChip from './TriggerAttackEffectChip.svelte';
 	import WoundEffectChip from './WoundEffectChip.svelte';
@@ -127,6 +129,8 @@
 		<ReplaceEncounterEffectChip {effect} />
 	{:else if effect instanceof ResolveEncounterEffect}
 		<ResolveEncounterEffectChip {effect} />
+	{:else if effect instanceof SanityLossEffect}
+		<SanityLossEffectChip {effect} />
 	{:else if effect instanceof ResultsTableEffect}
 		<ResultsTableEffectChip {effect} />
 	{:else if effect instanceof TransformFocusEffect}
