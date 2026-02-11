@@ -20,6 +20,8 @@ export interface ResultRange {
 
 export type ResultSelector = Result | ResultRange;
 
+export type ResultSpec = ResultSelector | ResultString;
+
 export const parseResultString = (str: ResultString): ResultSelector => {
 	if (str === 'CF') {
 		return 'CF';
@@ -38,6 +40,5 @@ export const parseResultString = (str: ResultString): ResultSelector => {
 	}
 };
 
-export const resolveResultExpression = (
-	expression: ResultSelector | ResultString
-): ResultSelector => (typeof expression === 'string' ? parseResultString(expression) : expression);
+export const resolveResultExpression = (expression: ResultSpec): ResultSelector =>
+	typeof expression === 'string' ? parseResultString(expression) : expression;
