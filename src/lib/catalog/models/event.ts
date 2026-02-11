@@ -13,7 +13,8 @@ export type EventType =
 	| 'chapterEnd'
 	| 'provoked'
 	| 'takingDamage'
-	| 'fateDrawn';
+	| 'fateDrawn'
+	| 'revealed';
 
 export type EventProps = { type: EventType; name: LocalisedText };
 
@@ -103,5 +104,9 @@ export const events: Record<EventType, Event> = {
 			es: 'Después de robar una ficha de destino',
 			en: 'After drawing a fate token'
 		}
+	}),
+	revealed: new Event({
+		type: 'revealed',
+		name: { ca: 'Revelació', es: 'Revelación', en: 'When revealed' }
 	})
 };
