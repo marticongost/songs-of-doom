@@ -14,7 +14,8 @@ export type EventType =
 	| 'provoked'
 	| 'takingDamage'
 	| 'fateDrawn'
-	| 'revealed';
+	| 'revealed'
+	| 'moving';
 
 export type EventProps = { type: EventType; name: LocalisedText };
 
@@ -108,5 +109,9 @@ export const events: Record<EventType, Event> = {
 	revealed: new Event({
 		type: 'revealed',
 		name: { ca: 'Revelació', es: 'Revelación', en: 'When revealed' }
+	}),
+	moving: new Event({
+		type: 'moving',
+		name: { ca: "En moure's", es: 'Al moverse', en: 'When moving' }
 	})
 };
