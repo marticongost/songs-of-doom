@@ -30,4 +30,4 @@
 	/>
 {/if}
 
-<TargetChip relation="possessive" ellideSelf={true} target={effect.target} />
+<TargetChip relation="possessive" target={effect.target} />

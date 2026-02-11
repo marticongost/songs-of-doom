@@ -1,7 +1,6 @@
 import type { BooleanExpressionType } from './expressions';
 
 export type TargetType =
-	| 'self'
 	| 'owner'
 	| 'active-player'
 	| 'attacker'

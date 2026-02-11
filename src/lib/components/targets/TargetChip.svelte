@@ -6,17 +6,16 @@
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
 	interface Props extends StandardAttributeProps {
-		target: Target | TargetDiscriminator;
-		ellideSelf?: boolean;
+		target?: Target | TargetDiscriminator;
 		relation?: 'possessive' | 'to';
 		cardinality?: TargetCardinality;
 	}
 
-	const { target, ellideSelf = false, relation, cardinality, ...attributes }: Props = $props();
+	const { target, relation, cardinality, ...attributes }: Props = $props();
 	const locale = getLocale();
 
 	const isPlural = $derived(
-		(cardinality ?? ('cardinality' in target && target.cardinality)) === 'multiple'
+		target && (cardinality ?? ('cardinality' in target && target.cardinality)) === 'multiple'
 	);
 </script>
 
@@ -31,11 +30,9 @@
 	{/if}
 {/snippet}
 
-{#if !ellideSelf || target.type !== 'self' || target.condition}
+{#if target}
 	<span {...standardAttributes(attributes, 'target-chip')}>
-		{#if target.type === 'self'}
-			{@render text({ ca: 'tu mateix', es: 'ti mismo', en: 'yourself' })}
-		{:else if target.type === 'owner'}
+		{#if target.type === 'owner'}
 			{@render text({ ca: 'el propietari', es: 'el propietario', en: 'the owner' })}
 		{:else if target.type === 'active-player'}
 			{@render text({ ca: 'el jugador actiu', es: 'el jugador activo', en: 'the active player' })}

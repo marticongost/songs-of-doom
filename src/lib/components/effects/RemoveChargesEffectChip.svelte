@@ -25,4 +25,4 @@
 	{/snippet}
 </Text>
 
-<TargetChip relation="possessive" target={effect.target} ellideSelf={true} />
+<TargetChip relation="possessive" target={effect.target} />

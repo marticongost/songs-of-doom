@@ -11,11 +11,11 @@ export interface RechargeEffectProps {
 
 export class AddChargesEffect extends Effect {
 	readonly amount: RechargeAmount;
-	readonly target: Target;
+	readonly target?: Target;
 
 	constructor({ amount, target }: RechargeEffectProps) {
 		super();
 		this.amount = amount;
-		this.target = finalise(Target, target ?? 'self');
+		this.target = finalise(Target, target);
 	}
 }

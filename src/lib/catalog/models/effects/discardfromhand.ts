@@ -10,8 +10,7 @@ export type DiscardFromHandSelection = 'owner' | 'random';
  */
 export interface DiscardFromHandEffectProps {
 	/**
-	 * Who is affected by the effect.
-	 * Defaults to "self" (the card triggering the effect).
+	 * Who is affected by the effect. Defaults to the current subject.
 	 */
 	target?: TargetSpec;
 
@@ -34,7 +33,7 @@ export interface DiscardFromHandEffectProps {
  */
 export class DiscardFromHandEffect extends Effect {
 	/** Who is affected by the effect. */
-	readonly target: Target;
+	readonly target?: Target;
 
 	/** How many cards to discard. */
 	readonly amount: ScalarExpressionType;
@@ -44,7 +43,7 @@ export class DiscardFromHandEffect extends Effect {
 
 	constructor({ target, amount, selection }: DiscardFromHandEffectProps) {
 		super();
-		this.target = finalise(Target, target ?? 'self');
+		this.target = finalise(Target, target);
 		this.amount = amount ?? 1;
 		this.selection = selection ?? 'owner';
 	}

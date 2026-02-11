@@ -9,7 +9,8 @@ import { Effect } from './effect';
 export interface HealEffectProps {
 	/** The amount of damage to remove from the target. */
 	amount: ScalarExpressionType;
-	/** Who benefits from the healing. Defaults to self. */
+
+	/** Who benefits from the healing. Defaults to the current subject. */
 	target?: TargetSpec;
 }
 
@@ -20,9 +21,9 @@ export class HealEffect extends Effect {
 	/** The amount of damage to remove from the target. */
 	readonly amount: ScalarExpressionType;
 	/** Who benefits from the healing. */
-	readonly target: Target;
+	readonly target?: Target;
 
-	constructor({ amount, target = 'self' }: HealEffectProps) {
+	constructor({ amount, target }: HealEffectProps) {
 		super();
 		this.amount = amount;
 		this.target = finalise(Target, target);

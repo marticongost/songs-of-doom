@@ -21,6 +21,4 @@
 	/>
 {/if}
 
-{#if effect.target.type !== 'self'}
-	<TargetChip ellideSelf={true} relation="possessive" target={effect.target} />
-{/if}
+<TargetChip relation="possessive" target={effect.target} />

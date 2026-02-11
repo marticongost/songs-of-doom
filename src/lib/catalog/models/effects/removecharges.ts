@@ -16,11 +16,11 @@ export interface RemoveChargesEffectProps {
  */
 export class RemoveChargesEffect extends Effect {
 	readonly amount?: ScalarExpressionType;
-	readonly target: Target;
+	readonly target?: Target;
 
 	constructor({ amount, target }: RemoveChargesEffectProps) {
 		super();
 		this.amount = amount;
-		this.target = finalise(Target, target ?? 'self');
+		this.target = finalise(Target, target);
 	}
 }

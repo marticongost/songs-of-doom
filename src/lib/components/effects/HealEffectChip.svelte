@@ -21,7 +21,7 @@ Renders a heal effect, displaying the amount of damage removed and the target.
 	<Text ca="Curar" es="Curar" en="Heal" />
 	<ExpressionChip expression={effect.amount} />
 	<InlineSvg class="health-icon" src="stats/health.svg" />
-	<TargetChip target={effect.target} ellideSelf={true} relation="to" />
+	<TargetChip target={effect.target} relation="to" />
 </span>
 
 <style lang="scss">

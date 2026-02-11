@@ -16,16 +16,16 @@ export interface ChargesExpressionProps {
  * This is a scalar value that can be used in comparisons or arithmetic operations.
  *
  * Examples:
- * - `gt(new ChargesExpression({ target: new TargetDiscriminator('self') }), 0)` - has at least 1 charge
+ * - `gt(new ChargesExpression({ target: new TargetDiscriminator('object') }), 0)` - object has at least 1 charge
  * - `gte(new ChargesExpression({ target: { type: 'object', condition: owned } }), 3)` - owned object has at least 3 charges
  */
 export class ChargesExpression extends ScalarExpression {
 	/** The target card whose charges are to be counted. */
-	readonly target: TargetDiscriminator;
+	readonly target?: TargetDiscriminator;
 
 	constructor({ target }: ChargesExpressionProps) {
 		super();
-		this.target = finalise(TargetDiscriminator, target ?? 'self');
+		this.target = finalise(TargetDiscriminator, target);
 	}
 
 	translate(): LocalisedText {
