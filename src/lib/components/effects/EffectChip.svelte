@@ -7,6 +7,7 @@
 		ConditionalEffect,
 		ConferPropertiesEffect,
 		DefendEffect,
+		DiscardEffect,
 		DiscardFromHandEffect,
 		DrawCardsEffect,
 		DrawFocusEffect,
@@ -39,6 +40,7 @@
 	import ConditionalEffectChip from './ConditionalEffectChip.svelte';
 	import ConferPropertiesEffectChip from './ConferPropertiesEffectChip.svelte';
 	import DefendEffectChip from './DefendEffectChip.svelte';
+	import DiscardEffectChip from './DiscardEffectChip.svelte';
 	import DiscardFromHandEffectChip from './DiscardFromHandEffectChip.svelte';
 	import DrawCardsEffectChip from './DrawCardsEffectChip.svelte';
 	import DrawFocusEffectChip from './DrawFocusEffectChip.svelte';
@@ -69,6 +71,8 @@
 <span {...standardAttributes(attributes, 'effect-chip')}>
 	{#if effect instanceof DrawCardsEffect}
 		<DrawCardsEffectChip {effect} />
+	{:else if effect instanceof DiscardEffect}
+		<DiscardEffectChip {effect} />
 	{:else if effect instanceof DiscardFromHandEffect}
 		<DiscardFromHandEffectChip {effect} />
 	{:else if effect instanceof ModifyRollEffect}
