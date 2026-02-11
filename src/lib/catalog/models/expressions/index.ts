@@ -25,6 +25,7 @@ export {
 export { and, AndExpression, not, NotExpression, or, OrExpression } from './logical';
 
 // Boolean expressions
+export { copyAlreadyAttached, CopyAlreadyAttachedExpression } from './copy-already-attached';
 export { engaged, EngagedExpression } from './engaged';
 export { owned, OwnedExpression } from './owned';
 export {
