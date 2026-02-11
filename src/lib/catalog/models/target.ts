@@ -1,6 +1,14 @@
 import type { BooleanExpressionType } from './expressions';
 
-export type TargetType = 'self' | 'owner' | 'attacker' | 'defender' | 'enemy' | 'ally' | 'object';
+export type TargetType =
+	| 'self'
+	| 'owner'
+	| 'active-player'
+	| 'attacker'
+	| 'defender'
+	| 'enemy'
+	| 'ally'
+	| 'object';
 
 export type TargetCardinality = 'single' | 'multiple';
 
