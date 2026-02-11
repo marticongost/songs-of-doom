@@ -1,6 +1,6 @@
-import { Action, Constant } from '$lib/catalog/models/capabilities';
+import { Obligation } from '$lib/catalog/models/capabilities';
 import { attachOrReplaceWithNewEncounterWhenRevealed } from '$lib/catalog/models/common';
-import { ChangeStatsEffect, discard } from '$lib/catalog/models/effects';
+import { discard, ModifyCapabilityCostEffect } from '$lib/catalog/models/effects';
 import { Encounter } from '$lib/catalog/models/encounter';
 
 export default new Encounter({
@@ -11,16 +11,9 @@ export default new Encounter({
 	},
 	capabilities: [attachOrReplaceWithNewEncounterWhenRevealed],
 	attachmentCapabilities: [
-		new Constant({
-			effects: [
-				new ChangeStatsEffect({
-					strength: -1
-				})
-			]
-		}),
-		new Action({
-			cost: { strength: 1 },
-			effects: [discard]
+		new Obligation({
+			triggers: ['moving'],
+			effects: [new ModifyCapabilityCostEffect({ cost: { strength: 2 } }), discard]
 		})
 	]
 });
