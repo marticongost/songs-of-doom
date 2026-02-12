@@ -31,9 +31,7 @@ export class AttackEffect extends Effect {
 						entries: Object.entries(results).map(([result, outcome]) => ({
 							result: parseResultString(result as ResultString),
 							effects:
-								typeof outcome === 'number'
-									? [new WoundEffect({ damage: outcome, target: 'defender' })]
-									: outcome
+								typeof outcome === 'number' ? [new WoundEffect({ damage: outcome })] : outcome
 						}))
 					});
 		this.properties = properties ?? [];

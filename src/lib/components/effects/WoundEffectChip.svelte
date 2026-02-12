@@ -19,6 +19,4 @@
 	<PropertyList properties={effect.properties} />
 {/if}
 
-{#if effect.target.type !== 'defender'}
-	<TargetChip target={effect.target} relation="to" />
-{/if}
+<TargetChip target={effect.target} relation="to" />

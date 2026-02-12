@@ -5,13 +5,13 @@ import { Effect } from './effect';
 
 export interface WoundEffectProps {
 	damage: number;
-	target: TargetSpec;
+	target?: TargetSpec;
 	properties?: Array<Property>;
 }
 
 export class WoundEffect extends Effect {
 	readonly damage: number;
-	readonly target: Target;
+	readonly target?: Target;
 	readonly properties: Array<Property>;
 
 	constructor({ damage, target, properties }: WoundEffectProps) {

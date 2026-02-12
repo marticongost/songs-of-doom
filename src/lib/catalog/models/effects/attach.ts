@@ -6,7 +6,7 @@ import { Effect } from './effect';
  * Props for configuring an AttachEffect.
  */
 export interface AttachEffectProps {
-	/** The card to attach to. Defaults to the active player. */
+	/** The card to attach to. Defaults to the current subject. */
 	target?: TargetSpec;
 }
 
@@ -16,10 +16,10 @@ export interface AttachEffectProps {
  */
 export class AttachEffect extends Effect {
 	/** The card to attach to. */
-	readonly target: Target;
+	readonly target?: Target;
 
 	constructor({ target }: AttachEffectProps) {
 		super();
-		this.target = finalise(Target, target ?? 'active-player');
+		this.target = finalise(Target, target);
 	}
 }
