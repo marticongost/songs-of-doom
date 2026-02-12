@@ -17,8 +17,15 @@ Displays the test expression followed by the results table.
 	const { effect }: Props = $props();
 </script>
 
-<Text ca="Prova de" es="Prueba de" en="Test of" />
-<ExpressionChip expression={effect.expression} />
+<Text ca="Prova" es="Prueba" en="Test" />
 <Parameters>
-	<ResultsTableEffectChip effect={effect.results} />
+	<ExpressionChip expression={effect.expression} />
 </Parameters>
+<ResultsTableEffectChip class="test-results-table" effect={effect.results} />
+
+<style lang="scss">
+	@use '@reguitzell/styles' as rz;
+	:global(.test-results-table) {
+		margin-left: rz.size(sm);
+	}
+</style>
