@@ -30,3 +30,4 @@ export { TestEffect } from './test';
 export { TransformFocusEffect } from './transformfocus';
 export { TriggerAttackEffect } from './triggerattack';
 export { WoundEffect } from './wound';
+export { GoTowardsEffect } from './gotowards';

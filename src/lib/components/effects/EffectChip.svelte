@@ -31,6 +31,7 @@
 		TransformFocusEffect,
 		TriggerAttackEffect,
 		WoundEffect,
+		GoTowardsEffect,
 		type Effect
 	} from '$lib/catalog/models/effects';
 	import { AddChargesEffect } from '$lib/catalog/models/effects/recharge';
@@ -68,6 +69,7 @@
 	import TransformFocusEffectChip from './TransformFocusEffectChip.svelte';
 	import TriggerAttackEffectChip from './TriggerAttackEffectChip.svelte';
 	import WoundEffectChip from './WoundEffectChip.svelte';
+	import GoTowardsEffectChip from './GoTowardsEffectChip.svelte';
 
 	interface Props extends StandardAttributeProps {
 		effect: Effect;
@@ -141,5 +143,7 @@
 		<TransformFocusEffectChip {effect} />
 	{:else if effect instanceof WoundEffect}
 		<WoundEffectChip {effect} />
+	{:else if effect instanceof GoTowardsEffect}
+		<GoTowardsEffectChip {effect} />
 	{/if}
 </span>
