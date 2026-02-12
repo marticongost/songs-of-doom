@@ -20,8 +20,11 @@ There are two main categories of expressions:
 
 ### Basic structure
 
-- **File name**: kebab-case (e.g. `engaged.ts`, `distance.ts`, `count.ts`), placed in `src/lib/catalog/models/expressions/`
-- **Class**: extends either `BooleanExpression` or `ScalarExpression` (imported from their respective files)
+- **File location**: Expressions are organized into subpackages by type:
+  - Boolean expressions: `src/lib/catalog/models/expressions/boolean/`
+  - Scalar expressions: `src/lib/catalog/models/expressions/scalar/`
+- **File name**: kebab-case (e.g. `engaged.ts`, `distance.ts`, `count.ts`)
+- **Class**: extends either `BooleanExpression` or `ScalarExpression` (imported from the subpackage)
 - **Fields**: all `readonly`, assigned in the constructor
 - **Constructor**: takes a single destructured props object when needed, calls `super()` first
 - **JSDoc**: add doc comments to the interface (if any), the class, and every field
@@ -35,6 +38,7 @@ All expressions inherit from `Expression`, which defines a `translate()` method 
 Many expressions like `engaged` or `distance` don't need configuration. For these:
 
 ```typescript
+// src/lib/catalog/models/expressions/boolean/engaged.ts
 import type { LocalisedText } from '$lib/localisation';
 import { BooleanExpression } from './boolean-expression';
 
@@ -66,7 +70,8 @@ export const engaged = new EngagedExpression();
 When an expression needs configuration, define a props interface:
 
 ```typescript
-import { Target, type TargetProps } from '../target';
+// src/lib/catalog/models/expressions/scalar/count.ts
+import { Target, type TargetProps } from '../../target';
 import { ScalarExpression } from './scalar-expression';
 
 /**
@@ -112,11 +117,24 @@ export function count(target: TargetProps | Target): CountExpression {
 - Standalone interface, does **not** extend any base interface
 - Each property has a JSDoc comment
 
+### Cross-package imports
+
+When a scalar expression needs types from the boolean package (e.g., `ComparisonOperator`), use absolute imports:
+
+```typescript
+import type { ComparisonOperator } from '$lib/catalog/models/expressions/boolean/comparison';
+```
+
 ### Comparison shorthands (scalar expressions)
 
 Scalar expressions can override `getComparisonShorthand(operator, value)` to provide localised text for specific comparison patterns. The `ComparisonExpression` class calls this automatically when rendering.
 
 ```typescript
+// src/lib/catalog/models/expressions/scalar/distance.ts
+import type { ComparisonOperator } from '$lib/catalog/models/expressions/boolean/comparison';
+import type { LocalisedText } from '$lib/localisation';
+import { ScalarExpression, type ScalarExpressionType } from './scalar-expression';
+
 export class DistanceExpression extends ScalarExpression {
 	translate(): LocalisedText {
 		return { ca: 'distància', es: 'distancia', en: 'distance' };
@@ -154,12 +172,16 @@ When the user requests a new expression:
 
 1. **Determine the expression type**: Ask the user or infer whether it should be a boolean or scalar expression
 2. **Determine if props are needed**: Does the expression need configuration, or is it stateless?
-3. **Create the model file** in `src/lib/catalog/models/expressions/`:
+3. **Create the model file** in the appropriate subpackage:
+   - Boolean expressions: `src/lib/catalog/models/expressions/boolean/`
+   - Scalar expressions: `src/lib/catalog/models/expressions/scalar/`
    - If stateless: Create class extending `BooleanExpression`/`ScalarExpression`, implement `translate()`, and export a singleton instance
    - If configurable: Create a `{ClassName}Props` interface and class with constructor, implement `translate()`
    - For scalar expressions with meaningful comparison shorthands, override `getComparisonShorthand()`
    - Add comprehensive JSDoc comments and usage examples
-4. **Barrel-export** the new class (and any companion types/functions) from `src/lib/catalog/models/expressions/index.ts`
+4. **Barrel-export** the new class (and any companion types/functions) from the subpackage's `index.ts`:
+   - Boolean expressions: `src/lib/catalog/models/expressions/boolean/index.ts`
+   - Scalar expressions: `src/lib/catalog/models/expressions/scalar/index.ts`
 5. **Update ExpressionChip.svelte** (only if the expression needs custom rendering beyond localised text):
    - Import the new expression class
    - Add an `{:else if expression instanceof NewExpression}` branch in the `expressionNodeSnippet`
@@ -178,7 +200,7 @@ When the user requests a new expression:
 
 - Measurements: `distance` (singleton with `translate()` and `getComparisonShorthand()`)
 - Counts: `CountExpression` (configurable with target props, requires custom ExpressionChip rendering)
-- Wound tracking: `remainingWounds`, `receivedWounds` (singletons with `translate()` and shorthands)
+- Wound tracking: `receivedWounds` (singleton with `translate()` and `getComparisonShorthand()`), `remainingWounds` (singleton with `translate()`)
 - Stats and numeric primitives are handled separately
 
 ## Formatting
