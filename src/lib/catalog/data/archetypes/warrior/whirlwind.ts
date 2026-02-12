@@ -1,6 +1,5 @@
-import { Action, Obligation } from '$lib/catalog/models/capabilities';
+import { Action } from '$lib/catalog/models/capabilities';
 import {
-	RemoveChargesEffect,
 	repeatCapability,
 	ResultsTableEffect,
 	TriggerAttackEffect
@@ -28,7 +27,7 @@ export default upgradable(Skill, 2, (variants) => ({
 						new ResultsTableEffect({
 							entries: [
 								{
-									result: '1-2',
+									result: variants.values('1+', '1-2'),
 									effects: [new AddChargesEffect({ amount: 1 }), repeatCapability]
 								},
 								...variants.ifMatches(2, {
@@ -40,10 +39,6 @@ export default upgradable(Skill, 2, (variants) => ({
 					]
 				})
 			]
-		}),
-		new Obligation({
-			triggers: ['chapterEnd'],
-			effects: [new RemoveChargesEffect({})]
 		})
 	]
 }));
