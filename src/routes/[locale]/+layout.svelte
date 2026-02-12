@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import UserMenu from '$lib/components/auth/UserMenu.svelte';
 	import InlineSvg from '$lib/components/InlineSvg.svelte';
 	import Navigation from '$lib/components/Navigation.svelte';
 	import { setLocale } from '$lib/context/locale';
@@ -20,6 +21,9 @@
 		includeRoot={true}
 		currentPath={getSectionPathName(page.url.pathname, data.locale)}
 	/>
+	<div class="header-right">
+		<UserMenu user={data.user ?? null} />
+	</div>
 </header>
 
 <main>
@@ -54,6 +58,11 @@
 			var(--header-background-color),
 			var(--page-background-color)
 		);
+	}
+
+	.header-right {
+		margin-left: auto;
+		align-self: center;
 	}
 
 	main {

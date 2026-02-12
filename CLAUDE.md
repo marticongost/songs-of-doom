@@ -20,6 +20,15 @@ npm run lint             # Run prettier + eslint
 npm run format           # Format code with prettier
 ```
 
+### Database Commands
+
+```bash
+npx prisma generate      # Generate Prisma client after schema changes
+npx prisma db push       # Push schema changes to database
+npx prisma studio        # Open Prisma Studio for database management
+npx tsx scripts/create-user.ts <username> <password>  # Create admin user
+```
+
 ## Architecture
 
 ### Catalog System
@@ -142,6 +151,28 @@ SVG files in `src/lib/assets/svg/` are optimized automatically:
 - Watch mode during development optimizes on save
 - Import as Svelte components via `src/lib/assets/svg/index.ts`
 
+### Database & Authentication
+
+The app uses PostgreSQL with Prisma 7 for data persistence and custom session-based authentication:
+
+- **Database**: PostgreSQL via Prisma with the `@prisma/adapter-pg` driver adapter
+- **Schema**: [prisma/schema.prisma](prisma/schema.prisma) defines `User` and `Session` models
+- **Configuration**: [prisma.config.ts](prisma.config.ts) configures the database URL from environment
+- **Environment**: `DATABASE_URL` must be set in `.env` (see `.env.example`)
+
+Authentication components:
+
+- **Server utilities**: `src/lib/server/` contains `db.ts` (Prisma client), `auth.ts` (session management), and `password.ts` (Argon2id hashing)
+- **Session hook**: [src/hooks.server.ts](src/hooks.server.ts) validates sessions on every request and populates `event.locals.user`
+- **Auth routes**: Login at `/[locale]/auth/login`, logout via POST to `/[locale]/auth/logout`
+- **UI**: [UserMenu](src/lib/components/auth/UserMenu.svelte) component displays login link or username with logout button
+
+User management is admin-only via CLI script—no public signup. After setting up the database, create users with:
+
+```bash
+npx tsx scripts/create-user.ts <username> <password>
+```
+
 ## Custom Skills
 
 This project includes custom Claude Code skills:
@@ -173,5 +204,5 @@ Don't suppress linting errors! If that seems to be the only way of fixing an iss
 - **No extensions in imports**: Import TypeScript as `./file` not `./file.ts`
 - **Strict TypeScript**: All strict flags enabled, no implicit any
 - **Import order**: External deps, then $lib imports, then relative imports
-- **File organization**: Components in `src/lib/components/{category}/`, models in `src/lib/catalog/models/{category}/`, rules reference content in `src/lib/rules-reference/entries/{slug}/`
+- **File organization**: Components in `src/lib/components/{category}/`, models in `src/lib/catalog/models/{category}/`, rules reference content in `src/lib/rules-reference/entries/{slug}/`, server-only code in `src/lib/server/`
 - **Formatting**: Run `npm run format` after editing files to ensure consistent formatting via Prettier
