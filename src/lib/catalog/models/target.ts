@@ -1,4 +1,4 @@
-import type { BooleanExpressionType } from './expressions';
+import type { BooleanExpressionType, ScalarExpressionType } from './expressions';
 
 export type TargetType =
 	| 'owner'
@@ -10,6 +10,14 @@ export type TargetType =
 	| 'object';
 
 export type TargetCardinality = 'single' | 'multiple';
+
+export type TargetSelection =
+	| 'player-chosen'
+	| 'random'
+	| 'closest'
+	| 'furthest'
+	| { lowest: ScalarExpressionType }
+	| { highest: ScalarExpressionType };
 
 export interface TargetDiscriminatorProps {
 	type: TargetType;
@@ -35,19 +43,23 @@ export class TargetDiscriminator {
 
 export interface TargetProps extends TargetDiscriminatorProps {
 	cardinality?: TargetCardinality;
+	selection?: TargetSelection;
 }
 
 export type TargetSpec = TargetType | Target | TargetProps;
 
 export class Target extends TargetDiscriminator {
 	readonly cardinality: TargetCardinality;
+	readonly selection: TargetSelection;
 
 	constructor(props: TargetType | TargetProps) {
 		super(props);
 		if (typeof props === 'string') {
 			this.cardinality = 'single';
+			this.selection = 'player-chosen';
 		} else {
 			this.cardinality = props.cardinality ?? 'single';
+			this.selection = props.selection ?? 'player-chosen';
 		}
 	}
 }
