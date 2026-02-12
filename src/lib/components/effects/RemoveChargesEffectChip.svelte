@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { RemoveChargesEffect } from '$lib/catalog/models/effects';
+	import { expressionPlurality } from '$lib/catalog/models/expressions';
 	import ExpressionChip from '$lib/components/expressions/ExpressionChip.svelte';
 	import Text from '../localisation/Text.svelte';
 	import TargetChip from '../targets/TargetChip.svelte';
@@ -11,16 +12,17 @@
 	const { effect }: Props = $props();
 </script>
 
-<Text
-	ca="Eliminar %(expression) càrregues"
-	es="Eliminar %(expression) cargas"
-	en="Remove %(expression) charges"
->
+<Text ca="Eliminar %(expression)" es="Eliminar %(expression)" en="Remove %(expression)">
 	{#snippet expression()}
 		{#if effect.amount === undefined}
-			<Text ca="totes les" es="todas las" en="all" />
+			<Text ca="totes les càrregues" es="todas las cargas" en="all charges" />
 		{:else}
 			<ExpressionChip expression={effect.amount} />
+			{#if expressionPlurality(effect.amount) === 1}
+				<Text ca="càrrega" es="carga" en="charge" />
+			{:else}
+				<Text ca="càrregues" es="cargas" en="charges" />
+			{/if}
 		{/if}
 	{/snippet}
 </Text>
