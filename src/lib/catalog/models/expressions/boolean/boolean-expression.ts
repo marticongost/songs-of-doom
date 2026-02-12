@@ -1,7 +1,6 @@
-import { ConditionalEffect } from '../effects/conditional';
-import type { Effect } from '../effects/effect';
-import type { Property } from '../properties';
-import { Expression } from './expression';
+import { ConditionalEffect, type Effect } from '$lib/catalog/models/effects';
+import { Expression } from '$lib/catalog/models/expressions/expression';
+import type { Property } from '$lib/catalog/models/properties';
 
 /**
  * Base class for expressions that produce boolean (true/false) values.

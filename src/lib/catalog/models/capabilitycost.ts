@@ -1,5 +1,5 @@
 import type { LocalisedText } from '$lib/localisation';
-import type { ScalarExpressionType } from './expressions/scalar-expression';
+import type { ScalarExpressionType } from './expressions';
 import { focusTypes, type FocusType } from './focus';
 import type { IndicatorType } from './stats';
 

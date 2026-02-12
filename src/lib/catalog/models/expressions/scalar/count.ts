@@ -1,5 +1,5 @@
+import { TargetDiscriminator, type TargetDiscriminatorSpec } from '$lib/catalog/models/target';
 import { finalise } from '$lib/modelling';
-import { TargetDiscriminator, type TargetDiscriminatorSpec } from '../target';
 import { ScalarExpression } from './scalar-expression';
 
 /**

@@ -1,5 +1,5 @@
+import type { ComparisonOperator } from '$lib/catalog/models/expressions/boolean/comparison';
 import type { LocalisedText } from '$lib/localisation';
-import type { ComparisonOperator } from './comparison';
 import { ScalarExpression, type ScalarExpressionType } from './scalar-expression';
 
 /**

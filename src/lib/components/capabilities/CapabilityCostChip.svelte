@@ -8,7 +8,7 @@ Renders a capability cost for a given type.
 -->
 <script lang="ts">
 	import type { CapabilityCostType } from '$lib/catalog/models/capabilitycost';
-	import type { ScalarExpressionType } from '$lib/catalog/models/expressions/scalar-expression';
+	import type { ScalarExpressionType } from '$lib/catalog/models/expressions';
 	import { focusTypes, type FocusType } from '$lib/catalog/models/focus';
 	import { indicatorTypes, type StatType } from '$lib/catalog/models/stats';
 	import {

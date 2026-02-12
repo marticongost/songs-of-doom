@@ -1,6 +1,6 @@
 import type { LocalisedText } from '$lib/localisation';
+import { Expression } from '../expression';
 import { BooleanExpression, type BooleanExpressionType } from './boolean-expression';
-import { Expression } from './expression';
 
 /**
  * Logical AND operation between two or more boolean expressions.

@@ -1,4 +1,4 @@
-import { type ScalarExpressionType } from '../expressions';
+import type { ScalarExpressionType } from '../expressions';
 import type { Property } from '../properties';
 import { parseResultString, type Result, type ResultRange, type ResultString } from '../results';
 import { Effect } from './effect';

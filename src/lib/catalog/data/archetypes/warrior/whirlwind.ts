@@ -7,8 +7,7 @@ import {
 } from '$lib/catalog/models/effects';
 import { AddChargesEffect } from '$lib/catalog/models/effects/recharge';
 import type { ResultsTableEntryProps } from '$lib/catalog/models/effects/resultstable';
-import { charges } from '$lib/catalog/models/expressions';
-import { plus } from '$lib/catalog/models/expressions/scalar-operation';
+import { charges, plus } from '$lib/catalog/models/expressions';
 import { Skill } from '$lib/catalog/models/skill';
 import { upgradable } from '$lib/catalog/models/upgrades';
 

@@ -1,7 +1,7 @@
 import { Action } from '$lib/catalog/models/capabilities';
 import { DrawCardsEffect, WoundEffect } from '$lib/catalog/models/effects';
 import { and, distance, eq, lte } from '$lib/catalog/models/expressions';
-import { remainingWounds } from '$lib/catalog/models/expressions/wounded';
+import { remainingWounds } from '$lib/catalog/models/expressions/scalar/wounds';
 import { Skill } from '$lib/catalog/models/skill';
 import { upgradable } from '$lib/catalog/models/upgrades';
 import piercing from '../../properties/piercing';

@@ -1,4 +1,4 @@
-import type { BooleanExpressionType } from '../expressions/boolean-expression';
+import type { BooleanExpressionType } from '../expressions';
 import { Effect } from './effect';
 
 export interface ConditionalEffectProps {

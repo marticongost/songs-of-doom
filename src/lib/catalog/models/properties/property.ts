@@ -1,5 +1,5 @@
 import type { LocalisedText } from '$lib/localisation';
-import { BooleanExpression } from '../expressions/boolean-expression';
+import { BooleanExpression } from '../expressions';
 
 export interface PropertyProps {
 	title: LocalisedText;

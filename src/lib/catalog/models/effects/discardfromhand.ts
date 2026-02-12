@@ -1,5 +1,5 @@
 import { finalise } from '$lib/modelling';
-import { type ScalarExpressionType } from '../expressions';
+import type { ScalarExpressionType } from '../expressions';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 

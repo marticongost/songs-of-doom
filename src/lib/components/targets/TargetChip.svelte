@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Target, TargetCardinality, TargetDiscriminator } from '$lib/catalog/models/target';
-	import ExpressionChip from '$lib/components/expressions/ExpressionChip.svelte';
 	import { getLocale } from '$lib/context/locale';
 	import { possessiveRelation, toRelation, translate, type LocalisedText } from '$lib/localisation';
+	import ExpressionChip from '../expressions/ExpressionChip.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
 	interface Props extends StandardAttributeProps {

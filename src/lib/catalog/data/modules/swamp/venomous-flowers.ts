@@ -1,8 +1,7 @@
 import { Obligation } from '$lib/catalog/models/capabilities';
 import { DiscardFromHandEffect, TestEffect } from '$lib/catalog/models/effects';
 import { Encounter } from '$lib/catalog/models/encounter';
-import { handSize } from '$lib/catalog/models/expressions';
-import { minus } from '$lib/catalog/models/expressions/scalar-operation';
+import { handSize, minus } from '$lib/catalog/models/expressions';
 import { intelligence } from '$lib/catalog/models/stats';
 
 export default new Encounter({

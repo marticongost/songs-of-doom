@@ -1,7 +1,7 @@
+import type { ComparisonOperator } from '$lib/catalog/models/expressions/boolean/comparison';
+import type { Stat } from '$lib/catalog/models/stats';
 import type { LocalisedText } from '$lib/localisation';
-import type { Stat } from '../stats';
-import type { ComparisonOperator } from './comparison';
-import { Expression } from './expression';
+import { Expression } from '../expression';
 
 /**
  * Base class for expressions that produce numeric (scalar) values.

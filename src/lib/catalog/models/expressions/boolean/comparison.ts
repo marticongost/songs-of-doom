@@ -1,8 +1,10 @@
+import {
+	ScalarExpression,
+	type ScalarExpressionType
+} from '$lib/catalog/models/expressions/scalar/scalar-expression';
+import { ScalarOperation } from '$lib/catalog/models/expressions/scalar/scalar-operation';
 import type { LocalisedText } from '$lib/localisation';
 import { BooleanExpression } from './boolean-expression';
-import { ScalarExpression } from './scalar-expression';
-import { type ScalarExpressionType } from './scalar-expression';
-import { ScalarOperation } from './scalar-operation';
 
 /**
  * A comparison operator between two scalar values.

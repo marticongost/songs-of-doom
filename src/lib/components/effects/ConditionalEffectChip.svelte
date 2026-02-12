@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ConditionalEffect } from '$lib/catalog/models/effects';
-	import ExpressionChip from '$lib/components/expressions/ExpressionChip.svelte';
 	import ArrowIcon from '../ArrowIcon.svelte';
+	import ExpressionChip from '../expressions/ExpressionChip.svelte';
 	import Text from '../localisation/Text.svelte';
 	import EffectList from './EffectList.svelte';
 

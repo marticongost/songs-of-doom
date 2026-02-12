@@ -4,6 +4,7 @@ Renders any expression (scalar or boolean) with proper formatting.
 Handles primitives, operations, comparisons, logical operators, and custom expression types.
 -->
 <script lang="ts">
+	import type { ScalarExpressionType } from '$lib/catalog/models/expressions';
 	import {
 		AndExpression,
 		ComparisonExpression,
@@ -15,7 +16,6 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		ScalarOperation,
 		type BooleanExpressionType
 	} from '$lib/catalog/models/expressions';
-	import type { ScalarExpressionType } from '$lib/catalog/models/expressions/scalar-expression';
 	import { Property } from '$lib/catalog/models/properties';
 	import { Stat } from '$lib/catalog/models/stats';
 	import InlineSvg from '../InlineSvg.svelte';
