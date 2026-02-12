@@ -1,5 +1,6 @@
 import { creature, type EntityType } from '../models/properties/';
-import { Entity, type EntityProps } from './entity';
+import { ChildEntity, type EntityProps } from './entity';
+import type { Module } from './module';
 import type { AttributeType } from './stats';
 
 export type CreatureStatType = AttributeType | 'health';
@@ -9,9 +10,8 @@ export interface CreatureProps extends EntityProps<Creature> {
 	stats: Record<CreatureStatType, number>;
 }
 
-export class Creature extends Entity {
+export class Creature extends ChildEntity<Module> {
 	override readonly type: EntityType = creature;
-	override readonly set = undefined;
 	readonly stats: Record<CreatureStatType, number>;
 
 	constructor({ stats, ...baseProps }: CreatureProps) {

@@ -20,11 +20,7 @@ export const entities = new EntityCatalog(
 		eager: true,
 		import: 'default'
 	}),
-	import.meta.glob<Creature>(`./data/creatures/**/*.ts`, {
-		eager: true,
-		import: 'default'
-	}),
-	import.meta.glob<Module | Encounter>(`./data/modules/**/*.ts`, {
+	import.meta.glob<Module | Encounter | Creature>(`./data/modules/**/*.ts`, {
 		eager: true,
 		import: 'default'
 	})
