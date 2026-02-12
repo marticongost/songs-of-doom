@@ -6,6 +6,7 @@ export type ResultString =
 	| CriticalFailure
 	| `${Result}`
 	| `${Result}+`
+	| 'failed'
 	| '0-1'
 	| '0-2'
 	| '0-3'
@@ -18,13 +19,15 @@ export interface ResultRange {
 	max?: NumericResult;
 }
 
-export type ResultSelector = Result | ResultRange;
+export type ResultSelector = Result | ResultRange | Array<Result>;
 
 export type ResultSpec = ResultSelector | ResultString;
 
 export const parseResultString = (str: ResultString): ResultSelector => {
 	if (str === 'CF') {
 		return 'CF';
+	} else if (str === 'failed') {
+		return ['CF', 0];
 	} else if (/^[0123]$/.test(str)) {
 		return parseInt(str, 10) as Result;
 	} else if (/^[0123]\+$/.test(str)) {

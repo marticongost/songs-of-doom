@@ -21,6 +21,10 @@
 <span {...standardAttributes(attributes, 'result-selector-chip')}>
 	{#if typeof result === 'number' || result === 'CF'}
 		{@render resultSnippet(result)}
+	{:else if result instanceof Array}
+		{#each result as r (r)}
+			{@render resultSnippet(r)}
+		{/each}
 	{:else if result.min && result.max}
 		{#each Array.from({ length: result.max - result.min + 1 }, (_, i) => i + result.min!) as r (r)}
 			{@render resultSnippet(r as Result)}
