@@ -37,8 +37,8 @@
 <style>
 	:global(.inline-svg) {
 		display: inline-block;
-		width: auto;
-		height: 1em;
+		width: var(--svg-width, auto);
+		height: var(--svg-height, 1em);
 		vertical-align: middle;
 		fill: currentColor;
 	}
