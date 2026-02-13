@@ -4,13 +4,13 @@
 	leading icon rendered via `InlineSvg`.
 -->
 <script lang="ts">
-	import { getLocale } from '$lib/context/locale';
-	import { translate, type LocalisedText } from '$lib/localisation';
 	import InlineSvg from '$lib/components/InlineSvg.svelte';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
+	import { getLocale } from '$lib/context/locale';
+	import { translate, type LocalisedText } from '$lib/localisation';
 
 	interface Option {
 		value: string;
@@ -59,6 +59,10 @@
 			background-color: var(--panel-background-color);
 			border: var(--panel-border);
 			border-radius: 0.3em;
+
+			&:focus {
+				outline: var(--focus-outline);
+			}
 		}
 
 		&.has-icon {
