@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import UserMenu from '$lib/components/auth/UserMenu.svelte';
+	import UserButton from '$lib/components/auth/UserButton.svelte';
 	import InlineSvg from '$lib/components/InlineSvg.svelte';
 	import Navigation from '$lib/components/Navigation.svelte';
 	import { setLocale } from '$lib/context/locale';
@@ -21,7 +21,7 @@
 		includeRoot={true}
 		currentPath={getSectionPathName(page.url.pathname, data.locale)}
 	/>
-	<UserMenu class="user-menu" user={data.user ?? null} />
+	<UserButton class="user-button" user={data.user ?? null} />
 </header>
 
 <main>
@@ -58,7 +58,8 @@
 		);
 	}
 
-	:global(.user-menu) {
+	:global(.user-button) {
+		--svg-height: 1.5em;
 		margin-left: auto;
 		align-self: center;
 	}
