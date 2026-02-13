@@ -20,6 +20,7 @@ body {
 	$palette-white: #fff;
 	$palette-brown: #a17a55;
 	$palette-red: #a15555;
+	$palette-buccaneer: #702e2e;
 	$palette-thatch: #bd9898;
 	$palette-green: #55a155;
 	$palette-old-gold: #d2b532;
@@ -109,6 +110,15 @@ body {
 	// Links
 	--link-color: #{$palette-red};
 	--link-hover-color: #{$palette-thatch};
+
+	// Buttons
+	--button-background-color: #{$palette-buccaneer};
+	--button-foreground-color: #{$palette-white};
+	--button-hover-background-color: #{$palette-red};
+	--button-hover-foreground-color: #{$palette-white};
+
+	// Focus
+	--focus-outline: 2px solid #{$palette-thatch};
 }
 
 @include rz.reset-elements;
