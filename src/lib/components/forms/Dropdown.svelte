@@ -56,9 +56,9 @@
 			font-family: inherit;
 			font-size: inherit;
 			color: var(--text-color);
-			background-color: var(--panel-background-color);
-			border: var(--panel-border);
-			border-radius: 0.3em;
+			background-color: var(--input-background-color);
+			border: var(--input-border);
+			border-radius: rz.size(sm);
 
 			&:focus {
 				outline: var(--focus-outline);

@@ -30,7 +30,7 @@ body {
 	$palette-blue: #5555a1;
 	$palette-purple: #7655a1;
 	$palette-violet: #a155a1;
-	$palette-mine-shaft: #333;
+	$palette-shade: #282828;
 	$palette-somber: #222;
 	$palette-cloud: rgb(207, 213, 219);
 	$palette-ash: #333;
@@ -119,7 +119,8 @@ body {
 	--button-hover-foreground-color: #{$palette-white};
 
 	// Inputs
-	--input-background-color: #{$palette-mine-shaft};
+	--input-background-color: #{$palette-shade};
+	--input-border: 2px solid #{$palette-ash};
 
 	// Forms
 	--focus-outline: 2px solid #{$palette-thatch};

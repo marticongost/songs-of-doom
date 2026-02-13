@@ -75,11 +75,12 @@ A styled text input with optional leading icon.
 			font-size: inherit;
 			color: var(--text-color);
 			background-color: var(--input-background-color);
-			border: none;
+			border: var(--input-border);
 			border-radius: rz.size(sm);
 
 			&:focus {
-				outline: var(--focus-outline);
+				border: var(--focus-outline);
+				outline: none;
 			}
 
 			&::placeholder {
