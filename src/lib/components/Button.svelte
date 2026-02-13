@@ -25,6 +25,9 @@
 
 		/** Button content */
 		children: Snippet;
+
+		/** The button's appearance. Use `transparent` to create a chromeless button. */
+		appearance?: 'primary' | 'transparent';
 	}
 
 	const {
@@ -33,6 +36,7 @@
 		onclick,
 		href,
 		children,
+		appearance = 'primary',
 		...attributes
 	}: Props = $props();
 </script>
@@ -43,6 +47,8 @@
 		{...standardAttributes(attributes, 'button')}
 		{href}
 		class:disabled
+		class:primary={appearance === 'primary'}
+		class:transparent={appearance === 'transparent'}
 		aria-disabled={disabled || undefined}
 		onclick={disabled ? undefined : onclick}
 	>
@@ -50,7 +56,15 @@
 	</a>
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 {:else}
-	<button {...standardAttributes(attributes, 'button')} {type} {disabled} {onclick}>
+	<button
+		{...standardAttributes(attributes, 'button')}
+		{type}
+		{disabled}
+		{onclick}
+		class:primary={appearance === 'primary'}
+		class:transparent={appearance === 'transparent'}
+		style:anchor-name={anchor}
+	>
 		{@render children()}
 	</button>
 {/if}
@@ -58,7 +72,7 @@
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
 
-	.button {
+	.button:not(.transparent) {
 		@include rz.hpadding(md);
 		@include rz.vpadding(sm);
 		background-color: var(--button-background-color);
@@ -86,6 +100,17 @@
 		&.disabled {
 			opacity: 0.5;
 			cursor: not-allowed;
+		}
+	}
+
+	.transparent {
+		border: none;
+		padding: 0;
+		background: none;
+		font-size: inherit;
+
+		&:focus {
+			outline: var(--focus-outline);
 		}
 	}
 </style>
