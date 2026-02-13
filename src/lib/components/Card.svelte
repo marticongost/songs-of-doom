@@ -173,8 +173,21 @@
 
 	.header {
 		@include rz.row;
+		position: relative;
 		border-bottom: var(--panel-separator);
-		background-image: var(--main-background);
+		background: url('../assets/img/card-heading.png') center / cover;
+
+		&::before {
+			content: '';
+			position: absolute;
+			inset: 0;
+			background-image: var(--main-background);
+			opacity: 0.7;
+		}
+
+		> :global(*) {
+			position: relative;
+		}
 	}
 
 	.title {
@@ -225,9 +238,22 @@
 	.details {
 		@include rz.row(sm);
 		@include rz.padding(sm);
+		position: relative;
 		border-top: var(--panel-separator);
 		border-bottom: var(--panel-separator);
-		background-image: var(--secondary-background);
+		background: url('../assets/img/card-subheading.png') center / cover;
+
+		&::before {
+			content: '';
+			position: absolute;
+			inset: 0;
+			background-image: var(--secondary-background);
+			opacity: 0.7;
+		}
+
+		> :global(*) {
+			position: relative;
+		}
 	}
 
 	.body {
