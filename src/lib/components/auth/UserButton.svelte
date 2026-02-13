@@ -32,6 +32,9 @@
 
 <div {...standardAttributes(attributes, 'user-button')}>
 	<IconButton src="user.svg" popovertarget={popoverId} anchor={anchorName} />
+	{#if user}
+		<div class="logged-in-cue"></div>
+	{/if}
 	<Popover id={popoverId} class="user-popover" anchor={anchorName}>
 		{#if user}
 			<LoggedUserDetails {user} onSuccess={closePopover} />
@@ -42,11 +45,24 @@
 </div>
 
 <style lang="scss">
+	@use '@reguitzell/styles' as rz;
+
 	.user-button {
 		display: inline-block;
 	}
 
 	:global(.user-popover) {
 		width: 20em;
+	}
+
+	.logged-in-cue {
+		position: absolute;
+		position-anchor: --user-popover;
+		position-area: x-end y-end;
+		border-radius: 100%;
+		background-color: var(--positive-color);
+		width: rz.size(sm);
+		height: rz.size(sm);
+		top: -0.5em;
 	}
 </style>
