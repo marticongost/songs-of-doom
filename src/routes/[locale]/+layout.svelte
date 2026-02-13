@@ -21,9 +21,7 @@
 		includeRoot={true}
 		currentPath={getSectionPathName(page.url.pathname, data.locale)}
 	/>
-	<div class="header-right">
-		<UserMenu user={data.user ?? null} />
-	</div>
+	<UserMenu class="user-menu" user={data.user ?? null} />
 </header>
 
 <main>
@@ -60,7 +58,7 @@
 		);
 	}
 
-	.header-right {
+	:global(.user-menu) {
 		margin-left: auto;
 		align-self: center;
 	}

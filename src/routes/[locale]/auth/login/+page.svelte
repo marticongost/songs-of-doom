@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import Button from '$lib/components/Button.svelte';
+	import Input from '$lib/components/forms/Input.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import type { ActionData } from './$types';
 
@@ -15,8 +17,8 @@
 		<label for="username">
 			<Text ca="Nom d'usuari" es="Nombre de usuario" en="Username" />
 		</label>
-		<input
-			type="text"
+		<Input
+			autofocus={true}
 			id="username"
 			name="username"
 			autocomplete="username"
@@ -30,7 +32,7 @@
 		<label for="password">
 			<Text ca="Contrasenya" es="Contraseña" en="Password" />
 		</label>
-		<input
+		<Input
 			type="password"
 			id="password"
 			name="password"
@@ -40,9 +42,9 @@
 		/>
 	</div>
 
-	<button type="submit" class="submit-button">
-		<Text ca="Entra" es="Entrar" en="Log in" />
-	</button>
+	<Button type="submit" class="submit-button">
+		<Text ca="Entrar" es="Entrar" en="Log in" />
+	</Button>
 </form>
 
 <style lang="scss">
