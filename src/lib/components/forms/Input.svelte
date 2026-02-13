@@ -17,22 +17,33 @@ A styled text input with optional leading icon.
 	interface Props extends StandardAttributeProps {
 		/** Input type (text, search, email, etc.) */
 		type?: 'text' | 'search' | 'email' | 'password' | 'number';
+
+		/** The name of the form element. Used to identify the field when the input is
+		 * submitted as part of a form. */
+		name?: string;
+
 		/** Current input value */
 		value?: string;
+
 		/** Placeholder text */
 		placeholder?: string;
+
 		/** Optional SVG icon source displayed before the input */
 		icon?: string;
+
 		/** Whether to auto-focus on mount */
 		autofocus?: boolean;
+
 		/** Accessible label for screen readers */
 		'aria-label'?: string;
+
 		/** Called when input value changes */
 		oninput?: (e: Event & { currentTarget: HTMLInputElement }) => void;
 	}
 
 	let {
 		type = 'text',
+		name,
 		value = $bindable(''),
 		placeholder,
 		icon,
@@ -47,7 +58,7 @@ A styled text input with optional leading icon.
 	{#if icon}
 		<InlineSvg class="input-icon" src={icon} />
 	{/if}
-	<input {type} bind:value {placeholder} {autofocus} aria-label={ariaLabel} {oninput} />
+	<input {type} {name} bind:value {placeholder} {autofocus} aria-label={ariaLabel} {oninput} />
 </span>
 
 <style lang="scss">

@@ -1,5 +1,6 @@
 // Base interface for components that accept standard HTML attributes
 export interface StandardAttributeProps {
+	id?: string;
 	class?: string;
 	style?: string;
 	[key: string]: unknown;
