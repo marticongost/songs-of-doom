@@ -23,6 +23,15 @@
 		/** If provided, renders as an anchor element */
 		href?: string;
 
+		/** ID of a popover element to control (only applies to button, not anchor) */
+		popovertarget?: string;
+
+		/** Action to perform on the popover: toggle, show, or hide */
+		popovertargetaction?: 'toggle' | 'show' | 'hide';
+
+		/** CSS anchor name for anchor positioning (sets anchor-name style property) */
+		anchor?: string;
+
 		/** Button content */
 		children: Snippet;
 
@@ -35,6 +44,9 @@
 		disabled = false,
 		onclick,
 		href,
+		popovertarget,
+		popovertargetaction,
+		anchor,
 		children,
 		appearance = 'primary',
 		...attributes
@@ -61,6 +73,8 @@
 		{type}
 		{disabled}
 		{onclick}
+		{popovertarget}
+		{popovertargetaction}
 		class:primary={appearance === 'primary'}
 		class:transparent={appearance === 'transparent'}
 		style:anchor-name={anchor}
