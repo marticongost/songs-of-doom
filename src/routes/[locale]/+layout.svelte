@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import UserButton from '$lib/components/auth/UserButton.svelte';
 	import InlineSvg from '$lib/components/InlineSvg.svelte';
+	import LanguageButton from '$lib/components/LanguageButton.svelte';
 	import Navigation from '$lib/components/Navigation.svelte';
 	import { setLocale } from '$lib/context/locale';
 	import { getSectionPathName, siteTree } from '$lib/navigation.js';
@@ -21,7 +22,10 @@
 		includeRoot={true}
 		currentPath={getSectionPathName(page.url.pathname, data.locale)}
 	/>
-	<UserButton class="user-button" user={data.user ?? null} />
+	<div class="app-controls">
+		<LanguageButton class="language-button" />
+		<UserButton class="user-button" user={data.user ?? null} />
+	</div>
 </header>
 
 <main>
@@ -58,7 +62,7 @@
 		);
 	}
 
-	:global(.user-button) {
+	.app-controls {
 		--svg-height: 1.5em;
 		margin-left: auto;
 		align-self: center;
