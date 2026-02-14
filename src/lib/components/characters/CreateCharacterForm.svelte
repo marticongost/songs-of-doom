@@ -12,6 +12,7 @@
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
+	import ErrorMessage from '../errors/ErrorMessage.svelte';
 
 	interface Props extends StandardAttributeProps {
 		/** Error message to display, if any */
@@ -26,12 +27,12 @@
 
 <form {...standardAttributes(attributes, 'create-character-form')} method="POST" use:enhance>
 	{#if errorMessage}
-		<div class="error-message">{errorMessage}</div>
+		<ErrorMessage>{errorMessage}</ErrorMessage>
 	{/if}
 
 	<div class="form-field">
 		<label for="name">
-			<Text ca="Nom del personatge" es="Nombre del personaje" en="Character name" />
+			<Text ca="Nom" es="Nombre" en="Name" />
 		</label>
 		<Input {autofocus} id="name" name="name" required minlength={2} />
 	</div>
@@ -55,13 +56,5 @@
 			font-weight: bold;
 			color: var(--text-heading-color);
 		}
-	}
-
-	.error-message {
-		@include rz.padding(sm md);
-		background: rgba(161, 85, 85, 0.2);
-		border: 1px solid var(--stat-health-color);
-		border-radius: rz.size(xs);
-		color: var(--stat-health-color);
 	}
 </style>
