@@ -73,15 +73,29 @@
 	a[data-level='1'] {
 		@include rz.column(sm);
 		@include rz.padding(md);
-		color: var(--text-color);
+		color: var(--nav-color);
+		border-bottom-left-radius: rz.size(sm);
+		border-bottom-right-radius: rz.size(sm);
+
+		&:focus {
+			outline: var(--focus-outline);
+		}
 
 		:global(svg) {
-			opacity: 0.3;
+			filter: drop-shadow(0 0 0.5em black);
 			height: 3em;
+			transition: transform 0.2s;
+		}
+
+		&:hover {
+			color: var(--nav-hover-color);
+		}
+
+		&:hover :global(svg) {
+			transform: scale(1.1);
 		}
 
 		.label {
-			opacity: 0.5;
 			font-weight: bold;
 			font-family: var(--heading-font);
 			font-size: 1.5em;
@@ -89,15 +103,7 @@
 
 		&[data-match='selected'],
 		&[data-match='ancestor']:not([data-path='/']) {
-			:global(svg) {
-				color: var(--nav-selected-icon-color);
-				opacity: 1;
-			}
-
-			.label {
-				opacity: 1;
-				color: var(--text-heading-color);
-			}
+			color: var(--nav-selected-color);
 		}
 	}
 </style>
