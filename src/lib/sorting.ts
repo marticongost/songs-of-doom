@@ -1,7 +1,14 @@
 import type { Entity } from '$lib/catalog/models/entity';
 import { requireLocalisedField, type Locale, type LocalisedText } from '$lib/localisation';
 
-export type SortCriteriaType = 'alpha' | 'type' | 'xp-asc' | 'xp-desc' | 'gold-asc' | 'gold-desc';
+export type SortCriteriaType =
+	| 'alpha'
+	| 'type'
+	| 'set'
+	| 'xp-asc'
+	| 'xp-desc'
+	| 'gold-asc'
+	| 'gold-desc';
 
 export abstract class SortCriteria {
 	readonly label: LocalisedText;
@@ -48,6 +55,23 @@ class AlphabeticalSort extends SortCriteria {
 	}
 }
 
+class SetSort extends SortCriteria {
+	sort(entities: Array<Entity>, locale: Locale): Array<Entity> {
+		return [...entities].sort((a, b) => {
+			const aSet = a.set;
+			const bSet = b.set;
+
+			// Entities without a set go to the end
+			if (!aSet && !bSet) return compareByTitle(a, b, locale);
+			if (!aSet) return 1;
+			if (!bSet) return -1;
+
+			// Sort by set title, then by entity title as tiebreaker
+			return compareByTitle(aSet, bSet, locale) || compareByTitle(a, b, locale);
+		});
+	}
+}
+
 class NumericCostSort extends SortCriteria {
 	constructor(
 		label: LocalisedText,
@@ -71,6 +95,7 @@ class NumericCostSort extends SortCriteria {
 export const sortCriteria: Record<SortCriteriaType, SortCriteria> = {
 	alpha: new AlphabeticalSort({ ca: 'Alfabètic', es: 'Alfabético', en: 'Alphabetical' }),
 	type: new EntityTypeSort({ ca: 'Tipus', es: 'Tipo', en: 'Type' }),
+	set: new SetSort({ ca: 'Conjunt', es: 'Conjunto', en: 'Set' }),
 	'xp-asc': new NumericCostSort(
 		{ ca: 'Experiència (ascendent)', es: 'Experiencia (ascendente)', en: 'Experience (ascending)' },
 		'xpCost',
