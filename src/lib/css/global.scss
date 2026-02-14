@@ -40,7 +40,8 @@ body {
 	$palette-chatelle: #b4a8bb;
 	$palette-ivory: #f0f0e0;
 	$palette-cedar: #330f1b;
-	$palette-cocoa-brown: rgb(21, 15, 18);
+	$palette-cocoa-brown: #150f12;
+	$palette-light-cocoa-brown: #1f161a;
 
 	// === Color assignments ===
 
@@ -126,6 +127,13 @@ body {
 
 	// Forms
 	--focus-outline: 2px solid #{$palette-thatch};
+
+	// Tables
+	--table-heading-color: var(--text-heading-color);
+	--table-heading-separator: 2px solid #{$palette-cinder};
+	--table-background-color: #{$palette-cocoa-brown};
+	--table-stripe-background-color: #{$palette-light-cocoa-brown};
+	--table-hover-background-color: #{$palette-buccaneer};
 }
 
 @include rz.reset-elements;

@@ -1,5 +1,11 @@
 export const locales = ['ca', 'es', 'en'] as const;
 
+export const intlLocaleMap: Record<Locale, string> = {
+	ca: 'ca-ES',
+	es: 'es-ES',
+	en: 'en-US'
+};
+
 export type Locale = (typeof locales)[number];
 
 export type LocalisedText = Partial<Record<Locale, string>>;
