@@ -46,8 +46,8 @@ method.
 		/** Whether to stripe alternating rows. Defaults to true. */
 		striped?: boolean;
 
-		/** Row hover effect. Defaults to true. */
-		hoverable?: boolean;
+		/** Row click handler. */
+		onClickRow?: (row: T) => void;
 	}
 
 	const {
@@ -55,11 +55,12 @@ method.
 		columns,
 		showHeader = true,
 		striped = true,
-		hoverable = true,
+		onClickRow,
 		...attributes
 	}: Props = $props();
 
 	const locale = getLocale();
+	const hoverable = $derived(onClickRow !== undefined);
 </script>
 
 <table {...standardAttributes(attributes, 'table')} class:striped class:hoverable>
@@ -77,7 +78,7 @@ method.
 
 	<tbody>
 		{#each rows as row, rowIndex (rowIndex)}
-			<tr>
+			<tr onclick={() => onClickRow?.(row)}>
 				{#each columns as column, colIndex (colIndex)}
 					{@const value = column.getValue(row)}
 					<td style:text-align={column.align}>
@@ -123,8 +124,12 @@ method.
 			background-color: var(--table-stripe-background-color);
 		}
 
-		&.hoverable tbody tr:hover {
-			background-color: var(--table-hover-background-color);
+		&.hoverable tbody tr {
+			cursor: pointer;
+
+			&:hover {
+				background-color: var(--table-hover-background-color);
+			}
 		}
 	}
 </style>
