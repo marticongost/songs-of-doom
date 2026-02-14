@@ -55,11 +55,22 @@
 	header {
 		@include rz.row(xl);
 		@include rz.hpadding(var(--page-hpadding));
-		background-image: linear-gradient(
-			to bottom,
-			var(--header-background-color),
-			var(--page-background-color)
-		);
+		background-image:
+			linear-gradient(
+				to bottom,
+				color-mix(in srgb, var(--header-background-color) 80%, transparent),
+				color-mix(in srgb, var(--page-background-color) 80%, transparent)
+			),
+			linear-gradient(to bottom, transparent, var(--page-background-color)),
+			url('../../lib/assets/img/page-header.png');
+		background-size:
+			100% 100%,
+			100% 100%,
+			128px;
+		background-position:
+			center,
+			center,
+			center top;
 	}
 
 	.app-controls {
