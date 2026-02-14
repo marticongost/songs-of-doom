@@ -91,6 +91,14 @@ export const siteTree = new Section({
 	},
 	children: [
 		{
+			name: 'characters',
+			title: {
+				ca: 'Personatges',
+				es: 'Personajes',
+				en: 'Characters'
+			}
+		},
+		{
 			name: 'cards',
 			title: {
 				ca: 'Cartes',

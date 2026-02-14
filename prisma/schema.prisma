@@ -8,11 +8,12 @@ datasource db {
 }
 
 model User {
-  id        String    @id
-  createdAt DateTime  @default(now())
-  username  String    @unique
-  password  String
-  sessions  Session[]
+  id         String      @id
+  createdAt  DateTime    @default(now())
+  username   String      @unique
+  password   String
+  sessions   Session[]
+  characters Character[]
 }
 
 model Session {
@@ -22,4 +23,25 @@ model Session {
   user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model Character {
+  id        Int                 @id @default(autoincrement())
+  ownerId   String
+  owner     User                @relation(references: [id], fields: [ownerId], onDelete: Cascade)
+  name      String
+  revisions CharacterRevision[]
+}
+
+model CharacterRevision {
+  characterId Int
+  character   Character @relation(references: [id], fields: [characterId], onDelete: Cascade)
+  number      Int
+  createdAt   DateTime  @default(now())
+  state       Json
+  totalXp     Int
+  spentXp     Int
+  availableXp Int
+
+  @@id([characterId, number])
 }
