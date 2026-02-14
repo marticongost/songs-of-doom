@@ -1,4 +1,5 @@
 import type { Entity } from '$lib/catalog/models/entity';
+import type { EntityTypeId } from '$lib/catalog/models/properties/entitytypes';
 import { requireLocalisedField, type Locale, type LocalisedText } from '$lib/localisation';
 
 export type SortCriteriaType =
@@ -31,6 +32,20 @@ export abstract class SortCriteria {
 	}
 }
 
+export interface Group {
+	id: string;
+	title: LocalisedText;
+}
+
+export interface GroupingResult {
+	group: Group;
+	entities: Array<Entity>;
+}
+
+export abstract class GroupingCriteria extends SortCriteria {
+	abstract group(entities: Array<Entity>, locale: Locale): Array<GroupingResult>;
+}
+
 function compareByTitle(
 	a: { title: LocalisedText },
 	b: { title: LocalisedText },
@@ -41,34 +56,87 @@ function compareByTitle(
 	return aTitle.localeCompare(bTitle, locale);
 }
 
-class EntityTypeSort extends SortCriteria {
+const UNCATEGORIZED_ID = '__uncategorized__';
+const uncategorizedTitle: LocalisedText = {
+	ca: 'Sense categoria',
+	es: 'Sin categoría',
+	en: 'Uncategorized'
+};
+
+class SetSort extends GroupingCriteria {
+	group(entities: Array<Entity>, locale: Locale): Array<GroupingResult> {
+		const groups = new Map<string, { group: Group; entities: Entity[] }>();
+
+		for (const entity of entities) {
+			const set = entity.set;
+			const id = set?.id ?? UNCATEGORIZED_ID;
+			const title = set?.title ?? uncategorizedTitle;
+
+			if (!groups.has(id)) {
+				groups.set(id, { group: { id, title }, entities: [] });
+			}
+			groups.get(id)!.entities.push(entity);
+		}
+
+		// Sort groups alphabetically, but keep Uncategorized at the end
+		const uncategorized = groups.get(UNCATEGORIZED_ID);
+		groups.delete(UNCATEGORIZED_ID);
+
+		const sortedGroups = [...groups.values()]
+			.sort((a, b) => compareByTitle(a.group, b.group, locale))
+			.map(({ group, entities }) => ({
+				group,
+				entities: this.sort(entities, locale)
+			}));
+
+		if (uncategorized) {
+			sortedGroups.push({
+				group: uncategorized.group,
+				entities: this.sort(uncategorized.entities, locale)
+			});
+		}
+
+		return sortedGroups;
+	}
+
 	sort(entities: Array<Entity>, locale: Locale): Array<Entity> {
-		return entities.sort((a, b) => {
-			return compareByTitle(a.type, b.type, locale) || compareByTitle(a, b, locale);
+		return [...entities].sort((a, b) => {
+			return compareByTitle(a, b, locale);
 		});
+	}
+}
+
+class EntityTypeSort extends GroupingCriteria {
+	group(entities: Array<Entity>, locale: Locale): Array<GroupingResult> {
+		const groups = new Map<EntityTypeId, { group: Group; entities: Entity[] }>();
+
+		for (const entity of entities) {
+			const type = entity.type;
+			if (!groups.has(type.id)) {
+				groups.set(type.id, {
+					group: { id: type.id, title: type.pluralTitle },
+					entities: []
+				});
+			}
+			groups.get(type.id)!.entities.push(entity);
+		}
+
+		return [...groups.values()]
+			.sort((a, b) => compareByTitle(a.group, b.group, locale))
+			.map(({ group, entities }) => ({
+				group,
+				entities: this.sort(entities, locale)
+			}));
+	}
+
+	sort(entities: Array<Entity>, locale: Locale): Array<Entity> {
+		return [...entities].sort((a, b) => compareByTitle(a, b, locale));
 	}
 }
 
 class AlphabeticalSort extends SortCriteria {
 	sort(entities: Array<Entity>, locale: Locale): Array<Entity> {
 		return [...entities].sort((a, b) => compareByTitle(a, b, locale));
-	}
-}
-
-class SetSort extends SortCriteria {
-	sort(entities: Array<Entity>, locale: Locale): Array<Entity> {
-		return [...entities].sort((a, b) => {
-			const aSet = a.set;
-			const bSet = b.set;
-
-			// Entities without a set go to the end
-			if (!aSet && !bSet) return compareByTitle(a, b, locale);
-			if (!aSet) return 1;
-			if (!bSet) return -1;
-
-			// Sort by set title, then by entity title as tiebreaker
-			return compareByTitle(aSet, bSet, locale) || compareByTitle(a, b, locale);
-		});
 	}
 }
 

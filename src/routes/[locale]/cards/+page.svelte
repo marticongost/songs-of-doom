@@ -10,11 +10,14 @@
 	import { translate } from '$lib/localisation';
 	import { filterByTitle } from '$lib/search';
 	import {
+		GroupingCriteria,
+		SortCriteria,
 		sortCriteria,
-		sortedEntities as sortEntities,
 		sortOptions,
+		type GroupingResult,
 		type SortCriteriaType
 	} from '$lib/sorting';
+	import type { Entity } from '$lib/catalog/models/entity';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -109,7 +112,19 @@
 	const typeFiltered = $derived(
 		currentType ? searchFiltered.filter((entity) => entity.type.id === currentType) : searchFiltered
 	);
-	const sorted = $derived(sortEntities(typeFiltered, currentSort, data.locale));
+
+	type SortedResult =
+		| { entities: Entity[]; groupedEntities?: never }
+		| { groupedEntities: GroupingResult[]; entities?: never };
+
+	const resolvedCriteria = $derived(SortCriteria.resolve(currentSort));
+
+	const sorted: SortedResult = $derived.by(() => {
+		if (resolvedCriteria instanceof GroupingCriteria) {
+			return { groupedEntities: resolvedCriteria.group(typeFiltered, data.locale) };
+		}
+		return { entities: resolvedCriteria.sort(typeFiltered, data.locale) };
+	});
 
 	function onSortChange(value: SortCriteriaType) {
 		updateUrl({ sort: value });
@@ -136,7 +151,11 @@
 	<SortDropdown options={sortOptions} value={currentSort} onChange={onSortChange} />
 </div>
 
-<EntityGrid entities={sorted} keyboardNav={nav} />
+{#if sorted.groupedEntities}
+	<EntityGrid groupedEntities={sorted.groupedEntities} keyboardNav={nav} />
+{:else}
+	<EntityGrid entities={sorted.entities} keyboardNav={nav} />
+{/if}
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
