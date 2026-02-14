@@ -5,7 +5,10 @@ import type { Session, SessionUser } from '$lib/server/auth';
 // for information about these interfaces
 declare global {
 	namespace App {
-		// interface Error {}
+		interface Error {
+			type?: 'auth_required';
+			message: string;
+		}
 		interface Locals {
 			user: SessionUser | null;
 			session: Session | null;

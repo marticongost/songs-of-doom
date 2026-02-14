@@ -1,9 +1,15 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import Button from '$lib/components/Button.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { DateColumn, IntegerColumn, StringColumn, Table } from '$lib/components/tables';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
+
+	const newCharacterPath = '/[locale]/characters/new' as const;
+	const characterDetailPath = '/[locale]/characters/[id]' as const;
 
 	interface CharacterRow {
 		id: number;
@@ -26,7 +32,28 @@
 		})
 	);
 
-	const columns = [
+	function openCharacter(row: CharacterRow): void {
+		goto(resolve(characterDetailPath, { locale: data.locale, id: String(row.id) }));
+	}
+</script>
+
+<div class="toolbar">
+	<Button href={resolve(newCharacterPath, { locale: data.locale })}>
+		<Text ca="Nou personatge" es="Nuevo personaje" en="New character" />
+	</Button>
+</div>
+
+<p class="results-count">
+	<Text
+		ca="%(count) personatges"
+		es="%(count) personajes"
+		en="%(count) characters"
+		count={rows.length}
+	/>
+</p>
+
+{#if rows.length > 0}
+	{@const columns = [
 		new StringColumn<CharacterRow>({
 			header: { ca: 'Nom', es: 'Nombre', en: 'Name' },
 			expression: 'name'
@@ -43,20 +70,8 @@
 			header: { ca: 'Propietari', es: 'Propietario', en: 'Owner' },
 			expression: (row) => row.owner
 		})
-	];
-</script>
-
-<p class="results-count">
-	<Text
-		ca="%(count) personatges"
-		es="%(count) personajes"
-		en="%(count) characters"
-		count={rows.length}
-	/>
-</p>
-
-{#if rows.length > 0}
-	<Table {rows} {columns} />
+	]}
+	<Table {rows} {columns} onClickRow={openCharacter} />
 {:else}
 	<p class="empty-message">
 		<Text
@@ -69,6 +84,10 @@
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
+
+	.toolbar {
+		margin-bottom: rz.size(lg);
+	}
 
 	.results-count {
 		color: var(--text-subtle-color);
