@@ -79,6 +79,7 @@
 		border: var(--popover-border, var(--input-border));
 		border-radius: rz.size(sm);
 		box-shadow: 0 0 rz.size(md) rgba(black, 0.5);
+		color: inherit;
 
 		&::backdrop {
 			background: transparent;
