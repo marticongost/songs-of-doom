@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Entity } from '$lib/catalog/models/entity';
 	import { resolve } from '$app/paths';
+	import type { Entity } from '$lib/catalog/models/entity';
 	import { getLocale } from '$lib/context/locale';
 	import Button from './Button.svelte';
 	import Card from './Card.svelte';
@@ -63,7 +63,7 @@
 		text-align: left;
 		width: 100%;
 
-		@each $type in archetype, trait, skill, ally, item, creature {
+		@each $type in archetype, trait, skill, ally, item, creature, encounter {
 			&[data-type='#{$type}'] {
 				background-image: var(--card-type-#{$type}-main-background);
 			}

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Archetype } from '$lib/catalog/models/archetype';
 	import { Entity } from '$lib/catalog/models/entity';
+	import { Module } from '$lib/catalog/models/module';
 	import { entityTypes } from '$lib/catalog/models/properties';
 	import Card from '$lib/components/Card.svelte';
 	import CardButton from '$lib/components/CardButton.svelte';
@@ -25,47 +26,58 @@
 	</section>
 {/snippet}
 
-<div class="card-page">
-	<Card entity={data.entity} linked={false} />
+<div class="card-page" class:module={data.entity instanceof Module}>
+	{#if data.entity instanceof Module}
+		{@render cardSet(
+			{ ca: 'Encontres', es: 'Encuentros', en: 'Encounters' },
+			data.entity.getChildrenOfType(entityTypes.encounter)
+		)}
+		{@render cardSet(
+			{ ca: 'Criatures', es: 'Criaturas', en: 'Creatures' },
+			data.entity.getChildrenOfType(entityTypes.creature)
+		)}
+	{:else}
+		<Card entity={data.entity} linked={false} />
 
-	<aside>
-		{#if data.entity.requiredArchetype}
-			{@render cardSet({ ca: 'Arquetip', es: 'Arquetipo', en: 'Archetype' }, [
-				data.entity.requiredArchetype
-			])}
-		{/if}
-		{#if data.entity instanceof Archetype}
-			{@const archetype = data.entity as Archetype}
-			{@render cardSet(
-				{ ca: 'Subarquetips', es: 'Subarquetipo', en: 'Subarchetypes' },
-				archetype.getChildrenOfType(entityTypes.archetype)
-			)}
-			{@render cardSet(
-				{ ca: 'Trets', es: 'Rasgos', en: 'Traits' },
-				archetype.getChildrenOfType(entityTypes.trait)
-			)}
-			{@render cardSet(
-				{ ca: 'Habilitats', es: 'Habilidades', en: 'Skills' },
-				archetype.getChildrenOfType(entityTypes.skill)
-			)}
-			{@render cardSet(
-				{ ca: 'Aliats', es: 'Aliados', en: 'Allies' },
-				archetype.getChildrenOfType(entityTypes.ally)
-			)}
-		{/if}
-		{#if data.entity.variants.length > 1}
-			{@render cardSet(
-				{ ca: 'Altres variants', es: 'Otras variantes', en: 'Other variants' },
-				data.entity.variants.filter((e) => e.variantId !== data.entity.variantId)
-			)}
-		{/if}
-	</aside>
+		<aside>
+			{#if data.entity.requiredArchetype}
+				{@render cardSet({ ca: 'Arquetip', es: 'Arquetipo', en: 'Archetype' }, [
+					data.entity.requiredArchetype
+				])}
+			{/if}
+			{#if data.entity instanceof Archetype}
+				{@const archetype = data.entity as Archetype}
+				{@render cardSet(
+					{ ca: 'Subarquetips', es: 'Subarquetipo', en: 'Subarchetypes' },
+					archetype.getChildrenOfType(entityTypes.archetype)
+				)}
+				{@render cardSet(
+					{ ca: 'Trets', es: 'Rasgos', en: 'Traits' },
+					archetype.getChildrenOfType(entityTypes.trait)
+				)}
+				{@render cardSet(
+					{ ca: 'Habilitats', es: 'Habilidades', en: 'Skills' },
+					archetype.getChildrenOfType(entityTypes.skill)
+				)}
+				{@render cardSet(
+					{ ca: 'Aliats', es: 'Aliados', en: 'Allies' },
+					archetype.getChildrenOfType(entityTypes.ally)
+				)}
+			{/if}
+			{#if data.entity.variants.length > 1}
+				{@render cardSet(
+					{ ca: 'Altres variants', es: 'Otras variantes', en: 'Other variants' },
+					data.entity.variants.filter((e) => e.variantId !== data.entity.variantId)
+				)}
+			{/if}
+		</aside>
+	{/if}
 </div>
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
 
-	.card-page {
+	.card-page:not(.module) {
 		@include rz.row(xl);
 		align-items: flex-start;
 	}

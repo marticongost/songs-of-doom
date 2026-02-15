@@ -172,7 +172,9 @@ export abstract class ParentEntity extends Entity {
 		if (this._children === undefined) {
 			this._children = getEntryMetadata(this)
 				.catalog.all()
-				.filter((entity) => entity.requiredArchetype === this) as Array<ChildEntity<this>>;
+				.filter((entity) => entity instanceof ChildEntity && entity.parent === this) as Array<
+				ChildEntity<this>
+			>;
 		}
 		return this._children;
 	}
