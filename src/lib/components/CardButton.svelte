@@ -32,7 +32,9 @@
 	>
 		<div class="title"><Text {...entity.title} /></div>
 		<CardLevel {entity} />
-		<ExperienceIndicator amount={entity.xpCost ?? 0} />
+		{#if entity.xpCost !== undefined}
+			<ExperienceIndicator amount={entity.xpCost} />
+		{/if}
 	</button>
 	<Popover id={popoverId} anchor={anchorName} position="right">
 		<div class="popover-content">
