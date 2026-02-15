@@ -1,0 +1,23 @@
+import { finalise } from '@songsofdoom/common';
+import type { Property } from '../properties';
+import { Target, type TargetSpec } from '../target';
+import { Effect } from './effect';
+
+export interface WoundEffectProps {
+	damage: number;
+	target?: TargetSpec;
+	properties?: Array<Property>;
+}
+
+export class WoundEffect extends Effect {
+	readonly damage: number;
+	readonly target?: Target;
+	readonly properties: Array<Property>;
+
+	constructor({ damage, target, properties }: WoundEffectProps) {
+		super();
+		this.damage = damage;
+		this.target = finalise(Target, target);
+		this.properties = properties ?? [];
+	}
+}

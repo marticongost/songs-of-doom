@@ -28,7 +28,7 @@ Property (abstract, extends BooleanExpression)
 A simple flag property. Description is auto-generated (Catalan, Spanish, English).
 
 ```typescript
-import { Keyword } from '$lib/catalog/models/properties';
+import { Keyword } from '../models/properties';
 
 export default new Keyword({
 	title: { ca: 'Armadura', es: 'Armadura', en: 'Armor' }
@@ -40,7 +40,7 @@ export default new Keyword({
 A game rule with a localised description explaining its effect.
 
 ```typescript
-import { Rule } from '$lib/catalog/models/properties/rule';
+import { Rule } from '../models/properties/rule';
 
 export default new Rule({
 	title: {
@@ -56,7 +56,7 @@ export default new Rule({
 A parametric rule template that takes a numeric value. Entities use it via `.with({ value })`.
 
 ```typescript
-import { ScalarRule } from '$lib/catalog/models/properties';
+import { ScalarRule } from '../models/properties';
 
 export default new ScalarRule({
 	title: {
@@ -67,7 +67,7 @@ export default new ScalarRule({
 });
 ```
 
-Usage in entity data files:
+Usage in entity data files (within the game package):
 
 ```typescript
 import toughness from '../../properties/toughness';
@@ -78,7 +78,7 @@ toughness.with({ value: 2 });
 
 ### EntityType
 
-EntityTypes are pre-defined singletons in `src/lib/catalog/models/properties/entitytypes.ts`. Adding a new EntityType requires updating:
+EntityTypes are pre-defined singletons in `packages/game/src/models/properties/entitytypes.ts`. Adding a new EntityType requires updating:
 
 1. The `EntityTypeId` union type
 2. The singleton export
@@ -88,19 +88,22 @@ This is rare and should be discussed with the user before proceeding.
 
 ## Data file conventions
 
-- **Location**: `src/lib/catalog/data/properties/{slug}.ts`
+Property data files are in the `@songsofdoom/game` package:
+
+- **Location**: `packages/game/src/data/properties/{slug}.ts`
 - **File name**: lowercase, hyphenated slug (e.g. `toughness.ts`, `projectile.ts`)
 - **Export**: `export default new {PropertyClass}({ ... })`
-- **Import path for classes**:
-  - `Keyword`: import from `'$lib/catalog/models/properties'`
-  - `Rule`: import from `'$lib/catalog/models/properties/rule'`
-  - `ScalarRule`: import from `'$lib/catalog/models/properties'`
+- **Barrel export**: Add the property to `packages/game/src/data/properties/index.ts`
+- **Import path for classes** (relative from data file):
+  - `Keyword`: import from `'../../models/properties'`
+  - `Rule`: import from `'../../models/properties/rule'`
+  - `ScalarRule`: import from `'../../models/properties'`
 - **Localisation**: provide `title` in `ca`, `es`, `en` order
 - **Description** (Rule only): provide `description` in `ca`, `es`, `en` order
 
 ## Rules reference integration
 
-Rules (including ScalarRules) are **auto-discovered** by `src/lib/rules-reference/model-sources.ts` via `import.meta.glob`. When you create a Rule or ScalarRule data file, its title is automatically available to the rules reference system — no manual registration needed. Keywords are **not** auto-discovered (they are not `instanceof Rule`).
+Rules (including ScalarRules) are **auto-discovered** by `packages/web/src/lib/rules-reference/model-sources.ts` via the `propertyData` export from `@songsofdoom/game`. When you create a Rule or ScalarRule data file and export it from the barrel, its title is automatically available to the rules reference system — no manual registration needed. Keywords are **not** auto-discovered (they are not `instanceof Rule`).
 
 ## Tasks
 
@@ -114,14 +117,17 @@ When the user requests a new property:
    - Is it a simple flag/tag? → Keyword
    - Is it a new entity category? → EntityType (rare)
 
-2. **Create (or edit) the data file** in `src/lib/catalog/data/properties/`:
+2. **Create (or edit) the data file** in `packages/game/src/data/properties/`:
    - Use the slug as the file name (e.g. `piercing.ts`)
    - Export default with the appropriate class and localised fields
 
-3. **Rules reference entry** (non-Keyword properties only):
+3. **Barrel-export** from `packages/game/src/data/properties/index.ts`:
+   - Add `export { default as {slug} } from './{slug}';`
+
+4. **Rules reference entry** (non-Keyword properties only):
    - For Rule, ParametricRule, ScalarRule and EntityType properties, invoke the `/update-rules-reference` skill to create a rules reference entry
    - The entry will be model-sourced (title auto-resolved from the Rule instance), so entry files should **not** include a title export
    - Only the body content (explanation, examples, cross-links) is needed in the entry files
 
-4. **Format**: Run `npm run format` to ensure consistent formatting via Prettier
-5. **Check**: Run `npm run check` and `npm run lint` to validate the changes
+5. **Format**: Run `npm run format` to ensure consistent formatting via Prettier
+6. **Check**: Run `npm run check` and `npm run lint` to validate the changes

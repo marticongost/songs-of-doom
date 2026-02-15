@@ -1,0 +1,21 @@
+import { finalise } from '@songsofdoom/common';
+import { Target, type TargetSpec } from '../target';
+import { Effect } from './effect';
+
+export type RechargeAmount = number | 'max';
+
+export interface RechargeEffectProps {
+	amount: RechargeAmount;
+	target?: TargetSpec;
+}
+
+export class AddChargesEffect extends Effect {
+	readonly amount: RechargeAmount;
+	readonly target?: Target;
+
+	constructor({ amount, target }: RechargeEffectProps) {
+		super();
+		this.amount = amount;
+		this.target = finalise(Target, target);
+	}
+}

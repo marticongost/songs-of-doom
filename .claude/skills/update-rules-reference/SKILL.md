@@ -19,16 +19,16 @@ The rules reference (`/[locale]/rules-reference/`) is an alphabetical, searchabl
 
 **Architecture:**
 
-- **Module**: [src/lib/rules-reference/](src/lib/rules-reference/)
-  - [index.ts](src/lib/rules-reference/index.ts) — loads entry files (`.svelte` and `.svx`) via `import.meta.glob`, builds the entry index
-  - [model-sources.ts](src/lib/rules-reference/model-sources.ts) — maps slugs to existing model instances (Stats, EntityTypes, Focuses, Rules)
-  - [types.ts](src/lib/rules-reference/types.ts) — TypeScript types for entries and entry modules
-- **Content**: `src/lib/rules-reference/entries/{slug}/{slug}-{locale}.svelte` — one directory per concept, one `.svelte` file per locale (ca, es, en). Legacy `.svx` files are also supported.
-- **Components**: `src/lib/components/rules-reference/`
+- **Module**: [packages/web/src/lib/rules-reference/](packages/web/src/lib/rules-reference/)
+  - [index.ts](packages/web/src/lib/rules-reference/index.ts) — loads entry files (`.svelte` and `.svx`) via `import.meta.glob`, builds the entry index
+  - [model-sources.ts](packages/web/src/lib/rules-reference/model-sources.ts) — maps slugs to existing model instances (Stats, EntityTypes, Focuses, Rules) from `@songsofdoom/game`
+  - [types.ts](packages/web/src/lib/rules-reference/types.ts) — TypeScript types for entries and entry modules
+- **Content**: `packages/web/src/lib/rules-reference/entries/{slug}/{slug}-{locale}.svelte` — one directory per concept, one `.svelte` file per locale (ca, es, en). Legacy `.svx` files are also supported.
+- **Components**: `packages/web/src/lib/components/rules-reference/`
   - `RuleEntry.svelte` — displays a single entry on the rules reference page
   - `RuleLink.svelte` — cross-reference link component (auto-resolves localised titles)
   - `RuleSearch.svelte` — search/filter UI
-- **Route**: [src/routes/[locale]/rules-reference/+page.svelte](src/routes/[locale]/rules-reference/+page.svelte)
+- **Route**: [packages/web/src/routes/[locale]/rules-reference/+page.svelte](packages/web/src/routes/[locale]/rules-reference/+page.svelte)
 
 ## Entry types
 
@@ -36,17 +36,17 @@ There are two types of rules reference entries:
 
 ### 1. Model-sourced entries
 
-Title comes from an existing model instance's `title` or `name` field. The [model-sources.ts](src/lib/rules-reference/model-sources.ts) module auto-derives these from:
+Title comes from an existing model instance's `title` or `name` field. The `model-sources.ts` module auto-derives these from `@songsofdoom/game`:
 
 - **Stats** (from `stats` record): `strength`, `agility`, `intelligence`, `charisma`, `will`, `health`, `sanity`
 - **Entity types** (from `entityTypes` record): creature types, item types, etc.
 - **Focuses** (from `focuses` record, excluding attribute-based duplicates)
-- **Rules** (auto-discovered via `import.meta.glob` on `src/lib/catalog/data/properties/*.ts`, filtered by `instanceof Rule`)
+- **Rules** (from `propertyData` export, filtered by `instanceof Rule`)
 
 For model-sourced entries:
 
 - **Do not** include a title (it's auto-resolved from the model)
-- Create entry files at `src/lib/rules-reference/entries/{slug}/{slug}-{locale}.svelte` where `slug` matches the model's key
+- Create entry files at `packages/web/src/lib/rules-reference/entries/{slug}/{slug}-{locale}.svelte` where `slug` matches the model's key
 - The entry file only contains the body content (explanation, examples, cross-links)
 
 ### 2. Ad-hoc entries
@@ -56,7 +56,7 @@ Used for game concepts without a dedicated model class (e.g., "capability", "opp
 For ad-hoc entries:
 
 - **Export** `metadata` with a `title` field via `<script module lang="ts">`
-- Create entry files at `src/lib/rules-reference/entries/{slug}/{slug}-{locale}.svelte` where `slug` is your chosen URL-friendly identifier
+- Create entry files at `packages/web/src/lib/rules-reference/entries/{slug}/{slug}-{locale}.svelte` where `slug` is your chosen URL-friendly identifier
 
 ## Creating a new entry
 
@@ -64,12 +64,12 @@ Follow these steps:
 
 ### 1. Determine entry type and slug
 
-- If the concept corresponds to an existing model (Stat, EntityType, Focus, Rule), check [model-sources.ts](src/lib/rules-reference/model-sources.ts) to see if it's already mapped. If it is, the entry is model-sourced and you should use that model's key as the slug.
+- If the concept corresponds to an existing model (Stat, EntityType, Focus, Rule), check `packages/web/src/lib/rules-reference/model-sources.ts` to see if it's already mapped. If it is, the entry is model-sourced and you should use that model's key as the slug.
 - Otherwise, choose a short, URL-friendly slug (lowercase, hyphens for spaces).
 
 ### 2. Create the directory and entry files
 
-Create `src/lib/rules-reference/entries/{slug}/` with three `.svelte` files:
+Create `packages/web/src/lib/rules-reference/entries/{slug}/` with three `.svelte` files:
 
 - `{slug}-ca.svelte` (Catalan)
 - `{slug}-es.svelte` (Spanish)
@@ -128,7 +128,7 @@ The `RuleLink` component auto-resolves the localised title from the slug. You ca
 
 ### 6. Convert existing plain text references to links
 
-After creating the new entry, search all other rules reference entries for plain text mentions of the new concept that should become `RuleLink` components. For example, if you just created a `toughness` entry, search for the word "toughness" (and its translations) across all existing entry files in `src/lib/rules-reference/entries/`.
+After creating the new entry, search all other rules reference entries for plain text mentions of the new concept that should become `RuleLink` components. For example, if you just created a `toughness` entry, search for the word "toughness" (and its translations) across all existing entry files in `packages/web/src/lib/rules-reference/entries/`.
 
 - Search for the concept name in each locale (e.g., "duresa", "dureza", "toughness") across existing `.svelte` entry files
 - Replace plain text occurrences with `<RuleLink slug="{slug}" />`, using `label` or `transform="lowercase"` as needed to preserve the original text's grammar and casing
@@ -143,18 +143,18 @@ Run `npm run dev` and navigate to `/ca/rules-reference` (or `/es/rules-reference
 
 ## Updating an existing entry
 
-1. Locate the entry directory at `src/lib/rules-reference/entries/{slug}/`
+1. Locate the entry directory at `packages/web/src/lib/rules-reference/entries/{slug}/`
 2. Edit the relevant locale file(s) (`.svelte`)
-3. If changing a model-sourced entry's title, update the source model instead of the front matter
+3. If changing a model-sourced entry's title, update the source model in `@songsofdoom/game` instead of the front matter
 4. Verify in browser
 
 ## Understanding game concepts
 
 If you're unsure about a game concept:
 
-1. **Check the rules reference first**: Read through existing entries in `src/lib/rules-reference/entries/` to understand the game's terminology and mechanics
-2. **Check model definitions**: Look at `src/lib/catalog/models/` for type definitions and structure
-3. **Check data files**: Look at `src/lib/catalog/data/` for concrete examples of how concepts are used in game content
+1. **Check the rules reference first**: Read through existing entries in `packages/web/src/lib/rules-reference/entries/` to understand the game's terminology and mechanics
+2. **Check model definitions**: Look at `packages/game/src/models/` for type definitions and structure
+3. **Check data files**: Look at `packages/game/src/data/` for concrete examples of how concepts are used in game content
 4. **Ask the user**: If the concept isn't documented yet, ask the user for clarification before proceeding
 
 ## Entry format

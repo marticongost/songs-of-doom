@@ -1,0 +1,17 @@
+import { Constant } from '../../../models/capabilities';
+import { ChangeStatsEffect } from '../../../models/effects';
+import { Trait } from '../../../models/trait';
+
+export default new Trait({
+	title: {
+		ca: 'Fortalesa',
+		es: 'Fortaleza',
+		en: 'Resilience'
+	},
+	xpCost: 3,
+	capabilities: [
+		new Constant({
+			effects: [new ChangeStatsEffect({ health: 2 })]
+		})
+	]
+});

@@ -1,0 +1,17 @@
+{
+	"name": "@songsofdoom/common",
+	"version": "0.0.1",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./localisation": "./src/localisation/index.ts"
+	},
+	"scripts": {
+		"build": "vite build",
+		"check": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3",
+		"vite": "^7.2.6"
+	}
+}

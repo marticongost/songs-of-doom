@@ -1,0 +1,185 @@
+import type { LocalisedText } from '@songsofdoom/common/localisation';
+import { getEntryMetadata } from '../catalog';
+import { Archetype } from './archetype';
+import type { Capability } from './capability';
+import type { Property } from './properties';
+import type { EntityType } from './properties/entitytypes';
+
+export interface EntityProps<T> {
+	title: LocalisedText;
+	description?: LocalisedText;
+	properties?: Array<Property>;
+	capabilities?: Array<Capability>;
+	attachmentCapabilities?: Array<Capability>;
+	maxCharges?: number;
+	xpCost?: number;
+	goldCost?: number;
+
+	/**
+	 * The level of this entity variant (1-based; typically between 1 and 3).
+	 */
+	level?: number;
+
+	/**
+	 * The variants of this entity (including this one). Each variant represents an
+	 * upgrade over the previous one, which adds new effects, enhances existing ones or
+	 * relaxes or removes constraints.
+	 */
+	variants?: Array<T>;
+}
+
+export abstract class Entity {
+	readonly title: LocalisedText;
+	readonly description?: LocalisedText;
+	protected readonly explicitProperties: Array<Property>;
+	readonly capabilities: Array<Capability>;
+	readonly attachmentCapabilities: Array<Capability>;
+	readonly maxCharges: number;
+	readonly xpCost?: number;
+	readonly goldCost?: number;
+
+	/**
+	 * The level of this entity variant (1-based; typically between 1 and 3).
+	 */
+	readonly level: number;
+
+	/**
+	 * The variants of this entity (including this one). Each variant represents an
+	 * upgrade over the previous one, which adds new effects, enhances existing ones or
+	 * relaxes or removes constraints.
+	 */
+	readonly variants: Array<this>;
+
+	abstract readonly set: ParentEntity | undefined;
+	abstract readonly type: EntityType;
+
+	constructor({
+		title,
+		description,
+		properties,
+		capabilities,
+		attachmentCapabilities,
+		maxCharges,
+		xpCost,
+		goldCost,
+		level,
+		variants
+	}: EntityProps<Entity>) {
+		this.title = title;
+		this.description = description;
+		this.explicitProperties = properties ?? [];
+		this.capabilities = capabilities ?? [];
+		this.attachmentCapabilities = attachmentCapabilities ?? [];
+		this.maxCharges = maxCharges ?? 0;
+		this.xpCost = xpCost;
+		this.goldCost = goldCost;
+		this.level = level ?? 1;
+		this.variants = (variants ?? [this]) as Array<this>;
+	}
+
+	get id() {
+		return getEntryMetadata(this).id;
+	}
+
+	get variantId() {
+		return getEntryMetadata(this).variantId;
+	}
+
+	get properties(): Array<Property> {
+		return [this.type, ...this.explicitProperties];
+	}
+
+	/**
+	 * Get the basic variant of this entity (level 1).
+	 */
+	get basicVariant(): this {
+		return this.variants[0];
+	}
+
+	/**
+	 * Get the next variant of this entity, if any.
+	 */
+	get nextVariant(): this | undefined {
+		return this.variants.length > this.level ? this.variants[this.level] : undefined;
+	}
+
+	/**
+	 * Get the previous variant of this entity, if any.
+	 */
+	get previousVariant(): this | undefined {
+		return this.level > 1 ? this.variants[this.level - 2] : undefined;
+	}
+
+	/** An archetype that must be possessed in order to acquire this entity. */
+	get requiredArchetype(): Archetype | undefined {
+		return undefined;
+	}
+}
+
+const NOT_COMPUTED = Symbol('not computed');
+
+export abstract class ChildEntity<C extends ParentEntity> extends Entity {
+	private _parent: C | typeof NOT_COMPUTED = NOT_COMPUTED;
+
+	override get set(): C {
+		return this.parent;
+	}
+
+	override get requiredArchetype(): Archetype | undefined {
+		const parent = this.parent;
+		return parent instanceof Archetype ? parent : parent?.requiredArchetype;
+	}
+
+	get parent(): C {
+		if (this._parent === NOT_COMPUTED) {
+			const metadata = getEntryMetadata(this);
+			if (metadata.path.length >= 2) {
+				const archetypeId = metadata.path[metadata.path.length - 2];
+				return (this._parent = metadata.catalog.require(archetypeId) as C);
+			}
+			throw new Error(`${this.constructor.name} ${this.id} is not inside a parent`);
+		}
+		return this._parent;
+	}
+}
+
+export abstract class ParentEntity extends Entity {
+	private _parent: this | undefined | typeof NOT_COMPUTED = NOT_COMPUTED;
+	private _children: Array<ChildEntity<this>> | undefined = undefined;
+
+	constructor(props: EntityProps<ParentEntity>) {
+		super(props);
+		this._children = undefined;
+	}
+
+	override get set(): this {
+		return this;
+	}
+
+	get parent(): this | undefined {
+		if (this._parent === NOT_COMPUTED) {
+			const metadata = getEntryMetadata(this);
+			if (metadata.path.length >= 3) {
+				const archetypeId = metadata.path[metadata.path.length - 3];
+				return (this._parent = metadata.catalog.require(archetypeId) as this);
+			}
+			return (this._parent = undefined);
+		}
+		return this._parent;
+	}
+
+	get children(): Array<ChildEntity<this>> {
+		if (this._children === undefined) {
+			this._children = getEntryMetadata(this)
+				.catalog.all()
+				.filter((entity) => entity instanceof ChildEntity && entity.parent === this) as Array<
+				ChildEntity<this>
+			>;
+		}
+		return this._children;
+	}
+
+	getChildrenOfType(type: EntityType): Array<Entity> {
+		return this.children.filter((child) => child.type === type);
+	}
+}

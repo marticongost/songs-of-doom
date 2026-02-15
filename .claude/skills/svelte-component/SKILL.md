@@ -23,9 +23,9 @@ Conventions:
 
 ## Location
 
-Place components in `lib/components` by default. The user may request a subfolder, to
-group related components together (e.g. `lib/gizmo/GizmoList.svelte`,
-`lib/gizmo/GizmoChip.svelte`).
+Place components in `packages/web/src/lib/components` by default. The user may request a subfolder, to
+group related components together (e.g. `packages/web/src/lib/components/gizmo/GizmoList.svelte`,
+`packages/web/src/lib/components/gizmo/GizmoChip.svelte`).
 
 ## Svelte version
 
@@ -66,7 +66,11 @@ these rules.
 
 ## Imports
 
-Use absolute imports, take advantage of the `$lib` alias.
+Use absolute imports:
+
+- Use `$lib` alias for imports within the web package (e.g., `$lib/components/...`)
+- Import game models and data from `@songsofdoom/game`
+- Import localization helpers from `@songsofdoom/common/localisation`
 
 ## Template
 

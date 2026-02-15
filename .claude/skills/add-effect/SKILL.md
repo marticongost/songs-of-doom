@@ -11,13 +11,13 @@ Use this skill when the user needs to add a new type of effect that can be added
 
 ## Model conventions
 
-There are two patterns for effect classes depending on whether the effect requires configuration:
+Effect models are in the `@songsofdoom/game` package. There are two patterns depending on whether the effect requires configuration:
 
 ### Effects with parameters
 
 For effects that require configuration (e.g. amount of damage, target, etc.):
 
-- **File name**: lowercase, no hyphens (e.g. `drawcards.ts`, `modifydamage.ts`), placed in `src/lib/catalog/models/effects/`
+- **File name**: lowercase, no hyphens (e.g. `drawcards.ts`, `modifydamage.ts`), placed in `packages/game/src/models/effects/`
 - **Props interface**: named `{ClassName}Props` — standalone, does **not** extend any base interface
 - **Class**: extends `Effect` (imported from `./effect`)
 - **Fields**: all `readonly`, assigned in the constructor
@@ -82,7 +82,7 @@ Usage in data files:
 
 ```typescript
 // Use the singleton directly instead of instantiating
-import { engage } from '$lib/catalog/models/effects';
+import { engage } from '@songsofdoom/game';
 
 effects: [engage]; // NOT: effects: [new EngageEffect()]
 ```
@@ -91,15 +91,18 @@ Existing singletons: `chase`, `discard`, `engage`, `equip`, `negateDamage`, `red
 
 ## Component conventions
 
-- **File name**: PascalCase with `EffectChip` suffix (e.g. `ModifyDamageEffectChip.svelte`), placed in `src/lib/components/effects/`
+Chip components are in the `@songsofdoom/web` package:
+
+- **File name**: PascalCase with `EffectChip` suffix (e.g. `ModifyDamageEffectChip.svelte`), placed in `packages/web/src/lib/components/effects/`
 - **Props**: interface with a single `effect` prop typed to the concrete effect class
+- **Imports**: Import effect classes from `@songsofdoom/game`
 - **Localisation**: use the `<Text>` component with `ca`, `es`, and `en` props for all user-visible strings; use `%(name)` placeholders for interpolated values
 
 ### Example chip component
 
 ```svelte
 <script lang="ts">
-	import { DrawCardsEffect } from '$lib/catalog/models/effects';
+	import { DrawCardsEffect } from '@songsofdoom/game';
 	import Text from '$lib/components/localisation/Text.svelte';
 
 	interface Props {
@@ -122,17 +125,17 @@ Existing singletons: `chase`, `discard`, `engage`, `equip`, `negateDamage`, `red
 Follow the process below exactly. Do NOT inspect the codebase for other examples unless
 specifically instructed to do so.
 
-1. **Create the model file** in `src/lib/catalog/models/effects/`:
+1. **Create the model file** in `packages/game/src/models/effects/`:
    - **If the effect has parameters**: export a `{ClassName}Props` interface and a class with readonly fields, a destructured constructor, and JSDoc
    - **If the effect has no parameters**: export only the class (no constructor needed) and a singleton instance with a descriptive camelCase name
-2. **Barrel-export** from `src/lib/catalog/models/effects/index.ts`:
+2. **Barrel-export** from `packages/game/src/models/effects/index.ts`:
    - Export the class (always)
    - Export the singleton instance (for parameterless effects)
-3. **Create the chip component** `{ClassName}EffectChip.svelte` in `src/lib/components/effects/`:
-   - Accept an `effect` prop typed to the new class
+3. **Create the chip component** `{ClassName}EffectChip.svelte` in `packages/web/src/lib/components/effects/`:
+   - Accept an `effect` prop typed to the new class (import from `@songsofdoom/game`)
    - Render localised text using `<Text>` with `ca`/`es`/`en` props
-4. **Update the dispatcher** in `src/lib/components/effects/EffectChip.svelte`:
-   - Import the new effect class and chip component
+4. **Update the dispatcher** in `packages/web/src/lib/components/effects/EffectChip.svelte`:
+   - Import the new effect class from `@songsofdoom/game` and the chip component
    - Add an `{:else if effect instanceof NewEffect}` branch rendering the new chip
 
 Make sure to use the /svelte-component skill to follow project conventions when creating

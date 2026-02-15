@@ -5,11 +5,13 @@ node_modules
 .vercel
 .netlify
 .wrangler
-/.svelte-kit
-/build
+.svelte-kit
+build
+dist
 
 # Prisma
-/prisma/generated
+prisma/generated
+packages/*/prisma/generated
 
 # OS
 .DS_Store
