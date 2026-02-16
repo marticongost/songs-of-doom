@@ -2,6 +2,7 @@ import type { LocalisedText } from '@songsofdoom/common/localisation';
 import { getEntryMetadata } from '../catalog';
 import { Archetype } from './archetype';
 import type { Capability } from './capability';
+import type { Effect } from './effects';
 import type { Property } from './properties';
 import type { EntityType } from './properties/entitytypes';
 
@@ -37,6 +38,10 @@ export abstract class Entity {
 	readonly maxCharges: number;
 	readonly xpCost?: number;
 	readonly goldCost?: number;
+
+	/** The maximum number of copies of this entity that a player can acquire, or
+	 * `undefined` it unlimited or not applicable. */
+	readonly maxCopies: number | undefined = undefined;
 
 	/**
 	 * The level of this entity variant (1-based; typically between 1 and 3).
@@ -113,6 +118,11 @@ export abstract class Entity {
 	/** An archetype that must be possessed in order to acquire this entity. */
 	get requiredArchetype(): Archetype | undefined {
 		return undefined;
+	}
+
+	/** Lists all permanent effects provided by this entity's capabilities. */
+	permanentEffects(): Array<Effect> {
+		return [];
 	}
 }
 

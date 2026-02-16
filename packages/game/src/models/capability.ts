@@ -15,4 +15,8 @@ export abstract class Capability {
 		this.cost = finalise(CapabilityCost, cost ?? {});
 		this.effects = effects;
 	}
+
+	constantEffects(): Array<Effect> {
+		return [];
+	}
 }

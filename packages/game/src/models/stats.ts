@@ -5,25 +5,30 @@ export type IndicatorType = 'health' | 'sanity';
 
 export type StatType = AttributeType | IndicatorType;
 
+export const STARTING_ATTRIBUTE_VALUE = 3;
+export const STARTING_INDICATOR_VALUE = 7;
+
 export abstract class Stat {
 	readonly type: StatType;
 	readonly name: LocalisedText;
+	readonly startingValue: number;
 
-	constructor(type: StatType, name: LocalisedText) {
+	constructor(type: StatType, name: LocalisedText, startingValue: number) {
 		this.type = type;
 		this.name = name;
+		this.startingValue = startingValue;
 	}
 }
 
 export class Attribute extends Stat {
 	constructor(type: AttributeType, name: LocalisedText) {
-		super(type, name);
+		super(type, name, STARTING_ATTRIBUTE_VALUE);
 	}
 }
 
 export class Indicator extends Stat {
 	constructor(type: IndicatorType, name: LocalisedText) {
-		super(type, name);
+		super(type, name, STARTING_INDICATOR_VALUE);
 	}
 }
 

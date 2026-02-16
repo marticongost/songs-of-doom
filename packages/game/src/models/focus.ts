@@ -1,5 +1,5 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
-import { attributeTypes, stats, Stat, type AttributeType } from './stats';
+import { attributeTypes, Stat, stats, type AttributeType } from './stats';
 
 export type FocusType = AttributeType | 'heroism' | 'any';
 
@@ -62,3 +62,12 @@ export class Focuses {
 		);
 	}
 }
+
+export const FOCUS_TOKENS_FOR_STAT_VALUES: Record<number, Record<number, number>> = {
+	1: { 1: 1 },
+	2: { 1: 2 },
+	3: { 1: 1, 2: 1 },
+	4: { 1: 1, 2: 1, 3: 1 },
+	5: { 2: 2, 3: 2 },
+	6: { 2: 2, 3: 3 }
+};

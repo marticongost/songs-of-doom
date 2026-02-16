@@ -62,4 +62,8 @@ export class ChangeStatsEffect extends Effect {
 		}
 		return groups;
 	}
+
+	override setStat(stat: StatType, currentValue: number): number {
+		return currentValue + this.get(stat);
+	}
 }
