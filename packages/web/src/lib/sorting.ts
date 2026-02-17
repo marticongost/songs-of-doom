@@ -1,10 +1,9 @@
-import type { Entity } from '@songsofdoom/game';
-import type { EntityTypeId } from '@songsofdoom/game';
 import {
 	requireLocalisedField,
 	type Locale,
 	type LocalisedText
 } from '@songsofdoom/common/localisation';
+import type { Entity, EntityTypeId } from '@songsofdoom/game';
 
 export type SortCriteriaType =
 	| 'alpha'
@@ -16,9 +15,11 @@ export type SortCriteriaType =
 	| 'gold-desc';
 
 export abstract class SortCriteria {
+	readonly type: SortCriteriaType;
 	readonly label: LocalisedText;
 
-	constructor(label: LocalisedText) {
+	constructor(type: SortCriteriaType, label: LocalisedText) {
+		this.type = type;
 		this.label = label;
 	}
 
@@ -146,11 +147,12 @@ class AlphabeticalSort extends SortCriteria {
 
 class NumericCostSort extends SortCriteria {
 	constructor(
+		type: SortCriteriaType,
 		label: LocalisedText,
 		private readonly field: 'xpCost' | 'goldCost',
 		private readonly direction: 'asc' | 'desc'
 	) {
-		super(label);
+		super(type, label);
 	}
 
 	sort(entities: Array<Entity>, locale: Locale): Array<Entity> {
@@ -164,44 +166,52 @@ class NumericCostSort extends SortCriteria {
 	}
 }
 
+export const alpha = new AlphabeticalSort('alpha', {
+	ca: 'Alfabètic',
+	es: 'Alfabético',
+	en: 'Alphabetical'
+});
+export const type = new EntityTypeSort('type', { ca: 'Tipus', es: 'Tipo', en: 'Type' });
+export const set = new SetSort('set', { ca: 'Conjunt', es: 'Conjunto', en: 'Set' });
+export const xpAsc = new NumericCostSort(
+	'xp-asc',
+	{ ca: 'Experiència (ascendent)', es: 'Experiencia (ascendente)', en: 'Experience (ascending)' },
+	'xpCost',
+	'asc'
+);
+export const xpDesc = new NumericCostSort(
+	'xp-desc',
+	{
+		ca: 'Experiència (descendent)',
+		es: 'Experiencia (descendente)',
+		en: 'Experience (descending)'
+	},
+	'xpCost',
+	'desc'
+);
+export const goldAsc = new NumericCostSort(
+	'gold-asc',
+	{ ca: 'Or (ascendent)', es: 'Oro (ascendente)', en: 'Gold (ascending)' },
+	'goldCost',
+	'asc'
+);
+export const goldDesc = new NumericCostSort(
+	'gold-desc',
+	{
+		ca: 'Or (descendent)',
+		es: 'Oro (descendente)',
+		en: 'Gold (descending)'
+	},
+	'goldCost',
+	'desc'
+);
+
 export const sortCriteria: Record<SortCriteriaType, SortCriteria> = {
-	alpha: new AlphabeticalSort({ ca: 'Alfabètic', es: 'Alfabético', en: 'Alphabetical' }),
-	type: new EntityTypeSort({ ca: 'Tipus', es: 'Tipo', en: 'Type' }),
-	set: new SetSort({ ca: 'Conjunt', es: 'Conjunto', en: 'Set' }),
-	'xp-asc': new NumericCostSort(
-		{ ca: 'Experiència (ascendent)', es: 'Experiencia (ascendente)', en: 'Experience (ascending)' },
-		'xpCost',
-		'asc'
-	),
-	'xp-desc': new NumericCostSort(
-		{
-			ca: 'Experiència (descendent)',
-			es: 'Experiencia (descendente)',
-			en: 'Experience (descending)'
-		},
-		'xpCost',
-		'desc'
-	),
-	'gold-asc': new NumericCostSort(
-		{ ca: 'Or (ascendent)', es: 'Oro (ascendente)', en: 'Gold (ascending)' },
-		'goldCost',
-		'asc'
-	),
-	'gold-desc': new NumericCostSort(
-		{ ca: 'Or (descendent)', es: 'Oro (descendente)', en: 'Gold (descending)' },
-		'goldCost',
-		'desc'
-	)
+	alpha,
+	type,
+	set,
+	'xp-asc': xpAsc,
+	'xp-desc': xpDesc,
+	'gold-asc': goldAsc,
+	'gold-desc': goldDesc
 };
-
-export const sortOptions: Array<{ value: SortCriteriaType; label: LocalisedText }> = Object.entries(
-	sortCriteria
-).map(([value, criteria]) => ({ value: value as SortCriteriaType, label: criteria.label }));
-
-export function sortedEntities(
-	entities: Array<Entity>,
-	criteria: SortCriteriaType | SortCriteria,
-	locale: Locale
-): Array<Entity> {
-	return SortCriteria.resolve(criteria).sort(entities, locale);
-}
