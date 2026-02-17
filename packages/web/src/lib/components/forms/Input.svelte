@@ -70,6 +70,7 @@ A styled text input with optional leading icon.
 
 		input {
 			width: 100%;
+			height: var(--input-height);
 			padding: rz.size(sm) rz.size(md);
 			font-family: inherit;
 			font-size: inherit;

@@ -53,6 +53,7 @@
 
 		select {
 			@include rz.padding(sm);
+			height: var(--input-height);
 			font-family: inherit;
 			font-size: inherit;
 			color: var(--text-color);

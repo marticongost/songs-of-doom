@@ -23,6 +23,7 @@ body {
 	$palette-buccaneer: #702e2e;
 	$palette-thatch: #bd9898;
 	$palette-hurricane: #857a7a;
+	$palette-scorpion: #665f5f;
 	$palette-silk: #d9cccc;
 	$palette-green: #55a155;
 	$palette-old-gold: #d2b532;
@@ -129,9 +130,11 @@ body {
 	// Inputs
 	--input-background-color: #{$palette-shade};
 	--input-border: 2px solid #{$palette-ash};
+	--input-height: 2.6em;
 
 	// Forms
-	--focus-outline: 2px solid #{$palette-thatch};
+	--focus-outline-color: #{$palette-thatch};
+	--focus-outline: 2px solid var(--focus-outline-color);
 
 	// Tables
 	--table-heading-color: var(--text-heading-color);
@@ -139,6 +142,13 @@ body {
 	--table-background-color: #{$palette-cocoa-brown};
 	--table-stripe-background-color: #{$palette-light-cocoa-brown};
 	--table-hover-background-color: #{$palette-buccaneer};
+
+	// Switches
+	--switch-color: #{$palette-scorpion};
+	--switch-selected-background: #{$palette-cedar};
+	--switch-selected-color: #{$palette-thatch};
+	--switch-hover-color: #{$palette-ash};
+	--switch-separator: var(--input-border);
 }
 
 @include rz.reset-elements;
