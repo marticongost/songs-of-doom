@@ -9,13 +9,6 @@
 </script>
 
 <script lang="ts">
-	import { Ally } from '@songsofdoom/game';
-	import { Archetype } from '@songsofdoom/game';
-	import { Creature } from '@songsofdoom/game';
-	import type { Entity } from '@songsofdoom/game';
-	import { Item } from '@songsofdoom/game';
-	import type { Module } from '@songsofdoom/game';
-	import { Skill } from '@songsofdoom/game';
 	import CapabilityList from '$lib/components/capabilities/CapabilityList.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import PropertyList from '$lib/components/properties/PropertyList.svelte';
@@ -24,6 +17,8 @@
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
 	import { getLocale } from '$lib/context/locale';
+	import type { Entity, Module } from '@songsofdoom/game';
+	import { Ally, Archetype, Creature, Item, Skill } from '@songsofdoom/game';
 	import AttributesSheet from './AttributesSheet.svelte';
 	import CapabilityCostList from './capabilities/CapabilityCostList.svelte';
 	import ChargesChip from './capabilities/ChargesChip.svelte';
@@ -150,6 +145,11 @@
 			left: rz.size(sm);
 			font-size: 1.4em;
 			box-shadow: 0 0 1em rgba(black, 0.5);
+		}
+
+		&:focus {
+			border-color: var(--focus-outline-color);
+			outline: none;
 		}
 	}
 
