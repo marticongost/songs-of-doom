@@ -15,6 +15,8 @@ Combines EntitySearchToolbar and EntityGrid into a single, reusable component.
 -->
 <script lang="ts">
 	import { KeyboardNavigation } from '$lib/attachments/keyboard-nav';
+	import Card from '$lib/components/Card.svelte';
+	import CardButton from '$lib/components/CardButton.svelte';
 	import EntityGrid from '$lib/components/EntityGrid.svelte';
 	import EntitySearchToolbar from '$lib/components/EntitySearchToolbar.svelte';
 	import {
@@ -23,7 +25,6 @@ Combines EntitySearchToolbar and EntityGrid into a single, reusable component.
 	} from '$lib/components/standardattributes';
 	import { EntitySearchState } from '$lib/search';
 	import type { Entity } from '@songsofdoom/game';
-	import type { Component } from 'svelte';
 
 	interface Props extends StandardAttributeProps {
 		/** Entities to display and filter */
@@ -32,14 +33,15 @@ Combines EntitySearchToolbar and EntityGrid into a single, reusable component.
 		search: EntitySearchState;
 		/** Whether to autofocus the search input */
 		autofocus?: boolean;
-		/** Custom component to render each entity */
-		EntityComponent?: Component<{ entity: Entity }>;
 	}
 
-	const { entities, search, autofocus = false, EntityComponent, ...attributes }: Props = $props();
+	const { entities, search, autofocus = false, ...attributes }: Props = $props();
 
 	const nav = new KeyboardNavigation({ mode: 'grid' });
 	const results = $derived(search.getResults(entities));
+
+	// Use custom component if provided, otherwise derive from view state
+	const EntityComponent = $derived(search.view === 'button' ? CardButton : Card);
 </script>
 
 <div {...standardAttributes(attributes, 'entity-catalog')}>

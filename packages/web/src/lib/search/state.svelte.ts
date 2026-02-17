@@ -17,6 +17,17 @@ import { filterByTitle } from './search';
 export type EntityTypeInput = EntityTypeId | EntityType;
 export type SortCriteriaInput = SortCriteriaType | SortCriteria;
 
+/** View mode for entity display */
+export type ViewType = 'card' | 'button';
+const viewTypes: ViewType[] = ['card', 'button'];
+
+/** Option for the view Switch component */
+export interface ViewOption {
+	value: ViewType;
+	icon: string;
+	'aria-label': LocalisedText;
+}
+
 export interface EntitySearchStateOptions {
 	/** Restrict which entity types can be filtered (defaults to all) */
 	allowedTypes?: EntityTypeInput[];
@@ -24,6 +35,10 @@ export interface EntitySearchStateOptions {
 	allowedSorts?: SortCriteriaInput[];
 	/** Default sort criteria (defaults to 'alpha') */
 	defaultSort?: SortCriteriaInput;
+	/** Restrict which views are available (defaults to both) */
+	allowedViews?: ViewType[];
+	/** Default view mode (defaults to 'card') */
+	defaultView?: ViewType;
 	/** Sync state with URL params (defaults to true) */
 	syncUrl?: boolean;
 }
@@ -59,21 +74,26 @@ export class EntitySearchState {
 	private readonly sortParam = 'sort';
 	private readonly searchParam = 'q';
 	private readonly typeParam = 'type';
+	private readonly viewParam = 'view';
 
 	// Configuration
 	readonly allowedTypes: EntityType[] | undefined;
 	readonly allowedSorts: SortCriteria[];
 	readonly defaultSort: SortCriteria;
+	readonly allowedViews: ViewType[];
+	readonly defaultView: ViewType;
 	private readonly syncUrl: boolean;
 
 	// Reactive state
 	private _search = $state('');
 	private _type = $state<EntityType | null>(null);
 	private _sort = $state<SortCriteria>(sortCriteria.alpha);
+	private _view = $state<ViewType>('card');
 
 	// Dropdown options (computed once from configuration)
 	readonly typeOptions: Array<{ value: EntityTypeId | ''; label: LocalisedText }>;
 	readonly sortOptions: Array<{ value: SortCriteriaType; label: LocalisedText }>;
+	readonly viewOptions: ViewOption[];
 
 	constructor(options?: EntitySearchStateOptions) {
 		// Normalize configuration
@@ -84,6 +104,11 @@ export class EntitySearchState {
 			? normalizeSortCriteria(options.defaultSort)
 			: sortCriteria.alpha;
 		this.syncUrl = options?.syncUrl ?? true;
+
+		// Initialize view configuration
+		this.allowedViews = options?.allowedViews ?? viewTypes;
+		this.defaultView = options?.defaultView ?? 'card';
+		this._view = this.defaultView;
 
 		// Initialize sort to default
 		this._sort = this.defaultSort;
@@ -99,6 +124,17 @@ export class EntitySearchState {
 		this.sortOptions = this.allowedSorts.map((criteria) => ({
 			value: criteria.type,
 			label: criteria.label
+		}));
+
+		// Build view options for Switch
+		const viewLabels: Record<ViewType, LocalisedText> = {
+			card: { ca: 'Vista de targetes', es: 'Vista de tarjetas', en: 'Card view' },
+			button: { ca: 'Vista de llista', es: 'Vista de lista', en: 'List view' }
+		};
+		this.viewOptions = this.allowedViews.map((view) => ({
+			value: view,
+			icon: `views/${view}.svg`,
+			'aria-label': viewLabels[view]
 		}));
 
 		// Initialize from URL if syncing
@@ -118,6 +154,10 @@ export class EntitySearchState {
 
 	get sort(): SortCriteria {
 		return this._sort;
+	}
+
+	get view(): ViewType {
+		return this._view;
 	}
 
 	/** Sets the search query */
@@ -157,6 +197,19 @@ export class EntitySearchState {
 		}
 		if (this.syncUrl) {
 			this.updateUrl({ sort: this._sort.type });
+		}
+	}
+
+	/** Sets the view mode */
+	setView(value: ViewType): void {
+		// Validate against allowed views
+		if (!this.allowedViews.includes(value)) {
+			this._view = this.defaultView;
+		} else {
+			this._view = value;
+		}
+		if (this.syncUrl) {
+			this.updateUrl({ view: this._view });
 		}
 	}
 
@@ -223,10 +276,30 @@ export class EntitySearchState {
 			// Invalid sort in URL, clean up
 			this.updateUrl({ sort: this.defaultSort.type });
 		}
+
+		// Parse view
+		const viewParam = url.searchParams.get(this.viewParam);
+		if (viewParam && viewTypes.includes(viewParam as ViewType)) {
+			const view = viewParam as ViewType;
+			if (this.allowedViews.includes(view)) {
+				this._view = view;
+			} else {
+				// Invalid view for this context, clean up URL
+				this.updateUrl({ view: this.defaultView });
+			}
+		} else if (viewParam) {
+			// Invalid view in URL, clean up
+			this.updateUrl({ view: this.defaultView });
+		}
 	}
 
 	/** Updates URL parameters, removing defaults for clean URLs */
-	private updateUrl(params: { sort?: SortCriteriaType; search?: string; type?: string }): void {
+	private updateUrl(params: {
+		sort?: SortCriteriaType;
+		search?: string;
+		type?: string;
+		view?: ViewType;
+	}): void {
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- URL used only for manipulation, not reactive binding
 		const url = new URL(page.url);
 
@@ -251,6 +324,14 @@ export class EntitySearchState {
 				url.searchParams.delete(this.typeParam);
 			} else {
 				url.searchParams.set(this.typeParam, params.type);
+			}
+		}
+
+		if (params.view !== undefined) {
+			if (params.view === this.defaultView) {
+				url.searchParams.delete(this.viewParam);
+			} else {
+				url.searchParams.set(this.viewParam, params.view);
 			}
 		}
 

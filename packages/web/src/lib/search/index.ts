@@ -4,5 +4,7 @@ export {
 	type EntitySearchStateOptions,
 	type EntityTypeInput,
 	type SortCriteriaInput,
-	type SortedResult
+	type SortedResult,
+	type ViewOption,
+	type ViewType
 } from './state.svelte';

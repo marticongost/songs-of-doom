@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import type { Entity } from '@songsofdoom/game';
 	import { getLocale } from '$lib/context/locale';
+	import type { Entity } from '@songsofdoom/game';
 	import Button from './Button.svelte';
 	import Card from './Card.svelte';
 	import CardLevel from './CardLevel.svelte';
@@ -57,13 +57,13 @@
 		@include rz.row(sm);
 		@include rz.vpadding(sm);
 		@include rz.hpadding(md);
+		width: 20em;
 		border: var(--panel-border);
 		border-radius: rz.size(sm);
 		cursor: pointer;
 		font-family: inherit;
 		font-size: inherit;
 		text-align: left;
-		width: 100%;
 
 		@each $type in archetype, trait, skill, ally, item, creature, encounter {
 			&[data-type='#{$type}'] {

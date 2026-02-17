@@ -12,12 +12,13 @@ entity type filter dropdown, and sort criteria dropdown.
 	import type { KeyboardNavigation } from '$lib/attachments/keyboard-nav';
 	import Dropdown from '$lib/components/forms/Dropdown.svelte';
 	import SearchInput from '$lib/components/forms/SearchInput.svelte';
+	import Switch from '$lib/components/forms/Switch.svelte';
 	import SortDropdown from '$lib/components/SortDropdown.svelte';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
-	import { EntitySearchState } from '$lib/search';
+	import { EntitySearchState, type ViewType } from '$lib/search';
 	import type { SortCriteriaType } from '$lib/sorting';
 	import type { EntityTypeId } from '@songsofdoom/game';
 
@@ -39,6 +40,10 @@ entity type filter dropdown, and sort criteria dropdown.
 	function onSortChange(value: SortCriteriaType) {
 		state.setSort(value);
 	}
+
+	function onViewChange(value: ViewType) {
+		state.setView(value);
+	}
 </script>
 
 <div {...standardAttributes(attributes, 'entity-search-toolbar')}>
@@ -50,6 +55,14 @@ entity type filter dropdown, and sort criteria dropdown.
 	/>
 	<Dropdown options={state.typeOptions} value={state.type?.id ?? ''} onChange={onTypeChange} />
 	<SortDropdown options={state.sortOptions} value={state.sort.type} onChange={onSortChange} />
+	{#if state.viewOptions.length > 1}
+		<Switch
+			options={state.viewOptions}
+			value={state.view}
+			onchange={onViewChange}
+			aria-label={{ ca: 'Mode de visualització', es: 'Modo de visualización', en: 'View mode' }}
+		/>
+	{/if}
 </div>
 
 <style lang="scss">
