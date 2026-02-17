@@ -2,8 +2,37 @@
  * @vitest-environment jsdom
  */
 
-import { describe, expect, it, vi, afterEach } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { KeyboardNavigation } from './keyboard-nav';
+
+function mockElementRect(
+	element: HTMLElement,
+	top: number,
+	left: number,
+	width: number,
+	height: number
+): void {
+	const rect = {
+		top,
+		left,
+		bottom: top + height,
+		right: left + width,
+		width,
+		height,
+		x: left,
+		y: top,
+		toJSON: () => ({})
+	} as DOMRect;
+
+	element.getBoundingClientRect = () => rect;
+	element.getClientRects = () =>
+		[
+			{
+				...rect,
+				toJSON: () => ({})
+			}
+		] as unknown as DOMRectList;
+}
 
 /**
  * Helper to create a mock DOM structure for testing.
@@ -23,19 +52,7 @@ function createMockGrid(
 			const item = document.createElement('a');
 			item.setAttribute('href', '#');
 			item.textContent = `Item ${row * cols + col}`;
-			// Mock getBoundingClientRect for position-based navigation
-			item.getBoundingClientRect = () =>
-				({
-					top: row * itemHeight,
-					left: col * itemWidth,
-					bottom: row * itemHeight + itemHeight,
-					right: col * itemWidth + itemWidth,
-					width: itemWidth,
-					height: itemHeight,
-					x: col * itemWidth,
-					y: row * itemHeight,
-					toJSON: () => ({})
-				}) as DOMRect;
+			mockElementRect(item, row * itemHeight, col * itemWidth, itemWidth, itemHeight);
 			container.appendChild(item);
 			items.push(item);
 		}
@@ -79,8 +96,10 @@ describe('KeyboardNavigation', () => {
 			const c = document.createElement('div');
 			const custom1 = document.createElement('div');
 			custom1.className = 'custom-item';
+			mockElementRect(custom1, 0, 0, 100, 50);
 			const custom2 = document.createElement('div');
 			custom2.className = 'custom-item';
+			mockElementRect(custom2, 0, 100, 100, 50);
 			const other = document.createElement('a');
 			c.append(custom1, custom2, other);
 			document.body.appendChild(c);
@@ -105,6 +124,37 @@ describe('KeyboardNavigation', () => {
 
 			expect(nav.getItems()).toHaveLength(6);
 			expect(nav.getItems()).toEqual(items);
+		});
+
+		it('filters out hidden, disabled, and aria-hidden elements', () => {
+			const nav = new KeyboardNavigation({ mode: 'grid' });
+			const c = document.createElement('div');
+
+			const visible = document.createElement('button');
+			visible.textContent = 'visible';
+			mockElementRect(visible, 0, 0, 100, 50);
+
+			const hidden = document.createElement('button');
+			hidden.textContent = 'hidden';
+			hidden.style.display = 'none';
+			mockElementRect(hidden, 0, 100, 100, 50);
+
+			const ariaHidden = document.createElement('button');
+			ariaHidden.textContent = 'aria-hidden';
+			ariaHidden.setAttribute('aria-hidden', 'true');
+			mockElementRect(ariaHidden, 0, 200, 100, 50);
+
+			const disabled = document.createElement('button');
+			disabled.textContent = 'disabled';
+			disabled.disabled = true;
+			mockElementRect(disabled, 0, 300, 100, 50);
+
+			c.append(visible, hidden, ariaHidden, disabled);
+			document.body.appendChild(c);
+			container = c;
+			cleanup = attachNavigation(nav, c);
+
+			expect(nav.getItems()).toEqual([visible]);
 		});
 	});
 

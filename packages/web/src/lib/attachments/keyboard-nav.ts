@@ -5,7 +5,7 @@ export type NavMode = 'row' | 'column' | 'grid';
 export interface KeyboardNavOptions {
 	/** Navigation mode: 'row' (left/right), 'column' (up/down), or 'grid' (all arrows) */
 	mode: NavMode;
-	/** CSS selector for focusable items (default: 'a, [tabindex]') */
+	/** CSS selector for focusable items (default: 'a, button, [tabindex]') */
 	itemSelector?: string;
 	/** Override: called on Escape/Up from first (default: focus search input) */
 	onEscape?: () => void;
@@ -20,7 +20,7 @@ export interface KeyboardNavOptions {
  * const nav = new KeyboardNavigation({ mode: 'grid' });
  *
  * <SearchInput {@attach nav.searchInputAttachment()} />
- * <EntityGrid keyboardNav={nav} />
+ * <EntityListing keyboardNav={nav} />
  * ```
  */
 export class KeyboardNavigation {
@@ -33,7 +33,7 @@ export class KeyboardNavigation {
 
 	constructor(options: KeyboardNavOptions) {
 		this.mode = options.mode;
-		this.itemSelector = options.itemSelector ?? 'a, [tabindex]';
+		this.itemSelector = options.itemSelector ?? 'a, button, [tabindex]';
 		this.customOnEscape = options.onEscape;
 	}
 
@@ -51,32 +51,123 @@ export class KeyboardNavigation {
 	/** Get all navigable items in the container */
 	getItems(): HTMLElement[] {
 		if (!this.container) return [];
-		return Array.from(this.container.querySelectorAll<HTMLElement>(this.itemSelector));
+		return Array.from(this.container.querySelectorAll<HTMLElement>(this.itemSelector)).filter(
+			(item) => {
+				if (item.matches(':disabled')) return false;
+				if (item.getAttribute('aria-hidden') === 'true') return false;
+
+				const style = getComputedStyle(item);
+				if (style.visibility === 'hidden' || style.display === 'none') return false;
+
+				return item.getClientRects().length > 0;
+			}
+		);
 	}
 
 	/** Find the first item */
 	findFirst(): HTMLElement | null {
-		return this.getItems()[0] ?? null;
+		return this.getItemsByVisualOrder()[0] ?? null;
 	}
 
 	/** Find the last item */
 	findLast(): HTMLElement | null {
-		const items = this.getItems();
+		const items = this.getItemsByVisualOrder();
 		return items[items.length - 1] ?? null;
 	}
 
 	/** Find next item in array order (for Left/Right navigation) */
 	findNext(current: HTMLElement): HTMLElement | null {
-		const items = this.getItems();
+		const items = this.getItemsByVisualOrder();
 		const index = items.indexOf(current);
 		return items[index + 1] ?? null;
 	}
 
 	/** Find previous item in array order (for Left/Right navigation) */
 	findPrevious(current: HTMLElement): HTMLElement | null {
-		const items = this.getItems();
+		const items = this.getItemsByVisualOrder();
 		const index = items.indexOf(current);
 		return items[index - 1] ?? null;
+	}
+
+	/** Get items sorted by on-screen coordinates (top-to-bottom, left-to-right) */
+	private getItemsByVisualOrder(): HTMLElement[] {
+		return this.getItems().sort((a, b) => {
+			const aRect = a.getBoundingClientRect();
+			const bRect = b.getBoundingClientRect();
+			const yDiff = aRect.top - bRect.top;
+			if (Math.abs(yDiff) > 1) return yDiff;
+			return aRect.left - bRect.left;
+		});
+	}
+
+	/** Find item to the left based on on-screen coordinates */
+	findLeft(current: HTMLElement): HTMLElement | null {
+		const items = this.getItems();
+		const rect = current.getBoundingClientRect();
+		const currentCenterY = rect.top + rect.height / 2;
+		const currentCenterX = rect.left + rect.width / 2;
+
+		const candidates = items.filter((el) => {
+			if (el === current) return false;
+			const elRect = el.getBoundingClientRect();
+			const elCenterX = elRect.left + elRect.width / 2;
+			return elCenterX < currentCenterX - 1;
+		});
+
+		if (candidates.length === 0) return null;
+
+		return candidates.reduce((best, el) => {
+			const elRect = el.getBoundingClientRect();
+			const bestRect = best.getBoundingClientRect();
+			const elCenterX = elRect.left + elRect.width / 2;
+			const bestCenterX = bestRect.left + bestRect.width / 2;
+			const elCenterY = elRect.top + elRect.height / 2;
+			const bestCenterY = bestRect.top + bestRect.height / 2;
+
+			const elDx = currentCenterX - elCenterX;
+			const bestDx = currentCenterX - bestCenterX;
+			const elDy = Math.abs(elCenterY - currentCenterY);
+			const bestDy = Math.abs(bestCenterY - currentCenterY);
+
+			const elScore = elDx * 1000 + elDy;
+			const bestScore = bestDx * 1000 + bestDy;
+			return elScore < bestScore ? el : best;
+		});
+	}
+
+	/** Find item to the right based on on-screen coordinates */
+	findRight(current: HTMLElement): HTMLElement | null {
+		const items = this.getItems();
+		const rect = current.getBoundingClientRect();
+		const currentCenterY = rect.top + rect.height / 2;
+		const currentCenterX = rect.left + rect.width / 2;
+
+		const candidates = items.filter((el) => {
+			if (el === current) return false;
+			const elRect = el.getBoundingClientRect();
+			const elCenterX = elRect.left + elRect.width / 2;
+			return elCenterX > currentCenterX + 1;
+		});
+
+		if (candidates.length === 0) return null;
+
+		return candidates.reduce((best, el) => {
+			const elRect = el.getBoundingClientRect();
+			const bestRect = best.getBoundingClientRect();
+			const elCenterX = elRect.left + elRect.width / 2;
+			const bestCenterX = bestRect.left + bestRect.width / 2;
+			const elCenterY = elRect.top + elRect.height / 2;
+			const bestCenterY = bestRect.top + bestRect.height / 2;
+
+			const elDx = elCenterX - currentCenterX;
+			const bestDx = bestCenterX - currentCenterX;
+			const elDy = Math.abs(elCenterY - currentCenterY);
+			const bestDy = Math.abs(bestCenterY - currentCenterY);
+
+			const elScore = elDx * 1000 + elDy;
+			const bestScore = bestDx * 1000 + bestDy;
+			return elScore < bestScore ? el : best;
+		});
 	}
 
 	/** Find item above (for grid Up navigation) */
@@ -123,7 +214,7 @@ export class KeyboardNavigation {
 	isInFirstRow(element: HTMLElement): boolean {
 		const items = this.getItems();
 		if (items.length === 0) return false;
-		const firstY = items[0].getBoundingClientRect().top;
+		const firstY = Math.min(...items.map((item) => item.getBoundingClientRect().top));
 		const currentY = element.getBoundingClientRect().top;
 		return Math.abs(currentY - firstY) < 1;
 	}
@@ -280,14 +371,14 @@ export class KeyboardNavigation {
 	private handleLeft(target: HTMLElement, e: KeyboardEvent): void {
 		if (this.mode === 'column') return;
 		e.preventDefault();
-		const prev = this.findPrevious(target);
+		const prev = this.findLeft(target) ?? this.findPrevious(target);
 		if (prev) this.focusItem(prev);
 	}
 
 	private handleRight(target: HTMLElement, e: KeyboardEvent): void {
 		if (this.mode === 'column') return;
 		e.preventDefault();
-		const next = this.findNext(target);
+		const next = this.findRight(target) ?? this.findNext(target);
 		if (next) this.focusItem(next);
 	}
 }

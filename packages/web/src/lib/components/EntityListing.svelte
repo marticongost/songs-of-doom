@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import type { KeyboardNavigation } from '$lib/attachments/keyboard-nav';
-	import type { Entity } from '@songsofdoom/game';
 	import Card from '$lib/components/Card.svelte';
-	import { translate, type Locale } from '@songsofdoom/common/localisation';
 	import type { GroupingResult } from '$lib/sorting';
+	import { translate, type Locale } from '@songsofdoom/common/localisation';
+	import type { Entity } from '@songsofdoom/game';
 	import type { Component } from 'svelte';
 	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
 
 	interface BaseProps extends StandardAttributeProps {
 		EntityComponent?: Component<{ entity: Entity }>;
+		appearance?: 'grid' | 'columns';
 		/** Optional keyboard navigation handler */
 		keyboardNav?: KeyboardNavigation;
 	}
@@ -24,6 +25,7 @@
 		entities,
 		groupedEntities,
 		EntityComponent = Card,
+		appearance = 'grid',
 		keyboardNav,
 		...attributes
 	}: Props = $props();
@@ -32,8 +34,8 @@
 </script>
 
 <div
-	{...standardAttributes(attributes, 'entity-grid')}
-	class:grid={!groupedEntities}
+	{...standardAttributes(attributes, 'entity-listing')}
+	class:flat-grid={!groupedEntities && appearance === 'grid'}
 	class:groups={groupedEntities}
 	{@attach keyboardNav?.resultsAttachment()}
 >
@@ -44,24 +46,44 @@
 					{translate(group.title, locale)}
 					<span class="group-count">({groupEntities.length})</span>
 				</h2>
-				<div class="grid">
-					{#each groupEntities as entity (entity.variantId)}
-						<EntityComponent {entity} />
-					{/each}
-				</div>
+				{#if appearance === 'columns'}
+					<div class="entities columns">
+						{#each groupEntities as entity (entity.variantId)}
+							<div class="entity">
+								<EntityComponent {entity} />
+							</div>
+						{/each}
+					</div>
+				{:else}
+					<div class="entities grid">
+						{#each groupEntities as entity (entity.variantId)}
+							<EntityComponent {entity} />
+						{/each}
+					</div>
+				{/if}
 			</section>
 		{/each}
 	{:else if entities && entities.length > 0}
-		{#each entities as entity (entity.variantId)}
-			<EntityComponent {entity} />
-		{/each}
+		{#if appearance === 'columns'}
+			<div class="entities columns">
+				{#each entities as entity (entity.variantId)}
+					<div class="entity">
+						<EntityComponent {entity} />
+					</div>
+				{/each}
+			</div>
+		{:else}
+			{#each entities as entity (entity.variantId)}
+				<EntityComponent {entity} />
+			{/each}
+		{/if}
 	{/if}
 </div>
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
 
-	.grid {
+	.flat-grid {
 		@include rz.grid(lg);
 	}
 
@@ -69,8 +91,26 @@
 		@include rz.column(xl);
 	}
 
+	.entities.grid {
+		@include rz.grid(lg);
+	}
+
 	.group {
 		@include rz.column(md);
+	}
+
+	.entities.columns {
+		column-gap: rz.size(md);
+		column-width: 20em;
+
+		.entity + .entity {
+			margin-top: rz.size(md);
+		}
+	}
+
+	.entity {
+		break-inside: avoid;
+		-webkit-column-break-inside: avoid;
 	}
 
 	.group-heading {

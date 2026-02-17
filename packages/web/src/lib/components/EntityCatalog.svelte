@@ -1,7 +1,7 @@
 <!--
 @component
 A complete entity catalog with search, filtering, sorting, and grid display.
-Combines EntitySearchToolbar and EntityGrid into a single, reusable component.
+Combines EntitySearchToolbar and EntityListing into a single, reusable component.
 
 @example
 ```svelte
@@ -17,7 +17,7 @@ Combines EntitySearchToolbar and EntityGrid into a single, reusable component.
 	import { KeyboardNavigation } from '$lib/attachments/keyboard-nav';
 	import Card from '$lib/components/Card.svelte';
 	import CardButton from '$lib/components/CardButton.svelte';
-	import EntityGrid from '$lib/components/EntityGrid.svelte';
+	import EntityListing from '$lib/components/EntityListing.svelte';
 	import EntitySearchToolbar from '$lib/components/EntitySearchToolbar.svelte';
 	import {
 		standardAttributes,
@@ -42,9 +42,10 @@ Combines EntitySearchToolbar and EntityGrid into a single, reusable component.
 
 	// Use custom component if provided, otherwise derive from view state
 	const EntityComponent = $derived(search.view === 'button' ? CardButton : Card);
+	const appearance = $derived(search.view === 'button' ? 'columns' : 'grid');
 </script>
 
 <div {...standardAttributes(attributes, 'entity-catalog')}>
 	<EntitySearchToolbar state={search} keyboardNav={nav} {autofocus} />
-	<EntityGrid {...results} keyboardNav={nav} {EntityComponent} />
+	<EntityListing {...results} {appearance} keyboardNav={nav} {EntityComponent} />
 </div>
