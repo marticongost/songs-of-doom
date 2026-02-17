@@ -75,6 +75,11 @@
 		&:hover {
 			border-color: var(--text-highlight);
 		}
+
+		&:focus {
+			border-color: var(--focus-outline-color);
+			outline: none;
+		}
 	}
 
 	.title {
