@@ -58,7 +58,7 @@
 		@include rz.vpadding(sm);
 		@include rz.hpadding(md);
 		width: 100%;
-		height: 2.6em;
+		height: 2.8em;
 		border: var(--panel-border);
 		border-radius: rz.size(sm);
 		cursor: pointer;
