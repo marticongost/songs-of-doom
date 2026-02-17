@@ -156,6 +156,31 @@ describe('KeyboardNavigation', () => {
 
 			expect(nav.getItems()).toEqual([visible]);
 		});
+
+		it('filters out elements inside closed popovers', () => {
+			const nav = new KeyboardNavigation({ mode: 'grid' });
+			const c = document.createElement('div');
+
+			const visible = document.createElement('button');
+			visible.textContent = 'visible';
+			mockElementRect(visible, 0, 0, 100, 50);
+
+			const popover = document.createElement('div');
+			popover.setAttribute('popover', 'auto');
+			popover.style.display = 'none';
+
+			const inPopover = document.createElement('button');
+			inPopover.textContent = 'in-popover';
+			mockElementRect(inPopover, 0, 100, 100, 50);
+			popover.appendChild(inPopover);
+
+			c.append(visible, popover);
+			document.body.appendChild(c);
+			container = c;
+			cleanup = attachNavigation(nav, c);
+
+			expect(nav.getItems()).toEqual([visible]);
+		});
 	});
 
 	describe('findFirst', () => {

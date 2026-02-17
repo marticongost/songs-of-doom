@@ -56,10 +56,21 @@ export class KeyboardNavigation {
 				if (item.matches(':disabled')) return false;
 				if (item.getAttribute('aria-hidden') === 'true') return false;
 
+				const popover = item.closest<HTMLElement>('[popover]');
+				if (popover) {
+					try {
+						if (!popover.matches(':popover-open')) return false;
+					} catch {
+						if (popover.style.display === 'none' || popover.hasAttribute('hidden')) return false;
+					}
+				}
+
 				const style = getComputedStyle(item);
 				if (style.visibility === 'hidden' || style.display === 'none') return false;
 
-				return item.getClientRects().length > 0;
+				if (item.getClientRects().length === 0) return false;
+				const rect = item.getBoundingClientRect();
+				return rect.width > 0 && rect.height > 0;
 			}
 		);
 	}
