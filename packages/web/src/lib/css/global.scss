@@ -149,6 +149,10 @@ body {
 	--switch-selected-color: #{$palette-thatch};
 	--switch-hover-color: #{$palette-ash};
 	--switch-separator: var(--input-border);
+
+	// Popovers
+	--popover-background: #{$palette-black};
+	--popover-border: 2px solid #{$palette-dark-steel};
 }
 
 @include rz.reset-elements;

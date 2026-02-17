@@ -75,8 +75,8 @@
 		@include rz.padding(md);
 		position: fixed;
 		margin: 0;
-		background: var(--popover-background, var(--surface-background));
-		border: var(--popover-border, var(--input-border));
+		background: var(--popover-background);
+		border: var(--popover-border);
 		border-radius: rz.size(sm);
 		box-shadow: 0 0 rz.size(md) rgba(black, 0.5);
 		color: inherit;
