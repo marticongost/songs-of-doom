@@ -69,12 +69,16 @@
 
 	:global(.button.icon-button) {
 		@include rz.padding(xs);
-		border-radius: rz.size(sm);
 		color: var(--icon-button-color, currentColor);
 		cursor: pointer;
 
 		&:hover:not(:disabled) {
 			color: var(--icon-button-hover-color, var(--accent-color));
+		}
+
+		&:focus {
+			outline: none;
+			color: var(--icon-focus-color);
 		}
 	}
 </style>
