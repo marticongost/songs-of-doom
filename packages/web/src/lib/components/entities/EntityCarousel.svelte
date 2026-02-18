@@ -51,6 +51,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 	let currentIndex = $state(0);
 	let suppressTransitions = $state(false);
 	let cleanupScrollLock: (() => void) | undefined;
+	let lastWheelNavigationAt = 0;
 
 	// Derived state
 	const currentEntity = $derived(entities[currentIndex]);
@@ -177,6 +178,26 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 		}
 	}
 
+	function handleDialogWheel(e: WheelEvent): void {
+		e.preventDefault();
+
+		const now = Date.now();
+		if (now - lastWheelNavigationAt < 140) {
+			return;
+		}
+
+		if (e.deltaY > 0) {
+			goToNext();
+			lastWheelNavigationAt = now;
+			return;
+		}
+
+		if (e.deltaY < 0) {
+			goToPrevious();
+			lastWheelNavigationAt = now;
+		}
+	}
+
 	// Public API
 	export function open(index: number = 0): void {
 		suppressTransitions = true;
@@ -212,6 +233,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 	bind:this={dialogElement}
 	onclose={handleDialogClose}
 	onclick={handleDialogClick}
+	onwheel={handleDialogWheel}
 	onkeydown={handleKeydown}
 >
 	{#if currentEntity}
