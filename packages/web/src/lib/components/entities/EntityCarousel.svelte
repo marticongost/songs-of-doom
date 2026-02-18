@@ -50,6 +50,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 	let dialogElement: HTMLDialogElement | undefined = $state();
 	let currentIndex = $state(0);
 	let suppressTransitions = $state(false);
+	let cleanupScrollLock: (() => void) | undefined;
 
 	// Derived state
 	const currentEntity = $derived(entities[currentIndex]);
@@ -96,6 +97,49 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 		dialogElement?.close();
 	}
 
+	function lockDocumentScroll(): () => void {
+		if (typeof window === 'undefined') {
+			return () => {};
+		}
+
+		const html = document.documentElement;
+		const body = document.body;
+		const scrollY = window.scrollY;
+		const previousHtmlOverflow = html.style.overflow;
+		const previousBodyOverflow = body.style.overflow;
+		const previousBodyPosition = body.style.position;
+		const previousBodyTop = body.style.top;
+		const previousBodyWidth = body.style.width;
+
+		html.style.overflow = 'hidden';
+		body.style.overflow = 'hidden';
+		body.style.position = 'fixed';
+		body.style.top = `-${scrollY}px`;
+		body.style.width = '100%';
+
+		const preventPageScroll = (event: WheelEvent | TouchEvent): void => {
+			if (!dialogElement?.contains(event.target as Node)) {
+				event.preventDefault();
+			}
+		};
+
+		window.addEventListener('wheel', preventPageScroll, { passive: false });
+		window.addEventListener('touchmove', preventPageScroll, { passive: false });
+
+		return () => {
+			window.removeEventListener('wheel', preventPageScroll);
+			window.removeEventListener('touchmove', preventPageScroll);
+
+			html.style.overflow = previousHtmlOverflow;
+			body.style.overflow = previousBodyOverflow;
+			body.style.position = previousBodyPosition;
+			body.style.top = previousBodyTop;
+			body.style.width = previousBodyWidth;
+
+			window.scrollTo(0, scrollY);
+		};
+	}
+
 	// Keyboard handling
 	function handleKeydown(e: KeyboardEvent): void {
 		switch (e.key) {
@@ -121,6 +165,8 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 
 	// Dialog close event
 	function handleDialogClose(): void {
+		cleanupScrollLock?.();
+		cleanupScrollLock = undefined;
 		onclose?.();
 	}
 
@@ -135,6 +181,8 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 	export function open(index: number = 0): void {
 		suppressTransitions = true;
 		currentIndex = Math.max(0, Math.min(index, entities.length - 1));
+		cleanupScrollLock?.();
+		cleanupScrollLock = lockDocumentScroll();
 		dialogElement?.showModal();
 		// Re-enable transitions after the DOM has updated
 		requestAnimationFrame(() => {
@@ -150,6 +198,13 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 	function absOffset(offset: number): number {
 		return Math.abs(offset);
 	}
+
+	$effect(() => {
+		return () => {
+			cleanupScrollLock?.();
+			cleanupScrollLock = undefined;
+		};
+	});
 </script>
 
 <dialog
