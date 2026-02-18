@@ -124,6 +124,13 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 		onclose?.();
 	}
 
+	// Close when clicking background (dialog itself, not its content)
+	function handleDialogClick(e: MouseEvent): void {
+		if (e.target === dialogElement) {
+			closeCarousel();
+		}
+	}
+
 	// Public API
 	export function open(index: number = 0): void {
 		suppressTransitions = true;
@@ -149,6 +156,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 	{...standardAttributes(attributes, 'entity-carousel')}
 	bind:this={dialogElement}
 	onclose={handleDialogClose}
+	onclick={handleDialogClick}
 	onkeydown={handleKeydown}
 >
 	{#if currentEntity}
@@ -280,11 +288,13 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 		flex: 1;
 		min-height: 0;
 		perspective: 1000px;
+		pointer-events: none;
 	}
 
 	.carousel-card-slot {
 		position: absolute;
 		background-color: black;
+		pointer-events: auto;
 
 		// Arc positioning using CSS custom properties
 		// --offset: distance from center (-2, -1, 0, 1, 2)
