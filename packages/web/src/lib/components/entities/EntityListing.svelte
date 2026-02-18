@@ -1,18 +1,20 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import type { KeyboardNavigation } from '$lib/attachments/keyboard-nav';
-	import Card from '$lib/components/Card.svelte';
+	import Card from '../Card.svelte';
 	import type { GroupingResult } from '$lib/sorting';
 	import { translate, type Locale } from '@songsofdoom/common/localisation';
 	import type { Entity } from '@songsofdoom/game';
 	import type { Component } from 'svelte';
-	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
 	interface BaseProps extends StandardAttributeProps {
-		EntityComponent?: Component<{ entity: Entity }>;
+		EntityComponent?: Component<{ entity: Entity; onclick?: (e: MouseEvent) => void }>;
 		appearance?: 'grid' | 'columns';
 		/** Optional keyboard navigation handler */
 		keyboardNav?: KeyboardNavigation;
+		/** Callback when an entity is clicked (for carousel integration) */
+		onEntityClick?: (entity: Entity, index: number) => void;
 	}
 
 	type Props = BaseProps &
@@ -27,11 +29,35 @@
 		EntityComponent = Card,
 		appearance = 'grid',
 		keyboardNav,
+		onEntityClick,
 		...attributes
 	}: Props = $props();
 
 	const locale = $derived(page.params.locale as Locale);
+
+	// Calculate cumulative index for grouped entities
+	function getGroupStartIndex(groupIndex: number): number {
+		if (!groupedEntities) return 0;
+		let startIndex = 0;
+		for (let i = 0; i < groupIndex; i++) {
+			startIndex += groupedEntities[i].entities.length;
+		}
+		return startIndex;
+	}
+
+	// Create onclick handler for a specific entity/index
+	function createClickHandler(
+		entity: Entity,
+		flatIndex: number
+	): ((e: MouseEvent) => void) | undefined {
+		if (!onEntityClick) return undefined;
+		return () => onEntityClick(entity, flatIndex);
+	}
 </script>
+
+{#snippet renderEntity(entity: Entity, flatIndex: number)}
+	<EntityComponent {entity} onclick={createClickHandler(entity, flatIndex)} />
+{/snippet}
 
 <div
 	{...standardAttributes(attributes, 'entity-listing')}
@@ -40,7 +66,8 @@
 	{@attach keyboardNav?.resultsAttachment()}
 >
 	{#if groupedEntities}
-		{#each groupedEntities as { group, entities: groupEntities } (group.id)}
+		{#each groupedEntities as { group, entities: groupEntities }, groupIndex (group.id)}
+			{@const groupStartIndex = getGroupStartIndex(groupIndex)}
 			<section class="group">
 				<h2 class="group-heading">
 					{translate(group.title, locale)}
@@ -48,16 +75,16 @@
 				</h2>
 				{#if appearance === 'columns'}
 					<div class="entities columns">
-						{#each groupEntities as entity (entity.variantId)}
+						{#each groupEntities as entity, i (entity.variantId)}
 							<div class="entity">
-								<EntityComponent {entity} />
+								{@render renderEntity(entity, groupStartIndex + i)}
 							</div>
 						{/each}
 					</div>
 				{:else}
 					<div class="entities grid">
-						{#each groupEntities as entity (entity.variantId)}
-							<EntityComponent {entity} />
+						{#each groupEntities as entity, i (entity.variantId)}
+							{@render renderEntity(entity, groupStartIndex + i)}
 						{/each}
 					</div>
 				{/if}
@@ -66,15 +93,15 @@
 	{:else if entities && entities.length > 0}
 		{#if appearance === 'columns'}
 			<div class="entities columns">
-				{#each entities as entity (entity.variantId)}
+				{#each entities as entity, i (entity.variantId)}
 					<div class="entity">
-						<EntityComponent {entity} />
+						{@render renderEntity(entity, i)}
 					</div>
 				{/each}
 			</div>
 		{:else}
-			{#each entities as entity (entity.variantId)}
-				<EntityComponent {entity} />
+			{#each entities as entity, i (entity.variantId)}
+				{@render renderEntity(entity, i)}
 			{/each}
 		{/if}
 	{/if}

@@ -104,7 +104,7 @@ body {
 	--panel-separator: 1px solid #{$palette-ash};
 
 	// Text
-	--text-color: $palette-white;
+	--text-color: #{$palette-white};
 	--text-subtle-color: #888;
 	--text-muted-color: #{$palette-cinder};
 	--text-highlight: #{$palette-steel};

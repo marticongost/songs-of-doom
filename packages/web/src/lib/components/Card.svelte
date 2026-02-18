@@ -32,16 +32,24 @@
 
 	interface Props extends StandardAttributeProps {
 		entity: Entity;
+		/** Render as a link to the card detail page (default: true) */
 		linked?: boolean;
+		/** Click handler - when provided, renders as a button instead of a link */
+		onclick?: (e: MouseEvent) => void;
 	}
 
-	const { entity, linked = true, ...rest }: Props = $props();
+	const { entity, linked = false, onclick, ...rest }: Props = $props();
+
+	// Determine the element type: button if onclick, anchor if linked, div otherwise
+	const elementType = $derived(onclick ? 'button' : linked ? 'a' : 'div');
 	const discardReward = $derived(entity instanceof Skill ? entity.discardReward : undefined);
 </script>
 
 <svelte:element
-	this={linked ? 'a' : 'div'}
-	href={linked ? `/${getLocale()}/cards/${entity.variantId}` : undefined}
+	this={elementType}
+	href={elementType === 'a' ? `/${getLocale()}/cards/${entity.variantId}` : undefined}
+	type={elementType === 'button' ? 'button' : undefined}
+	{onclick}
 	{...standardAttributes(rest, 'card')}
 	data-type={entity.type.id}
 >
@@ -153,8 +161,17 @@
 		}
 	}
 
-	a.card:hover {
+	a.card:hover,
+	button.card:hover {
 		border-color: var(--text-highlight);
+	}
+
+	button.card {
+		cursor: pointer;
+		padding: 0;
+		color: inherit;
+		font-family: inherit;
+		text-align: left;
 	}
 
 	.image-row {
