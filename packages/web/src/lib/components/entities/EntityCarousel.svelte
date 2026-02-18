@@ -23,11 +23,13 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { getLocale } from '$lib/context/locale';
+	import { translate } from '@songsofdoom/common';
 	import type { Entity } from '@songsofdoom/game';
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import Button from '../Button.svelte';
 	import Card from '../Card.svelte';
+	import IconButton from '../IconButton.svelte';
 	import Text from '../localisation/Text.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
@@ -151,19 +153,32 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 >
 	{#if currentEntity}
 		<!-- Close button -->
-		<button class="close-button" onclick={closeCarousel} aria-label="Close">X</button>
+		<IconButton
+			class="close-button"
+			src="close-dialog.svg"
+			onclick={closeCarousel}
+			aria-label={translate({ ca: 'Tancar', es: 'Cerrar', en: 'Close' }, getLocale())}
+		/>
 
 		<!-- Navigation controls -->
 		<div class="controls">
-			<button class="nav-button" onclick={goToPrevious} disabled={currentIndex === 0}>
-				<Text ca="Anterior" es="Anterior" en="Previous" />
-			</button>
+			<IconButton
+				class="nav-button"
+				src="previous.svg"
+				onclick={goToPrevious}
+				disabled={currentIndex === 0}
+				aria-label={translate({ ca: 'Anterior', es: 'Anterior', en: 'Previous' }, getLocale())}
+			/>
 			<span class="position-indicator">
 				{currentIndex + 1} / {totalCount}
 			</span>
-			<button class="nav-button" onclick={goToNext} disabled={currentIndex === entities.length - 1}>
-				<Text ca="Seguent" es="Siguiente" en="Next" />
-			</button>
+			<IconButton
+				class="nav-button"
+				src="next.svg"
+				onclick={goToNext}
+				disabled={currentIndex === entities.length - 1}
+				aria-label={translate({ ca: 'Seguent', es: 'Siguiente', en: 'Next' }, getLocale())}
+			/>
 		</div>
 
 		<!-- Card stage with arc positioning -->
@@ -229,28 +244,16 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 		&:not([open]) {
 			display: none;
 		}
-	}
 
-	.close-button {
-		position: absolute;
-		top: rz.size(lg);
-		right: rz.size(lg);
-		background: var(--button-background-color);
-		color: var(--button-foreground-color);
-		border: none;
-		border-radius: rz.size(sm);
-		padding: rz.size(sm) rz.size(md);
-		cursor: pointer;
-		font-family: var(--text-font);
-		font-weight: bold;
-		font-size: 1.2em;
-
-		&:hover {
-			background: var(--button-hover-background-color);
+		:global(.nav-button) {
+			font-size: 2em;
 		}
 
-		&:focus {
-			outline: var(--focus-outline);
+		:global(.close-button) {
+			font-size: 2em;
+			position: absolute;
+			top: rz.size(lg);
+			right: rz.size(lg);
 		}
 	}
 
@@ -260,35 +263,11 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 		justify-content: center;
 	}
 
-	.nav-button {
-		background: var(--button-background-color);
-		color: var(--button-foreground-color);
-		border: none;
-		border-radius: rz.size(sm);
-		padding: rz.size(sm) rz.size(md);
-		cursor: pointer;
-		font-family: var(--text-font);
-		font-weight: bold;
-
-		&:hover:not(:disabled) {
-			background: var(--button-hover-background-color);
-		}
-
-		&:focus {
-			outline: var(--focus-outline);
-		}
-
-		&:disabled {
-			opacity: 0.4;
-			cursor: not-allowed;
-		}
-	}
-
 	.position-indicator {
 		font-family: var(--heading-font);
 		font-size: 1.2em;
 		color: var(--text-heading-color);
-		min-width: 6em;
+		min-width: 3em;
 		text-align: center;
 	}
 
