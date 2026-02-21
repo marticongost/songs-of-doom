@@ -10,6 +10,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	}
 	return {
 		title: character.name,
+		heading: null,
 		character
 	};
 };
