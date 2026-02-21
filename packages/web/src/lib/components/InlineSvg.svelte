@@ -40,7 +40,7 @@
 		width: var(--svg-width, auto);
 		height: var(--svg-height, 1em);
 		vertical-align: middle;
-		fill: currentColor;
+		fill: var(--svg-color, currentColor);
 	}
 	:global(.inline-svg.missing) {
 		outline: 2px solid red;
