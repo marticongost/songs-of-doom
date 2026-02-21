@@ -1,5 +1,5 @@
-import type { Component } from 'svelte';
 import type { Session, SessionUser } from '$lib/server/auth';
+import type { Component } from 'svelte';
 
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
@@ -14,7 +14,7 @@ declare global {
 			session: Session | null;
 		}
 		interface PageData {
-			heading?: Component;
+			heading?: Component | null;
 			user?: SessionUser | null;
 		}
 		// interface PageState {}

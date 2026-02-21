@@ -29,14 +29,16 @@
 </header>
 
 <main>
-	<div class="page-heading">
-		{#if page.data.heading}
-			{@const Heading = page.data.heading}
-			<Heading />
-		{:else}
-			<h1 class="page-title">{page.data.title}</h1>
-		{/if}
-	</div>
+	{#if page.data.heading !== null}
+		<div class="page-heading">
+			{#if page.data.heading}
+				{@const Heading = page.data.heading}
+				<Heading />
+			{:else}
+				<h1 class="page-title">{page.data.title}</h1>
+			{/if}
+		</div>
+	{/if}
 	{@render children()}
 </main>
 
