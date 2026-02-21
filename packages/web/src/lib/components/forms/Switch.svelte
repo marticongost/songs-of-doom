@@ -198,7 +198,7 @@ Each segment can display an icon, text, or both.
 				margin-left: -2px; // Collapse borders
 			}
 
-			&:hover:not(:disabled) {
+			&:hover:not(:disabled):not(.selected) {
 				background-color: var(--switch-hover-color);
 			}
 
