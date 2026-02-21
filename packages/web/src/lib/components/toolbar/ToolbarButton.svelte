@@ -27,14 +27,15 @@
 	.toolbar-button {
 		@include rz.column(xs);
 		@include rz.padding(md);
-		--svg-color: var(--toolbar-button-icon-color);
 		--svg-height: 1.7em;
 		--svg-width: auto;
-		color: var(--toolbar-button-text-color);
+		color: var(--toolbar-button-color);
 		font-weight: bold;
 
 		:global(svg) {
 			transition: transform 0.1s linear;
+			opacity: 0.6;
+			filter: grayscale(20%) drop-shadow(0 0 0.1em black);
 		}
 
 		&[disabled] {
@@ -44,8 +45,7 @@
 
 		&:hover {
 			background-color: var(--toolbar-button-hover-background-color);
-			color: var(--toolbar-button-hover-text-color);
-			--svg-color: var(--toolbar-button-hover-icon-color);
+			color: var(--toolbar-button-hover-color);
 
 			:global(svg) {
 				transform: scale(1.2);
