@@ -1,6 +1,8 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { prisma } from '$lib/server/db';
 import { translate, type Locale } from '@songsofdoom/common/localisation';
+import { CharacterState } from '@songsofdoom/game';
+import { characterStateToJson } from '$lib/database/characters';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
@@ -59,10 +61,19 @@ export const actions: Actions = {
 			});
 		}
 
+		const initialState = characterStateToJson(CharacterState.initial()) as object;
 		const character = await prisma.character.create({
 			data: {
 				name: name.trim(),
-				ownerId: locals.user.id
+				ownerId: locals.user.id,
+				revisions: {
+					create: {
+						number: 1,
+						state: initialState,
+						totalXp: 0,
+						finalised: false
+					}
+				}
 			}
 		});
 

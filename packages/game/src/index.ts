@@ -1,34 +1,34 @@
 // Catalog infrastructure
-export { EntityCatalog, getEntryMetadata, entities, type EntryMetadata } from './catalog';
+export { entities, EntityCatalog, getEntryMetadata, type EntryMetadata } from './catalog';
 
 // Core entity types
-export { Entity, ParentEntity, ChildEntity } from './models/entity';
-export { Archetype } from './models/archetype';
-export { Trait } from './models/trait';
-export { Skill } from './models/skill';
 export { Ally } from './models/ally';
+export { Archetype } from './models/archetype';
 export { Creature } from './models/creature';
-export { Module } from './models/module';
 export { Encounter } from './models/encounter';
+export { ChildEntity, Entity, ParentEntity } from './models/entity';
 export { Event } from './models/event';
+export { Module } from './models/module';
+export { Skill } from './models/skill';
+export { Trait } from './models/trait';
 
 // Inventory
 export * from './models/inventory';
 
 // Capabilities
+export * from './models/capabilities';
 export { Capability } from './models/capability';
 export {
 	CapabilityCost,
-	type CapabilityCostType,
-	type ScalarCapabilityCostType,
-	type CardTransitionType,
+	capabilityCostTypes,
 	CardTransition,
 	cardTransitions,
 	cardTransitionTypes,
 	scalarCapabilityCostTypes,
-	capabilityCostTypes
+	type CapabilityCostType,
+	type CardTransitionType,
+	type ScalarCapabilityCostType
 } from './models/capabilitycost';
-export * from './models/capabilities';
 
 // Effects
 export * from './models/effects';
@@ -41,63 +41,63 @@ export * from './models/properties';
 
 // Stats and Focus
 export {
-	Stat,
-	Attribute,
-	Indicator,
-	stats,
-	attributes,
-	indicators,
-	attributeTypes,
-	indicatorTypes,
-	statTypes,
-	strength,
-	agility,
-	intelligence,
-	charisma,
-	will,
-	health,
-	sanity,
-	type AttributeType,
-	type IndicatorType,
-	type StatType
-} from './models/stats';
-export {
 	Focus,
 	Focuses,
 	focuses,
 	focusTypes,
-	type FocusType,
-	type FocusesProps
+	type FocusesProps,
+	type FocusType
 } from './models/focus';
+export {
+	agility,
+	Attribute,
+	attributes,
+	attributeTypes,
+	charisma,
+	health,
+	Indicator,
+	indicators,
+	indicatorTypes,
+	intelligence,
+	sanity,
+	Stat,
+	stats,
+	statTypes,
+	strength,
+	will,
+	type AttributeType,
+	type IndicatorType,
+	type StatType
+} from './models/stats';
 
 // Results and Targets
 export {
-	type Result,
-	type NumericResult,
-	type CriticalFailure,
-	type ResultSelector,
-	type ResultSpec,
-	type ResultRange,
 	parseResultString,
-	resolveResultExpression
+	resolveResultExpression,
+	type CriticalFailure,
+	type NumericResult,
+	type Result,
+	type ResultRange,
+	type ResultSelector,
+	type ResultSpec
 } from './models/results';
 export {
 	Target,
 	TargetDiscriminator,
-	type TargetType,
 	type TargetCardinality,
+	type TargetDiscriminatorProps,
+	type TargetDiscriminatorSpec,
+	type TargetProps,
 	type TargetSelection,
 	type TargetSpec,
-	type TargetProps,
-	type TargetDiscriminatorProps,
-	type TargetDiscriminatorSpec
+	type TargetType
 } from './models/target';
 
 // Common capability utilities
 export {
+	attachOrReplaceWithNewEncounterWhenRevealed,
 	fullyRechargeOnChapterStart,
-	shootBeforeEngaged,
-	attachOrReplaceWithNewEncounterWhenRevealed
+	shootBeforeEngaged
 } from './models/common';
 
 // Upgrades
@@ -105,3 +105,6 @@ export { upgradable, VariantMatcher, type LevelExpr } from './models/upgrades';
 
 // Property data (instances of Rule, ScalarRule, etc.)
 export * as propertyData from './data/properties';
+
+// Characters
+export * from './models/characters';

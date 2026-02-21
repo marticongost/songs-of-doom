@@ -40,8 +40,7 @@ model CharacterRevision {
   createdAt   DateTime  @default(now())
   state       Json
   totalXp     Int
-  spentXp     Int
-  availableXp Int
+  finalised   Boolean
 
   @@id([characterId, number])
 }

@@ -4,36 +4,17 @@
 	import Button from '$lib/components/Button.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { DateColumn, IntegerColumn, StringColumn, Table } from '$lib/components/tables';
+	import type { Character } from '$lib/models/characters';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 
+	const characters = $derived(data.characters);
 	const newCharacterPath = '/[locale]/characters/new' as const;
 	const characterDetailPath = '/[locale]/characters/[id]' as const;
 
-	interface CharacterRow {
-		id: number;
-		name: string;
-		owner: string;
-		totalXp: number | null;
-		lastModified: Date | null;
-	}
-
-	const rows: CharacterRow[] = $derived(
-		data.characters.map((character: (typeof data.characters)[number]) => {
-			const latestRevision = character.revisions[0];
-			return {
-				id: character.id,
-				name: character.name,
-				owner: character.owner.username,
-				totalXp: latestRevision?.totalXp ?? null,
-				lastModified: latestRevision?.createdAt ?? null
-			};
-		})
-	);
-
-	function openCharacter(row: CharacterRow): void {
-		goto(resolve(characterDetailPath, { locale: data.locale, id: String(row.id) }));
+	function openCharacter(character: Character): void {
+		goto(resolve(characterDetailPath, { locale: data.locale, id: String(character.id) }));
 	}
 </script>
 
@@ -48,30 +29,30 @@
 		ca="%(count) personatges"
 		es="%(count) personajes"
 		en="%(count) characters"
-		count={rows.length}
+		count={characters.length}
 	/>
 </p>
 
-{#if rows.length > 0}
+{#if characters.length > 0}
 	{@const columns = [
-		new StringColumn<CharacterRow>({
+		new StringColumn<Character>({
 			header: { ca: 'Nom', es: 'Nombre', en: 'Name' },
 			expression: 'name'
 		}),
-		new IntegerColumn<CharacterRow>({
+		new IntegerColumn<Character>({
 			header: { ca: 'XP total', es: 'XP total', en: 'Total XP' },
-			expression: (row) => row.totalXp ?? 0
+			expression: 'totalXp'
 		}),
-		new DateColumn<CharacterRow>({
+		new DateColumn<Character>({
 			header: { ca: 'Última modificació', es: 'Última modificación', en: 'Last modified' },
-			expression: (row) => row.lastModified ?? new Date(0)
+			expression: 'lastModified'
 		}),
-		new StringColumn<CharacterRow>({
+		new StringColumn<Character>({
 			header: { ca: 'Propietari', es: 'Propietario', en: 'Owner' },
-			expression: (row) => row.owner
+			expression: (character) => character.owner.username
 		})
 	]}
-	<Table {rows} {columns} onClickRow={openCharacter} />
+	<Table rows={characters} {columns} onClickRow={openCharacter} />
 {:else}
 	<p class="empty-message">
 		<Text

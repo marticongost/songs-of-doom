@@ -15,15 +15,27 @@ import {
 export const STARTING_GOLD = 10;
 export const STARTING_EXPERIENCE = 0;
 
-export interface CharacterProps {
+/** Parameters for the {@link CharacterState} constructor. */
+export interface CharacterStateProps {
+	/** Indicates whether the character has been finalised (i.e. the character creation
+	 * process has been completed).
+	 */
 	finalised: boolean;
+
+	/** The number of copies of each upgrade the character has acquired. */
 	upgrades: Record<string, number> | Map<Entity, number>;
+
+	/** The number of copies of each skill in the character's deck. */
 	skillsDeck: Record<string, number> | Map<Skill, number>;
-	availableXp?: number;
-	gold?: number;
+
+	/** The amount of experience points the character currently has available to spend. */
+	availableXp: number;
+
+	/** The amount of gold the character currently has. */
+	gold: number;
 }
 
-export class Character {
+export class CharacterState {
 	/** Indicates whether the character has been finalised (i.e. the character creation
 	 * process has been completed).
 	 */
@@ -41,12 +53,22 @@ export class Character {
 	/** The amount of gold the character currently has. */
 	readonly gold: number;
 
-	constructor({ finalised, upgrades, skillsDeck, availableXp, gold }: CharacterProps) {
+	constructor({ finalised, upgrades, skillsDeck, availableXp, gold }: CharacterStateProps) {
 		this.finalised = finalised;
-		this.upgrades = Character.normaliseUpgrades(upgrades);
-		this.skillsDeck = Character.normaliseSkillDeck(skillsDeck);
-		this.availableXp = availableXp ?? STARTING_EXPERIENCE;
-		this.gold = gold ?? STARTING_GOLD;
+		this.upgrades = CharacterState.normaliseUpgrades(upgrades);
+		this.skillsDeck = CharacterState.normaliseSkillDeck(skillsDeck);
+		this.availableXp = availableXp;
+		this.gold = gold;
+	}
+
+	public static initial(): CharacterState {
+		return new CharacterState({
+			finalised: false,
+			upgrades: {},
+			skillsDeck: {},
+			availableXp: STARTING_EXPERIENCE,
+			gold: STARTING_GOLD
+		});
 	}
 
 	public getEntityAcquisitionImpediment(

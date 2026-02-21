@@ -12,7 +12,7 @@ export interface ColumnProps<T, V = unknown> {
 	header: LocalisedText;
 
 	/** Function to extract the cell value from a row */
-	expression: string | ((row: T) => V | undefined);
+	expression: keyof T | ((row: T) => V | undefined);
 
 	/** Text alignment: 'left' | 'center' | 'right'. Defaults vary by column type. */
 	align?: ColumnAlignment;
