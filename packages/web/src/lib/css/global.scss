@@ -45,6 +45,9 @@ body {
 	$palette-cedar: #330f1b;
 	$palette-cocoa-brown: #150f12;
 	$palette-light-cocoa-brown: #1f161a;
+	$palette-extra-light-cocoa-brown: #322329;
+	$palette-opium: #89717a;
+	$palette-dusty-gray: #c9b1ba;
 
 	// === Color assignments ===
 
@@ -102,6 +105,15 @@ body {
 	--panel-background-color: #{$palette-somber};
 	--panel-border: 2px solid #{$palette-ash};
 	--panel-separator: 1px solid #{$palette-ash};
+
+	// Toolbar
+	--toolbar-background-color: #{$palette-light-cocoa-brown};
+	--toolbar-border: 2px solid #{$palette-extra-light-cocoa-brown};
+	--toolbar-button-text-color: #{$palette-dusty-gray};
+	--toolbar-button-icon-color: #{$palette-opium};
+	--toolbar-button-hover-text-color: #{$palette-ivory};
+	--toolbar-button-hover-icon-color: #{$palette-dusty-gray};
+	--toolbar-button-hover-background-color: #{$palette-cocoa-brown};
 
 	// Text
 	--text-color: #{$palette-white};
