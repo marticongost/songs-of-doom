@@ -1,6 +1,9 @@
 # Build output
 .svelte-kit/
 
+# Generated files
+prisma/generated/
+
 # Package Managers
 package-lock.json
 
