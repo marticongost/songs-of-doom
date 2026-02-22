@@ -1,8 +1,9 @@
-import { error, fail, redirect } from '@sveltejs/kit';
+import { characterStateToJson } from '$lib/database/characters';
 import { prisma } from '$lib/server/db';
+import { characterUrl } from '$lib/urls';
 import { translate, type Locale } from '@songsofdoom/common/localisation';
 import { CharacterState } from '@songsofdoom/game';
-import { characterStateToJson } from '$lib/database/characters';
+import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
@@ -77,6 +78,6 @@ export const actions: Actions = {
 			}
 		});
 
-		redirect(302, `/${locale}/characters/${character.id}`);
+		redirect(302, characterUrl.get(character.id, locale));
 	}
 };

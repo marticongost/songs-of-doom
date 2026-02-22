@@ -22,7 +22,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 
 <script lang="ts">
 	import { getLocale } from '$lib/context/locale';
-	import { getEntityUrl } from '$lib/urls';
+	import { entityUrl } from '$lib/urls';
 	import { translate } from '@songsofdoom/common';
 	import type { Entity } from '@songsofdoom/game';
 	import type { Snippet } from 'svelte';
@@ -56,7 +56,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 	// Derived state
 	const currentEntity = $derived(entities[currentIndex]);
 	const totalCount = $derived(entities.length);
-	const cardHref = $derived(currentEntity ? getEntityUrl(currentEntity) : '');
+	const cardHref = $derived(currentEntity ? entityUrl.get(currentEntity) : '');
 
 	// Calculate visible range of cards
 	const visibleCards = $derived.by(() => {

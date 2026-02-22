@@ -1,25 +1,22 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import Button from '$lib/components/Button.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { DateColumn, IntegerColumn, StringColumn, Table } from '$lib/components/tables';
 	import type { Character } from '$lib/models/characters';
+	import { characterUrl, newCharacterUrl } from '$lib/urls';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 
 	const characters = $derived(data.characters);
-	const newCharacterPath = '/[locale]/characters/new' as const;
-	const characterDetailPath = '/[locale]/characters/[id]' as const;
 
 	function openCharacter(character: Character): void {
-		goto(resolve(characterDetailPath, { locale: data.locale, id: String(character.id) }));
+		characterUrl.go(character);
 	}
 </script>
 
 <div class="toolbar">
-	<Button href={resolve(newCharacterPath, { locale: data.locale })}>
+	<Button href={newCharacterUrl.get()}>
 		<Text ca="Nou personatge" es="Nuevo personaje" en="New character" />
 	</Button>
 </div>

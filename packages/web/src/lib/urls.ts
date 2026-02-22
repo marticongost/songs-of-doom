@@ -1,33 +1,48 @@
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
 import type { Locale } from '@songsofdoom/common';
 import type { Entity } from '@songsofdoom/game';
 import { getLocale } from './context/locale';
 import type { Character } from './models/characters';
 
-/** Gets the URL for a given entity.
- *
- * @param entity The entity to get the URL for.
- * @param locale An optional locale to include in the URL. If not provided, the current locale will be used.
- * @returns The URL for the given entity in the chosen locale.
- */
-export const getEntityUrl = (entity: Entity | string, locale?: Locale): string => {
-	return `/${locale ?? getLocale()}/cards/${typeof entity === 'string' ? entity : entity.variantId}`;
-};
+/** A URL handler that provides both URL retrieval and navigation. */
+export interface UrlHandler<TArgs extends unknown[]> {
+	/** Returns the resolved URL for the given arguments. */
+	get(...args: TArgs): string;
+	/** Navigates to the URL for the given arguments. */
+	go(...args: TArgs): void;
+}
 
-/** Gets the URL to create a new character.
- *
- * @param locale An optional locale to include in the URL. If not provided, the current locale will be used.
- * @returns The URL for creating a new character, in the chosen locale.
- */
-export const getNewCharacterUrl = (locale?: Locale): string => {
-	return `/${locale ?? getLocale()}/characters/new`;
-};
+/** Creates a URL handler with a default go() implementation that calls get(). */
+function createUrlHandler<TArgs extends unknown[]>(
+	get: (...args: TArgs) => string
+): UrlHandler<TArgs> {
+	return {
+		get,
+		go(...args: TArgs): void {
+			// eslint-disable-next-line svelte/no-navigation-without-resolve -- get() uses resolve()
+			goto(this.get(...args));
+		}
+	};
+}
 
-/** Gets the URL for a given character.
- *
- * @param character The character to get the URL for.
- * @param locale An optional locale to include in the URL. If not provided, the current locale will be used.
- * @returns The URL for the given character in the chosen locale.
- */
-export const getCharacterUrl = (character: Character | number, locale?: Locale): string => {
-	return `/${locale ?? getLocale()}/characters/${typeof character === 'number' ? character : character.id}`;
-};
+/** URL handler for entity pages. */
+export const entityUrl = createUrlHandler((entity: Entity | string, locale?: Locale) =>
+	resolve('/[locale]/cards/[id]', {
+		locale: locale ?? getLocale(),
+		id: typeof entity === 'string' ? entity : entity.variantId
+	})
+);
+
+/** URL handler for the new character page. */
+export const newCharacterUrl = createUrlHandler((locale?: Locale) =>
+	resolve('/[locale]/characters/new', { locale: locale ?? getLocale() })
+);
+
+/** URL handler for character pages. */
+export const characterUrl = createUrlHandler((character: Character | number, locale?: Locale) =>
+	resolve('/[locale]/characters/[id]', {
+		locale: locale ?? getLocale(),
+		id: String(typeof character === 'number' ? character : character.id)
+	})
+);

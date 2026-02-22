@@ -160,6 +160,25 @@ Svelte 5 components in `packages/web/` follow these patterns:
 
 Use the `/svelte-component` skill when creating or updating components.
 
+### URL Handling
+
+Internal navigation uses URL handlers from [packages/web/src/lib/urls.ts](packages/web/src/lib/urls.ts). Each handler provides:
+
+- `get(...args)` - Returns the resolved URL string
+- `go(...args)` - Navigates to the URL via `goto()`
+
+```typescript
+import { entityUrl, characterUrl, newCharacterUrl } from '$lib/urls';
+
+// Get URL for use in href
+<a href={entityUrl.get(entity)}>View</a>
+
+// Programmatic navigation
+characterUrl.go(character);
+```
+
+URL handlers use SvelteKit's `resolve()` with static route patterns (e.g., `'/[locale]/cards/[id]'`) for type-safe path generation and automatic base path handling.
+
 ### Testing
 
 Tests use vitest configured in each package's `vite.config.ts`. The game package tests models, while the web package tests application logic. All tests require assertions (`expect.requireAssertions: true`).

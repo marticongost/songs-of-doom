@@ -12,7 +12,7 @@ Accepts either an Entity object or an entity id string.
 <script lang="ts">
 	import Link from '$lib/components/Link.svelte';
 	import { getLocale } from '$lib/context/locale';
-	import { getEntityUrl } from '$lib/urls';
+	import { entityUrl } from '$lib/urls';
 	import { translate } from '@songsofdoom/common/localisation';
 	import type { Entity } from '@songsofdoom/game';
 	import { entities } from '@songsofdoom/game';
@@ -28,4 +28,4 @@ Accepts either an Entity object or an entity id string.
 	const entityObject = $derived(typeof entity === 'string' ? entities.require(entity) : entity);
 </script>
 
-<Link href={getEntityUrl(entityObject)}>{label ?? translate(entityObject.title, locale)}</Link>
+<Link href={entityUrl.get(entityObject)}>{label ?? translate(entityObject.title, locale)}</Link>

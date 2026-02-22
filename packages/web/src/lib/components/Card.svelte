@@ -16,7 +16,7 @@
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
-	import { getEntityUrl } from '$lib/urls';
+	import { entityUrl } from '$lib/urls';
 	import type { Entity, Module } from '@songsofdoom/game';
 	import { Ally, Archetype, attributeTypes, Creature, Item, Skill } from '@songsofdoom/game';
 	import CapabilityCostList from './capabilities/CapabilityCostList.svelte';
@@ -47,7 +47,7 @@
 
 <svelte:element
 	this={elementType}
-	href={elementType === 'a' ? getEntityUrl(entity) : undefined}
+	href={elementType === 'a' ? entityUrl.get(entity) : undefined}
 	type={elementType === 'button' ? 'button' : undefined}
 	{onclick}
 	{...standardAttributes(rest, 'card')}

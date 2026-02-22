@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getEntityUrl } from '$lib/urls';
+	import { entityUrl } from '$lib/urls';
 	import type { Entity } from '@songsofdoom/game';
 	import CardLevel from './CardLevel.svelte';
 	import ExperienceIndicator from './indicators/ExperienceIndicator.svelte';
@@ -12,7 +12,7 @@
 	}
 
 	const { entity, onclick, ...attributes }: Props = $props();
-	const attr = $derived(onclick ? { onclick } : { href: getEntityUrl(entity) });
+	const attr = $derived(onclick ? { onclick } : { href: entityUrl.get(entity) });
 </script>
 
 <svelte:element
