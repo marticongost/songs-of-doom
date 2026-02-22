@@ -1,12 +1,9 @@
 <script lang="ts">
-	import { Archetype } from '@songsofdoom/game';
-	import { Entity } from '@songsofdoom/game';
-	import { Module } from '@songsofdoom/game';
-	import { entityTypes } from '@songsofdoom/game';
 	import Card from '$lib/components/Card.svelte';
 	import CardButton from '$lib/components/CardButton.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { type LocalisedText } from '@songsofdoom/common/localisation';
+	import { Archetype, Entity, entityTypes, Module } from '@songsofdoom/game';
 	import type { PageProps } from './$types';
 	let { data }: PageProps = $props();
 </script>
@@ -40,6 +37,9 @@
 		<Card entity={data.entity} linked={false} />
 
 		<aside>
+			{#if data.entity.set && data.entity.set !== data.entity && data.entity.set instanceof Module}
+				{@render cardSet({ ca: 'Mòdul', es: 'Módulo', en: 'Module' }, [data.entity.set])}
+			{/if}
 			{#if data.entity.requiredArchetype}
 				{@render cardSet({ ca: 'Arquetip', es: 'Arquetipo', en: 'Archetype' }, [
 					data.entity.requiredArchetype
