@@ -11,23 +11,32 @@
 		icon: string;
 		label: LocalisedText;
 		disabled?: boolean;
+		href?: string;
+		onclick?: (e: MouseEvent) => void;
 	}
 
-	const { icon, label, disabled, ...rest }: Props = $props();
+	const { icon, label, disabled, href, onclick, ...rest }: Props = $props();
 </script>
 
-<button type="button" {...standardAttributes(rest, 'toolbar-button')} {disabled}>
+<svelte:element
+	this={href ? 'a' : 'button'}
+	{href}
+	{onclick}
+	target={href ? '_blank' : undefined}
+	{...standardAttributes(rest, 'toolbar-button')}
+	{disabled}
+>
 	<InlineSvg src={icon} />
 	<span class="label"><Text {...label} /></span>
-</button>
+</svelte:element>
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
 
 	.toolbar-button {
-		@include rz.column(xs);
+		@include rz.column(sm);
 		@include rz.padding(md);
-		--svg-height: 1.7em;
+		--svg-height: 1.5em;
 		--svg-width: auto;
 		color: var(--toolbar-button-color);
 		font-weight: bold;

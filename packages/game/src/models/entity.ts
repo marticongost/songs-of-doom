@@ -1,5 +1,6 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
 import { getEntryMetadata } from '../catalog';
+import { standard } from '../data/properties';
 import { Archetype } from './archetype';
 import type { Capability } from './capability';
 import type { Effect } from './effects';
@@ -123,6 +124,11 @@ export abstract class Entity {
 	/** Lists all permanent effects provided by this entity's capabilities. */
 	permanentEffects(): Array<Effect> {
 		return [];
+	}
+
+	/** Whether this entity is a standard one that all characters start with. */
+	isStandard(): boolean {
+		return this.properties.includes(standard);
 	}
 }
 

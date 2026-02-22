@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { EntityManager } from '$lib/components/entities/entitymanager';
 	import { entityUrl } from '$lib/urls';
 	import type { Entity } from '@songsofdoom/game';
 	import CardLevel from './CardLevel.svelte';
@@ -9,9 +10,11 @@
 	interface Props extends StandardAttributeProps {
 		entity: Entity;
 		onclick?: (e: MouseEvent) => void;
+		/** Optional entity manager for state and interactions */
+		entityManager?: EntityManager;
 	}
 
-	const { entity, onclick, ...attributes }: Props = $props();
+	const { entity, onclick, entityManager: _entityManager, ...attributes }: Props = $props();
 	const attr = $derived(onclick ? { onclick } : { href: entityUrl.get(entity) });
 </script>
 

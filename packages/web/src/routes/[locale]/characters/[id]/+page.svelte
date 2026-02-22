@@ -1,20 +1,30 @@
 <script lang="ts">
+	import CardButton from '$lib/components/CardButton.svelte';
 	import StatsSheet from '$lib/components/StatsSheet.svelte';
 	import EntityCatalog from '$lib/components/entities/EntityCatalog.svelte';
+	import EntityListing from '$lib/components/entities/EntityListing.svelte';
+	import type { EntityManager } from '$lib/components/entities/entitymanager';
 	import ExperienceIndicator from '$lib/components/indicators/ExperienceIndicator.svelte';
 	import GoldIndicator from '$lib/components/indicators/GoldIndicator.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import Toolbar from '$lib/components/toolbar/Toolbar.svelte';
 	import ToolbarButton from '$lib/components/toolbar/ToolbarButton.svelte';
 	import { EntitySearchState } from '$lib/search';
-	import { attributeTypes, entities, indicatorTypes, type EntityTypeId } from '@songsofdoom/game';
+	import { type LocalisedText } from '@songsofdoom/common';
+	import {
+		attributeTypes,
+		entities,
+		indicatorTypes,
+		type Entity,
+		type EntityTypeId
+	} from '@songsofdoom/game';
 	import type { PageData } from './$types';
 
 	const { data }: { data: PageData } = $props();
 
 	// All entities except modules
 	const { character } = data;
-	const characterState = $derived(character.newestRevision.state);
+	let characterState = $state(character.newestRevision.state);
 	const baseStats = $derived(characterState.getBaseStats());
 	const allowedTypes: EntityTypeId[] = ['archetype', 'trait', 'skill', 'item', 'ally'];
 	const allEntities = entities.all().filter((e) => allowedTypes.includes(e.type.id));
@@ -23,6 +33,19 @@
 		allowedTypes,
 		syncUrl: false
 	});
+
+	const entityManager: EntityManager = {
+		getNumberOfOwnedCopies(entity) {
+			return characterState.getNumberOfOwnedCopies(entity);
+		},
+		getAcquisitionImpediment(entity) {
+			return characterState.getEntityAcquisitionImpediment(entity);
+		},
+		onEntityAdded(entity) {
+			characterState = characterState.acquireEntity(entity);
+		},
+		onEntityRemoved(_entity) {}
+	};
 </script>
 
 <Toolbar>
@@ -40,7 +63,7 @@
 </Toolbar>
 
 <div class="content">
-	<div class="build">
+	<div class="details">
 		<section class="stats">
 			<h1 class="section-title">
 				<Text ca="Característiques" es="Características" en="Stats" />
@@ -51,11 +74,31 @@
 			</div>
 		</section>
 	</div>
+	<div class="build">
+		{@render cardSet(
+			{ ca: 'Arquetips', es: 'Arquetipos', en: 'Archetypes' },
+			characterState.archetypes()
+		)}
+		{@render cardSet({ ca: 'Trets', es: 'Rasgos', en: 'Traits' }, characterState.traits())}
+		{@render cardSet(
+			{ ca: 'Habilitats', es: 'Habilidades', en: 'Skills' },
+			characterState.skills()
+		)}
+		{@render cardSet({ ca: 'Aliats', es: 'Aliados', en: 'Allies' }, characterState.allies())}
+		{@render cardSet({ ca: 'Objectes', es: 'Objetos', en: 'Items' }, characterState.items())}
+	</div>
 	<section class="catalog">
 		<h1 class="section-title"><Text ca="Afegir cartes" es="Añadir cartas" en="Add cards" /></h1>
-		<EntityCatalog entities={allEntities} search={searchState} />
+		<EntityCatalog entities={allEntities} search={searchState} {entityManager} />
 	</section>
 </div>
+
+{#snippet cardSet(title: LocalisedText, entities: Entity[])}
+	<section class="card-set">
+		<h1 class="section-title"><Text {...title} /></h1>
+		<EntityListing {entities} {entityManager} EntityComponent={CardButton} />
+	</section>
+{/snippet}
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
@@ -97,5 +140,18 @@
 			padding-top: rz.size(md);
 			border-top: var(--panel-separator);
 		}
+	}
+
+	.details {
+		flex: 0 0 auto;
+	}
+
+	.build {
+		@include rz.column(lg);
+		flex: 0 0 20em;
+	}
+
+	.catalog {
+		flex: 1 1 auto;
 	}
 </style>

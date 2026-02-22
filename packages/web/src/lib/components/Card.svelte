@@ -16,6 +16,7 @@
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
+	import type { EntityManager } from '$lib/components/entities/entitymanager';
 	import { entityUrl } from '$lib/urls';
 	import type { Entity, Module } from '@songsofdoom/game';
 	import { Ally, Archetype, attributeTypes, Creature, Item, Skill } from '@songsofdoom/game';
@@ -36,9 +37,17 @@
 		linked?: boolean;
 		/** Click handler - when provided, renders as a button instead of a link */
 		onclick?: (e: MouseEvent) => void;
+		/** Optional entity manager for state and interactions */
+		entityManager?: EntityManager;
 	}
 
-	const { entity, linked = false, onclick, ...rest }: Props = $props();
+	const {
+		entity,
+		linked = true,
+		onclick,
+		entityManager: _entityManager,
+		...rest
+	}: Props = $props();
 
 	// Determine the element type: button if onclick, anchor if linked, div otherwise
 	const elementType = $derived(onclick ? 'button' : linked ? 'a' : 'div');

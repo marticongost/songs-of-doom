@@ -25,26 +25,26 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 	import { entityUrl } from '$lib/urls';
 	import { translate } from '@songsofdoom/common';
 	import type { Entity } from '@songsofdoom/game';
-	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import Button from '../Button.svelte';
 	import Card from '../Card.svelte';
 	import IconButton from '../IconButton.svelte';
-	import Text from '../localisation/Text.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
+	import Toolbar from '../toolbar/Toolbar.svelte';
+	import ToolbarButton from '../toolbar/ToolbarButton.svelte';
+	import type { EntityManager } from './entitymanager';
 
 	interface Props extends StandardAttributeProps {
 		/** All entities available for viewing */
 		entities: Entity[];
 		/** Number of sibling cards to show on each side (default: 2) */
 		siblingCount?: number;
-		/** Additional action buttons, receives current entity */
-		actions?: Snippet<[Entity]>;
+		/** Entity manager for handling actions */
+		entityManager: EntityManager;
 		/** Callback when carousel is closed */
 		onclose?: () => void;
 	}
 
-	const { entities, siblingCount = 2, actions, onclose, ...attributes }: Props = $props();
+	const { entities, siblingCount = 2, entityManager, onclose, ...attributes }: Props = $props();
 
 	// State
 	let dialogElement: HTMLDialogElement | undefined = $state();
@@ -285,14 +285,23 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 		</div>
 
 		<!-- Actions area -->
-		<div class="actions">
-			<Button href={cardHref}>
-				<Text ca="Obrir" es="Abrir" en="Open" />
-			</Button>
-			{#if actions}
-				{@render actions(currentEntity)}
-			{/if}
-		</div>
+		<Toolbar class="actions">
+			<ToolbarButton
+				icon="open.svg"
+				href={cardHref}
+				label={{ ca: 'Obrir', es: 'Abrir', en: 'Open' }}
+			/>
+			<ToolbarButton
+				icon="add.svg"
+				onclick={() => entityManager.onEntityAdded(currentEntity)}
+				label={{ ca: 'Afegir', es: 'Añadir', en: 'Add' }}
+			/>
+			<ToolbarButton
+				icon="remove.svg"
+				onclick={() => entityManager.onEntityRemoved(currentEntity)}
+				label={{ ca: 'Eliminar', es: 'Eliminar', en: 'Remove' }}
+			/>
+		</Toolbar>
 	{/if}
 </dialog>
 
@@ -319,7 +328,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 		color: var(--text-color);
 
 		&::backdrop {
-			background: rgba(0, 0, 0, 0.85);
+			background: rgba(0, 0, 0, 0.9);
 		}
 
 		&:not([open]) {

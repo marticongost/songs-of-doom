@@ -1,9 +1,13 @@
 import { entities } from '../../catalog';
 import { innate } from '../../data/properties';
+import { Ally } from '../ally';
+import { Archetype } from '../archetype';
 import type { Entity } from '../entity';
 import { FOCUS_TOKENS_FOR_STAT_VALUES, focuses, type Focus, type FocusType } from '../focus';
+import { Item } from '../inventory';
 import { Skill } from '../skill';
 import { attributes, stats, type Stat, type StatType } from '../stats';
+import { Trait } from '../trait';
 import {
 	ArchetypeRequiredImpediment,
 	InnateTraitImpediment,
@@ -13,7 +17,7 @@ import {
 } from './entityacquisitionimpediments';
 
 export const STARTING_GOLD = 10;
-export const STARTING_EXPERIENCE = 0;
+export const STARTING_EXPERIENCE = 10;
 
 /** Parameters for the {@link CharacterState} constructor. */
 export interface CharacterStateProps {
@@ -71,13 +75,34 @@ export class CharacterState {
 		});
 	}
 
+	public getNumberOfOwnedCopies(entity: Entity | string): number {
+		if (typeof entity === 'string') {
+			entity = entities.require(entity);
+		}
+		if (entity instanceof Skill) {
+			return this.skillsDeck.get(entity) ?? 0;
+		}
+		if (entity.isStandard()) {
+			return 1;
+		}
+		if (this.upgrades.has(entity)) {
+			return this.upgrades.get(entity) ? 1 : 0;
+		}
+		// TODO: inventory
+		return 0;
+	}
+
 	public getEntityAcquisitionImpediment(
 		entity: Entity | string
 	): EntityAcquisitionImpediment | undefined {
 		if (typeof entity === 'string') {
 			entity = entities.require(entity);
 		}
-		if (entity.requiredArchetype && !this.hasUpgrade(entity.requiredArchetype)) {
+		if (
+			entity.requiredArchetype &&
+			!entity.requiredArchetype.isStandard() &&
+			!this.hasUpgrade(entity.requiredArchetype)
+		) {
 			return new ArchetypeRequiredImpediment(entity.requiredArchetype);
 		}
 		if (this.availableXp < (entity.xpCost ?? 0)) {
@@ -97,6 +122,59 @@ export class CharacterState {
 			entity = entities.require(entity);
 		}
 		return this.upgrades.has(entity);
+	}
+
+	public ownedEntities(): Array<Entity> {
+		const standardEntities = entities.all().filter((entity) => entity.isStandard());
+		return [
+			...standardEntities,
+			...Array.from(this.upgrades.entries())
+				.filter(([_, copies]) => copies > 0)
+				.map(([entity, _]) => entity)
+		];
+	}
+
+	public archetypes(): Array<Archetype> {
+		return this.ownedEntities().filter((entity) => entity instanceof Archetype);
+	}
+
+	public traits(): Array<Trait> {
+		return this.ownedEntities().filter((entity) => entity instanceof Trait);
+	}
+
+	public skills(): Array<Skill> {
+		return [...this.skillsDeck.keys()];
+	}
+
+	public allies(): Array<Ally> {
+		return this.ownedEntities().filter((entity) => entity instanceof Ally);
+	}
+
+	public items(): Array<Item> {
+		return this.ownedEntities().filter((entity) => entity instanceof Item);
+	}
+
+	public acquireEntity(entity: Entity): CharacterState {
+		const acquisitionImpediment = this.getEntityAcquisitionImpediment(entity);
+		if (acquisitionImpediment) return this;
+
+		const newUpgrades = new Map(this.upgrades);
+		if (entity.xpCost || entity.goldCost || entity instanceof Ally || entity instanceof Item) {
+			newUpgrades.set(entity, (newUpgrades.get(entity) ?? 0) + 1);
+		}
+
+		const newSkillsDeck = new Map(this.skillsDeck);
+		if (entity instanceof Skill) {
+			newSkillsDeck.set(entity, (newSkillsDeck.get(entity) ?? 0) + 1);
+		}
+
+		return new CharacterState({
+			...this,
+			upgrades: newUpgrades,
+			skillsDeck: newSkillsDeck,
+			availableXp: this.availableXp - (entity.xpCost ?? 0),
+			gold: this.gold - (entity.goldCost ?? 0)
+		});
 	}
 
 	private static normaliseUpgrades(

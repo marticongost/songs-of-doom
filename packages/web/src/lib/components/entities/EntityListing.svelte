@@ -1,20 +1,28 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import type { KeyboardNavigation } from '$lib/attachments/keyboard-nav';
-	import Card from '../Card.svelte';
 	import type { GroupingResult } from '$lib/sorting';
 	import { translate, type Locale } from '@songsofdoom/common/localisation';
 	import type { Entity } from '@songsofdoom/game';
 	import type { Component } from 'svelte';
+	import Card from '../Card.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
+	import EntityCarousel, { type EntityCarouselApi } from './EntityCarousel.svelte';
+	import type { EntityManager } from './entitymanager';
 
 	interface BaseProps extends StandardAttributeProps {
-		EntityComponent?: Component<{ entity: Entity; onclick?: (e: MouseEvent) => void }>;
+		EntityComponent?: Component<{
+			entity: Entity;
+			onclick?: (e: MouseEvent) => void;
+			entityManager?: EntityManager;
+		}>;
 		appearance?: 'grid' | 'columns';
+
 		/** Optional keyboard navigation handler */
 		keyboardNav?: KeyboardNavigation;
-		/** Callback when an entity is clicked (for carousel integration) */
-		onEntityClick?: (entity: Entity, index: number) => void;
+
+		/** Optional entity manager - enables carousel when provided */
+		entityManager?: EntityManager;
 	}
 
 	type Props = BaseProps &
@@ -29,9 +37,23 @@
 		EntityComponent = Card,
 		appearance = 'grid',
 		keyboardNav,
-		onEntityClick,
+		entityManager,
 		...attributes
 	}: Props = $props();
+
+	let carouselRef: EntityCarouselApi | undefined = $state();
+
+	// Flatten entities for carousel consumption
+	const carouselEntities = $derived.by(() => {
+		if (groupedEntities) {
+			return groupedEntities.flatMap((g) => g.entities);
+		}
+		return entities ?? [];
+	});
+
+	function openCarousel(_entity: Entity, index: number): void {
+		carouselRef?.open(index);
+	}
 
 	const locale = $derived(page.params.locale as Locale);
 
@@ -46,17 +68,17 @@
 	}
 
 	// Create onclick handler for a specific entity/index
-	function createClickHandler(
+	function createEntityClickHandler(
 		entity: Entity,
 		flatIndex: number
 	): ((e: MouseEvent) => void) | undefined {
-		if (!onEntityClick) return undefined;
-		return () => onEntityClick(entity, flatIndex);
+		if (!entityManager) return undefined;
+		return () => openCarousel(entity, flatIndex);
 	}
 </script>
 
 {#snippet renderEntity(entity: Entity, flatIndex: number)}
-	<EntityComponent {entity} onclick={createClickHandler(entity, flatIndex)} />
+	<EntityComponent {entity} onclick={createEntityClickHandler(entity, flatIndex)} {entityManager} />
 {/snippet}
 
 <div
@@ -106,6 +128,10 @@
 		{/if}
 	{/if}
 </div>
+
+{#if entityManager}
+	<EntityCarousel bind:this={carouselRef} entities={carouselEntities} {entityManager} />
+{/if}
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
