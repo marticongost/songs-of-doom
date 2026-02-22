@@ -46,14 +46,10 @@ const fromSerializableData = (value: unknown): unknown => {
 const createTransporter = <T, Props extends object>(type: Constructor<T, Props>) => ({
 	encode: (value: T): Props | false => {
 		if (!(value instanceof type)) return false;
-		const encoded = toSerializableData(value) as Props;
-		console.log(`[transport] encode ${type.name}:`, JSON.stringify(encoded).slice(0, 200));
-		return encoded;
+		return toSerializableData(value) as Props;
 	},
 	decode: (props: Props): T => {
-		console.log(`[transport] decode ${type.name} input:`, JSON.stringify(props).slice(0, 200));
 		const restored = fromSerializableData(props) as Props;
-		console.log(`[transport] decode ${type.name} restored:`, restored);
 		return new type(restored);
 	}
 });
