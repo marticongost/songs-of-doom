@@ -143,7 +143,7 @@ export class CharacterState {
 	getBaseStats(): Map<Stat, number> {
 		const baseStats = new Map<Stat, number>();
 		for (const stat of Object.values(stats)) {
-			baseStats.set(stat, 0);
+			baseStats.set(stat, stat.startingValue);
 		}
 		this.upgrades.forEach((copies, entity) => {
 			entity.permanentEffects().forEach((effect) => {
