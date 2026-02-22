@@ -3,6 +3,7 @@
 	import EntityCatalog from '$lib/components/entities/EntityCatalog.svelte';
 	import ExperienceIndicator from '$lib/components/indicators/ExperienceIndicator.svelte';
 	import GoldIndicator from '$lib/components/indicators/GoldIndicator.svelte';
+	import Text from '$lib/components/localisation/Text.svelte';
 	import Toolbar from '$lib/components/toolbar/Toolbar.svelte';
 	import ToolbarButton from '$lib/components/toolbar/ToolbarButton.svelte';
 	import { EntitySearchState } from '$lib/search';
@@ -40,14 +41,20 @@
 
 <div class="content">
 	<div class="build">
-		<div class="stats-sheet">
-			<StatsSheet stats={baseStats} statTypes={attributeTypes} showLabels={true} />
-			<StatsSheet stats={baseStats} statTypes={indicatorTypes} showLabels={true} />
-		</div>
+		<section class="stats">
+			<h1 class="section-title">
+				<Text ca="Característiques" es="Características" en="Stats" />
+			</h1>
+			<div class="stats-sheet">
+				<StatsSheet stats={baseStats} statTypes={attributeTypes} showLabels={true} />
+				<StatsSheet stats={baseStats} statTypes={indicatorTypes} showLabels={true} />
+			</div>
+		</section>
 	</div>
-	<div class="catalog">
+	<section class="catalog">
+		<h1 class="section-title"><Text ca="Afegir cartes" es="Añadir cartas" en="Add cards" /></h1>
 		<EntityCatalog entities={allEntities} search={searchState} />
-	</div>
+	</section>
 </div>
 
 <style lang="scss">
@@ -60,6 +67,13 @@
 		margin-right: rz.size(lg);
 	}
 
+	.section-title {
+		font-family: var(--heading-font);
+		font-size: 1.3em;
+		color: var(--text-heading-color);
+		margin-bottom: rz.size(md);
+	}
+
 	.resources {
 		@include rz.row(sm);
 		margin-left: auto;
@@ -68,8 +82,10 @@
 	}
 
 	.content {
+		@include rz.row(xl);
+		@include rz.hpadding(md);
+		border: 2px solid transparent;
 		margin-top: rz.size(lg);
-		@include rz.row(lg);
 		align-items: flex-start;
 	}
 
