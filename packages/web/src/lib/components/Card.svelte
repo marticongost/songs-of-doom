@@ -18,8 +18,7 @@
 	} from '$lib/components/standardattributes';
 	import { getLocale } from '$lib/context/locale';
 	import type { Entity, Module } from '@songsofdoom/game';
-	import { Ally, Archetype, Creature, Item, Skill } from '@songsofdoom/game';
-	import AttributesSheet from './AttributesSheet.svelte';
+	import { Ally, Archetype, attributeTypes, Creature, Item, Skill } from '@songsofdoom/game';
 	import CapabilityCostList from './capabilities/CapabilityCostList.svelte';
 	import ChargesChip from './capabilities/ChargesChip.svelte';
 	import CardLevel from './CardLevel.svelte';
@@ -29,6 +28,7 @@
 	import HealthIndicator from './indicators/HealthIndicator.svelte';
 	import SanityIndicator from './indicators/SanityIndicator.svelte';
 	import InlineSvg from './InlineSvg.svelte';
+	import AttributesSheet from './StatsSheet.svelte';
 
 	interface Props extends StandardAttributeProps {
 		entity: Entity;
@@ -77,7 +77,7 @@
 	</div>
 	<div class="image-row">
 		{#if entity instanceof Creature || entity instanceof Ally}
-			<AttributesSheet attributes={entity.stats} />
+			<AttributesSheet stats={entity.stats} statTypes={attributeTypes} class="attributes" />
 			<div class="indicators">
 				<HealthIndicator amount={entity.stats.health} contrast={true} />
 				{#if entity instanceof Ally}
@@ -242,6 +242,11 @@
 	.required-archetype {
 		font-size: 0.9em;
 		opacity: 0.7;
+	}
+
+	:global(.attributes) {
+		background-image: linear-gradient(to right, transparent, rgba(black, 0.1));
+		border-right: var(--panel-separator);
 	}
 
 	.indicators {
