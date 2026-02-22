@@ -1,18 +1,20 @@
 <script lang="ts">
+	import StatsSheet from '$lib/components/StatsSheet.svelte';
 	import EntityCatalog from '$lib/components/entities/EntityCatalog.svelte';
 	import ExperienceIndicator from '$lib/components/indicators/ExperienceIndicator.svelte';
 	import GoldIndicator from '$lib/components/indicators/GoldIndicator.svelte';
 	import Toolbar from '$lib/components/toolbar/Toolbar.svelte';
 	import ToolbarButton from '$lib/components/toolbar/ToolbarButton.svelte';
 	import { EntitySearchState } from '$lib/search';
-	import { entities, type EntityTypeId } from '@songsofdoom/game';
+	import { attributeTypes, entities, indicatorTypes, type EntityTypeId } from '@songsofdoom/game';
 	import type { PageData } from './$types';
 
 	const { data }: { data: PageData } = $props();
 
 	// All entities except modules
 	const { character } = data;
-	const characterState = character.newestRevision.state;
+	const characterState = $derived(character.newestRevision.state);
+	const baseStats = $derived(characterState.getBaseStats());
 	const allowedTypes: EntityTypeId[] = ['archetype', 'trait', 'skill', 'item', 'ally'];
 	const allEntities = entities.all().filter((e) => allowedTypes.includes(e.type.id));
 
@@ -30,14 +32,19 @@
 		icon="finalize.svg"
 		label={{ ca: 'Finalitzar', es: 'Finalizar', en: 'Finalize' }}
 	/>
-	<div class="indicators">
+	<div class="resources">
 		<GoldIndicator amount={characterState.gold} />
 		<ExperienceIndicator amount={characterState.availableXp} />
 	</div>
 </Toolbar>
 
 <div class="content">
-	<div class="build"></div>
+	<div class="build">
+		<div class="stats-sheet">
+			<StatsSheet stats={baseStats} statTypes={attributeTypes} showLabels={true} />
+			<StatsSheet stats={baseStats} statTypes={indicatorTypes} showLabels={true} />
+		</div>
+	</div>
 	<div class="catalog">
 		<EntityCatalog entities={allEntities} search={searchState} />
 	</div>
@@ -53,7 +60,7 @@
 		margin-right: rz.size(lg);
 	}
 
-	.indicators {
+	.resources {
 		@include rz.row(sm);
 		margin-left: auto;
 		padding: rz.size(md);
@@ -63,5 +70,16 @@
 	.content {
 		margin-top: rz.size(lg);
 		@include rz.row(lg);
+		align-items: flex-start;
+	}
+
+	.stats-sheet {
+		@include rz.column;
+
+		& > :global(* + *) {
+			margin-top: rz.size(md);
+			padding-top: rz.size(md);
+			border-top: var(--panel-separator);
+		}
 	}
 </style>
