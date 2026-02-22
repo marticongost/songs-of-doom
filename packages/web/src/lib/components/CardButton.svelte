@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getLocale } from '$lib/context/locale';
 	import type { Entity } from '@songsofdoom/game';
 	import CardLevel from './CardLevel.svelte';
 	import ExperienceIndicator from './indicators/ExperienceIndicator.svelte';
@@ -11,15 +12,21 @@
 	}
 
 	const { entity, onclick, ...attributes }: Props = $props();
+	const attr = $derived(onclick ? { onclick } : { href: `/${getLocale()}/cards/${entity.id}` });
 </script>
 
-<button {...standardAttributes(attributes, 'card-button')} data-type={entity.type.id} {onclick}>
+<svelte:element
+	this={onclick ? 'button' : 'a'}
+	{...standardAttributes(attributes, 'card-button')}
+	data-type={entity.type.id}
+	{...attr}
+>
 	<div class="title"><Text {...entity.title} /></div>
 	<CardLevel {entity} />
 	{#if entity.xpCost !== undefined}
 		<ExperienceIndicator amount={entity.xpCost} />
 	{/if}
-</button>
+</svelte:element>
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
