@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Card from '$lib/components/Card.svelte';
-	import CardButton from '$lib/components/CardButton.svelte';
+	import Card from '$lib/components/entities/Card.svelte';
+	import CardButton from '$lib/components/entities/CardButton.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { type LocalisedText } from '@songsofdoom/common/localisation';
 	import { Archetype, Entity, entityTypes, Module } from '@songsofdoom/game';

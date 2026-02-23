@@ -2,10 +2,10 @@
 	import type { EntityManager } from '$lib/components/entities/entitymanager';
 	import { entityUrl } from '$lib/urls';
 	import type { Entity } from '@songsofdoom/game';
+	import ExperienceIndicator from '../indicators/ExperienceIndicator.svelte';
+	import Text from '../localisation/Text.svelte';
+	import { type StandardAttributeProps, standardAttributes } from '../standardattributes';
 	import CardLevel from './CardLevel.svelte';
-	import ExperienceIndicator from './indicators/ExperienceIndicator.svelte';
-	import Text from './localisation/Text.svelte';
-	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
 
 	interface Props extends StandardAttributeProps {
 		entity: Entity;

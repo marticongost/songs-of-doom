@@ -25,9 +25,9 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 	import { translate } from '@songsofdoom/common';
 	import type { Entity } from '@songsofdoom/game';
 	import { fade } from 'svelte/transition';
-	import Card from '../Card.svelte';
 	import IconButton from '../IconButton.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
+	import Card from './Card.svelte';
 	import type { EntityManager } from './entitymanager';
 	import EntityToolbar from './EntityToolbar.svelte';
 

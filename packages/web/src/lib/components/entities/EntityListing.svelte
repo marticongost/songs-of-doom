@@ -4,9 +4,9 @@
 	import type { GroupingResult } from '$lib/sorting';
 	import { translate, type Locale } from '@songsofdoom/common/localisation';
 	import type { Entity } from '@songsofdoom/game';
-	import Card from '../Card.svelte';
-	import CardButton from '../CardButton.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
+	import Card from './Card.svelte';
+	import CardButton from './CardButton.svelte';
 	import EntityCarousel, { type EntityCarouselApi } from './EntityCarousel.svelte';
 	import type { EntityManager } from './entitymanager';
 

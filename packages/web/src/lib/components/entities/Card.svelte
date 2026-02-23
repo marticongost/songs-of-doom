@@ -20,17 +20,17 @@
 	import { entityUrl } from '$lib/urls';
 	import type { Entity, Module } from '@songsofdoom/game';
 	import { Ally, Archetype, attributeTypes, Creature, Item, Skill } from '@songsofdoom/game';
-	import CapabilityCostList from './capabilities/CapabilityCostList.svelte';
-	import ChargesChip from './capabilities/ChargesChip.svelte';
+	import CapabilityCostList from '../capabilities/CapabilityCostList.svelte';
+	import ChargesChip from '../capabilities/ChargesChip.svelte';
+	import Image from '../Image.svelte';
+	import ExperienceIndicator from '../indicators/ExperienceIndicator.svelte';
+	import GoldIndicator from '../indicators/GoldIndicator.svelte';
+	import HealthIndicator from '../indicators/HealthIndicator.svelte';
+	import SanityIndicator from '../indicators/SanityIndicator.svelte';
+	import InlineSvg from '../InlineSvg.svelte';
+	import AttributesSheet from '../StatsSheet.svelte';
 	import CardLevel from './CardLevel.svelte';
-	import EntityToolbar from './entities/EntityToolbar.svelte';
-	import Image from './Image.svelte';
-	import ExperienceIndicator from './indicators/ExperienceIndicator.svelte';
-	import GoldIndicator from './indicators/GoldIndicator.svelte';
-	import HealthIndicator from './indicators/HealthIndicator.svelte';
-	import SanityIndicator from './indicators/SanityIndicator.svelte';
-	import InlineSvg from './InlineSvg.svelte';
-	import AttributesSheet from './StatsSheet.svelte';
+	import EntityToolbar from './EntityToolbar.svelte';
 
 	interface Props extends StandardAttributeProps {
 		entity: Entity;

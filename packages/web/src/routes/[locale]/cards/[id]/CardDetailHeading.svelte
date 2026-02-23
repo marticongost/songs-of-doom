@@ -11,11 +11,10 @@
 
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Archetype } from '@songsofdoom/game';
-	import type { Entity } from '@songsofdoom/game';
-	import { Module } from '@songsofdoom/game';
-	import CardLevel from '$lib/components/CardLevel.svelte';
 	import InlineSvg from '$lib/components/InlineSvg.svelte';
+	import CardLevel from '$lib/components/entities/CardLevel.svelte';
+	import type { Entity } from '@songsofdoom/game';
+	import { Archetype, Module } from '@songsofdoom/game';
 	const setIcon = $derived(getSetIcon(page.data.entity as Entity));
 </script>
 
