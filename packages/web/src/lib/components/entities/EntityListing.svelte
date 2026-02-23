@@ -75,7 +75,7 @@
 </script>
 
 {#snippet renderCard(entity: Entity, _flatIndex: number)}
-	<Card {entity} {entityManager} linked={false} />
+	<Card {entity} {entityManager} linked={!entityManager} />
 {/snippet}
 
 {#snippet renderCardButton(entity: Entity, flatIndex: number)}
