@@ -2,6 +2,7 @@
 	import type { EntityManager } from '$lib/components/entities/entitymanager';
 	import { entityUrl } from '$lib/urls';
 	import type { Entity } from '@songsofdoom/game';
+	import CardCopiesIndicator from '../indicators/CardCopiesIndicator.svelte';
 	import ExperienceIndicator from '../indicators/ExperienceIndicator.svelte';
 	import Text from '../localisation/Text.svelte';
 	import { type StandardAttributeProps, standardAttributes } from '../standardattributes';
@@ -14,7 +15,7 @@
 		entityManager?: EntityManager;
 	}
 
-	const { entity, onclick, entityManager: _entityManager, ...attributes }: Props = $props();
+	const { entity, onclick, entityManager: entityManager, ...attributes }: Props = $props();
 	const attr = $derived(onclick ? { onclick } : { href: entityUrl.get(entity) });
 </script>
 
@@ -26,6 +27,9 @@
 	{...attr}
 >
 	<div class="title"><Text {...entity.title} /></div>
+	{#if entityManager}
+		<CardCopiesIndicator amount={entityManager.getNumberOfOwnedCopies(entity)} />
+	{/if}
 	<CardLevel {entity} />
 	{#if entity.xpCost !== undefined}
 		<ExperienceIndicator amount={entity.xpCost} />

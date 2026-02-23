@@ -23,6 +23,7 @@
 	import CapabilityCostList from '../capabilities/CapabilityCostList.svelte';
 	import ChargesChip from '../capabilities/ChargesChip.svelte';
 	import Image from '../Image.svelte';
+	import CardCopiesIndicator from '../indicators/CardCopiesIndicator.svelte';
 	import ExperienceIndicator from '../indicators/ExperienceIndicator.svelte';
 	import GoldIndicator from '../indicators/GoldIndicator.svelte';
 	import HealthIndicator from '../indicators/HealthIndicator.svelte';
@@ -95,6 +96,11 @@
 				{/if}
 				{#if entity.goldCost !== undefined}
 					<GoldIndicator amount={entity.goldCost} style="font-size: 1.1em; align-self: center" />
+				{/if}
+				{#if entityManager}
+					<div class="entity-manager-indicators">
+						<CardCopiesIndicator amount={entityManager.getNumberOfOwnedCopies(entity)} />
+					</div>
 				{/if}
 			</div>
 		</div>
@@ -294,6 +300,10 @@
 		bottom: rz.size(xs);
 		right: rz.size(xs);
 		font-size: 1.5em;
+	}
+
+	.entity-manager-indicators {
+		font-size: 1.2em;
 	}
 
 	.details {
