@@ -4,19 +4,15 @@
 	import type { GroupingResult } from '$lib/sorting';
 	import { translate, type Locale } from '@songsofdoom/common/localisation';
 	import type { Entity } from '@songsofdoom/game';
-	import type { Component } from 'svelte';
 	import Card from '../Card.svelte';
+	import CardButton from '../CardButton.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import EntityCarousel, { type EntityCarouselApi } from './EntityCarousel.svelte';
 	import type { EntityManager } from './entitymanager';
 
 	interface BaseProps extends StandardAttributeProps {
-		EntityComponent?: Component<{
-			entity: Entity;
-			onclick?: (e: MouseEvent) => void;
-			entityManager?: EntityManager;
-		}>;
-		appearance?: 'grid' | 'columns';
+		/** The appearance of the entity listing */
+		appearance?: 'card-grid' | 'button-columns';
 
 		/** Optional keyboard navigation handler */
 		keyboardNav?: KeyboardNavigation;
@@ -34,12 +30,13 @@
 	const {
 		entities,
 		groupedEntities,
-		EntityComponent = Card,
-		appearance = 'grid',
+		appearance = 'card-grid',
 		keyboardNav,
 		entityManager,
 		...attributes
 	}: Props = $props();
+
+	const renderEntity = $derived(appearance === 'button-columns' ? renderCardButton : renderCard);
 
 	let carouselRef: EntityCarouselApi | undefined = $state();
 
@@ -77,13 +74,17 @@
 	}
 </script>
 
-{#snippet renderEntity(entity: Entity, flatIndex: number)}
-	<EntityComponent {entity} onclick={createEntityClickHandler(entity, flatIndex)} {entityManager} />
+{#snippet renderCard(entity: Entity, _flatIndex: number)}
+	<Card {entity} {entityManager} linked={false} />
+{/snippet}
+
+{#snippet renderCardButton(entity: Entity, flatIndex: number)}
+	<CardButton {entity} {entityManager} onclick={createEntityClickHandler(entity, flatIndex)} />
 {/snippet}
 
 <div
 	{...standardAttributes(attributes, 'entity-listing')}
-	class:flat-grid={!groupedEntities && appearance === 'grid'}
+	class:flat-grid={!groupedEntities && appearance === 'card-grid'}
 	class:groups={groupedEntities}
 	{@attach keyboardNav?.resultsAttachment()}
 >
@@ -95,7 +96,7 @@
 					{translate(group.title, locale)}
 					<span class="group-count">({groupEntities.length})</span>
 				</h2>
-				{#if appearance === 'columns'}
+				{#if appearance === 'button-columns'}
 					<div class="entities columns">
 						{#each groupEntities as entity, i (entity.variantId)}
 							<div class="entity">
@@ -113,7 +114,7 @@
 			</section>
 		{/each}
 	{:else if entities && entities.length > 0}
-		{#if appearance === 'columns'}
+		{#if appearance === 'button-columns'}
 			<div class="entities columns">
 				{#each entities as entity, i (entity.variantId)}
 					<div class="entity">

@@ -10,19 +10,20 @@
 
 <script lang="ts">
 	import CapabilityList from '$lib/components/capabilities/CapabilityList.svelte';
+	import type { EntityManager } from '$lib/components/entities/entitymanager';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import PropertyList from '$lib/components/properties/PropertyList.svelte';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
-	import type { EntityManager } from '$lib/components/entities/entitymanager';
 	import { entityUrl } from '$lib/urls';
 	import type { Entity, Module } from '@songsofdoom/game';
 	import { Ally, Archetype, attributeTypes, Creature, Item, Skill } from '@songsofdoom/game';
 	import CapabilityCostList from './capabilities/CapabilityCostList.svelte';
 	import ChargesChip from './capabilities/ChargesChip.svelte';
 	import CardLevel from './CardLevel.svelte';
+	import EntityToolbar from './entities/EntityToolbar.svelte';
 	import Image from './Image.svelte';
 	import ExperienceIndicator from './indicators/ExperienceIndicator.svelte';
 	import GoldIndicator from './indicators/GoldIndicator.svelte';
@@ -41,87 +42,106 @@
 		entityManager?: EntityManager;
 	}
 
-	const {
-		entity,
-		linked = true,
-		onclick,
-		entityManager: _entityManager,
-		...rest
-	}: Props = $props();
+	const { entity, linked = true, onclick, entityManager: entityManager, ...rest }: Props = $props();
 
 	// Determine the element type: button if onclick, anchor if linked, div otherwise
 	const elementType = $derived(onclick ? 'button' : linked ? 'a' : 'div');
 	const discardReward = $derived(entity instanceof Skill ? entity.discardReward : undefined);
+
+	let cardElement: HTMLElement | undefined;
+
+	const passFocusToToolbar = () => {
+		const firstFocusable = cardElement?.querySelector(
+			'.toolbar-container button:not(:disabled), .toolbar-container a'
+		);
+		if (firstFocusable instanceof HTMLElement) {
+			firstFocusable.focus({ preventScroll: true });
+		}
+	};
 </script>
 
 <svelte:element
 	this={elementType}
+	bind:this={cardElement}
 	href={elementType === 'a' ? entityUrl.get(entity) : undefined}
 	type={elementType === 'button' ? 'button' : undefined}
+	tabindex={elementType === 'div' && entityManager ? -1 : undefined}
 	{onclick}
 	{...standardAttributes(rest, 'card')}
 	data-type={entity.type.id}
+	data-entity={entity.id}
+	onfocus={entityManager ? passFocusToToolbar : undefined}
 >
-	<div class="header">
-		{#if entity.set}
-			<div class="set-frame">
-				<InlineSvg class="set-icon" src={getSetIcon(entity.set)} />
-			</div>
-		{/if}
-		<div class="title"><Text {...entity.title} /></div>
-		<CardLevel {entity} />
-		<div class="acquisition">
-			{#if entity.requiredArchetype}
-				<div class="required-archetype">
-					<Text {...entity.requiredArchetype.title} />
+	<div class="content">
+		<div class="header">
+			{#if entity.set}
+				<div class="set-frame">
+					<InlineSvg class="set-icon" src={getSetIcon(entity.set)} />
 				</div>
 			{/if}
-			{#if entity.xpCost !== undefined}
-				<ExperienceIndicator amount={entity.xpCost} style="font-size: 1.1em; align-self: center" />
+			<div class="title"><Text {...entity.title} /></div>
+			<CardLevel {entity} />
+			<div class="acquisition">
+				{#if entity.requiredArchetype}
+					<div class="required-archetype">
+						<Text {...entity.requiredArchetype.title} />
+					</div>
+				{/if}
+				{#if entity.xpCost !== undefined}
+					<ExperienceIndicator
+						amount={entity.xpCost}
+						style="font-size: 1.1em; align-self: center"
+					/>
+				{/if}
+				{#if entity.goldCost !== undefined}
+					<GoldIndicator amount={entity.goldCost} style="font-size: 1.1em; align-self: center" />
+				{/if}
+			</div>
+		</div>
+		<div class="image-row">
+			{#if entity instanceof Creature || entity instanceof Ally}
+				<AttributesSheet stats={entity.stats} statTypes={attributeTypes} class="attributes" />
+				<div class="indicators">
+					<HealthIndicator amount={entity.stats.health} contrast={true} />
+					{#if entity instanceof Ally}
+						<SanityIndicator amount={entity.stats.sanity} contrast={true} />
+					{/if}
+				</div>
 			{/if}
-			{#if entity.goldCost !== undefined}
-				<GoldIndicator amount={entity.goldCost} style="font-size: 1.1em; align-self: center" />
+			<Image class="image" src="cards/{entity.id}.jpg" />
+			{#if discardReward && !discardReward.empty()}
+				<CapabilityCostList class="discard-reward" cost={discardReward} layout="column" />
+			{/if}
+		</div>
+		<div class="details">
+			<PropertyList style="margin-right: auto" properties={entity.properties} />
+			{#if entity.maxCharges}
+				<ChargesChip charges={entity.maxCharges} />
+			{/if}
+			{#if entity instanceof Item && entity.slot}
+				<InlineSvg class="slot" src="slots/{entity.slot.type}.svg" />
+			{/if}
+		</div>
+		<div class="body">
+			{#if entity.description}
+				<div class="description">{entity.description}</div>
+			{/if}
+			<CapabilityList class="capabilities" capabilities={entity.capabilities} />
+			{#if entity.attachmentCapabilities.length > 0}
+				<div class="attachment">
+					<div class="attachment-title">
+						<Text ca="Mentre estigui vinculada" es="Mientras esté vinculada" en="While attached" />
+					</div>
+					<CapabilityList capabilities={entity.attachmentCapabilities} />
+				</div>
 			{/if}
 		</div>
 	</div>
-	<div class="image-row">
-		{#if entity instanceof Creature || entity instanceof Ally}
-			<AttributesSheet stats={entity.stats} statTypes={attributeTypes} class="attributes" />
-			<div class="indicators">
-				<HealthIndicator amount={entity.stats.health} contrast={true} />
-				{#if entity instanceof Ally}
-					<SanityIndicator amount={entity.stats.sanity} contrast={true} />
-				{/if}
-			</div>
-		{/if}
-		<Image class="image" src="cards/{entity.id}.jpg" />
-		{#if discardReward && !discardReward.empty()}
-			<CapabilityCostList class="discard-reward" cost={discardReward} layout="column" />
-		{/if}
-	</div>
-	<div class="details">
-		<PropertyList style="margin-right: auto" properties={entity.properties} />
-		{#if entity.maxCharges}
-			<ChargesChip charges={entity.maxCharges} />
-		{/if}
-		{#if entity instanceof Item && entity.slot}
-			<InlineSvg class="slot" src="slots/{entity.slot.type}.svg" />
-		{/if}
-	</div>
-	<div class="body">
-		{#if entity.description}
-			<div class="description">{entity.description}</div>
-		{/if}
-		<CapabilityList class="capabilities" capabilities={entity.capabilities} />
-		{#if entity.attachmentCapabilities.length > 0}
-			<div class="attachment">
-				<div class="attachment-title">
-					<Text ca="Mentre estigui vinculada" es="Mientras esté vinculada" en="While attached" />
-				</div>
-				<CapabilityList capabilities={entity.attachmentCapabilities} />
-			</div>
-		{/if}
-	</div>
+	{#if entityManager}
+		<div class="toolbar-container">
+			<EntityToolbar {entity} {entityManager} />
+		</div>
+	{/if}
 </svelte:element>
 
 <style lang="scss">
@@ -135,15 +155,14 @@
 	$header-padding: sm;
 
 	.card {
-		@include rz.column;
-		align-items: stretch;
+		position: relative;
 		border: var(--panel-border);
 		border-radius: 0.5em;
 		background-color: var(--panel-background-color);
 		font-size: #{math.div($card-screen-width, $card-print-width) * $card-content-scale}em;
 		width: #{math.div($card-print-width, $card-content-scale)}em;
 		height: #{math.div($card-print-height, $card-content-scale)}em;
-		overflow: hidden;
+		overflow: clip;
 
 		@each $type in archetype, trait, skill, ally, item, creature, encounter {
 			&[data-type='#{$type}'] {
@@ -164,12 +183,23 @@
 			box-shadow: 0 0 1em rgba(black, 0.5);
 		}
 
-		&:focus {
+		&:focus-within {
 			border-color: var(--focus-outline-color);
 			outline: none;
 		}
 	}
 
+	.content {
+		@include rz.column;
+		align-items: stretch;
+		height: 100%;
+	}
+
+	div[tabindex] {
+		cursor: pointer;
+	}
+
+	div[tabindex]:hover,
 	a.card:hover,
 	button.card:hover {
 		border-color: var(--text-highlight);
@@ -309,5 +339,19 @@
 		font-family: var(--heading-font);
 		color: var(--text-heading-color);
 		margin-bottom: rz.size(sm);
+	}
+
+	.toolbar-container {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		transform: translateY(100%);
+		transition: transform 0.2s ease-out;
+		will-change: transform;
+	}
+
+	.card:focus-within .toolbar-container {
+		transform: translateY(0);
 	}
 </style>

@@ -262,8 +262,8 @@ export class KeyboardNavigation {
 	resultsAttachment(): Attachment<HTMLElement> {
 		return (element: HTMLElement) => {
 			this.container = element;
-			// Don't setup roving tabindex immediately - do it lazily when first item is focused
-			// This avoids timing issues with dynamic content and keeps Tab working naturally
+			// Don't setup roving tabindex immediately - do it lazily when first item is focused.
+			// Items that need to be click-focusable should set their own tabindex.
 
 			const handleKeydown = (e: KeyboardEvent) => this.handleKeydown(e);
 			element.addEventListener('keydown', handleKeydown);

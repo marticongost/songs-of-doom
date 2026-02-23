@@ -19,11 +19,6 @@
 
 <Toolbar {...standardAttributes(attributes, 'entity-toolbar')}>
 	<ToolbarButton
-		icon="open.svg"
-		href={entityUrl.get(entity)}
-		label={{ ca: 'Obrir', es: 'Abrir', en: 'Open' }}
-	/>
-	<ToolbarButton
 		icon="add.svg"
 		onclick={() => entityManager.onEntityAdded(entity)}
 		label={{ ca: 'Afegir', es: 'Añadir', en: 'Add' }}
@@ -32,6 +27,11 @@
 		icon="remove.svg"
 		onclick={() => entityManager.onEntityRemoved(entity)}
 		label={{ ca: 'Eliminar', es: 'Eliminar', en: 'Remove' }}
+	/>
+	<ToolbarButton
+		icon="open.svg"
+		href={entityUrl.get(entity)}
+		label={{ ca: 'Obrir', es: 'Abrir', en: 'Open' }}
 	/>
 </Toolbar>
 

@@ -22,6 +22,7 @@
 	this={onclick ? 'button' : 'a'}
 	{...standardAttributes(attributes, 'card-button')}
 	data-type={entity.type.id}
+	data-entity={entity.id}
 	{...attr}
 >
 	<div class="title"><Text {...entity.title} /></div>
