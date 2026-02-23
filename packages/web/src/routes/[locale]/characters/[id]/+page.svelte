@@ -43,7 +43,9 @@
 		onEntityAdded(entity) {
 			characterState = characterState.acquireEntity(entity);
 		},
-		onEntityRemoved(_entity) {}
+		onEntityRemoved(entity) {
+			characterState = characterState.returnEntity(entity);
+		}
 	};
 </script>
 

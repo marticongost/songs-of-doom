@@ -177,6 +177,36 @@ export class CharacterState {
 		});
 	}
 
+	public returnEntity(entity: Entity): CharacterState {
+		const newUpgrades = new Map(this.upgrades);
+		if (entity.xpCost || entity.goldCost || entity instanceof Ally || entity instanceof Item) {
+			const currentCopies = newUpgrades.get(entity) ?? 0;
+			if (currentCopies == 1) {
+				newUpgrades.delete(entity);
+			} else if (currentCopies > 1) {
+				newUpgrades.set(entity, currentCopies - 1);
+			}
+		}
+
+		const newSkillsDeck = new Map(this.skillsDeck);
+		if (entity instanceof Skill) {
+			const currentCopies = newSkillsDeck.get(entity) ?? 0;
+			if (currentCopies == 1) {
+				newSkillsDeck.delete(entity);
+			} else if (currentCopies > 1) {
+				newSkillsDeck.set(entity, currentCopies - 1);
+			}
+		}
+
+		return new CharacterState({
+			...this,
+			upgrades: newUpgrades,
+			skillsDeck: newSkillsDeck,
+			availableXp: this.availableXp + (entity.xpCost ?? 0),
+			gold: this.gold + (entity.goldCost ?? 0)
+		});
+	}
+
 	private static normaliseUpgrades(
 		upgrades: Record<string, number> | Map<Entity, number>
 	): Map<Entity, number> {
