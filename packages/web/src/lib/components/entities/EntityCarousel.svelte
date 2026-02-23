@@ -22,16 +22,14 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 
 <script lang="ts">
 	import { getLocale } from '$lib/context/locale';
-	import { entityUrl } from '$lib/urls';
 	import { translate } from '@songsofdoom/common';
 	import type { Entity } from '@songsofdoom/game';
 	import { fade } from 'svelte/transition';
 	import Card from '../Card.svelte';
 	import IconButton from '../IconButton.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
-	import Toolbar from '../toolbar/Toolbar.svelte';
-	import ToolbarButton from '../toolbar/ToolbarButton.svelte';
 	import type { EntityManager } from './entitymanager';
+	import EntityToolbar from './EntityToolbar.svelte';
 
 	interface Props extends StandardAttributeProps {
 		/** All entities available for viewing */
@@ -56,7 +54,6 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 	// Derived state
 	const currentEntity = $derived(entities[currentIndex]);
 	const totalCount = $derived(entities.length);
-	const cardHref = $derived(currentEntity ? entityUrl.get(currentEntity) : '');
 
 	// Calculate visible range of cards
 	const visibleCards = $derived.by(() => {
@@ -284,24 +281,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 			{/each}
 		</div>
 
-		<!-- Actions area -->
-		<Toolbar class="actions">
-			<ToolbarButton
-				icon="open.svg"
-				href={cardHref}
-				label={{ ca: 'Obrir', es: 'Abrir', en: 'Open' }}
-			/>
-			<ToolbarButton
-				icon="add.svg"
-				onclick={() => entityManager.onEntityAdded(currentEntity)}
-				label={{ ca: 'Afegir', es: 'Añadir', en: 'Add' }}
-			/>
-			<ToolbarButton
-				icon="remove.svg"
-				onclick={() => entityManager.onEntityRemoved(currentEntity)}
-				label={{ ca: 'Eliminar', es: 'Eliminar', en: 'Remove' }}
-			/>
-		</Toolbar>
+		<EntityToolbar entity={currentEntity} {entityManager} />
 	{/if}
 </dialog>
 
@@ -416,11 +396,5 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 		&:hover {
 			opacity: 1;
 		}
-	}
-
-	.actions {
-		@include rz.row(md);
-		align-items: center;
-		justify-content: center;
 	}
 </style>
