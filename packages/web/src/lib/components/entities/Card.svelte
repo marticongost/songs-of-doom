@@ -48,6 +48,7 @@
 	// Determine the element type: button if onclick, anchor if linked, div otherwise
 	const elementType = $derived(onclick ? 'button' : linked ? 'a' : 'div');
 	const discardReward = $derived(entity instanceof Skill ? entity.discardReward : undefined);
+	const hasToolbar = $derived(entityManager && !onclick);
 
 	let cardElement: HTMLElement | undefined;
 
@@ -71,7 +72,7 @@
 	{...standardAttributes(rest, 'card')}
 	data-type={entity.type.id}
 	data-entity={entity.id}
-	onfocus={entityManager ? passFocusToToolbar : undefined}
+	onfocus={hasToolbar ? passFocusToToolbar : undefined}
 >
 	<div class="content">
 		<div class="header">
@@ -143,7 +144,7 @@
 			{/if}
 		</div>
 	</div>
-	{#if entityManager}
+	{#if entityManager && hasToolbar}
 		<div class="toolbar-container">
 			<EntityToolbar {entity} {entityManager} />
 		</div>

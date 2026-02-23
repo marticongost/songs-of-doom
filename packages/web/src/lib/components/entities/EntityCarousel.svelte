@@ -276,6 +276,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 							}
 						}}
 						aria-label={offset === 0 ? undefined : `Go to card ${currentIndex + offset + 1}`}
+						{entityManager}
 					/>
 				</div>
 			{/each}
