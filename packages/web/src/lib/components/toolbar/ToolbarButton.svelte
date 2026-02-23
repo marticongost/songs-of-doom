@@ -60,5 +60,11 @@
 				transform: scale(1.2);
 			}
 		}
+
+		&:focus {
+			outline: none;
+			background-color: var(--toolbar-button-focus-background-color);
+			color: var(--toolbar-button-focus-color);
+		}
 	}
 </style>

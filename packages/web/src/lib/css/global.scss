@@ -110,9 +110,11 @@ body {
 	// Toolbar
 	--toolbar-border: 2px solid #{$palette-extra-light-cocoa-brown};
 	--toolbar-background-color: #{$palette-light-cocoa-brown};
-	--toolbar-button-hover-background-color: #{$palette-cocoa-brown};
 	--toolbar-button-color: #{$palette-opium};
+	--toolbar-button-hover-background-color: #{$palette-extra-light-cocoa-brown};
 	--toolbar-button-hover-color: #{$palette-dusty-gray};
+	--toolbar-button-focus-background-color: #{$palette-cocoa-brown};
+	--toolbar-button-focus-color: #{$palette-dusty-gray};
 
 	// Text
 	--text-color: #{$palette-white};
