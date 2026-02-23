@@ -167,6 +167,9 @@ body {
 	// Popovers
 	--popover-background: #{$palette-black};
 	--popover-border: 2px solid #{$palette-dark-steel};
+
+	// Indicators
+	--card-copies-indicator-color: #{$palette-hurricane};
 }
 
 @include rz.reset-elements;
