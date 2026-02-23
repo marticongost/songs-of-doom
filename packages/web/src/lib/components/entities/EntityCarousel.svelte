@@ -14,16 +14,18 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 ```
 -->
 <script lang="ts" module>
+	import type { Entity } from '@songsofdoom/game';
+
 	export interface EntityCarouselApi {
 		open: (index?: number) => void;
 		close: () => void;
+		getCurrentEntity: () => Entity | undefined;
 	}
 </script>
 
 <script lang="ts">
 	import { getLocale } from '$lib/context/locale';
 	import { translate } from '@songsofdoom/common';
-	import type { Entity } from '@songsofdoom/game';
 	import { fade } from 'svelte/transition';
 	import IconButton from '../IconButton.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
@@ -206,6 +208,10 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 
 	export function close(): void {
 		closeCarousel();
+	}
+
+	export function getCurrentEntity(): Entity | undefined {
+		return currentEntity;
 	}
 
 	// Helper for CSS abs() fallback

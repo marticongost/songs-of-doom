@@ -3,7 +3,7 @@
 	import type { KeyboardNavigation } from '$lib/attachments/keyboard-nav';
 	import type { GroupingResult } from '$lib/sorting';
 	import { translate, type Locale } from '@songsofdoom/common/localisation';
-	import type { Entity } from '@songsofdoom/game';
+	import { type Entity } from '@songsofdoom/game';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import Card from './Card.svelte';
 	import CardButton from './CardButton.svelte';
@@ -53,6 +53,21 @@
 	}
 
 	const locale = $derived(page.params.locale as Locale);
+	const carouselAwareEntityManager = $derived(
+		entityManager
+			? {
+					...entityManager,
+					onEntityRemoved(entity: Entity) {
+						if (entity === carouselRef?.getCurrentEntity()) {
+							entityManager.onEntityRemoved(entity);
+							if (entityManager.getNumberOfOwnedCopies(entity) === 0) {
+								carouselRef?.close();
+							}
+						}
+					}
+				}
+			: undefined
+	);
 
 	// Calculate cumulative index for grouped entities
 	function getGroupStartIndex(groupIndex: number): number {
@@ -130,8 +145,12 @@
 	{/if}
 </div>
 
-{#if entityManager}
-	<EntityCarousel bind:this={carouselRef} entities={carouselEntities} {entityManager} />
+{#if carouselAwareEntityManager}
+	<EntityCarousel
+		bind:this={carouselRef}
+		entities={carouselEntities}
+		entityManager={carouselAwareEntityManager}
+	/>
 {/if}
 
 <style lang="scss">
