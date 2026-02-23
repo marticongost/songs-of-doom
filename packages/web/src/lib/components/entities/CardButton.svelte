@@ -27,12 +27,12 @@
 	{...attr}
 >
 	<div class="title"><Text {...entity.title} /></div>
-	{#if entityManager}
-		<CardCopiesIndicator amount={entityManager.getNumberOfOwnedCopies(entity)} />
-	{/if}
 	<CardLevel {entity} />
 	{#if entity.xpCost !== undefined}
 		<ExperienceIndicator amount={entity.xpCost} />
+	{/if}
+	{#if entityManager}
+		<CardCopiesIndicator amount={entityManager.getNumberOfOwnedCopies(entity)} />
 	{/if}
 </svelte:element>
 
