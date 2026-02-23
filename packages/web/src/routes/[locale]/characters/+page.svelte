@@ -8,15 +8,16 @@
 
 	let { data }: PageProps = $props();
 
+	const locale = data.locale;
 	const characters = $derived(data.characters);
 
 	function openCharacter(character: Character): void {
-		characterUrl.go(character);
+		characterUrl.go(character, locale);
 	}
 </script>
 
 <div class="toolbar">
-	<Button href={newCharacterUrl.get()}>
+	<Button href={newCharacterUrl.get(locale)}>
 		<Text ca="Nou personatge" es="Nuevo personaje" en="New character" />
 	</Button>
 </div>
