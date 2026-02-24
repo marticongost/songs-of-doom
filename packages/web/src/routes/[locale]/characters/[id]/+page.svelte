@@ -1,11 +1,11 @@
 <script lang="ts">
+	import IconButton from '$lib/components/IconButton.svelte';
 	import StatsSheet from '$lib/components/StatsSheet.svelte';
 	import EntityCatalog from '$lib/components/entities/EntityCatalog.svelte';
 	import EntityListing from '$lib/components/entities/EntityListing.svelte';
 	import type { EntityManager } from '$lib/components/entities/entitymanager';
 	import ExperienceIndicator from '$lib/components/indicators/ExperienceIndicator.svelte';
 	import GoldIndicator from '$lib/components/indicators/GoldIndicator.svelte';
-	import IconButton from '$lib/components/IconButton.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import Toolbar from '$lib/components/toolbar/Toolbar.svelte';
 	import ToolbarButton from '$lib/components/toolbar/ToolbarButton.svelte';
@@ -93,7 +93,8 @@
 		{@render cardSet(
 			{ ca: 'Habilitats', es: 'Habilidades', en: 'Skills' },
 			characterState.skills(),
-			'skill'
+			'skill',
+			characterState.skillDeckSize
 		)}
 		{@render cardSet(
 			{ ca: 'Aliats', es: 'Aliados', en: 'Allies' },
@@ -117,10 +118,21 @@
 	</section>
 </div>
 
-{#snippet cardSet(title: LocalisedText, entities: Entity[], entityTypeId: EntityTypeId)}
+{#snippet cardSet(
+	title: LocalisedText,
+	entities: Entity[],
+	entityTypeId: EntityTypeId,
+	expectedSize: number | undefined = undefined
+)}
 	<section class="card-set">
-		<div class="section-header">
+		<div class="card-set-header">
 			<h1 class="section-title"><Text {...title} /></h1>
+			<span class="card-set-size">
+				{entities.length}
+				{#if expectedSize !== undefined}
+					/ {expectedSize}
+				{/if}
+			</span>
 			<IconButton
 				src="funnel.svg"
 				aria-label={{
@@ -145,24 +157,32 @@
 		margin-right: rz.size(lg);
 	}
 
-	.section-header {
+	.card-set-header {
 		@include rz.row(sm);
-		align-items: center;
+		padding-bottom: rz.size(sm);
+		border-bottom: var(--panel-separator);
 		margin-bottom: rz.size(md);
 	}
 
-	.section-header .section-title {
+	.card-set-header .section-title {
 		margin-bottom: 0;
 	}
 
-	.section-header :global(.icon-button) {
-		--svg-height: 1em;
-		font-size: 1.1em;
-		opacity: 0.6;
+	.card-set-header :global(.icon-button) {
+		position: relative;
+		top: -0.1em;
+		--svg-height: 0.8em;
+		opacity: 0.3;
 
 		&:hover {
 			opacity: 1;
 		}
+	}
+
+	.card-set-size {
+		margin-left: auto;
+		font-family: var(--number-font);
+		font-weight: bold;
 	}
 
 	.section-title {

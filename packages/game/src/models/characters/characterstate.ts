@@ -57,6 +57,9 @@ export class CharacterState {
 	/** The amount of gold the character currently has. */
 	readonly gold: number;
 
+	/** The number of skill cards the character's deck should have. */
+	readonly skillDeckSize = 20;
+
 	constructor({ finalised, upgrades, skillsDeck, availableXp, gold }: CharacterStateProps) {
 		this.finalised = finalised;
 		this.upgrades = CharacterState.normaliseUpgrades(upgrades);
