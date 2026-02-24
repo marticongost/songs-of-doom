@@ -9,11 +9,24 @@
 	const { amount, ...attributes }: Props = $props();
 </script>
 
-<Indicator {...standardAttributes(attributes, 'card-copies-indicator')} {amount} icon="cards.svg" />
+<Indicator
+	{...standardAttributes(attributes, 'card-copies-indicator')}
+	{amount}
+	icon="cards.svg"
+	data-amount={amount}
+/>
 
 <style lang="scss">
 	:global(.card-copies-indicator) {
 		--indicator-value-text-shadow: 0 0 0.2em black;
 		--indicator-color: var(--card-copies-indicator-color);
+	}
+
+	:global(.card-copies-indicator[data-amount='0']) {
+		opacity: 0.4;
+	}
+
+	:global(.card-copies-indicator[data-amount='0'] svg) {
+		filter: grayscale(100%);
 	}
 </style>
