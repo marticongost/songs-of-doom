@@ -111,7 +111,7 @@ export class CharacterState {
 		if (this.availableXp < (entity.xpCost ?? 0)) {
 			return new InsufficientExperienceImpediment(entity.xpCost ?? 0);
 		}
-		if (entity.maxCopies !== undefined && (this.upgrades.get(entity) || 0) >= entity.maxCopies) {
+		if (entity.maxCopies !== undefined && this.getNumberOfOwnedCopies(entity) >= entity.maxCopies) {
 			return new LimitReachedImpediment(entity.maxCopies);
 		}
 		if (this.finalised && entity.properties.includes(innate)) {
