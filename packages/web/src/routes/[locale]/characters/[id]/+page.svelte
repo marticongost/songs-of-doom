@@ -5,6 +5,7 @@
 	import type { EntityManager } from '$lib/components/entities/entitymanager';
 	import ExperienceIndicator from '$lib/components/indicators/ExperienceIndicator.svelte';
 	import GoldIndicator from '$lib/components/indicators/GoldIndicator.svelte';
+	import IconButton from '$lib/components/IconButton.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import Toolbar from '$lib/components/toolbar/Toolbar.svelte';
 	import ToolbarButton from '$lib/components/toolbar/ToolbarButton.svelte';
@@ -32,6 +33,13 @@
 		allowedTypes,
 		syncUrl: false
 	});
+
+	let catalog: EntityCatalog | undefined;
+
+	function handleFilterClick(entityTypeId: EntityTypeId) {
+		searchState.setType(entityTypeId);
+		catalog?.scrollIntoViewAndFocus();
+	}
 
 	const entityManager: EntityManager = {
 		getNumberOfOwnedCopies(entity) {
@@ -78,25 +86,51 @@
 	<div class="build">
 		{@render cardSet(
 			{ ca: 'Arquetips', es: 'Arquetipos', en: 'Archetypes' },
-			characterState.archetypes()
+			characterState.archetypes(),
+			'archetype'
 		)}
-		{@render cardSet({ ca: 'Trets', es: 'Rasgos', en: 'Traits' }, characterState.traits())}
+		{@render cardSet({ ca: 'Trets', es: 'Rasgos', en: 'Traits' }, characterState.traits(), 'trait')}
 		{@render cardSet(
 			{ ca: 'Habilitats', es: 'Habilidades', en: 'Skills' },
-			characterState.skills()
+			characterState.skills(),
+			'skill'
 		)}
-		{@render cardSet({ ca: 'Aliats', es: 'Aliados', en: 'Allies' }, characterState.allies())}
-		{@render cardSet({ ca: 'Objectes', es: 'Objetos', en: 'Items' }, characterState.items())}
+		{@render cardSet(
+			{ ca: 'Aliats', es: 'Aliados', en: 'Allies' },
+			characterState.allies(),
+			'ally'
+		)}
+		{@render cardSet(
+			{ ca: 'Objectes', es: 'Objetos', en: 'Items' },
+			characterState.items(),
+			'item'
+		)}
 	</div>
 	<section class="catalog">
 		<h1 class="section-title"><Text ca="Afegir cartes" es="Añadir cartas" en="Add cards" /></h1>
-		<EntityCatalog entities={allEntities} search={searchState} {entityManager} />
+		<EntityCatalog
+			bind:this={catalog}
+			entities={allEntities}
+			search={searchState}
+			{entityManager}
+		/>
 	</section>
 </div>
 
-{#snippet cardSet(title: LocalisedText, entities: Entity[])}
+{#snippet cardSet(title: LocalisedText, entities: Entity[], entityTypeId: EntityTypeId)}
 	<section class="card-set">
-		<h1 class="section-title"><Text {...title} /></h1>
+		<div class="section-header">
+			<h1 class="section-title"><Text {...title} /></h1>
+			<IconButton
+				src="funnel.svg"
+				aria-label={{
+					ca: `Filtrar ${title.ca}`,
+					es: `Filtrar ${title.es}`,
+					en: `Filter ${title.en}`
+				}}
+				onclick={() => handleFilterClick(entityTypeId)}
+			/>
+		</div>
 		<EntityListing {entities} {entityManager} appearance="button-columns" />
 	</section>
 {/snippet}
@@ -109,6 +143,26 @@
 		color: var(--text-heading-color);
 		padding: rz.size(md);
 		margin-right: rz.size(lg);
+	}
+
+	.section-header {
+		@include rz.row(sm);
+		align-items: center;
+		margin-bottom: rz.size(md);
+	}
+
+	.section-header .section-title {
+		margin-bottom: 0;
+	}
+
+	.section-header :global(.icon-button) {
+		--svg-height: 1em;
+		font-size: 1.1em;
+		opacity: 0.6;
+
+		&:hover {
+			opacity: 1;
+		}
 	}
 
 	.section-title {

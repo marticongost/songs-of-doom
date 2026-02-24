@@ -41,9 +41,19 @@ Optionally includes a carousel viewer for browsing entities when an EntityManage
 
 	// Use custom component if provided, otherwise derive from view state
 	const appearance = $derived(search.view === 'button' ? 'button-columns' : 'card-grid');
+
+	let toolbar: EntitySearchToolbar | undefined;
+	let catalogElement: HTMLDivElement | undefined;
+
+	export function scrollIntoViewAndFocus() {
+		catalogElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		setTimeout(() => {
+			toolbar?.focusSearchInput();
+		}, 300);
+	}
 </script>
 
-<div {...standardAttributes(attributes, 'entity-catalog')}>
-	<EntitySearchToolbar state={search} keyboardNav={nav} {autofocus} />
+<div bind:this={catalogElement} {...standardAttributes(attributes, 'entity-catalog')}>
+	<EntitySearchToolbar bind:this={toolbar} state={search} keyboardNav={nav} {autofocus} />
 	<EntityListing {...results} {appearance} keyboardNav={nav} {entityManager} />
 </div>

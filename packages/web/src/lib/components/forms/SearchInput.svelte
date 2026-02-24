@@ -58,9 +58,16 @@ Designed for filtering content by text search.
 	}: Props = $props();
 
 	const locale = getLocale();
+
+	let inputComponent: Input | undefined;
+
+	export function focus() {
+		inputComponent?.focus();
+	}
 </script>
 
 <Input
+	bind:this={inputComponent}
 	{...standardAttributes(attributes, 'search-input')}
 	type="search"
 	bind:value

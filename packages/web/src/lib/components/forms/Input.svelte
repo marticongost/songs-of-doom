@@ -52,13 +52,28 @@ A styled text input with optional leading icon.
 		oninput,
 		...attributes
 	}: Props = $props();
+
+	let inputElement: HTMLInputElement | undefined;
+
+	export function focus() {
+		inputElement?.focus();
+	}
 </script>
 
 <span {...standardAttributes(attributes, 'input-wrapper')} class:has-icon={!!icon}>
 	{#if icon}
 		<InlineSvg class="input-icon" src={icon} />
 	{/if}
-	<input {type} {name} bind:value {placeholder} {autofocus} aria-label={ariaLabel} {oninput} />
+	<input
+		bind:this={inputElement}
+		{type}
+		{name}
+		bind:value
+		{placeholder}
+		{autofocus}
+		aria-label={ariaLabel}
+		{oninput}
+	/>
 </span>
 
 <style lang="scss">

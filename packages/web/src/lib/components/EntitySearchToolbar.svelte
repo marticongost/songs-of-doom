@@ -33,6 +33,12 @@ entity type filter dropdown, and sort criteria dropdown.
 
 	const { state, keyboardNav, autofocus = false, ...attributes }: Props = $props();
 
+	let searchInput: SearchInput | undefined;
+
+	export function focusSearchInput() {
+		searchInput?.focus();
+	}
+
 	function onTypeChange(value: string) {
 		state.setType(value === '' ? null : (value as EntityTypeId));
 	}
@@ -48,6 +54,7 @@ entity type filter dropdown, and sort criteria dropdown.
 
 <div {...standardAttributes(attributes, 'entity-search-toolbar')}>
 	<SearchInput
+		bind:this={searchInput}
 		{@attach keyboardNav?.searchInputAttachment()}
 		value={state.search}
 		oninput={state.onSearchInput}
