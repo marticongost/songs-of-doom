@@ -1,4 +1,8 @@
-import type { Entity, EntityAcquisitionImpediment } from '@songsofdoom/game';
+import type {
+	Entity,
+	EntityAcquisitionImpediment,
+	EntityRemovalImpediment
+} from '@songsofdoom/game';
 
 /** Manager for handling state and interactions for entities in the catalog, such as
  * showing owned copies and acquisition impediments.
@@ -9,6 +13,9 @@ export interface EntityManager {
 
 	/** Determines any impediments to acquiring a specific entity. */
 	getAcquisitionImpediment(entity: Entity): EntityAcquisitionImpediment | undefined;
+
+	/** Determines any impediments to removing a specific entity. */
+	getRemovalImpediment(entity: Entity): EntityRemovalImpediment | undefined;
 
 	/** Callback when an entity is added. */
 	onEntityAdded: (entity: Entity) => void;

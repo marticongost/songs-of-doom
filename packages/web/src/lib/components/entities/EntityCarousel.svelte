@@ -36,15 +36,28 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 	interface Props extends StandardAttributeProps {
 		/** All entities available for viewing */
 		entities: Entity[];
+
 		/** Number of sibling cards to show on each side (default: 2) */
 		siblingCount?: number;
+
 		/** Entity manager for handling actions */
 		entityManager: EntityManager;
+
 		/** Callback when carousel is closed */
 		onclose?: () => void;
+
+		/** Whether to visually dim unavailable entities. */
+		dimUnavailableEntities?: boolean;
 	}
 
-	const { entities, siblingCount = 2, entityManager, onclose, ...attributes }: Props = $props();
+	const {
+		entities,
+		siblingCount = 2,
+		entityManager,
+		onclose,
+		dimUnavailableEntities = false,
+		...attributes
+	}: Props = $props();
 
 	// State
 	let dialogElement: HTMLDialogElement | undefined = $state();
@@ -283,6 +296,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 						}}
 						aria-label={offset === 0 ? undefined : `Go to card ${currentIndex + offset + 1}`}
 						{entityManager}
+						dimmed={dimUnavailableEntities && !!entityManager.getAcquisitionImpediment(entity)}
 					/>
 				</div>
 			{/each}

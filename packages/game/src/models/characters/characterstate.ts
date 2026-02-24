@@ -15,6 +15,12 @@ import {
 	LimitReachedImpediment,
 	type EntityAcquisitionImpediment
 } from './entityacquisitionimpediments';
+import {
+	InnateTraitRemovalImpediment,
+	MinimumAmountReachedRemovalImpediment,
+	StandardTraitRemovalImpediment,
+	type EntityRemovalImpediment
+} from './entityremovalimpediments';
 
 export const STARTING_GOLD = 10;
 export const STARTING_EXPERIENCE = 10;
@@ -118,6 +124,22 @@ export class CharacterState {
 			return new InnateTraitImpediment();
 		}
 		return undefined;
+	}
+
+	public getEntityRemovalImpediment(entity: Entity | string): EntityRemovalImpediment | undefined {
+		if (typeof entity === 'string') {
+			entity = entities.require(entity);
+		}
+		if (entity.isStandard()) {
+			return new StandardTraitRemovalImpediment();
+		}
+		if (this.finalised && entity.properties.includes(innate)) {
+			return new InnateTraitRemovalImpediment();
+		}
+		const ownedCopies = this.getNumberOfOwnedCopies(entity);
+		if (ownedCopies === 0) {
+			return new MinimumAmountReachedRemovalImpediment(0);
+		}
 	}
 
 	public hasUpgrade(entity: Entity | string): boolean {

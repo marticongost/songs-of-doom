@@ -1,27 +1,38 @@
 <script lang="ts">
 	import type { EntityManager } from '$lib/components/entities/entitymanager';
 	import { entityUrl } from '$lib/urls';
-	import type { Entity } from '@songsofdoom/game';
+	import { type Entity } from '@songsofdoom/game';
 	import CardCopiesIndicator from '../indicators/CardCopiesIndicator.svelte';
 	import ExperienceIndicator from '../indicators/ExperienceIndicator.svelte';
 	import Text from '../localisation/Text.svelte';
-	import { type StandardAttributeProps, standardAttributes } from '../standardattributes';
+	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import CardLevel from './CardLevel.svelte';
 
 	interface Props extends StandardAttributeProps {
 		entity: Entity;
 		onclick?: (e: MouseEvent) => void;
+
 		/** Optional entity manager for state and interactions */
 		entityManager?: EntityManager;
+
+		/** Whether to visually dim the button */
+		dimmed?: boolean;
 	}
 
-	const { entity, onclick, entityManager: entityManager, ...attributes }: Props = $props();
+	const {
+		entity,
+		onclick,
+		entityManager: entityManager,
+		dimmed = false,
+		...attributes
+	}: Props = $props();
 	const attr = $derived(onclick ? { onclick } : { href: entityUrl.get(entity) });
 </script>
 
 <svelte:element
 	this={onclick ? 'button' : 'a'}
 	{...standardAttributes(attributes, 'card-button')}
+	class:dimmed
 	data-type={entity.type.id}
 	data-entity={entity.id}
 	{...attr}
@@ -66,6 +77,11 @@
 			border-color: var(--focus-outline-color);
 			outline: none;
 		}
+	}
+
+	.dimmed {
+		opacity: 0.6;
+		filter: grayscale(30%) brightness(80%);
 	}
 
 	.title {

@@ -19,6 +19,9 @@
 
 		/** Optional entity manager - enables carousel when provided */
 		entityManager?: EntityManager;
+
+		/** Whether to visually dim unavailable entities. */
+		dimUnavailableEntities?: boolean;
 	}
 
 	type Props = BaseProps &
@@ -33,6 +36,7 @@
 		appearance = 'card-grid',
 		keyboardNav,
 		entityManager,
+		dimUnavailableEntities = false,
 		...attributes
 	}: Props = $props();
 
@@ -90,11 +94,21 @@
 </script>
 
 {#snippet renderCard(entity: Entity, _flatIndex: number)}
-	<Card {entity} {entityManager} linked={!entityManager} />
+	<Card
+		{entity}
+		{entityManager}
+		linked={!entityManager}
+		dimmed={dimUnavailableEntities && !!entityManager?.getAcquisitionImpediment(entity)}
+	/>
 {/snippet}
 
 {#snippet renderCardButton(entity: Entity, flatIndex: number)}
-	<CardButton {entity} {entityManager} onclick={createEntityClickHandler(entity, flatIndex)} />
+	<CardButton
+		{entity}
+		{entityManager}
+		onclick={createEntityClickHandler(entity, flatIndex)}
+		dimmed={dimUnavailableEntities && !!entityManager?.getAcquisitionImpediment(entity)}
+	/>
 {/snippet}
 
 <div
@@ -150,6 +164,7 @@
 		bind:this={carouselRef}
 		entities={carouselEntities}
 		entityManager={carouselAwareEntityManager}
+		{dimUnavailableEntities}
 	/>
 {/if}
 

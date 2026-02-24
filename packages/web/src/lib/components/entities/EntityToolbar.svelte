@@ -15,6 +15,7 @@
 	}
 
 	const { entity, entityManager, ...attributes }: Props = $props();
+	const acquisitionImpediment = $derived(entityManager.getAcquisitionImpediment(entity));
 </script>
 
 <Toolbar {...standardAttributes(attributes, 'entity-toolbar')}>
@@ -22,11 +23,13 @@
 		icon="add.svg"
 		onclick={() => entityManager.onEntityAdded(entity)}
 		label={{ ca: 'Afegir', es: 'Añadir', en: 'Add' }}
+		disabled={!!acquisitionImpediment}
 	/>
 	<ToolbarButton
 		icon="remove.svg"
 		onclick={() => entityManager.onEntityRemoved(entity)}
 		label={{ ca: 'Eliminar', es: 'Eliminar', en: 'Remove' }}
+		disabled={!!entityManager.getRemovalImpediment(entity)}
 	/>
 	<ToolbarButton
 		icon="open.svg"

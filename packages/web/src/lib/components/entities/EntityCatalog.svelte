@@ -26,15 +26,28 @@ Optionally includes a carousel viewer for browsing entities when an EntityManage
 	interface Props extends StandardAttributeProps {
 		/** Entities to display and filter */
 		entities: Entity[];
+
 		/** Search state instance that manages filtering and URL sync */
 		search: EntitySearchState;
+
 		/** Whether to autofocus the search input */
 		autofocus?: boolean;
+
 		/** Optional entity manager - enables carousel when provided */
 		entityManager?: EntityManager;
+
+		/** Whether to visually dim unavailable entities. */
+		dimUnavailableEntities?: boolean;
 	}
 
-	const { entities, search, autofocus = false, entityManager, ...attributes }: Props = $props();
+	const {
+		entities,
+		search,
+		autofocus = false,
+		entityManager,
+		dimUnavailableEntities = false,
+		...attributes
+	}: Props = $props();
 
 	const nav = new KeyboardNavigation({ mode: 'grid', itemSelector: '[data-entity]' });
 	const results = $derived(search.getResults(entities));
@@ -55,5 +68,11 @@ Optionally includes a carousel viewer for browsing entities when an EntityManage
 
 <div bind:this={catalogElement} {...standardAttributes(attributes, 'entity-catalog')}>
 	<EntitySearchToolbar bind:this={toolbar} state={search} keyboardNav={nav} {autofocus} />
-	<EntityListing {...results} {appearance} keyboardNav={nav} {entityManager} />
+	<EntityListing
+		{...results}
+		{appearance}
+		keyboardNav={nav}
+		{entityManager}
+		{dimUnavailableEntities}
+	/>
 </div>

@@ -35,15 +35,28 @@
 
 	interface Props extends StandardAttributeProps {
 		entity: Entity;
+
 		/** Render as a link to the card detail page (default: true) */
 		linked?: boolean;
+
 		/** Click handler - when provided, renders as a button instead of a link */
 		onclick?: (e: MouseEvent) => void;
+
 		/** Optional entity manager for state and interactions */
 		entityManager?: EntityManager;
+
+		/** Whether to visually dim the card */
+		dimmed?: boolean;
 	}
 
-	const { entity, linked = true, onclick, entityManager: entityManager, ...rest }: Props = $props();
+	const {
+		entity,
+		linked = true,
+		onclick,
+		entityManager: entityManager,
+		dimmed = false,
+		...rest
+	}: Props = $props();
 
 	// Determine the element type: button if onclick, anchor if linked, div otherwise
 	const elementType = $derived(onclick ? 'button' : linked ? 'a' : 'div');
@@ -65,6 +78,7 @@
 <svelte:element
 	this={elementType}
 	bind:this={cardElement}
+	class:dimmed
 	href={elementType === 'a' ? entityUrl.get(entity) : undefined}
 	type={elementType === 'button' ? 'button' : undefined}
 	tabindex={elementType === 'div' && entityManager ? -1 : undefined}
@@ -232,6 +246,11 @@
 		height: #{math.div($card-print-width, $card-content-scale) * math.div(9, 16)}em;
 		object-fit: cover;
 		object-position: center;
+	}
+
+	.dimmed :global(.image) {
+		filter: grayscale(100%) brightness(0.8);
+		opacity: 0.7;
 	}
 
 	.header {

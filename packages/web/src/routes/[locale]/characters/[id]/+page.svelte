@@ -48,6 +48,9 @@
 		getAcquisitionImpediment(entity) {
 			return characterState.getEntityAcquisitionImpediment(entity);
 		},
+		getRemovalImpediment(entity) {
+			return characterState.getEntityRemovalImpediment(entity);
+		},
 		onEntityAdded(entity) {
 			characterState = characterState.acquireEntity(entity);
 		},
@@ -113,6 +116,7 @@
 			bind:this={catalog}
 			entities={allEntities}
 			search={searchState}
+			dimUnavailableEntities={true}
 			{entityManager}
 		/>
 	</section>
