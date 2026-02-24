@@ -238,7 +238,7 @@
 		@include rz.row;
 		position: relative;
 		border-bottom: var(--panel-separator);
-		background: url('../assets/img/card-heading.png') center / cover;
+		background: url('../../assets/img/card-heading.png') center / cover;
 
 		&::before {
 			content: '';
@@ -313,7 +313,7 @@
 		position: relative;
 		border-top: var(--panel-separator);
 		border-bottom: var(--panel-separator);
-		background: url('../assets/img/card-subheading.png') center / cover;
+		background: url('../../assets/img/card-subheading.png') center / cover;
 
 		&::before {
 			content: '';
