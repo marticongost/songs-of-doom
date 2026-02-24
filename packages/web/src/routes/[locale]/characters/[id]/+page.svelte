@@ -27,7 +27,9 @@
 	let characterState = $state(character.newestRevision.state);
 	const baseStats = $derived(characterState.getBaseStats());
 	const allowedTypes: EntityTypeId[] = ['archetype', 'trait', 'skill', 'item', 'ally'];
-	const allEntities = entities.all().filter((e) => allowedTypes.includes(e.type.id));
+	const allEntities = entities
+		.all()
+		.filter((e) => allowedTypes.includes(e.type.id) && !e.isStandard());
 
 	const searchState = new EntitySearchState({
 		allowedTypes,
