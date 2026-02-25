@@ -3,9 +3,13 @@ import { User } from '$lib/models/user';
 import { prisma } from '$lib/server/db';
 import type { CharacterState } from '@songsofdoom/game';
 import type { Prisma } from '../../../prisma/generated/prisma/client';
+import { characterStateToJson, type CharacterStateJson } from './characterstate';
+import { withOptimisticConcurrencyRetry } from './optimistic-concurrency';
+
+export { characterStateToJson, type CharacterStateJson } from './characterstate';
 
 const CharacterFields = {
-	owner: { select: { username: true, createdAt: true } },
+	owner: { select: { id: true, username: true, createdAt: true } },
 	revisions: {
 		orderBy: { number: 'desc' },
 		take: 1
@@ -23,6 +27,7 @@ export const getCharacterById = async (characterId: number): Promise<Character |
 	return characterData ? characterFromRecord(characterData) : undefined;
 };
 
+/** Retrieves all characters with their owner and latest revision. */
 export const getCharacters = async (): Promise<Character[]> => {
 	const characterData = await prisma.character.findMany({ include: CharacterFields });
 	return characterData.map(characterFromRecord);
@@ -43,24 +48,39 @@ export const characterFromRecord = (characterData: CharacterRecord): Character =
 		}))
 	});
 
-/** The JSON specification for the `CharacterRevision.state` database field. */
-export interface CharacterStateJson {
-	finalised: boolean;
-	upgrades: Record<string, number>;
-	skillsDeck: Record<string, number>;
-	availableXp: number;
-	gold: number;
-}
+/**
+ * Creates a new revision for a character, saving the current state.
+ * @param characterId - The ID of the character to update
+ * @param state - The new CharacterState to save
+ * @returns The new revision number
+ */
+export const createCharacterRevision = async (
+	characterId: number,
+	state: CharacterState
+): Promise<{ revisionNumber: number }> => {
+	const stateJson = characterStateToJson(state);
 
-/** Transforms a `Map` with objects that have an `id` property into a `Record`. */
-const mapToRecord = <K extends { id: string }, V>(map: Map<K, V>): Record<string, V> =>
-	Object.fromEntries([...map.entries()].map(([key, value]) => [key.id, value]));
+	return withOptimisticConcurrencyRetry(async () =>
+		prisma.$transaction(async (tx) => {
+			const currentRevision = await tx.characterRevision.findFirst({
+				where: { characterId },
+				orderBy: { number: 'desc' },
+				select: { number: true, totalXp: true }
+			});
 
-/** Transforms a {@link CharacterState} model into a {@link CharacterStateJson} record. */
-export const characterStateToJson = (state: CharacterState): CharacterStateJson => ({
-	finalised: state.finalised,
-	upgrades: mapToRecord(state.upgrades),
-	skillsDeck: mapToRecord(state.skillsDeck),
-	availableXp: state.availableXp,
-	gold: state.gold
-});
+			const newRevisionNumber = (currentRevision?.number ?? 0) + 1;
+
+			await tx.characterRevision.create({
+				data: {
+					characterId,
+					number: newRevisionNumber,
+					state: stateJson as object,
+					totalXp: currentRevision?.totalXp ?? 0,
+					finalised: state.finalised
+				}
+			});
+
+			return { revisionNumber: newRevisionNumber };
+		})
+	);
+};

@@ -1,7 +1,18 @@
 import { Character, CharacterRevision } from '$lib/models/characters';
 import { User } from '$lib/models/user';
 import type { Constructor } from '@songsofdoom/common';
-import { CharacterState } from '@songsofdoom/game';
+import { CharacterState, Entity } from '@songsofdoom/game';
+import { mapToRecord } from '../../common/src/utils';
+
+const getSerializableMapKey = (key: unknown): string | number => {
+	if (key instanceof Entity) {
+		return key.variantId;
+	}
+	if (typeof key === 'string' || typeof key === 'number') {
+		return key;
+	}
+	throw new Error(`Unsupported map key type: ${typeof key}`);
+};
 
 /** Recursively converts values into JSON-serialisable forms, including Maps and Dates. */
 const toSerializableData = (value: unknown): unknown => {
@@ -9,12 +20,7 @@ const toSerializableData = (value: unknown): unknown => {
 		return { $date: value.toISOString() };
 	}
 	if (value instanceof Map) {
-		return Object.fromEntries(
-			[...value.entries()].map(([k, v]) => [
-				typeof k === 'object' && k !== null && 'id' in k ? k.id : k,
-				toSerializableData(v)
-			])
-		);
+		return mapToRecord(value, { mapKeys: getSerializableMapKey, mapValues: toSerializableData });
 	}
 	if (Array.isArray(value)) {
 		return value.map(toSerializableData);

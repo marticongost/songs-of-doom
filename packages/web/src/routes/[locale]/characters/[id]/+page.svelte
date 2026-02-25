@@ -1,14 +1,18 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import IconButton from '$lib/components/IconButton.svelte';
 	import StatsSheet from '$lib/components/StatsSheet.svelte';
 	import EntityCatalog from '$lib/components/entities/EntityCatalog.svelte';
 	import EntityListing from '$lib/components/entities/EntityListing.svelte';
 	import type { EntityManager } from '$lib/components/entities/entitymanager';
+	import ErrorMessage from '$lib/components/errors/ErrorMessage.svelte';
+	import SuccessMessage from '$lib/components/feedback/SuccessMessage.svelte';
 	import ExperienceIndicator from '$lib/components/indicators/ExperienceIndicator.svelte';
 	import GoldIndicator from '$lib/components/indicators/GoldIndicator.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import Toolbar from '$lib/components/toolbar/Toolbar.svelte';
 	import ToolbarButton from '$lib/components/toolbar/ToolbarButton.svelte';
+	import { characterStateToJson } from '$lib/database/characterstate';
 	import { EntitySearchState } from '$lib/search';
 	import { type LocalisedText } from '@songsofdoom/common';
 	import {
@@ -22,9 +26,14 @@
 
 	const { data }: { data: PageData } = $props();
 
-	// All entities except modules
-	const { character } = data;
+	const { character, canEdit } = data;
 	let characterState = $state(character.newestRevision.state);
+
+	// Save state management
+	type SaveStatus = 'idle' | 'saving' | 'success' | 'error';
+	let saveStatus = $state<SaveStatus>('idle');
+	let saveMessage = $state<string | undefined>();
+	let successTimeout: ReturnType<typeof setTimeout> | undefined;
 	const baseStats = $derived(characterState.getBaseStats());
 	const allowedTypes: EntityTypeId[] = ['archetype', 'trait', 'skill', 'item', 'ally'];
 	const allEntities = entities
@@ -67,12 +76,54 @@
 
 <Toolbar>
 	<h1 class="character-name">{character.name}</h1>
-	<ToolbarButton icon="accept.svg" label={{ ca: 'Desar', es: 'Guardar', en: 'Save' }} />
+
+	<form
+		method="POST"
+		action="?/save"
+		use:enhance={() => {
+			saveStatus = 'saving';
+			saveMessage = undefined;
+			return async ({ result }) => {
+				if (result.type === 'success' && result.data) {
+					saveStatus = 'success';
+					saveMessage = (result.data as { message?: string }).message;
+					clearTimeout(successTimeout);
+					successTimeout = setTimeout(() => {
+						saveStatus = 'idle';
+					}, 3000);
+				} else if (result.type === 'failure' && result.data) {
+					saveStatus = 'error';
+					saveMessage = (result.data as { message?: string }).message;
+				}
+			};
+		}}
+	>
+		<input
+			type="hidden"
+			name="state"
+			value={JSON.stringify(characterStateToJson(characterState))}
+		/>
+		<ToolbarButton
+			icon="accept.svg"
+			label={{ ca: 'Desar', es: 'Guardar', en: 'Save' }}
+			busy={saveStatus === 'saving'}
+			disabled={!canEdit}
+		/>
+	</form>
+
 	<ToolbarButton icon="revert.svg" label={{ ca: 'Revertir', es: 'Revertir', en: 'Revert' }} />
 	<ToolbarButton
 		icon="finalize.svg"
 		label={{ ca: 'Finalitzar', es: 'Finalizar', en: 'Finalize' }}
 	/>
+
+	{#if saveStatus === 'success' && saveMessage}
+		<SuccessMessage>{saveMessage}</SuccessMessage>
+	{/if}
+	{#if saveStatus === 'error' && saveMessage}
+		<ErrorMessage>{saveMessage}</ErrorMessage>
+	{/if}
+
 	<div class="resources">
 		<GoldIndicator amount={characterState.gold} />
 		<ExperienceIndicator amount={characterState.availableXp} />

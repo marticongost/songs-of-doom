@@ -302,7 +302,7 @@ export class CharacterState {
 			);
 		}
 
-		for (const [skill, copies] of skillDeck) {
+		for (const [skill, copies] of skillDeck.entries()) {
 			if (copies < 1 || (skill.maxCopies !== undefined && copies > skill.maxCopies)) {
 				throw new Error(`Invalid number of copies ${copies} for skill ${skill.id}`);
 			}
