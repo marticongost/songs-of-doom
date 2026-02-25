@@ -17,6 +17,8 @@
 		icon: string;
 		label: LocalisedText;
 		disabled?: boolean;
+		/** Shows an orbiting dots animation and disables the button */
+		busy?: boolean;
 		href?: string;
 		onclick?: (e: MouseEvent) => void;
 		anchor?: string;
@@ -24,7 +26,12 @@
 		disabledReason?: Snippet;
 	}
 
-	const { icon, label, disabled, href, onclick, anchor, disabledReason, ...rest }: Props = $props();
+	const { icon, label, disabled, busy, href, onclick, anchor, disabledReason, ...rest }: Props =
+		$props();
+
+	const busyDotIndices = Array.from({ length: 5 }, (_, index) => index);
+
+	const isDisabled = $derived(disabled || busy);
 
 	// Generate unique ID for popover if disabled reason is provided
 	const popoverId = $derived(
@@ -49,11 +56,20 @@
 	{onclick}
 	target={href ? '_blank' : undefined}
 	{...standardAttributes(rest, 'toolbar-button')}
-	{disabled}
+	disabled={isDisabled}
 	style:anchor-name={anchorName}
 	{...popoverHandlers}
 >
-	<InlineSvg src={icon} />
+	<div class="icon-container">
+		<InlineSvg src={icon} />
+		{#if busy}
+			<div class="orbit-container" style:--dot-count={busyDotIndices.length} aria-hidden="true">
+				{#each busyDotIndices as i (i)}
+					<span class="dot" style:--dot-index={i}></span>
+				{/each}
+			</div>
+		{/if}
+	</div>
 	<span class="label"><Text {...label} /></span>
 </svelte:element>
 
@@ -105,6 +121,57 @@
 			outline: none;
 			background-color: var(--toolbar-button-focus-background-color);
 			color: var(--toolbar-button-focus-color);
+		}
+	}
+
+	.orbit-container {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		--orbit-radius: 1.3em;
+		animation: spin 1s linear infinite;
+	}
+
+	.icon-container {
+		position: relative;
+		display: grid;
+		place-items: center;
+		width: 1.5em;
+		height: 1.5em;
+		margin-inline: auto;
+
+		:global(svg) {
+			width: 100%;
+			height: 100%;
+		}
+	}
+
+	.dot {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		--arc-turn: 0.5turn;
+		--arc-start: -0.25turn;
+		--max-dot-size: 0.35em;
+		--dot-size-factor: calc((var(--dot-index) + 1) / var(--dot-count));
+		--dot-angle: calc(
+			var(--arc-start) + var(--arc-turn) * var(--dot-index) / (var(--dot-count) - 1)
+		);
+		--dot-size: calc(var(--max-dot-size) * var(--dot-size-factor));
+		width: var(--dot-size);
+		height: var(--dot-size);
+		background-color: currentColor;
+		border-radius: 50%;
+		opacity: 0.85;
+		transform: translate(-50%, -50%) rotate(var(--dot-angle)) translateX(var(--orbit-radius));
+	}
+
+	@keyframes spin {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
 		}
 	}
 
