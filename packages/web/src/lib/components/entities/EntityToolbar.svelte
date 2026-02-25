@@ -6,6 +6,7 @@
 	import { entityUrl } from '$lib/urls';
 	import type { Entity } from '@songsofdoom/game';
 	import { tick } from 'svelte';
+	import ImpedimentMessage from '../impediments/ImpedimentMessage.svelte';
 	import Toolbar from '../toolbar/Toolbar.svelte';
 	import ToolbarButton from '../toolbar/ToolbarButton.svelte';
 	import type { EntityManager } from './entitymanager';
@@ -68,13 +69,25 @@
 			onclick={handleAdd}
 			label={{ ca: 'Afegir', es: 'Añadir', en: 'Add' }}
 			disabled={!!acquisitionImpediment}
-		/>
+		>
+			{#snippet disabledReason()}
+				{#if acquisitionImpediment}
+					<ImpedimentMessage impediment={acquisitionImpediment} />
+				{/if}
+			{/snippet}
+		</ToolbarButton>
 		<ToolbarButton
 			icon="remove.svg"
 			onclick={handleRemove}
 			label={{ ca: 'Eliminar', es: 'Eliminar', en: 'Remove' }}
 			disabled={!!removalImpediment}
-		/>
+		>
+			{#snippet disabledReason()}
+				{#if removalImpediment}
+					<ImpedimentMessage impediment={removalImpediment} />
+				{/if}
+			{/snippet}
+		</ToolbarButton>
 		<ToolbarButton
 			icon="open.svg"
 			href={entityUrl.get(entity)}
