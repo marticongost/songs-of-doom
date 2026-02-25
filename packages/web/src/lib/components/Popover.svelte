@@ -86,7 +86,7 @@
 		}
 
 		&[data-position='top'] {
-			top: -#{rz.size(sm)};
+			top: calc(#{rz.size(sm)} * -1);
 		}
 
 		&[data-position='bottom'] {
@@ -94,7 +94,7 @@
 		}
 
 		&[data-position='left'] {
-			left: -#{rz.size(sm)};
+			left: calc(#{rz.size(sm)} * -1);
 		}
 
 		&[data-position='right'] {
