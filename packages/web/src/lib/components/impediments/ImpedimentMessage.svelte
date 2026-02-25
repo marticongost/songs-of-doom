@@ -15,6 +15,7 @@
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
 	import { entityUrl } from '$lib/urls';
+	import { plural2 } from '@songsofdoom/common';
 	import {
 		ArchetypeRequiredImpediment,
 		InnateTraitImpediment,
@@ -118,25 +119,39 @@
 		{/if}
 	{:else if impediment instanceof LimitReachedImpediment}
 		<Text
-			ca="Ja tens el màxim de %(maxCopies) còpies."
-			es="Ya tienes el máximo de %(maxCopies) copias."
-			en="You already have the maximum of %(maxCopies) copies."
-			maxCopies={impediment.maxCopies}
-		/>
+			ca="Ja tens el màxim de %(max) %(copies)."
+			es="Ya tienes el máximo de %(max) %(copies)."
+			en="You already have the maximum of %(max) %(copies)."
+			max={impediment.maxCopies}
+		>
+			{#snippet copies()}
+				<Text
+					ca={plural2(impediment.maxCopies, 'còpia', 'còpies')}
+					es={plural2(impediment.maxCopies, 'copia', 'copias')}
+					en={plural2(impediment.maxCopies, 'copy', 'copies')}
+				/>
+			{/snippet}
+		</Text>
 	{:else if impediment instanceof InsufficientExperienceImpediment}
 		<Text
-			ca="Necessites %(required) PX per adquirir aquesta carta."
-			es="Necesitas %(required) PX para adquirir esta carta."
-			en="You need %(required) XP to acquire this card."
-			required={impediment.requiredExperience}
-		/>
+			ca="Necessites %(xp) per adquirir aquesta carta."
+			es="Necesitas %(xp) para adquirir esta carta."
+			en="You need %(xp) to acquire this card."
+		>
+			{#snippet xp()}
+				<ExperienceIndicator amount={impediment.requiredExperience} />
+			{/snippet}
+		</Text>
 	{:else if impediment instanceof InsufficientGoldImpediment}
 		<Text
-			ca="Necessites %(required) or per adquirir aquesta carta."
-			es="Necesitas %(required) oro para adquirir esta carta."
-			en="You need %(required) gold to acquire this card."
-			required={impediment.requiredGold}
-		/>
+			ca="Necessites %(gold) per adquirir aquesta carta."
+			es="Necesitas %(gold) para adquirir esta carta."
+			en="You need %(gold) to acquire this card."
+		>
+			{#snippet gold()}
+				<GoldIndicator amount={impediment.requiredGold} />
+			{/snippet}
+		</Text>
 	{:else if impediment instanceof StandardTraitRemovalImpediment}
 		<Text
 			ca="Aquest tret és estàndard i no es pot eliminar."
