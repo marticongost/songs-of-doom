@@ -72,7 +72,7 @@
 		>
 			{#snippet disabledReason()}
 				{#if acquisitionImpediment}
-					<ImpedimentMessage impediment={acquisitionImpediment} />
+					<ImpedimentMessage impediment={acquisitionImpediment} {entity} {entityManager} />
 				{/if}
 			{/snippet}
 		</ToolbarButton>

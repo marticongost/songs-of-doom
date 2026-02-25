@@ -12,6 +12,7 @@ import {
 	ArchetypeRequiredImpediment,
 	InnateTraitImpediment,
 	InsufficientExperienceImpediment,
+	InsufficientGoldImpediment,
 	LimitReachedImpediment,
 	type EntityAcquisitionImpediment
 } from './entityacquisitionimpediments';
@@ -21,6 +22,11 @@ import {
 	StandardTraitRemovalImpediment,
 	type EntityRemovalImpediment
 } from './entityremovalimpediments';
+
+export interface AcquisitionOptions {
+	/** When true, also considers acquiring any missing required archetypes recursively. */
+	acquireDependencies?: boolean;
+}
 
 export const STARTING_GOLD = 10;
 export const STARTING_EXPERIENCE = 10;
@@ -102,11 +108,25 @@ export class CharacterState {
 	}
 
 	public getEntityAcquisitionImpediment(
-		entity: Entity | string
+		entity: Entity | string,
+		options?: AcquisitionOptions
 	): EntityAcquisitionImpediment | undefined {
 		if (typeof entity === 'string') {
 			entity = entities.require(entity);
 		}
+
+		if (options?.acquireDependencies) {
+			// Simulate acquiring all missing dependencies, then the entity itself
+			const missingDependencies = this.getMissingDependencies(entity);
+			let state: CharacterState = this;
+			for (const dependency of missingDependencies) {
+				const impediment = state.getEntityAcquisitionImpediment(dependency);
+				if (impediment) return impediment;
+				state = state.acquireEntity(dependency);
+			}
+			return state.getEntityAcquisitionImpediment(entity);
+		}
+
 		if (
 			entity.requiredArchetype &&
 			!entity.requiredArchetype.isStandard() &&
@@ -117,6 +137,9 @@ export class CharacterState {
 		if (this.availableXp < (entity.xpCost ?? 0)) {
 			return new InsufficientExperienceImpediment(entity.xpCost ?? 0);
 		}
+		if (this.gold < (entity.goldCost ?? 0)) {
+			return new InsufficientGoldImpediment(entity.goldCost ?? 0);
+		}
 		if (entity.maxCopies !== undefined && this.getNumberOfOwnedCopies(entity) >= entity.maxCopies) {
 			return new LimitReachedImpediment(entity.maxCopies);
 		}
@@ -124,6 +147,22 @@ export class CharacterState {
 			return new InnateTraitImpediment();
 		}
 		return undefined;
+	}
+
+	/**
+	 * Returns the list of entities that must be acquired before acquiring the given entity,
+	 * in the order they should be acquired (ancestors first).
+	 */
+	public getMissingDependencies(entity: Entity): Entity[] {
+		const missing: Entity[] = [];
+		let current = entity.requiredArchetype;
+
+		while (current && !current.isStandard() && !this.hasUpgrade(current)) {
+			missing.unshift(current);
+			current = current.requiredArchetype;
+		}
+
+		return missing;
 	}
 
 	public getEntityRemovalImpediment(entity: Entity | string): EntityRemovalImpediment | undefined {

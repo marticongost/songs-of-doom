@@ -47,11 +47,14 @@
 		getNumberOfOwnedCopies(entity) {
 			return characterState.getNumberOfOwnedCopies(entity);
 		},
-		getAcquisitionImpediment(entity) {
-			return characterState.getEntityAcquisitionImpediment(entity);
+		getAcquisitionImpediment(entity, options) {
+			return characterState.getEntityAcquisitionImpediment(entity, options);
 		},
 		getRemovalImpediment(entity) {
 			return characterState.getEntityRemovalImpediment(entity);
+		},
+		getMissingDependencies(entity) {
+			return characterState.getMissingDependencies(entity);
 		},
 		onEntityAdded(entity) {
 			characterState = characterState.acquireEntity(entity);

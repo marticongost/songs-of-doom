@@ -39,3 +39,13 @@ export class InsufficientExperienceImpediment extends EntityAcquisitionImpedimen
 		this.requiredExperience = requiredExperience;
 	}
 }
+
+/** Indicates that the character does not have enough gold to acquire the entity. */
+export class InsufficientGoldImpediment extends EntityAcquisitionImpediment {
+	readonly requiredGold: number;
+
+	constructor(requiredGold: number) {
+		super();
+		this.requiredGold = requiredGold;
+	}
+}

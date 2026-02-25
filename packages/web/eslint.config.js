@@ -31,7 +31,8 @@ export default defineConfig(
 					argsIgnorePattern: '^_',
 					varsIgnorePattern: '^_'
 				}
-			]
+			],
+			'@typescript-eslint/no-this-alias': 'off'
 		}
 	},
 	{
