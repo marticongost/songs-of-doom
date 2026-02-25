@@ -1,6 +1,6 @@
-import { CharacterState } from '@songsofdoom/game';
 import { characterStateToJson } from '$lib/database/characters';
 import { prisma } from '$lib/server/db';
+import { CharacterState } from '@songsofdoom/game';
 
 const fantasyNames = [
 	'Thordak the Brave',
@@ -37,6 +37,9 @@ async function main() {
 		console.error('Error: User "jordiseira" not found. Create it first.');
 		process.exit(1);
 	}
+
+	console.log('Deleting existing characters...');
+	await prisma.character.deleteMany();
 
 	console.log('Creating characters...');
 
