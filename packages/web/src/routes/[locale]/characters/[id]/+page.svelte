@@ -7,6 +7,7 @@
 	import type { EntityManager } from '$lib/components/entities/entitymanager';
 	import ErrorMessage from '$lib/components/errors/ErrorMessage.svelte';
 	import SuccessMessage from '$lib/components/feedback/SuccessMessage.svelte';
+	import FocusBag from '$lib/components/focuses/FocusBag.svelte';
 	import ExperienceIndicator from '$lib/components/indicators/ExperienceIndicator.svelte';
 	import GoldIndicator from '$lib/components/indicators/GoldIndicator.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
@@ -139,6 +140,14 @@
 			<div class="stats-sheet">
 				<StatsSheet stats={baseStats} statTypes={attributeTypes} showLabels={true} />
 				<StatsSheet stats={baseStats} statTypes={indicatorTypes} showLabels={true} />
+			</div>
+		</section>
+		<section class="focuses">
+			<h1 class="section-title">
+				<Text ca="Bossa de focus" es="Bolsa de focos" en="Focuses bag" />
+			</h1>
+			<div class="focuses-list">
+				<FocusBag focuses={characterState.getFocusTokens()} />
 			</div>
 		</section>
 	</div>
@@ -275,6 +284,10 @@
 			padding-top: rz.size(md);
 			border-top: var(--panel-separator);
 		}
+	}
+
+	.focuses {
+		margin-top: rz.size(lg);
 	}
 
 	.details {
