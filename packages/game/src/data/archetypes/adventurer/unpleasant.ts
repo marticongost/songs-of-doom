@@ -5,7 +5,7 @@ import { flaw, innate } from '../../properties';
 
 export default new Trait({
 	title: { en: 'Unpleasant', es: 'Desagradable', ca: 'Desagradable' },
-	xpCost: -2,
+	xpCost: -3,
 	properties: [innate, flaw],
 	capabilities: [
 		new Constant({
