@@ -44,8 +44,8 @@ export interface CharacterStateProps {
 	/** The number of copies of each skill in the character's deck. */
 	skillsDeck: Record<string, number> | Map<Skill, number>;
 
-	/** The amount of experience points the character currently has available to spend. */
-	availableXp: number;
+	/** The total amount of experience points the character has earned. */
+	totalXp: number;
 
 	/** The amount of gold the character currently has. */
 	gold: number;
@@ -63,20 +63,32 @@ export class CharacterState {
 	/** The number of copies of each skill in the character's deck. */
 	readonly skillsDeck: Map<Skill, number>;
 
-	/** The amount of experience points the character currently has available to spend. */
-	readonly availableXp: number;
+	/** The total amount of experience points the character has earned. */
+	readonly totalXp: number;
 
 	/** The amount of gold the character currently has. */
 	readonly gold: number;
 
+	/** The amount of experience points the character currently has available to spend.
+	 * Computed as {@link totalXp} minus the cost of all acquired upgrades, so that
+	 * changes to entity costs in the catalog are automatically reflected.
+	 */
+	get availableXp(): number {
+		let spent = 0;
+		for (const [entity, copies] of this.upgrades) {
+			spent += (entity.xpCost ?? 0) * copies;
+		}
+		return this.totalXp - spent;
+	}
+
 	/** The number of skill cards the character's deck should have. */
 	readonly skillDeckSize = 20;
 
-	constructor({ finalised, upgrades, skillsDeck, availableXp, gold }: CharacterStateProps) {
+	constructor({ finalised, upgrades, skillsDeck, totalXp, gold }: CharacterStateProps) {
 		this.finalised = finalised;
 		this.upgrades = CharacterState.normaliseUpgrades(upgrades);
 		this.skillsDeck = CharacterState.normaliseSkillDeck(skillsDeck);
-		this.availableXp = availableXp;
+		this.totalXp = totalXp;
 		this.gold = gold;
 	}
 
@@ -85,7 +97,7 @@ export class CharacterState {
 			finalised: false,
 			upgrades: {},
 			skillsDeck: {},
-			availableXp: STARTING_EXPERIENCE,
+			totalXp: STARTING_EXPERIENCE,
 			gold: STARTING_GOLD
 		});
 	}
@@ -236,7 +248,6 @@ export class CharacterState {
 			...this,
 			upgrades: newUpgrades,
 			skillsDeck: newSkillsDeck,
-			availableXp: this.availableXp - (entity.xpCost ?? 0),
 			gold: this.gold - (entity.goldCost ?? 0)
 		});
 	}
@@ -266,7 +277,6 @@ export class CharacterState {
 			...this,
 			upgrades: newUpgrades,
 			skillsDeck: newSkillsDeck,
-			availableXp: this.availableXp + (entity.xpCost ?? 0),
 			gold: this.gold + (entity.goldCost ?? 0)
 		});
 	}

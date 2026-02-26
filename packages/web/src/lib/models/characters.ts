@@ -1,6 +1,5 @@
 import { finalise } from '@songsofdoom/common';
-import type { CharacterStateProps } from '@songsofdoom/game';
-import { CharacterState } from '@songsofdoom/game';
+import { CharacterState, type CharacterStateProps } from '@songsofdoom/game';
 import type { User } from './user';
 
 export interface CharacterProps {

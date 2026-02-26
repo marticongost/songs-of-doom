@@ -1,7 +1,7 @@
 import { Character } from '$lib/models/characters';
 import { User } from '$lib/models/user';
 import { prisma } from '$lib/server/db';
-import type { CharacterState } from '@songsofdoom/game';
+import type { CharacterState, CharacterStateProps } from '@songsofdoom/game';
 import type { Prisma } from '../../../prisma/generated/prisma/client';
 import { characterStateToJson, type CharacterStateJson } from './characterstate';
 import { withOptimisticConcurrencyRetry } from './optimistic-concurrency';
@@ -44,7 +44,10 @@ export const characterFromRecord = (characterData: CharacterRecord): Character =
 			createdAt: revision.createdAt,
 			finalised: revision.finalised,
 			totalXp: revision.totalXp,
-			state: revision.state as unknown as CharacterStateJson
+			state: {
+				...(revision.state as unknown as CharacterStateJson),
+				totalXp: revision.totalXp
+			} as CharacterStateProps
 		}))
 	});
 

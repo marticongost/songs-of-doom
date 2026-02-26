@@ -10,10 +10,10 @@ const fantasyNames = [
 ];
 
 const characters = [
-	{ name: fantasyNames[0], owner: 'marticongost', totalXp: 150 },
-	{ name: fantasyNames[1], owner: 'marticongost', totalXp: 80 },
-	{ name: fantasyNames[2], owner: 'jordiseira', totalXp: 200 },
-	{ name: fantasyNames[3], owner: 'jordiseira', totalXp: 50 }
+	{ name: fantasyNames[0], owner: 'marticongost', totalXp: 20 },
+	{ name: fantasyNames[1], owner: 'marticongost', totalXp: 15 },
+	{ name: fantasyNames[2], owner: 'jordiseira', totalXp: 10 },
+	{ name: fantasyNames[3], owner: 'jordiseira', totalXp: 10 }
 ];
 
 const initialState = characterStateToJson(CharacterState.initial()) as object;

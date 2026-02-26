@@ -62,7 +62,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const initialState = characterStateToJson(CharacterState.initial()) as object;
+		const initial = CharacterState.initial();
 		const character = await prisma.character.create({
 			data: {
 				name: name.trim(),
@@ -70,8 +70,8 @@ export const actions: Actions = {
 				revisions: {
 					create: {
 						number: 1,
-						state: initialState,
-						totalXp: 0,
+						state: characterStateToJson(initial) as object,
+						totalXp: initial.totalXp,
 						finalised: false
 					}
 				}

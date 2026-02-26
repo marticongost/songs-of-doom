@@ -6,7 +6,6 @@ export interface CharacterStateJson {
 	finalised: boolean;
 	upgrades: Record<string, number>;
 	skillsDeck: Record<string, number>;
-	availableXp: number;
 	gold: number;
 }
 
@@ -15,6 +14,5 @@ export const characterStateToJson = (state: CharacterState): CharacterStateJson 
 	finalised: state.finalised,
 	upgrades: mapToRecord(state.upgrades, { mapKeys: (entity) => entity.variantId }),
 	skillsDeck: mapToRecord(state.skillsDeck, { mapKeys: (skill) => skill.variantId }),
-	availableXp: state.availableXp,
 	gold: state.gold
 });
