@@ -134,7 +134,7 @@ export class CharacterState {
 		) {
 			return new ArchetypeRequiredImpediment(entity.requiredArchetype);
 		}
-		if (this.availableXp < (entity.xpCost ?? 0)) {
+		if (entity.xpCost && entity.xpCost > 0 && this.availableXp < entity.xpCost) {
 			return new InsufficientExperienceImpediment(entity.xpCost ?? 0);
 		}
 		if (this.gold < (entity.goldCost ?? 0)) {
