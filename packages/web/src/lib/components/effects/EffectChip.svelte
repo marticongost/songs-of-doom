@@ -13,6 +13,7 @@
 		DrawFocusEffect,
 		EngageEffect,
 		EquipEffect,
+		ExhaustEffect,
 		HealEffect,
 		ModifyCapabilityCostEffect,
 		ModifyCarryingCapacityEffect,
@@ -51,6 +52,7 @@
 	import DrawFocusEffectChip from './DrawFocusEffectChip.svelte';
 	import EngageEffectChip from './EngageEffectChip.svelte';
 	import EquipEffectChip from './EquipEffectChip.svelte';
+	import ExhaustEffectChip from './ExhaustEffectChip.svelte';
 	import HealEffectChip from './HealEffectChip.svelte';
 	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
 	import ModifyCarryingCapacityEffectChip from './ModifyCarryingCapacityEffectChip.svelte';
@@ -109,6 +111,8 @@
 		<EngageEffectChip {effect} />
 	{:else if effect instanceof EquipEffect}
 		<EquipEffectChip {effect} />
+	{:else if effect instanceof ExhaustEffect}
+		<ExhaustEffectChip {effect} />
 	{:else if effect instanceof HealEffect}
 		<HealEffectChip {effect} />
 	{:else if effect instanceof ConferPropertiesEffect}

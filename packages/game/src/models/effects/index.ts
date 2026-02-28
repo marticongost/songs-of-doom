@@ -12,6 +12,7 @@ export { DrawFocusEffect } from './drawfocuseffect';
 export { Effect } from './effect';
 export { engage, EngageEffect } from './engage';
 export { equip, EquipEffect } from './equip';
+export { exhaust, ExhaustEffect } from './exhaust';
 export { GoTowardsEffect } from './gotowards';
 export { HealEffect } from './heal';
 export { ModifyCapabilityCostEffect } from './modifycapabilitycost';
