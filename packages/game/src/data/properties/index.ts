@@ -10,4 +10,5 @@ export { default as projectile } from './projectile';
 export { default as shield } from './shield';
 export { default as standard } from './standard';
 export { default as toughness } from './toughness';
+export { default as town } from './town';
 export { default as weapon } from './weapon';
