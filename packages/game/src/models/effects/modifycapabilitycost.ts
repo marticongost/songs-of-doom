@@ -14,6 +14,7 @@ export interface ModifyCapabilityCostEffectProps {
 export interface GrouppedCapabilityCosts {
 	increase?: Partial<Record<ScalarCapabilityCostType, number>>;
 	decrease?: Partial<Record<ScalarCapabilityCostType, number>>;
+	dynamic?: Partial<Record<ScalarCapabilityCostType, number>>;
 }
 
 export class ModifyCapabilityCostEffect extends Effect {
@@ -32,7 +33,10 @@ export class ModifyCapabilityCostEffect extends Effect {
 		const groups = { increase: undefined, decrease: undefined } as GrouppedCapabilityCosts;
 		for (const costType of scalarCapabilityCostTypes) {
 			const value = this.get(costType);
-			if (value > 0) {
+			if (typeof value !== 'number') {
+				groups.dynamic = groups.dynamic ?? {};
+				groups.dynamic[costType] = value;
+			} else if (value > 0) {
 				groups.increase = groups.increase ?? {};
 				groups.increase[costType] = value;
 			} else if (value < 0) {
