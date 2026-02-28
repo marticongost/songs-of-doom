@@ -11,6 +11,7 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		ComparisonExpression,
 		CountExpression,
 		Expression,
+		IsExpression,
 		NotExpression,
 		OrExpression,
 		result,
@@ -74,6 +75,16 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 	{:else if expression instanceof NotExpression}
 		<span class="operator"><Text ca="NO" es="NO" en="NOT" /></span>
 		{@render expressionNodeSnippet(expression.operand)}
+
+		<!-- IsExpression -->
+	{:else if expression instanceof IsExpression}
+		<TargetChip target={expression.target} />
+		{#if expression.target.cardinality === 'multiple'}
+			<Text ca="són" es="son" en="are" />
+		{:else}
+			<Text ca="és" es="es" en="is" />
+		{/if}
+		{@render expressionNodeSnippet(expression.expression)}
 
 		<!-- Boolean expressions -->
 	{:else if expression instanceof Property}

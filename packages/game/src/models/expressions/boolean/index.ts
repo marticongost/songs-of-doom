@@ -19,5 +19,6 @@ export { and, AndExpression, not, NotExpression, or, OrExpression } from './logi
 // Boolean expressions
 export { copyAlreadyAttached, CopyAlreadyAttachedExpression } from './copy-already-attached';
 export { engaged, EngagedExpression } from './engaged';
+export { is, IsExpression, type IsExpressionProps } from './is';
 export { owned, OwnedExpression } from './owned';
 export { wounded } from './wounded';
