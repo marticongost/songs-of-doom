@@ -2,6 +2,7 @@
 	import {
 		AttachEffect,
 		AttackEffect,
+		LooseGoldEffect,
 		ChangeStatsEffect,
 		ChaseEffect,
 		ConditionalEffect,
@@ -41,6 +42,7 @@
 	import AddChargeEffectChip from './AddChargeEffectChip.svelte';
 	import AttachEffectChip from './AttachEffectChip.svelte';
 	import AttackEffectChip from './AttackEffectChip.svelte';
+	import LooseGoldEffectChip from './LooseGoldEffectChip.svelte';
 	import ChangeStatsEffectChip from './ChangeStatsEffectChip.svelte';
 	import ChaseEffectChip from './ChaseEffectChip.svelte';
 	import ConditionalEffectChip from './ConditionalEffectChip.svelte';
@@ -93,6 +95,8 @@
 		<ModifyCapabilityCostEffectChip {effect} />
 	{:else if effect instanceof ModifyCarryingCapacityEffect}
 		<ModifyCarryingCapacityEffectChip {effect} />
+	{:else if effect instanceof LooseGoldEffect}
+		<LooseGoldEffectChip {effect} />
 	{:else if effect instanceof ChangeStatsEffect}
 		<ChangeStatsEffectChip {effect} />
 	{:else if effect instanceof ChaseEffect}
