@@ -7,7 +7,8 @@ export type TargetType =
 	| 'defender'
 	| 'enemy'
 	| 'ally'
-	| 'object';
+	| 'object'
+	| 'location';
 
 export type TargetCardinality = 'single' | 'multiple';
 

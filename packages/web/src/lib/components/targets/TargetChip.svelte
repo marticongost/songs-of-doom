@@ -1,5 +1,12 @@
+<script lang="ts" module>
+	const getGender = (target: Target | TargetDiscriminator | undefined, locale: string) => {
+		if (!target || locale === 'en') return undefined;
+		if (target.type === 'location') return 'feminine';
+		return 'masculine';
+	};
+</script>
+
 <script lang="ts">
-	import { Target, type TargetCardinality, type TargetDiscriminator } from '@songsofdoom/game';
 	import { getLocale } from '$lib/context/locale';
 	import {
 		possessiveRelation,
@@ -7,6 +14,7 @@
 		translate,
 		type LocalisedText
 	} from '@songsofdoom/common/localisation';
+	import { Target, type TargetCardinality, type TargetDiscriminator } from '@songsofdoom/game';
 	import ExpressionChip from '../expressions/ExpressionChip.svelte';
 	import Text from '../localisation/Text.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
@@ -28,6 +36,7 @@
 			target.selection !== 'random' &&
 			target.selection !== 'player-chosen'
 	);
+	const gender = $derived(getGender(target, getLocale()));
 </script>
 
 {#snippet text(localisedText: LocalisedText)}
@@ -75,17 +84,45 @@
 			{:else}
 				{@render text({ ca: 'un objecte', es: 'un objeto', en: 'an object' })}
 			{/if}
+		{:else if target.type === 'location'}
+			{#if isPlural}
+				{@render text({ ca: 'ubicacions', es: 'ubicaciones', en: 'locations' })}
+			{:else if isDeterminate}
+				{@render text({ ca: "l'ubicació", es: 'la ubicación', en: 'the location' })}
+			{:else}
+				{@render text({ ca: 'una ubicació', es: 'una ubicación', en: 'a location' })}
+			{/if}
 		{/if}
 		<ExpressionChip expression={target.condition} />
 		{#if target instanceof Target}
 			{#if target.selection === 'player-chosen'}
-				<Text ca="escollit pel jugador" es="elegido por el jugador" en="chosen by the player" />
+				<Text
+					ca={gender === 'feminine' ? 'escollida pel jugador' : 'escollit pel jugador'}
+					es={gender === 'feminine' ? 'elegida por el jugador' : 'elegido por el jugador'}
+					en="chosen by the player"
+				/>
 			{:else if target.selection === 'random'}
-				<Text ca="aleatori" es="aleatorio" en="random" />
+				<Text
+					ca={gender === 'feminine' ? 'aleatòria' : 'aleatori'}
+					es={gender === 'feminine' ? 'aleatoria' : 'aleatorio'}
+					en="random"
+				/>
 			{:else if target.selection === 'closest'}
-				<Text ca="més proper" es="más cercano" en="closest" />
+				{#if target.type === 'location'}
+					<Text ca="actual" es="actual" en="current" />
+				{:else}
+					<Text
+						ca={gender === 'feminine' ? 'més propera' : 'més proper'}
+						es={gender === 'feminine' ? 'más cercana' : 'más cercano'}
+						en="closest"
+					/>
+				{/if}
 			{:else if target.selection === 'furthest'}
-				<Text ca="més llunyà" es="más lejano" en="furthest" />
+				<Text
+					ca={gender === 'feminine' ? 'més distant' : 'més distant'}
+					es={gender === 'feminine' ? 'más lejana' : 'más lejano'}
+					en="furthest"
+				/>
 			{:else if 'lowest' in target.selection}
 				<Text ca="amb menys" es="con menos" en="with lowest" />
 				<ExpressionChip expression={target.selection.lowest} />
