@@ -31,6 +31,7 @@ body {
 	$palette-brandy-punch: #d6902d;
 	$palette-gold: #8a6519;
 	$palette-blue: #5555a1;
+	$palette-spindle: #b8c8eb;
 	$palette-purple: #7655a1;
 	$palette-violet: #a155a1;
 	$palette-shade: #282828;
@@ -170,6 +171,10 @@ body {
 
 	// Indicators
 	--card-copies-indicator-color: #{$palette-hurricane};
+
+	// Instructions
+	--instruction-color: #{$palette-spindle};
+	--instruction-font: var(--heading-font);
 }
 
 @include rz.reset-elements;

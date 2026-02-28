@@ -4,7 +4,6 @@ Renders any expression (scalar or boolean) with proper formatting.
 Handles primitives, operations, comparisons, logical operators, and custom expression types.
 -->
 <script lang="ts">
-	import type { ScalarExpressionType } from '@songsofdoom/game';
 	import {
 		AndExpression,
 		CashExpression,
@@ -14,9 +13,12 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		IsExpression,
 		NotExpression,
 		OrExpression,
+		Property,
 		result,
 		ScalarOperation,
-		type BooleanExpressionType
+		Stat,
+		type BooleanExpressionType,
+		type ScalarExpressionType
 	} from '@songsofdoom/game';
 	import GoldIcon from '../icons/GoldIcon.svelte';
 	import InlineSvg from '../InlineSvg.svelte';
@@ -63,17 +65,19 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 	{:else if expression instanceof AndExpression}
 		{#each expression.operands as operand, index (index)}
 			{#if index > 0}
-				<span class="operator">&</span>
+				<span class="instruction">
+					<Text ca=" i " es=" y " en=" and " />
+				</span>
 			{/if}
 			{@render expressionNodeSnippet(operand)}
 		{/each}
 	{:else if expression instanceof OrExpression}
 		{#each expression.operands as operand, index (index)}
-			{#if index > 0}<span class="operator"><Text ca="O" es="O" en="OR" /></span>{/if}
+			{#if index > 0}<span class="instruction"><Text ca=" o " es=" o " en=" or " /></span>{/if}
 			{@render expressionNodeSnippet(operand)}
 		{/each}
 	{:else if expression instanceof NotExpression}
-		<span class="operator"><Text ca="NO" es="NO" en="NOT" /></span>
+		<span class="instruction"><Text ca="no " es="no " en="not " /></span>
 		{@render expressionNodeSnippet(expression.operand)}
 
 		<!-- IsExpression -->
@@ -109,6 +113,12 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 
 <style lang="scss">
 	@use '@reguitzell/styles' as rz;
+
+	.instruction {
+		font-weight: bold;
+		color: var(--instruction-color);
+		font-family: var(--instruction-font);
+	}
 
 	.operator {
 		font-weight: bold;
