@@ -7,6 +7,7 @@ export { result, ResultExpression } from './result-expression';
 export { div, minus, mult, plus, ScalarOperation, type ScalarOperator } from './scalar-operation';
 
 // Scalar expressions
+export { cash, CashExpression } from './cash';
 export { charges, ChargesExpression, type ChargesExpressionProps } from './charges';
 export { count, CountExpression, type CountExpressionProps } from './count';
 export { distance, DistanceExpression } from './distance';

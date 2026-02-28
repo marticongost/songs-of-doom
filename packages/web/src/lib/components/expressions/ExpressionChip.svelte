@@ -7,6 +7,7 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 	import type { ScalarExpressionType } from '@songsofdoom/game';
 	import {
 		AndExpression,
+		CashExpression,
 		ComparisonExpression,
 		CountExpression,
 		Expression,
@@ -16,8 +17,7 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		ScalarOperation,
 		type BooleanExpressionType
 	} from '@songsofdoom/game';
-	import { Property } from '@songsofdoom/game';
-	import { Stat } from '@songsofdoom/game';
+	import GoldIcon from '../icons/GoldIcon.svelte';
 	import InlineSvg from '../InlineSvg.svelte';
 	import Text from '../localisation/Text.svelte';
 	import PropertyChip from '../properties/PropertyChip.svelte';
@@ -83,6 +83,10 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 	{:else if expression instanceof CountExpression}
 		<Text ca="Número" es="Número" en="Number" />
 		<TargetChip target={expression.target} cardinality="multiple" relation="possessive" />
+
+		<!-- Cash -->
+	{:else if expression instanceof CashExpression}
+		<GoldIcon />
 	{/if}
 {/snippet}
 
