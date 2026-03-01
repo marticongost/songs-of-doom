@@ -18,7 +18,7 @@ entity type filter dropdown, and sort criteria dropdown.
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
-	import { EntitySearchState, type ViewType } from '$lib/search';
+	import { EntitySearchState, type VersionFilter, type ViewType } from '$lib/search';
 	import type { SortCriteriaType } from '$lib/sorting';
 	import type { EntityTypeId } from '@songsofdoom/game';
 
@@ -50,6 +50,14 @@ entity type filter dropdown, and sort criteria dropdown.
 	function onViewChange(value: ViewType) {
 		state.setView(value);
 	}
+
+	function onSetChange(value: string) {
+		state.setSet(value === '' ? null : value);
+	}
+
+	function onVersionChange(value: string) {
+		state.setVersion(value as VersionFilter);
+	}
 </script>
 
 <div {...standardAttributes(attributes, 'entity-search-toolbar')}>
@@ -61,6 +69,10 @@ entity type filter dropdown, and sort criteria dropdown.
 		{autofocus}
 	/>
 	<Dropdown options={state.typeOptions} value={state.type?.id ?? ''} onChange={onTypeChange} />
+	{#if state.setOptions.length > 1}
+		<Dropdown options={state.setOptions} value={state.set?.id ?? ''} onChange={onSetChange} />
+	{/if}
+	<Dropdown options={state.versionOptions} value={state.version} onChange={onVersionChange} />
 	<SortDropdown options={state.sortOptions} value={state.sort.type} onChange={onSortChange} />
 	{#if state.viewOptions.length > 1}
 		<Switch

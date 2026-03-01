@@ -1,7 +1,15 @@
 import { goto } from '$app/navigation';
 import { page } from '$app/state';
-import type { LocalisedText } from '@songsofdoom/common/localisation';
-import { entityTypes, type Entity, type EntityType, type EntityTypeId } from '@songsofdoom/game';
+import { SvelteMap } from 'svelte/reactivity';
+import { translate, type LocalisedText } from '@songsofdoom/common/localisation';
+import {
+	entities as allEntities,
+	entityTypes,
+	ParentEntity,
+	type Entity,
+	type EntityType,
+	type EntityTypeId
+} from '@songsofdoom/game';
 
 import { getLocale } from '$lib/context/locale';
 import {
@@ -20,6 +28,10 @@ export type SortCriteriaInput = SortCriteriaType | SortCriteria;
 /** View mode for entity display */
 export type ViewType = 'card' | 'button';
 const viewTypes: ViewType[] = ['card', 'button'];
+
+/** Version filter options */
+export type VersionFilter = 'all' | 'base' | 'upgraded';
+const versionFilters: VersionFilter[] = ['all', 'base', 'upgraded'];
 
 /** Option for the view Switch component */
 export interface ViewOption {
@@ -75,6 +87,8 @@ export class EntitySearchState {
 	private readonly searchParam = 'q';
 	private readonly typeParam = 'type';
 	private readonly viewParam = 'view';
+	private readonly setParam = 'set';
+	private readonly versionParam = 'version';
 
 	// Configuration
 	readonly allowedTypes: EntityType[] | undefined;
@@ -89,11 +103,15 @@ export class EntitySearchState {
 	private _type = $state<EntityType | null>(null);
 	private _sort = $state<SortCriteria>(sortCriteria.alpha);
 	private _view = $state<ViewType>('card');
+	private _set = $state<ParentEntity | null>(null);
+	private _version = $state<VersionFilter>('all');
+	private _setOptions = $state<Array<{ value: string; label: LocalisedText }>>([]);
 
 	// Dropdown options (computed once from configuration)
 	readonly typeOptions: Array<{ value: EntityTypeId | ''; label: LocalisedText }>;
 	readonly sortOptions: Array<{ value: SortCriteriaType; label: LocalisedText }>;
 	readonly viewOptions: ViewOption[];
+	readonly versionOptions: Array<{ value: VersionFilter; label: LocalisedText }>;
 
 	constructor(options?: EntitySearchStateOptions) {
 		// Normalize configuration
@@ -137,6 +155,23 @@ export class EntitySearchState {
 			'aria-label': viewLabels[view]
 		}));
 
+		// Build version filter options
+		this.versionOptions = [
+			{
+				value: 'all',
+				label: { ca: 'Totes les versions', es: 'Todas las versiones', en: 'All versions' }
+			},
+			{ value: 'base', label: { ca: 'Versió base', es: 'Versión base', en: 'Base version' } },
+			{
+				value: 'upgraded',
+				label: {
+					ca: 'Versions millorades',
+					es: 'Versiones mejoradas',
+					en: 'Upgraded versions'
+				}
+			}
+		];
+
 		// Initialize from URL if syncing
 		if (this.syncUrl) {
 			this.initFromUrl();
@@ -158,6 +193,18 @@ export class EntitySearchState {
 
 	get view(): ViewType {
 		return this._view;
+	}
+
+	get set(): ParentEntity | null {
+		return this._set;
+	}
+
+	get version(): VersionFilter {
+		return this._version;
+	}
+
+	get setOptions(): Array<{ value: string; label: LocalisedText }> {
+		return this._setOptions;
 	}
 
 	/** Sets the search query */
@@ -213,6 +260,48 @@ export class EntitySearchState {
 		}
 	}
 
+	/** Sets the set filter (empty string or null for all sets) */
+	setSet(value: string | null): void {
+		if (!value) {
+			this._set = null;
+		} else {
+			const entity = allEntities.get(value);
+			this._set = entity instanceof ParentEntity ? entity : null;
+		}
+		if (this.syncUrl) {
+			this.updateUrl({ set: this._set?.id ?? '' });
+		}
+	}
+
+	/** Sets the version filter */
+	setVersion(value: VersionFilter): void {
+		this._version = versionFilters.includes(value) ? value : 'all';
+		if (this.syncUrl) {
+			this.updateUrl({ version: this._version });
+		}
+	}
+
+	/**
+	 * Updates the available set options from the entities being displayed.
+	 * Call this whenever the entities list changes (e.g., via $effect in EntityCatalog).
+	 */
+	updateSetOptions(entities: Entity[]): void {
+		const locale = getLocale();
+		const sets = new SvelteMap<string, ParentEntity>();
+		for (const entity of entities) {
+			if (entity.set) {
+				sets.set(entity.set.id, entity.set);
+			}
+		}
+		const sortedSets = Array.from(sets.values()).sort((a, b) =>
+			(translate(a.title, locale) ?? '').localeCompare(translate(b.title, locale) ?? '')
+		);
+		this._setOptions = [
+			{ value: '', label: { ca: 'Tots els conjunts', es: 'Todos los conjuntos', en: 'All sets' } },
+			...sortedSets.map((s) => ({ value: s.id, label: s.title }))
+		];
+	}
+
 	/** Event handler for search input (binds to oninput) */
 	onSearchInput = (e: Event & { currentTarget: HTMLInputElement }): void => {
 		this.setSearch(e.currentTarget.value);
@@ -233,11 +322,24 @@ export class EntitySearchState {
 			? searchFiltered.filter((entity) => entity.type === this._type)
 			: searchFiltered;
 
+		// Apply set filter
+		const setFiltered = this._set
+			? typeFiltered.filter((entity) => entity.set === this._set)
+			: typeFiltered;
+
+		// Apply version filter
+		const versionFiltered =
+			this._version === 'base'
+				? setFiltered.filter((entity) => entity.level === 1)
+				: this._version === 'upgraded'
+					? setFiltered.filter((entity) => entity.level >= 2)
+					: setFiltered;
+
 		// Apply sorting
 		if (this._sort instanceof GroupingCriteria) {
-			return { groupedEntities: this._sort.group(typeFiltered, locale) };
+			return { groupedEntities: this._sort.group(versionFiltered, locale) };
 		}
-		return { entities: this._sort.sort(typeFiltered, locale) };
+		return { entities: this._sort.sort(versionFiltered, locale) };
 	}
 
 	/** Initializes state from URL parameters */
@@ -291,6 +393,27 @@ export class EntitySearchState {
 			// Invalid view in URL, clean up
 			this.updateUrl({ view: this.defaultView });
 		}
+
+		// Parse set
+		const setParam = url.searchParams.get(this.setParam);
+		if (setParam) {
+			const entity = allEntities.get(setParam);
+			if (entity instanceof ParentEntity) {
+				this._set = entity;
+			} else {
+				// Invalid set in URL, clean up
+				this.updateUrl({ set: '' });
+			}
+		}
+
+		// Parse version
+		const versionParam = url.searchParams.get(this.versionParam);
+		if (versionParam && versionFilters.includes(versionParam as VersionFilter)) {
+			this._version = versionParam as VersionFilter;
+		} else if (versionParam) {
+			// Invalid version in URL, clean up
+			this.updateUrl({ version: 'all' });
+		}
 	}
 
 	/** Updates URL parameters, removing defaults for clean URLs */
@@ -299,6 +422,8 @@ export class EntitySearchState {
 		search?: string;
 		type?: string;
 		view?: ViewType;
+		set?: string;
+		version?: VersionFilter;
 	}): void {
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- URL used only for manipulation, not reactive binding
 		const url = new URL(page.url);
@@ -332,6 +457,22 @@ export class EntitySearchState {
 				url.searchParams.delete(this.viewParam);
 			} else {
 				url.searchParams.set(this.viewParam, params.view);
+			}
+		}
+
+		if (params.set !== undefined) {
+			if (params.set === '') {
+				url.searchParams.delete(this.setParam);
+			} else {
+				url.searchParams.set(this.setParam, params.set);
+			}
+		}
+
+		if (params.version !== undefined) {
+			if (params.version === 'all') {
+				url.searchParams.delete(this.versionParam);
+			} else {
+				url.searchParams.set(this.versionParam, params.version);
 			}
 		}
 

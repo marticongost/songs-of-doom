@@ -52,6 +52,10 @@ Optionally includes a carousel viewer for browsing entities when an EntityManage
 	const nav = new KeyboardNavigation({ mode: 'grid', itemSelector: '[data-entity]' });
 	const results = $derived(search.getResults(entities));
 
+	$effect(() => {
+		search.updateSetOptions(entities);
+	});
+
 	// Use custom component if provided, otherwise derive from view state
 	const appearance = $derived(search.view === 'button' ? 'button-columns' : 'card-grid');
 
