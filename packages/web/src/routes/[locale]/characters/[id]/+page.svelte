@@ -1,3 +1,8 @@
+<script lang="ts" module>
+	const sumCopiesOfEntities = (entities: Entity[], characterState: CharacterState) =>
+		entities.reduce((sum, e) => sum + characterState.getNumberOfOwnedCopies(e), 0);
+</script>
+
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import IconButton from '$lib/components/IconButton.svelte';
@@ -20,6 +25,7 @@
 		attributeTypes,
 		entities,
 		indicatorTypes,
+		type CharacterState,
 		type Entity,
 		type EntityTypeId
 	} from '@songsofdoom/game';
@@ -197,7 +203,7 @@
 		<div class="card-set-header">
 			<h1 class="section-title"><Text {...title} /></h1>
 			<span class="card-set-size">
-				{entities.length}
+				{sumCopiesOfEntities(entities, characterState)}
 				{#if expectedSize !== undefined}
 					/ {expectedSize}
 				{/if}
