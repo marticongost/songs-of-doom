@@ -9,13 +9,26 @@
 	import { characterStateToJson } from '$lib/database/characterstate';
 	import { EntitySearchState } from '$lib/search';
 	import { characterUrl } from '$lib/urls';
-	import { entities, type EntityTypeId } from '@songsofdoom/game';
+	import { entities, type CharacterState, type EntityTypeId } from '@songsofdoom/game';
 	import type { PageData } from './$types';
 
 	const { data }: { data: PageData } = $props();
 
 	const { character } = data;
 	let characterState = $state(character.newestRevision.state);
+
+	function stableStateJson(state: CharacterState): string {
+		const json = characterStateToJson(state);
+		return JSON.stringify({
+			finalised: json.finalised,
+			gold: json.gold,
+			upgrades: Object.fromEntries(Object.entries(json.upgrades).sort()),
+			skillsDeck: Object.fromEntries(Object.entries(json.skillsDeck).sort())
+		});
+	}
+
+	let savedStateJson = $state(stableStateJson(character.newestRevision.state));
+	const hasModifications = $derived(stableStateJson(characterState) !== savedStateJson);
 
 	type SaveStatus = 'idle' | 'saving' | 'success' | 'error';
 	let saveStatus = $state<SaveStatus>('idle');
@@ -76,6 +89,7 @@
 					if (result.type === 'success' && result.data) {
 						saveStatus = 'success';
 						saveMessage = (result.data as { message?: string }).message;
+						savedStateJson = stableStateJson(characterState);
 						clearTimeout(successTimeout);
 						successTimeout = setTimeout(() => {
 							saveStatus = 'idle';
@@ -96,18 +110,29 @@
 				icon="accept.svg"
 				label={{ ca: 'Desar', es: 'Guardar', en: 'Save' }}
 				busy={saveStatus === 'saving'}
+				disabled={!hasModifications}
 			/>
 		</form>
 
-		<ToolbarButton
-			icon="revert.svg"
-			label={{ ca: 'Cancel·lar', es: 'Cancelar', en: 'Cancel' }}
-			href={characterUrl.get(character)}
-		/>
-		<ToolbarButton
-			icon="finalize.svg"
-			label={{ ca: 'Finalitzar', es: 'Finalizar', en: 'Finalize' }}
-		/>
+		{#if hasModifications}
+			<ToolbarButton
+				icon="revert.svg"
+				label={{ ca: 'Cancel·lar', es: 'Cancelar', en: 'Cancel' }}
+				href={characterUrl.get(character)}
+			/>
+		{:else}
+			<ToolbarButton
+				icon="up.svg"
+				label={{ ca: 'Tancar', es: 'Cerrar', en: 'Close' }}
+				href={characterUrl.get(character)}
+			/>
+		{/if}
+		{#if !character.newestRevision.finalised}
+			<ToolbarButton
+				icon="finalize.svg"
+				label={{ ca: 'Finalitzar', es: 'Finalizar', en: 'Finalize' }}
+			/>
+		{/if}
 
 		{#if saveStatus === 'success' && saveMessage}
 			<SuccessMessage>{saveMessage}</SuccessMessage>
