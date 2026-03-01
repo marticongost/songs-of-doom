@@ -38,6 +38,7 @@ Displays a single focus token: an icon and its numeric pip value.
 		border: 2px solid currentColor;
 		border-radius: rz.size(sm);
 		background-color: white;
+		background-image: radial-gradient(circle at center, transparent 70%, currentColor);
 		width: 2.5em;
 		height: 2.5em;
 
