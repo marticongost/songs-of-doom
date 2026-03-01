@@ -10,7 +10,7 @@
 </script>
 
 <Indicator
-	{...standardAttributes(attributes, 'experience-indicator')}
+	{...standardAttributes(attributes, `experience-indicator${amount < 0 ? ' negative' : ''}`)}
 	{amount}
 	icon="experience.svg"
 />
@@ -20,5 +20,9 @@
 		--indicator-color: var(--experience-background-color);
 		--indicator-value-color: var(--experience-foreground-color);
 		--indicator-value-text-shadow: none;
+	}
+	:global(.experience-indicator.negative) {
+		--indicator-color: var(--experience-negative-background-color);
+		--indicator-value-color: var(--experience-negative-foreground-color);
 	}
 </style>

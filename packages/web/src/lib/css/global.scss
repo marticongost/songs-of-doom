@@ -72,6 +72,8 @@ body {
 	// Experience
 	--experience-foreground-color: #{$palette-somber};
 	--experience-background-color: #{$palette-ivory};
+	--experience-negative-foreground-color: #{$palette-ivory};
+	--experience-negative-background-color: var(--negative-color);
 
 	// Gold
 	--gold-foreground-color: #{$palette-worn-white};
