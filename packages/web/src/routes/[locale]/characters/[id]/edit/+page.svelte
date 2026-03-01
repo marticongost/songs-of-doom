@@ -6,6 +6,7 @@
 	import ErrorMessage from '$lib/components/errors/ErrorMessage.svelte';
 	import SuccessMessage from '$lib/components/feedback/SuccessMessage.svelte';
 	import ToolbarButton from '$lib/components/toolbar/ToolbarButton.svelte';
+	import ToolbarGroup from '$lib/components/toolbar/ToolbarGroup.svelte';
 	import { characterStateToJson } from '$lib/database/characterstate';
 	import { EntitySearchState } from '$lib/search';
 	import { characterUrl } from '$lib/urls';
@@ -15,7 +16,25 @@
 	const { data }: { data: PageData } = $props();
 
 	const { character } = data;
-	let characterState = $state(character.newestRevision.state);
+
+	let history = $state<CharacterState[]>([character.newestRevision.state]);
+	let historyIndex = $state(0);
+	const characterState = $derived(history[historyIndex]);
+	const canUndo = $derived(historyIndex > 0);
+	const canRedo = $derived(historyIndex < history.length - 1);
+
+	function pushState(newState: CharacterState) {
+		history = [...history.slice(0, historyIndex + 1), newState];
+		historyIndex = history.length - 1;
+	}
+
+	function undo() {
+		if (canUndo) historyIndex--;
+	}
+
+	function redo() {
+		if (canRedo) historyIndex++;
+	}
 
 	function stableStateJson(state: CharacterState): string {
 		const json = characterStateToJson(state);
@@ -63,10 +82,10 @@
 			return characterState.getMissingDependencies(entity);
 		},
 		onEntityAdded(entity) {
-			characterState = characterState.acquireEntity(entity);
+			pushState(characterState.acquireEntity(entity));
 		},
 		onEntityRemoved(entity) {
-			characterState = characterState.returnEntity(entity);
+			pushState(characterState.returnEntity(entity));
 		}
 	};
 </script>
@@ -79,60 +98,77 @@
 	cardSetsLayout="single-column"
 >
 	{#snippet toolbarActions()}
-		<form
-			method="POST"
-			action="?/save"
-			use:enhance={() => {
-				saveStatus = 'saving';
-				saveMessage = undefined;
-				return async ({ result }) => {
-					if (result.type === 'success' && result.data) {
-						saveStatus = 'success';
-						saveMessage = (result.data as { message?: string }).message;
-						savedStateJson = stableStateJson(characterState);
-						clearTimeout(successTimeout);
-						successTimeout = setTimeout(() => {
-							saveStatus = 'idle';
-						}, 3000);
-					} else if (result.type === 'failure' && result.data) {
-						saveStatus = 'error';
-						saveMessage = (result.data as { message?: string }).message;
-					}
-				};
-			}}
-		>
-			<input
-				type="hidden"
-				name="state"
-				value={JSON.stringify(characterStateToJson(characterState))}
+		<ToolbarGroup>
+			<ToolbarButton
+				icon="undo.svg"
+				label={{ ca: 'Desfer', es: 'Deshacer', en: 'Undo' }}
+				disabled={!canUndo}
+				onclick={undo}
 			/>
 			<ToolbarButton
-				icon="accept.svg"
-				label={{ ca: 'Desar', es: 'Guardar', en: 'Save' }}
-				busy={saveStatus === 'saving'}
-				disabled={!hasModifications}
+				icon="redo.svg"
+				label={{ ca: 'Refer', es: 'Rehacer', en: 'Redo' }}
+				disabled={!canRedo}
+				onclick={redo}
 			/>
-		</form>
-
-		{#if hasModifications}
-			<ToolbarButton
-				icon="revert.svg"
-				label={{ ca: 'Cancel·lar', es: 'Cancelar', en: 'Cancel' }}
-				href={characterUrl.get(character)}
-			/>
-		{:else}
-			<ToolbarButton
-				icon="up.svg"
-				label={{ ca: 'Tancar', es: 'Cerrar', en: 'Close' }}
-				href={characterUrl.get(character)}
-			/>
-		{/if}
-		{#if !character.newestRevision.finalised}
-			<ToolbarButton
-				icon="finalize.svg"
-				label={{ ca: 'Finalitzar', es: 'Finalizar', en: 'Finalize' }}
-			/>
-		{/if}
+		</ToolbarGroup>
+		<ToolbarGroup>
+			<form
+				method="POST"
+				action="?/save"
+				use:enhance={() => {
+					saveStatus = 'saving';
+					saveMessage = undefined;
+					return async ({ result }) => {
+						if (result.type === 'success' && result.data) {
+							saveStatus = 'success';
+							saveMessage = (result.data as { message?: string }).message;
+							savedStateJson = stableStateJson(characterState);
+							clearTimeout(successTimeout);
+							successTimeout = setTimeout(() => {
+								saveStatus = 'idle';
+							}, 3000);
+						} else if (result.type === 'failure' && result.data) {
+							saveStatus = 'error';
+							saveMessage = (result.data as { message?: string }).message;
+						}
+					};
+				}}
+			>
+				<input
+					type="hidden"
+					name="state"
+					value={JSON.stringify(characterStateToJson(characterState))}
+				/>
+				<ToolbarButton
+					icon="accept.svg"
+					label={{ ca: 'Desar', es: 'Guardar', en: 'Save' }}
+					busy={saveStatus === 'saving'}
+					disabled={!hasModifications}
+				/>
+			</form>
+			{#if hasModifications}
+				<ToolbarButton
+					icon="revert.svg"
+					label={{ ca: 'Cancel·lar', es: 'Cancelar', en: 'Cancel' }}
+					href={characterUrl.get(character)}
+				/>
+			{:else}
+				<ToolbarButton
+					icon="up.svg"
+					label={{ ca: 'Tancar', es: 'Cerrar', en: 'Close' }}
+					href={characterUrl.get(character)}
+				/>
+			{/if}
+		</ToolbarGroup>
+		<ToolbarGroup>
+			{#if !character.newestRevision.finalised}
+				<ToolbarButton
+					icon="finalize.svg"
+					label={{ ca: 'Finalitzar', es: 'Finalizar', en: 'Finalize' }}
+				/>
+			{/if}
+		</ToolbarGroup>
 
 		{#if saveStatus === 'success' && saveMessage}
 			<SuccessMessage>{saveMessage}</SuccessMessage>
