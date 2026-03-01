@@ -19,7 +19,7 @@
 	import {
 		ArchetypeRequiredImpediment,
 		InnateTraitImpediment,
-		InnateTraitRemovalImpediment,
+		PermanentTraitRemovalImpediment,
 		InsufficientExperienceImpediment,
 		InsufficientGoldImpediment,
 		LimitReachedImpediment,
@@ -158,11 +158,11 @@
 			es="Este rasgo es estándar y no se puede eliminar."
 			en="This trait is standard and cannot be removed."
 		/>
-	{:else if impediment instanceof InnateTraitRemovalImpediment}
+	{:else if impediment instanceof PermanentTraitRemovalImpediment}
 		<Text
-			ca="Aquest tret és innat i no es pot eliminar."
-			es="Este rasgo es innato y no se puede eliminar."
-			en="This trait is innate and cannot be removed."
+			ca="Aquest tret és permanent i no es pot eliminar."
+			es="Este rasgo es permanente y no se puede eliminar."
+			en="This trait is permanent and cannot be removed."
 		/>
 	{:else if impediment instanceof MinimumAmountReachedRemovalImpediment}
 		<Text

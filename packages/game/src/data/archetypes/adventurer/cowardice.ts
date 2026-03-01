@@ -6,7 +6,7 @@ import { flaw, innate } from '../../properties';
 export default new Trait({
 	title: { en: 'Cowardice', es: 'Cobardía', ca: 'Covardia' },
 	xpCost: -3,
-	properties: [innate, flaw],
+	properties: [flaw, innate],
 	capabilities: [
 		new Constant({
 			effects: [new ChangeStatsEffect({ will: -1 })]

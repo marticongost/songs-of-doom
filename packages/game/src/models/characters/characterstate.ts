@@ -1,5 +1,5 @@
 import { entities } from '../../catalog';
-import { innate } from '../../data/properties';
+import { innate, permanent } from '../../data/properties';
 import { Ally } from '../ally';
 import { Archetype } from '../archetype';
 import type { Entity } from '../entity';
@@ -17,7 +17,7 @@ import {
 	type EntityAcquisitionImpediment
 } from './entityacquisitionimpediments';
 import {
-	InnateTraitRemovalImpediment,
+	PermanentTraitRemovalImpediment,
 	MinimumAmountReachedRemovalImpediment,
 	StandardTraitRemovalImpediment,
 	type EntityRemovalImpediment
@@ -177,15 +177,19 @@ export class CharacterState {
 		return missing;
 	}
 
-	public getEntityRemovalImpediment(entity: Entity | string): EntityRemovalImpediment | undefined {
+	public getEntityRemovalImpediment(
+		entity: Entity | string,
+		originalState?: CharacterState
+	): EntityRemovalImpediment | undefined {
 		if (typeof entity === 'string') {
 			entity = entities.require(entity);
 		}
 		if (entity.isStandard()) {
 			return new StandardTraitRemovalImpediment();
 		}
-		if (this.finalised && entity.properties.includes(innate)) {
-			return new InnateTraitRemovalImpediment();
+		const wasInOriginalState = !originalState || originalState.getNumberOfOwnedCopies(entity) > 0;
+		if (this.finalised && entity.properties.includes(permanent) && wasInOriginalState) {
+			return new PermanentTraitRemovalImpediment();
 		}
 		const ownedCopies = this.getNumberOfOwnedCopies(entity);
 		if (ownedCopies === 0) {

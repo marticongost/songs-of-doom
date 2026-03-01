@@ -67,7 +67,7 @@
 			return characterState.getEntityAcquisitionImpediment(entity, options);
 		},
 		getRemovalImpediment(entity) {
-			return characterState.getEntityRemovalImpediment(entity);
+			return characterState.getEntityRemovalImpediment(entity, character.newestRevision.state);
 		},
 		getMissingDependencies(entity) {
 			return characterState.getMissingDependencies(entity);

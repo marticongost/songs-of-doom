@@ -6,12 +6,12 @@ import {
 } from '../../../models/effects';
 import { charges } from '../../../models/expressions';
 import { Trait } from '../../../models/trait';
-import { flaw } from '../../properties';
+import { flaw, permanent } from '../../properties';
 
 export default new Trait({
 	title: { ca: 'Vell', es: 'Viejo', en: 'Old' },
 	xpCost: -2,
-	properties: [flaw],
+	properties: [flaw, permanent],
 	capabilities: [
 		new Obligation({
 			triggers: ['moving'],
