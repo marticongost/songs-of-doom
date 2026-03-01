@@ -27,8 +27,11 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 	import { getLocale } from '$lib/context/locale';
 	import { translate } from '@songsofdoom/common';
 	import { fade } from 'svelte/transition';
+	import { entityUrl } from '$lib/urls';
 	import IconButton from '../IconButton.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
+	import Toolbar from '../toolbar/Toolbar.svelte';
+	import ToolbarButton from '../toolbar/ToolbarButton.svelte';
 	import Card from './Card.svelte';
 	import type { EntityManager } from './entitymanager';
 	import EntityToolbar from './EntityToolbar.svelte';
@@ -40,8 +43,8 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 		/** Number of sibling cards to show on each side (default: 2) */
 		siblingCount?: number;
 
-		/** Entity manager for handling actions */
-		entityManager: EntityManager;
+		/** Entity manager for handling actions. When omitted, shows a view-only carousel. */
+		entityManager?: EntityManager;
 
 		/** Callback when carousel is closed */
 		onclose?: () => void;
@@ -296,13 +299,23 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 						}}
 						aria-label={offset === 0 ? undefined : `Go to card ${currentIndex + offset + 1}`}
 						{entityManager}
-						dimmed={dimUnavailableEntities && !!entityManager.getAcquisitionImpediment(entity)}
+						dimmed={dimUnavailableEntities && !!entityManager?.getAcquisitionImpediment(entity)}
 					/>
 				</div>
 			{/each}
 		</div>
 
-		<EntityToolbar entity={currentEntity} {entityManager} />
+		{#if entityManager}
+			<EntityToolbar entity={currentEntity} {entityManager} />
+		{:else}
+			<Toolbar>
+				<ToolbarButton
+					icon="open.svg"
+					href={entityUrl.get(currentEntity)}
+					label={{ ca: 'Obrir', es: 'Abrir', en: 'Open' }}
+				/>
+			</Toolbar>
+		{/if}
 	{/if}
 </dialog>
 

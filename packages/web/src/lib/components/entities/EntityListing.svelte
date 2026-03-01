@@ -17,11 +17,14 @@
 		/** Optional keyboard navigation handler */
 		keyboardNav?: KeyboardNavigation;
 
-		/** Optional entity manager - enables carousel when provided */
+		/** Optional entity manager - enables carousel with add/remove when provided */
 		entityManager?: EntityManager;
 
 		/** Whether to visually dim unavailable entities. */
 		dimUnavailableEntities?: boolean;
+
+		/** Enables the carousel for viewing without add/remove options. Ignored when entityManager is provided. */
+		viewOnly?: boolean;
 	}
 
 	type Props = BaseProps &
@@ -37,6 +40,7 @@
 		keyboardNav,
 		entityManager,
 		dimUnavailableEntities = false,
+		viewOnly = false,
 		...attributes
 	}: Props = $props();
 
@@ -88,7 +92,7 @@
 		entity: Entity,
 		flatIndex: number
 	): ((e: MouseEvent) => void) | undefined {
-		if (!entityManager) return undefined;
+		if (!entityManager && !viewOnly) return undefined;
 		return () => openCarousel(entity, flatIndex);
 	}
 </script>
@@ -159,7 +163,7 @@
 	{/if}
 </div>
 
-{#if carouselAwareEntityManager}
+{#if carouselAwareEntityManager || viewOnly}
 	<EntityCarousel
 		bind:this={carouselRef}
 		entities={carouselEntities}

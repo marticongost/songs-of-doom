@@ -46,3 +46,11 @@ export const characterUrl = createUrlHandler((character: Character | number, loc
 		id: String(typeof character === 'number' ? character : character.id)
 	})
 );
+
+/** URL handler for character edit pages. */
+export const editCharacterUrl = createUrlHandler((character: Character | number, locale?: Locale) =>
+	resolve('/[locale]/characters/[id]/edit', {
+		locale: locale ?? getLocale(),
+		id: String(typeof character === 'number' ? character : character.id)
+	})
+);
