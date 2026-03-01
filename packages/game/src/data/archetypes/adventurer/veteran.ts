@@ -1,0 +1,15 @@
+import { Constant } from '../../../models/capabilities';
+import { ChangeStatsEffect } from '../../../models/effects';
+import { Trait } from '../../../models/trait';
+import { flaw, permanent } from '../../properties';
+
+export default new Trait({
+	title: { en: 'Veteran', es: 'Veterano', ca: 'Veterà' },
+	xpCost: -2,
+	properties: [flaw, permanent],
+	capabilities: [
+		new Constant({
+			effects: [new ChangeStatsEffect({ health: -1, sanity: -1 })]
+		})
+	]
+});
