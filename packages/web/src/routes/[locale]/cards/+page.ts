@@ -1,6 +1,6 @@
 import { entities } from '@songsofdoom/game';
 import type { Entity } from '@songsofdoom/game';
-import { Module } from '@songsofdoom/game';
+import { Discipline, Module } from '@songsofdoom/game';
 import { translate, type Locale } from '@songsofdoom/common/localisation';
 
 interface CardsPageData {
@@ -12,7 +12,9 @@ interface CardsPageData {
 export const load = ({ params }: { params: { locale: Locale } }): CardsPageData => {
 	return {
 		title: translate({ ca: 'Cartes', es: 'Cartas', en: 'Cards' }, params.locale),
-		entities: entities.all().filter((entity) => !(entity instanceof Module)),
+		entities: entities
+			.all()
+			.filter((entity) => !(entity instanceof Module) && !(entity instanceof Discipline)),
 		locale: params.locale
 	};
 };

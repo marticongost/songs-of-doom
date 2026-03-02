@@ -1,8 +1,9 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
 import { getEntryMetadata } from '../catalog';
 import { standard } from '../data/properties';
-import { Archetype } from './archetype';
+import { type Archetype } from './archetype';
 import type { Capability } from './capability';
+import { type Discipline } from './discipline';
 import type { Effect } from './effects';
 import type { Property } from './properties';
 import type { EntityType } from './properties/entitytypes';
@@ -116,8 +117,18 @@ export abstract class Entity {
 		return this.level > 1 ? this.variants[this.level - 2] : undefined;
 	}
 
+	/** An entity that must be possessed in order to acquire this entity. */
+	get requiredEntity(): Entity | undefined {
+		return this.requiredArchetype || this.requiredDiscipline;
+	}
+
 	/** An archetype that must be possessed in order to acquire this entity. */
 	get requiredArchetype(): Archetype | undefined {
+		return undefined;
+	}
+
+	/** A discipline that must be possessed in order to acquire this entity. */
+	get requiredDiscipline(): Discipline | undefined {
 		return undefined;
 	}
 
@@ -143,7 +154,12 @@ export abstract class ChildEntity<C extends ParentEntity> extends Entity {
 
 	override get requiredArchetype(): Archetype | undefined {
 		const parent = this.parent;
-		return parent instanceof Archetype ? parent : parent?.requiredArchetype;
+		return isArchetype(parent) ? parent : parent?.requiredArchetype;
+	}
+
+	override get requiredDiscipline(): Discipline | undefined {
+		const parent = this.parent;
+		return isDiscipline(parent) ? parent : parent?.requiredDiscipline;
 	}
 
 	get parent(): C {
@@ -199,3 +215,39 @@ export abstract class ParentEntity extends Entity {
 		return this.children.filter((child) => child.type === type);
 	}
 }
+
+export const isArchetype = (entity: Entity): entity is Archetype => {
+	return entity.type.id === 'archetype';
+};
+
+export const isDiscipline = (entity: Entity): entity is Discipline => {
+	return entity.type.id === 'discipline';
+};
+
+export const isTrait = (entity: Entity): entity is Entity => {
+	return entity.type.id === 'trait';
+};
+
+export const isSkill = (entity: Entity): entity is Entity => {
+	return entity.type.id === 'skill';
+};
+
+export const isItem = (entity: Entity): entity is Entity => {
+	return entity.type.id === 'item';
+};
+
+export const isCreature = (entity: Entity): entity is Entity => {
+	return entity.type.id === 'creature';
+};
+
+export const isAlly = (entity: Entity): entity is Entity => {
+	return entity.type.id === 'ally';
+};
+
+export const isEncounter = (entity: Entity): entity is Entity => {
+	return entity.type.id === 'encounter';
+};
+
+export const isModule = (entity: Entity): entity is Entity => {
+	return entity.type.id === 'module';
+};

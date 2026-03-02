@@ -2,6 +2,7 @@ export {
 	EntityType,
 	entityTypes,
 	archetype,
+	discipline,
 	trait,
 	skill,
 	item,

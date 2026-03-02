@@ -63,7 +63,7 @@
 		font-size: inherit;
 		text-align: left;
 
-		@each $type in archetype, trait, skill, ally, item, creature, encounter {
+		@each $type in archetype, discipline, trait, skill, ally, item, creature, encounter {
 			&[data-type='#{$type}'] {
 				background-image: var(--card-type-#{$type}-main-background);
 			}

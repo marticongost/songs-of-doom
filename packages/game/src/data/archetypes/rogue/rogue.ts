@@ -9,6 +9,7 @@ export default new Archetype({
 		en: 'Rogue'
 	},
 	xpCost: 5,
+	disciplines: ['dexterity'],
 	capabilities: [
 		new Opportunity({
 			triggers: ['payingCapability'],

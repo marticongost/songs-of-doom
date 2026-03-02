@@ -4,6 +4,7 @@ import { Property } from './property';
 export type EntityTypeId =
 	| 'module'
 	| 'archetype'
+	| 'discipline'
 	| 'trait'
 	| 'skill'
 	| 'item'
@@ -31,6 +32,11 @@ export const archetype = new EntityType(
 	'archetype',
 	{ ca: 'Arquetip', es: 'Arquetipo', en: 'Archetype' },
 	{ ca: 'Arquetips', es: 'Arquetipos', en: 'Archetypes' }
+);
+export const discipline = new EntityType(
+	'discipline',
+	{ ca: 'Disciplina', es: 'Disciplina', en: 'Discipline' },
+	{ ca: 'Disciplines', es: 'Disciplinas', en: 'Disciplines' }
 );
 export const trait = new EntityType(
 	'trait',
@@ -66,6 +72,7 @@ export const encounter = new EntityType(
 export const entityTypes: Record<EntityTypeId, EntityType> = {
 	module,
 	archetype,
+	discipline,
 	trait,
 	skill,
 	item,

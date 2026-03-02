@@ -10,6 +10,7 @@ import { attributes, stats, type Stat, type StatType } from '../stats';
 import { Trait } from '../trait';
 import {
 	ArchetypeRequiredImpediment,
+	DisciplineRequiredImpediment,
 	InnateTraitImpediment,
 	InsufficientExperienceImpediment,
 	InsufficientGoldImpediment,
@@ -139,6 +140,14 @@ export class CharacterState {
 			return state.getEntityAcquisitionImpediment(entity);
 		}
 
+		if (entity.requiredDiscipline) {
+			const disc = entity.requiredDiscipline;
+			const unlocking = disc.unlockingArchetypes;
+			if (unlocking.length > 0 && !unlocking.some((a) => a.isStandard() || this.hasUpgrade(a))) {
+				return new DisciplineRequiredImpediment(disc, unlocking);
+			}
+		}
+
 		if (
 			entity.requiredArchetype &&
 			!entity.requiredArchetype.isStandard() &&
@@ -166,6 +175,17 @@ export class CharacterState {
 	 * in the order they should be acquired (ancestors first).
 	 */
 	public getMissingDependencies(entity: Entity): Entity[] {
+		// For traits/skills in a discipline: check if any unlocking archetype is owned.
+		// If not, return the dep chain for the first unlocking archetype.
+		if (entity.requiredDiscipline) {
+			const disc = entity.requiredDiscipline;
+			const unlocking = disc.unlockingArchetypes;
+			if (unlocking.length > 0 && !unlocking.some((a) => this.hasUpgrade(a))) {
+				return this.getMissingDependencies(unlocking[0]);
+			}
+			return [];
+		}
+
 		const missing: Entity[] = [];
 		let current = entity.requiredArchetype;
 

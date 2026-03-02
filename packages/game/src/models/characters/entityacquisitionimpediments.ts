@@ -1,4 +1,5 @@
 import type { Archetype } from '../archetype';
+import type { Discipline } from '../discipline';
 
 /** An impediment that prevents a character from acquiring an entity. */
 export abstract class EntityAcquisitionImpediment {}
@@ -17,6 +18,21 @@ export class ArchetypeRequiredImpediment extends EntityAcquisitionImpediment {
 	constructor(archetype: Archetype) {
 		super();
 		this.archetype = archetype;
+	}
+}
+
+/**
+ * Indicates that the entity belongs to a discipline that is not yet unlocked.
+ * The character must acquire at least one of the unlocking archetypes to gain access.
+ */
+export class DisciplineRequiredImpediment extends EntityAcquisitionImpediment {
+	readonly discipline: Discipline;
+	readonly unlockingArchetypes: ReadonlyArray<Archetype>;
+
+	constructor(discipline: Discipline, unlockingArchetypes: ReadonlyArray<Archetype>) {
+		super();
+		this.discipline = discipline;
+		this.unlockingArchetypes = unlockingArchetypes;
 	}
 }
 

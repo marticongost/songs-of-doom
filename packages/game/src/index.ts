@@ -5,6 +5,7 @@ export { entities, EntityCatalog, getEntryMetadata, type EntryMetadata } from '.
 export { Ally } from './models/ally';
 export { Archetype } from './models/archetype';
 export { Creature } from './models/creature';
+export { Discipline } from './models/discipline';
 export { Encounter } from './models/encounter';
 export { ChildEntity, Entity, ParentEntity } from './models/entity';
 export { Event } from './models/event';

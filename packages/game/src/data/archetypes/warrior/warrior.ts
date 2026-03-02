@@ -8,6 +8,7 @@ export default new Archetype({
 		es: 'Guerrero',
 		en: 'Warrior'
 	},
+	disciplines: ['might', 'dexterity'],
 	xpCost: 5,
 	capabilities: [
 		new Opportunity({

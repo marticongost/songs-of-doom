@@ -7,6 +7,9 @@
 
 	For {@link ArchetypeRequiredImpediment}, when `entity` and `entityManager` are provided, also shows
 	a button to acquire the entity along with all missing required archetypes.
+
+	For {@link DisciplineRequiredImpediment}, when `entityManager` is provided, shows one button per
+	unlocking archetype to acquire that archetype (and its dep chain) to unlock the discipline.
 -->
 <script lang="ts">
 	import type { EntityManager } from '$lib/components/entities/entitymanager';
@@ -18,12 +21,13 @@
 	import { plural2 } from '@songsofdoom/common';
 	import {
 		ArchetypeRequiredImpediment,
+		DisciplineRequiredImpediment,
 		InnateTraitImpediment,
-		PermanentTraitRemovalImpediment,
 		InsufficientExperienceImpediment,
 		InsufficientGoldImpediment,
 		LimitReachedImpediment,
 		MinimumAmountReachedRemovalImpediment,
+		PermanentTraitRemovalImpediment,
 		StandardTraitRemovalImpediment,
 		type Entity,
 		type EntityAcquisitionImpediment,
@@ -80,6 +84,33 @@
 			entityManager.onEntityAdded(e);
 		}
 	}
+
+	/**
+	 * For DisciplineRequiredImpediment, computes per-archetype acquisition info.
+	 */
+	const disciplineArchetypeInfos = $derived.by(() => {
+		if (!(impediment instanceof DisciplineRequiredImpediment) || !entityManager) {
+			return undefined;
+		}
+
+		return impediment.unlockingArchetypes.map((archetype) => {
+			const missingDeps = entityManager.getMissingDependencies(archetype);
+			const toAcquire = [...missingDeps, archetype];
+			const totalXpCost = toAcquire.reduce((sum, e) => sum + (e.xpCost ?? 0), 0);
+			const totalGoldCost = toAcquire.reduce((sum, e) => sum + (e.goldCost ?? 0), 0);
+			const canAcquire = !entityManager.getAcquisitionImpediment(archetype, {
+				acquireDependencies: true
+			});
+			return { archetype, toAcquire, totalXpCost, totalGoldCost, canAcquire };
+		});
+	});
+
+	function handleAddArchetype(toAcquire: Array<Entity>) {
+		if (!entityManager) return;
+		for (const e of toAcquire) {
+			entityManager.onEntityAdded(e);
+		}
+	}
 </script>
 
 <span {...standardAttributes(attributes, 'impediment-message')}>
@@ -117,6 +148,41 @@
 				</div>
 			</Button>
 		{/if}
+	{:else if impediment instanceof DisciplineRequiredImpediment}
+		<div class="missing-discipline">
+			<Text
+				ca="Requereix la disciplina %(discipline)."
+				es="Requiere la disciplina %(discipline)."
+				en="Requires the %(discipline) discipline."
+			>
+				{#snippet discipline()}
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- entityUrl.get() uses resolve() -->
+					<a href={entityUrl.get(impediment.discipline)} target="_blank">
+						<Text {...impediment.discipline.title} />
+					</a>
+				{/snippet}
+			</Text>
+		</div>
+		<div class="missing-discipline-buttons">
+			{#if disciplineArchetypeInfos}
+				{#each disciplineArchetypeInfos as archetypeInfo (archetypeInfo.archetype.variantId)}
+					{#if archetypeInfo.canAcquire}
+						<Button onclick={() => handleAddArchetype(archetypeInfo.toAcquire)}>
+							<div class="add-all-elements">
+								<Text ca="Adquirir via" es="Adquirir mediante" en="Acquire via" />
+								<Text {...archetypeInfo.archetype.title} />
+								{#if archetypeInfo.totalXpCost > 0}
+									<ExperienceIndicator amount={archetypeInfo.totalXpCost} />
+								{/if}
+								{#if archetypeInfo.totalGoldCost > 0}
+									<GoldIndicator amount={archetypeInfo.totalGoldCost} />
+								{/if}
+							</div>
+						</Button>
+					{/if}
+				{/each}
+			{/if}
+		</div>
 	{:else if impediment instanceof LimitReachedImpediment}
 		<Text
 			ca="Ja tens el màxim de %(max) %(copies)."
@@ -188,8 +254,12 @@
 		}
 	}
 
-	.missing-archetypes {
+	.missing-discipline {
 		margin-bottom: rz.size(md);
+	}
+
+	.missing-discipline-buttons {
+		@include rz.column(sm);
 	}
 
 	.add-all-elements {

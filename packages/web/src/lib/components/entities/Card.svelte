@@ -1,7 +1,10 @@
 <script lang="ts" module>
-	const getSetIcon = (set: Archetype | Module): string => {
+	import { Archetype, Discipline, Module } from '@songsofdoom/game';
+	const getSetIcon = (set: Archetype | Discipline | Module): string => {
 		if (set instanceof Archetype) {
 			return `archetypes/${set.id}.svg`;
+		} else if (set instanceof Discipline) {
+			return `disciplines/${set.id}.svg`;
 		} else {
 			return `modules/${set.id}.svg`;
 		}
@@ -10,6 +13,7 @@
 
 <script lang="ts">
 	import CapabilityList from '$lib/components/capabilities/CapabilityList.svelte';
+	import DisciplineList from '$lib/components/disciplines/DisciplineList.svelte';
 	import type { EntityManager } from '$lib/components/entities/entitymanager';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import PropertyList from '$lib/components/properties/PropertyList.svelte';
@@ -18,8 +22,9 @@
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
 	import { entityUrl } from '$lib/urls';
-	import type { Entity, Module } from '@songsofdoom/game';
-	import { Ally, Archetype, attributeTypes, Creature, Item, Skill } from '@songsofdoom/game';
+	import type { Entity } from '@songsofdoom/game';
+	import { Ally, attributeTypes, Creature, Item, Skill } from '@songsofdoom/game';
+	import { isArchetype } from '../../../../../game/src/models/entity';
 	import CapabilityCostList from '../capabilities/CapabilityCostList.svelte';
 	import ChargesChip from '../capabilities/ChargesChip.svelte';
 	import Image from '../Image.svelte';
@@ -98,9 +103,9 @@
 			<div class="title"><Text {...entity.title} /></div>
 			<CardLevel {entity} />
 			<div class="acquisition">
-				{#if entity.requiredArchetype}
-					<div class="required-archetype">
-						<Text {...entity.requiredArchetype.title} />
+				{#if entity.requiredEntity}
+					<div class="required-entity">
+						<Text {...entity.requiredEntity.title} />
 					</div>
 				{/if}
 				{#if entity.xpCost !== undefined}
@@ -146,6 +151,15 @@
 		<div class="body">
 			{#if entity.description}
 				<div class="description">{entity.description}</div>
+			{/if}
+			{#if isArchetype(entity) && entity.disciplines.length}
+				<div class="disciplines">
+					<span class="disciplines-title">
+						<InlineSvg src="unlock.svg" />
+						<Text ca="Disciplines:" es="Disciplinas:" en="Disciplines:" />
+					</span>
+					<DisciplineList disciplines={entity.disciplines} />
+				</div>
 			{/if}
 			<CapabilityList class="capabilities" capabilities={entity.capabilities} />
 			{#if entity.attachmentCapabilities.length > 0}
@@ -304,7 +318,7 @@
 		margin-left: auto;
 	}
 
-	.required-archetype {
+	.required-entity {
 		font-size: 0.9em;
 		opacity: 0.7;
 	}
@@ -354,6 +368,24 @@
 		:global(.capabilities) {
 			@include rz.padding(sm);
 			flex: 1 1 auto;
+		}
+	}
+
+	.disciplines {
+		padding: rz.size(sm);
+		padding-bottom: 0;
+	}
+
+	.disciplines-title {
+		font-weight: bold;
+		color: var(--text-highlight);
+		--svg-color: var(--text-subtle-color);
+
+		:global(svg) {
+			flex: 0 0 auto;
+			position: relative;
+			top: calc(#{rz.size(xs)} * -0.5);
+			color: var(--text-subtle-color);
 		}
 	}
 

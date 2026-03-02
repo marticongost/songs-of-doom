@@ -100,6 +100,10 @@ export const entities = new EntityCatalog(
 		eager: true,
 		import: 'default'
 	}),
+	import.meta.glob<Entity>(`./data/disciplines/**/*.ts`, {
+		eager: true,
+		import: 'default'
+	}),
 	import.meta.glob<Ally>(`./data/allies/**/*.ts`, {
 		eager: true,
 		import: 'default'

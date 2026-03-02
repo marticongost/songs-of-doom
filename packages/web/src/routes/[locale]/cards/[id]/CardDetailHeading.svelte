@@ -2,6 +2,8 @@
 	const getSetIcon = (entity: Entity) => {
 		if (entity.set instanceof Archetype) {
 			return `archetypes/${entity.set.id}.svg`;
+		} else if (entity.set instanceof Discipline) {
+			return `disciplines/${entity.set.id}.svg`;
 		} else if (entity.set instanceof Module) {
 			return `modules/${entity.set.id}.svg`;
 		}
@@ -14,7 +16,7 @@
 	import InlineSvg from '$lib/components/InlineSvg.svelte';
 	import CardLevel from '$lib/components/entities/CardLevel.svelte';
 	import type { Entity } from '@songsofdoom/game';
-	import { Archetype, Module } from '@songsofdoom/game';
+	import { Archetype, Discipline, Module } from '@songsofdoom/game';
 	const setIcon = $derived(getSetIcon(page.data.entity as Entity));
 </script>
 
