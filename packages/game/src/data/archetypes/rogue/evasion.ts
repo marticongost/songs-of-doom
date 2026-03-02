@@ -1,3 +1,5 @@
+import { Opportunity } from '../../../models/capabilities';
+import { DefendEffect } from '../../../models/effects';
 import { Skill } from '../../../models/skill';
 import { upgradable } from '../../../models/upgrades';
 
@@ -9,5 +11,15 @@ export default upgradable(Skill, 2, (variants) => ({
 	},
 	xpCost: variants.values(0, 2),
 	discardReward: { agility: variants.level },
-	capabilities: []
+	capabilities: [
+		new Opportunity({
+			triggers: ['receivingAttack'],
+			cost: { agility: 1 },
+			effects: [
+				new DefendEffect({
+					expression: variants.values(2, 3)
+				})
+			]
+		})
+	]
 }));
