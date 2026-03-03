@@ -1,19 +1,181 @@
 <script lang="ts" module>
+	import type { LocalisedText } from '@songsofdoom/common';
+	import type { TargetType } from '@songsofdoom/game';
+
 	const getGender = (target: Target | TargetDiscriminator | undefined, locale: string) => {
 		if (!target || locale === 'en') return undefined;
-		if (target.type === 'location') return 'feminine';
+		if (target.type?.has('location')) return 'feminine';
 		return 'masculine';
+	};
+
+	const targetsText: Record<
+		TargetType,
+		{ determinate: LocalisedText; indeterminate?: LocalisedText; plural?: LocalisedText }
+	> = {
+		owner: {
+			determinate: {
+				ca: 'el propietari',
+				es: 'el propietario',
+				en: 'the owner'
+			}
+		},
+		'active-player': {
+			determinate: {
+				ca: 'el jugador actiu',
+				es: 'el jugador activo',
+				en: 'the active player'
+			}
+		},
+		attacker: {
+			determinate: {
+				ca: "l'atacant",
+				es: 'el atacante',
+				en: 'the attacker'
+			},
+			indeterminate: {
+				ca: 'un atacant',
+				es: 'un atacante',
+				en: 'an attacker'
+			},
+			plural: {
+				ca: 'atacants',
+				es: 'atacantes',
+				en: 'attackers'
+			}
+		},
+		defender: {
+			determinate: {
+				ca: 'el defensor',
+				es: 'el defensor',
+				en: 'the defender'
+			},
+			indeterminate: {
+				ca: 'un defensor',
+				es: 'un defensor',
+				en: 'a defender'
+			},
+			plural: {
+				ca: 'defensors',
+				es: 'defensores',
+				en: 'defenders'
+			}
+		},
+		enemy: {
+			determinate: {
+				ca: "l'enemic",
+				es: 'el enemigo',
+				en: 'the enemy'
+			},
+			indeterminate: {
+				ca: 'un enemic',
+				es: 'un enemigo',
+				en: 'an enemy'
+			},
+			plural: {
+				ca: 'enemics',
+				es: 'enemigos',
+				en: 'enemies'
+			}
+		},
+		ally: {
+			determinate: {
+				ca: "l'aliat",
+				es: 'el aliado',
+				en: 'the ally'
+			},
+			indeterminate: {
+				ca: 'un aliat',
+				es: 'un aliado',
+				en: 'an ally'
+			},
+			plural: {
+				ca: 'aliats',
+				es: 'aliados',
+				en: 'allies'
+			}
+		},
+		object: {
+			determinate: {
+				ca: "l'objecte",
+				es: 'el objeto',
+				en: 'the object'
+			},
+			indeterminate: {
+				ca: 'un objecte',
+				es: 'un objeto',
+				en: 'an object'
+			},
+			plural: {
+				ca: 'objectes',
+				es: 'objetos',
+				en: 'objects'
+			}
+		},
+		location: {
+			determinate: {
+				ca: "l'ubicació",
+				es: 'la ubicación',
+				en: 'the location'
+			},
+			indeterminate: {
+				ca: 'una ubicació',
+				es: 'una ubicación',
+				en: 'a location'
+			},
+			plural: {
+				ca: 'ubicacions',
+				es: 'ubicaciones',
+				en: 'locations'
+			}
+		}
+	};
+
+	interface GetTextOptions {
+		target?: Target | TargetDiscriminator;
+		relation: Props['relation'];
+		isDeterminate: boolean;
+		isPlural: boolean;
+	}
+
+	const getText = ({
+		target,
+		relation,
+		isDeterminate,
+		isPlural
+	}: GetTextOptions): string | undefined => {
+		if (!target?.type) return undefined;
+		const fragments: string[] = [];
+		for (const type of target.type) {
+			let typeText: LocalisedText | undefined;
+			if (isDeterminate) {
+				typeText = targetsText[type].determinate;
+			} else if (isPlural) {
+				typeText = targetsText[type].plural;
+			} else {
+				typeText = targetsText[type].indeterminate;
+			}
+			if (typeText) {
+				fragments.push(translate(typeText, getLocale()));
+			}
+		}
+		return wrapText(fragments.join(', '), relation);
+	};
+
+	const wrapText = (text: string | LocalisedText, relation: Props['relation']): string => {
+		const localisedTarget = typeof text === 'string' ? text : translate(text, getLocale());
+		if (relation === 'possessive') {
+			return possessiveRelation(localisedTarget, getLocale());
+		} else if (relation === 'to') {
+			return toRelation(localisedTarget, getLocale());
+		} else {
+			return localisedTarget;
+		}
 	};
 </script>
 
 <script lang="ts">
 	import { getLocale } from '$lib/context/locale';
-	import {
-		possessiveRelation,
-		toRelation,
-		translate,
-		type LocalisedText
-	} from '@songsofdoom/common/localisation';
+	import { possessiveRelation, toRelation, translate } from '@songsofdoom/common/localisation';
 	import { Target, type TargetCardinality, type TargetDiscriminator } from '@songsofdoom/game';
 	import ExpressionChip from '../expressions/ExpressionChip.svelte';
 	import Text from '../localisation/Text.svelte';
@@ -26,10 +188,9 @@
 	}
 
 	const { target, relation, cardinality, ...attributes }: Props = $props();
-	const locale = getLocale();
 
 	const isPlural = $derived(
-		target && (cardinality ?? ('cardinality' in target && target.cardinality)) === 'multiple'
+		!!target && (cardinality ?? ('cardinality' in target && target.cardinality)) === 'multiple'
 	);
 	const isDeterminate = $derived(
 		target instanceof Target &&
@@ -37,83 +198,38 @@
 			target.selection !== 'player-chosen'
 	);
 	const gender = $derived(getGender(target, getLocale()));
+	const text = $derived(getText({ target, relation, isDeterminate, isPlural }));
 </script>
-
-{#snippet text(localisedText: LocalisedText)}
-	{@const localisedTarget = translate(localisedText, locale)}
-	{#if relation === 'possessive'}
-		{possessiveRelation(localisedTarget, locale)}
-	{:else if relation === 'to'}
-		{toRelation(localisedTarget, locale)}
-	{:else}
-		{localisedTarget}
-	{/if}
-{/snippet}
 
 {#if target}
 	<span {...standardAttributes(attributes, 'target-chip')}>
-		{#if target.type === 'owner'}
-			{@render text({ ca: 'el propietari', es: 'el propietario', en: 'the owner' })}
-		{:else if target.type === 'active-player'}
-			{@render text({ ca: 'el jugador actiu', es: 'el jugador activo', en: 'the active player' })}
-		{:else if target.type === 'attacker'}
-			{@render text({ ca: "l'atacant", es: 'el atacante', en: 'the attacker' })}
-		{:else if target.type === 'defender'}
-			{@render text({ ca: 'el defensor', es: 'el defensor', en: 'the defender' })}
-		{:else if target.type === 'enemy'}
-			{#if isPlural}
-				{@render text({ ca: 'enemics', es: 'enemigos', en: 'enemies' })}
-			{:else if isDeterminate}
-				{@render text({ ca: "l'enemic", es: 'el enemigo', en: 'the enemy' })}
-			{:else}
-				{@render text({ ca: 'un enemic', es: 'un enemigo', en: 'an enemy' })}
-			{/if}
-		{:else if target.type === 'ally'}
-			{#if isPlural}
-				{@render text({ ca: 'aliats', es: 'aliados', en: 'allies' })}
-			{:else if isDeterminate}
-				{@render text({ ca: "l'aliat", es: 'el aliado', en: 'the ally' })}
-			{:else}
-				{@render text({ ca: 'un aliat', es: 'un aliado', en: 'an ally' })}
-			{/if}
-		{:else if target.type === 'object'}
-			{#if isPlural}
-				{@render text({ ca: 'objectes', es: 'objetos', en: 'objects' })}
-			{:else if isDeterminate}
-				{@render text({ ca: "l'objecte", es: 'el objeto', en: 'the object' })}
-			{:else}
-				{@render text({ ca: 'un objecte', es: 'un objeto', en: 'an object' })}
-			{/if}
-		{:else if target.type === 'location'}
-			{#if isPlural}
-				{@render text({ ca: 'ubicacions', es: 'ubicaciones', en: 'locations' })}
-			{:else if isDeterminate}
-				{@render text({ ca: "l'ubicació", es: 'la ubicación', en: 'the location' })}
-			{:else}
-				{@render text({ ca: 'una ubicació', es: 'una ubicación', en: 'a location' })}
-			{/if}
+		{#if text}
+			{text}
 		{/if}
 		{#if target instanceof Target && target.variable}
+			{#if !text && relation}
+				{#if relation === 'possessive'}
+					<Text ca="de" es="de" en="of" />
+				{:else if relation === 'to'}
+					<Text ca="a" es="a" en="to" />
+				{/if}
+			{/if}
 			<span class="variable">
 				{target.variable}
 			</span>
 		{/if}
 		<ExpressionChip expression={target.condition} />
 		{#if target instanceof Target}
-			{#if target.selection === 'player-chosen'}
-				<Text
-					ca={gender === 'feminine' ? 'escollida pel jugador' : 'escollit pel jugador'}
-					es={gender === 'feminine' ? 'elegida por el jugador' : 'elegido por el jugador'}
-					en="chosen by the player"
-				/>
-			{:else if target.selection === 'random'}
+			{#if target.selection === 'player-chosen'}{:else if target.selection === 'random'}
 				<Text
 					ca={gender === 'feminine' ? 'aleatòria' : 'aleatori'}
 					es={gender === 'feminine' ? 'aleatoria' : 'aleatorio'}
 					en="random"
 				/>
+			{:else if target.selection === 'this'}
+				<Text ca="d'aquesta carta" es="de esta carta" en="of this card" />
 			{:else if target.selection === 'closest'}
-				{#if target.type === 'location'}
+				{#if target.type?.has('location')}
 					<Text ca="actual" es="actual" en="current" />
 				{:else}
 					<Text

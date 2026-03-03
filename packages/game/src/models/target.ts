@@ -33,6 +33,7 @@ export type TargetCardinality = 'single' | 'multiple';
 /** A selection method for a target. Used by {@link Target} if more than one target
  * would match a {@link TargetDiscriminator}. */
 export type TargetSelection =
+	| 'this'
 	| 'player-chosen'
 	| 'random'
 	| 'closest'
@@ -42,8 +43,8 @@ export type TargetSelection =
 
 /** Constructor parameters for the {@link TargetDiscriminator} class. */
 export interface TargetDiscriminatorProps<T extends TargetType = TargetType> {
-	/** The type of target. */
-	type: T;
+	/** The type(s) of target. Omit or set to undefined to accept targets of any type. */
+	type?: T | ReadonlyArray<T> | ReadonlySet<T>;
 
 	/** An optional condition that must be met for the target to be valid. */
 	condition?: BooleanExpressionType;
@@ -51,24 +52,38 @@ export interface TargetDiscriminatorProps<T extends TargetType = TargetType> {
 
 export type TargetDiscriminatorSpec<T extends TargetType = TargetType> =
 	| T
+	| ReadonlyArray<T>
+	| ReadonlySet<T>
 	| TargetDiscriminator<T>
 	| TargetDiscriminatorProps<T>;
 
+function normalizeTargetType<T extends TargetType>(
+	type: T | ReadonlyArray<T> | ReadonlySet<T> | undefined
+): Set<T> | undefined {
+	if (type === undefined) return undefined;
+	if (typeof type === 'string') return new Set([type]);
+	return new Set(type);
+}
+
 /** Describes a predicate that can be used to determine valid targets for a game effect. */
 export class TargetDiscriminator<T extends TargetType = TargetType> {
-	/** The type of target. */
-	readonly type: T;
+	/** The type(s) of target, or undefined to accept targets of any type. */
+	readonly type: Set<T> | undefined;
 
 	/** An optional condition that must be met for the target to be valid. */
 	readonly condition?: BooleanExpressionType;
 
-	constructor(props: T | TargetDiscriminatorProps<T>) {
+	constructor(props: T | ReadonlyArray<T> | ReadonlySet<T> | TargetDiscriminatorProps<T>) {
 		if (typeof props === 'string') {
-			this.type = props;
+			this.type = new Set([props]);
+			this.condition = undefined;
+		} else if (Array.isArray(props) || props instanceof Set) {
+			this.type = new Set(props as Iterable<T>);
 			this.condition = undefined;
 		} else {
-			this.type = props.type;
-			this.condition = props.condition;
+			const p = props as TargetDiscriminatorProps<T>;
+			this.type = normalizeTargetType(p.type);
+			this.condition = p.condition;
 		}
 	}
 }
@@ -88,7 +103,12 @@ export interface TargetProps<
 	variable?: string;
 }
 
-export type TargetSpec<T extends TargetType = TargetType> = T | Target<T> | TargetProps<T>;
+export type TargetSpec<T extends TargetType = TargetType> =
+	| T
+	| ReadonlyArray<T>
+	| ReadonlySet<T>
+	| Target<T>
+	| TargetProps<T>;
 
 /** Describes the process and constraints for selecting a target for a game effect. */
 export class Target<T extends TargetType = TargetType> extends TargetDiscriminator<T> {
@@ -101,16 +121,17 @@ export class Target<T extends TargetType = TargetType> extends TargetDiscriminat
 	/** The variable to which the selected target(s) will be assigned. */
 	readonly variable?: string;
 
-	constructor(props: T | TargetProps<T>) {
+	constructor(props: T | ReadonlyArray<T> | ReadonlySet<T> | TargetProps<T>) {
 		super(props);
-		if (typeof props === 'string') {
+		if (typeof props === 'string' || Array.isArray(props) || props instanceof Set) {
 			this.cardinality = 'single';
 			this.selection = 'player-chosen';
 			this.variable = undefined;
 		} else {
-			this.cardinality = props.cardinality ?? 'single';
-			this.selection = props.selection ?? 'player-chosen';
-			this.variable = props.variable;
+			const p = props as TargetProps<T>;
+			this.cardinality = p.cardinality ?? 'single';
+			this.selection = p.selection ?? 'player-chosen';
+			this.variable = p.variable;
 		}
 	}
 }

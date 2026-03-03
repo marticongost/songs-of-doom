@@ -1,7 +1,7 @@
+import { finalise } from '@songsofdoom/common';
 import type { BooleanExpressionType } from '../expressions';
+import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
-
-export type TriggerAttackCard = 'any' | 'this';
 
 /**
  * Properties for creating a TriggerAttackEffect.
@@ -23,7 +23,7 @@ export interface TriggerAttackEffectProps {
 	/**
 	 * Specifies which cards are eligible for the triggered attack action.
 	 */
-	card?: TriggerAttackCard;
+	card?: TargetSpec;
 }
 
 /**
@@ -49,12 +49,12 @@ export class TriggerAttackEffect extends Effect {
 	/**
 	 * Specifies which cards are eligible for the triggered attack action.
 	 */
-	readonly card: TriggerAttackCard;
+	readonly card?: Target;
 
 	constructor({ modifiers, condition, card }: TriggerAttackEffectProps = {}) {
 		super();
 		this.modifiers = modifiers ?? [];
 		this.condition = condition;
-		this.card = card ?? 'any';
+		this.card = finalise(Target, card);
 	}
 }

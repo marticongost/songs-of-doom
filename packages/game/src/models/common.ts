@@ -11,11 +11,7 @@ export const fullyRechargeOnChapterStart = new Obligation({
 
 export const shootBeforeEngaged = new Opportunity({
 	triggers: ['beforeEnemyEngagesWithSelf'],
-	effects: [
-		new TriggerAttackEffect({
-			card: 'this'
-		})
-	]
+	effects: [new TriggerAttackEffect({ card: { selection: 'this' } })]
 });
 
 export const attachOrReplaceWithNewEncounterWhenRevealed = new Obligation({
