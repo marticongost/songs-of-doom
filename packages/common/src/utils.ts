@@ -3,8 +3,12 @@ export type Constructor<T, Props> = new (props: Props) => T;
 // Wrap the conditional return type so the function stays readable
 type Finalised<P, T> = P extends undefined ? undefined : T;
 
-export const finalise = <T, Props, P extends T | Props | undefined>(
-	model: Constructor<T, Props>,
+export const finalise = <
+	T,
+	C extends abstract new (...args: never[]) => T,
+	P extends T | ConstructorParameters<C>[0] | undefined
+>(
+	model: C,
 	props: P
 ): Finalised<P, T> => {
 	if (props === undefined) {
@@ -15,7 +19,9 @@ export const finalise = <T, Props, P extends T | Props | undefined>(
 		return props as Finalised<P, T>;
 	}
 
-	return new model(props as Props) as Finalised<P, T>;
+	return new (model as unknown as Constructor<T, ConstructorParameters<C>[0]>)(
+		props as ConstructorParameters<C>[0]
+	) as Finalised<P, T>;
 };
 
 export type MapToRecordOptions<
