@@ -180,6 +180,8 @@ body {
 	// Instructions
 	--instruction-color: #{$palette-spindle};
 	--instruction-font: var(--heading-font);
+	--variable-color: #{$palette-chatelle};
+	--variable-font: var(--instruction-font);
 }
 
 @include rz.reset-elements;

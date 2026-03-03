@@ -93,6 +93,11 @@
 				{@render text({ ca: 'una ubicació', es: 'una ubicación', en: 'a location' })}
 			{/if}
 		{/if}
+		{#if target instanceof Target && target.variable}
+			<span class="variable">
+				{target.variable}
+			</span>
+		{/if}
 		<ExpressionChip expression={target.condition} />
 		{#if target instanceof Target}
 			{#if target.selection === 'player-chosen'}
@@ -133,3 +138,11 @@
 		{/if}
 	</span>
 {/if}
+
+<style lang="scss">
+	.variable {
+		font-weight: bold;
+		font-family: var(--variable-font);
+		color: var(--variable-color);
+	}
+</style>

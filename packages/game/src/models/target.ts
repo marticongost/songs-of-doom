@@ -82,6 +82,10 @@ export interface TargetProps<
 
 	/** The method used to select the target(s). Defaults to 'player-chosen'. */
 	selection?: TargetSelection;
+
+	/** Assigns the selected target to a variable, for later reference in other effects
+	 * or expressions. */
+	variable?: string;
 }
 
 export type TargetSpec<T extends TargetType = TargetType> = T | Target<T> | TargetProps<T>;
@@ -94,14 +98,19 @@ export class Target<T extends TargetType = TargetType> extends TargetDiscriminat
 	/** The method used to select the target(s). */
 	readonly selection: TargetSelection;
 
+	/** The variable to which the selected target(s) will be assigned. */
+	readonly variable?: string;
+
 	constructor(props: T | TargetProps<T>) {
 		super(props);
 		if (typeof props === 'string') {
 			this.cardinality = 'single';
 			this.selection = 'player-chosen';
+			this.variable = undefined;
 		} else {
 			this.cardinality = props.cardinality ?? 'single';
 			this.selection = props.selection ?? 'player-chosen';
+			this.variable = props.variable;
 		}
 	}
 }
