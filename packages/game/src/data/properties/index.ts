@@ -9,6 +9,7 @@ export { default as permanent } from './permanent';
 export { default as piercing } from './piercing';
 export { default as projectile } from './projectile';
 export { default as shield } from './shield';
+export { default as smallWeapon } from './small-weapon';
 export { default as standard } from './standard';
 export { default as toughness } from './toughness';
 export { default as town } from './town';
