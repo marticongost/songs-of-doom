@@ -1,6 +1,7 @@
 import { Archetype } from '../../../models/archetype';
-import { Opportunity } from '../../../models/capabilities';
-import { TransformFocusEffect } from '../../../models/effects';
+import { Constant, Opportunity } from '../../../models/capabilities';
+import { TalentEffect, TransformFocusEffect } from '../../../models/effects';
+import { lightArmour } from '../../talents';
 
 export default new Archetype({
 	title: {
@@ -11,6 +12,9 @@ export default new Archetype({
 	xpCost: 5,
 	disciplines: ['dexterity', 'guile', 'security'],
 	capabilities: [
+		new Constant({
+			effects: [new TalentEffect({ talent: lightArmour })]
+		}),
 		new Opportunity({
 			triggers: ['payingCapability'],
 			cost: { cardTransition: 'exhaust' },

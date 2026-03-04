@@ -3,6 +3,7 @@ import { ConferPropertiesEffect } from '../../../models/effects';
 import { Item } from '../../../models/inventory';
 import armor from '../../properties/armor';
 import toughness from '../../properties/toughness';
+import { lightArmour } from '../../talents';
 
 export default new Item({
 	title: {
@@ -13,6 +14,7 @@ export default new Item({
 	slot: 'chest',
 	properties: [armor],
 	goldCost: 3,
+	requiredTalent: lightArmour,
 	capabilities: [
 		new Constant({
 			effects: [new ConferPropertiesEffect({ properties: [toughness.with({ value: 1 })] })]
