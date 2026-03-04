@@ -24,7 +24,7 @@
 	import { entityUrl } from '$lib/urls';
 	import type { Entity } from '@songsofdoom/game';
 	import { Ally, attributeTypes, Creature, Item, Skill } from '@songsofdoom/game';
-	import { isArchetype } from '../../../../../game/src/models/entity';
+	import { isArchetype, isItem } from '../../../../../game/src/models/entity';
 	import CapabilityCostList from '../capabilities/CapabilityCostList.svelte';
 	import ChargesChip from '../capabilities/ChargesChip.svelte';
 	import Image from '../Image.svelte';
@@ -35,6 +35,7 @@
 	import SanityIndicator from '../indicators/SanityIndicator.svelte';
 	import InlineSvg from '../InlineSvg.svelte';
 	import AttributesSheet from '../StatsSheet.svelte';
+	import TalentChip from '../talents/TalentChip.svelte';
 	import CardLevel from './CardLevel.svelte';
 	import EntityToolbar from './EntityToolbar.svelte';
 
@@ -152,7 +153,16 @@
 			{#if entity.description}
 				<div class="description">{entity.description}</div>
 			{/if}
-			{#if isArchetype(entity) && entity.disciplines.length}
+
+			{#if isItem(entity) && entity.requiredTalent}
+				<div class="required-talent">
+					<span class="required-talent-title">
+						<InlineSvg src="lock.svg" />
+						<Text ca="Requereix:" es="Requiere:" en="Requires:" />
+					</span>
+					<TalentChip talent={entity.requiredTalent} />
+				</div>
+			{:else if isArchetype(entity) && entity.disciplines.length}
 				<div class="disciplines">
 					<span class="disciplines-title">
 						<InlineSvg src="unlock.svg" />
@@ -161,6 +171,7 @@
 					<DisciplineList disciplines={entity.disciplines} />
 				</div>
 			{/if}
+
 			<CapabilityList class="capabilities" capabilities={entity.capabilities} />
 			{#if entity.attachmentCapabilities.length > 0}
 				<div class="attachment">
@@ -371,12 +382,14 @@
 		}
 	}
 
-	.disciplines {
+	.disciplines,
+	.required-talent {
 		padding: rz.size(sm);
 		padding-bottom: 0;
 	}
 
-	.disciplines-title {
+	.disciplines-title,
+	.required-talent-title {
 		font-weight: bold;
 		color: var(--text-highlight);
 		--svg-color: var(--text-subtle-color);
