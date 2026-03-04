@@ -33,6 +33,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 	import Toolbar from '../toolbar/Toolbar.svelte';
 	import ToolbarButton from '../toolbar/ToolbarButton.svelte';
 	import Card from './Card.svelte';
+	import { isLocked } from './common';
 	import type { EntityManager } from './entitymanager';
 	import EntityToolbar from './EntityToolbar.svelte';
 
@@ -50,7 +51,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 		onclose?: () => void;
 
 		/** Whether to visually dim unavailable entities. */
-		dimUnavailableEntities?: boolean;
+		dimLocked?: boolean;
 	}
 
 	const {
@@ -58,7 +59,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 		siblingCount = 2,
 		entityManager,
 		onclose,
-		dimUnavailableEntities = false,
+		dimLocked = false,
 		...attributes
 	}: Props = $props();
 
@@ -299,7 +300,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 						}}
 						aria-label={offset === 0 ? undefined : `Go to card ${currentIndex + offset + 1}`}
 						{entityManager}
-						dimmed={dimUnavailableEntities && !!entityManager?.getAcquisitionImpediment(entity)}
+						dimmed={dimLocked && isLocked(entity, entityManager)}
 					/>
 				</div>
 			{/each}

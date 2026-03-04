@@ -183,7 +183,7 @@
 			bind:this={catalogRef}
 			entities={allEntities}
 			search={searchState}
-			dimUnavailableEntities={true}
+			dimLocked={true}
 			{entityManager}
 		/>
 	{/snippet}

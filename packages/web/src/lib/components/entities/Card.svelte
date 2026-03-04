@@ -58,7 +58,7 @@
 		entity,
 		linked = true,
 		onclick,
-		entityManager: entityManager,
+		entityManager,
 		dimmed = false,
 		...rest
 	}: Props = $props();

@@ -37,7 +37,7 @@ Optionally includes a carousel viewer for browsing entities when an EntityManage
 		entityManager?: EntityManager;
 
 		/** Whether to visually dim unavailable entities. */
-		dimUnavailableEntities?: boolean;
+		dimLocked?: boolean;
 	}
 
 	const {
@@ -45,7 +45,7 @@ Optionally includes a carousel viewer for browsing entities when an EntityManage
 		search,
 		autofocus = false,
 		entityManager,
-		dimUnavailableEntities = false,
+		dimLocked = false,
 		...attributes
 	}: Props = $props();
 
@@ -72,11 +72,5 @@ Optionally includes a carousel viewer for browsing entities when an EntityManage
 
 <div bind:this={catalogElement} {...standardAttributes(attributes, 'entity-catalog')}>
 	<EntitySearchToolbar bind:this={toolbar} state={search} keyboardNav={nav} {autofocus} />
-	<EntityListing
-		{...results}
-		{appearance}
-		keyboardNav={nav}
-		{entityManager}
-		{dimUnavailableEntities}
-	/>
+	<EntityListing {...results} {appearance} keyboardNav={nav} {entityManager} {dimLocked} />
 </div>

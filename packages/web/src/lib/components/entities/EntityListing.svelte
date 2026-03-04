@@ -7,6 +7,7 @@
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import Card from './Card.svelte';
 	import CardButton from './CardButton.svelte';
+	import { isLocked } from './common';
 	import EntityCarousel, { type EntityCarouselApi } from './EntityCarousel.svelte';
 	import type { EntityManager } from './entitymanager';
 
@@ -21,7 +22,7 @@
 		entityManager?: EntityManager;
 
 		/** Whether to visually dim unavailable entities. */
-		dimUnavailableEntities?: boolean;
+		dimLocked?: boolean;
 
 		/** Enables the carousel for viewing without add/remove options. Ignored when entityManager is provided. */
 		viewOnly?: boolean;
@@ -39,7 +40,7 @@
 		appearance = 'card-grid',
 		keyboardNav,
 		entityManager,
-		dimUnavailableEntities = false,
+		dimLocked = false,
 		viewOnly = false,
 		...attributes
 	}: Props = $props();
@@ -102,7 +103,7 @@
 		{entity}
 		{entityManager}
 		linked={!entityManager}
-		dimmed={dimUnavailableEntities && !!entityManager?.getAcquisitionImpediment(entity)}
+		dimmed={dimLocked && isLocked(entity, entityManager)}
 	/>
 {/snippet}
 
@@ -111,7 +112,7 @@
 		{entity}
 		{entityManager}
 		onclick={createEntityClickHandler(entity, flatIndex)}
-		dimmed={dimUnavailableEntities && !!entityManager?.getAcquisitionImpediment(entity)}
+		dimmed={dimLocked && isLocked(entity, entityManager)}
 	/>
 {/snippet}
 
@@ -168,7 +169,7 @@
 		bind:this={carouselRef}
 		entities={carouselEntities}
 		entityManager={carouselAwareEntityManager}
-		{dimUnavailableEntities}
+		{dimLocked}
 	/>
 {/if}
 
