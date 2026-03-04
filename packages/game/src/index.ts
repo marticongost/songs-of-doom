@@ -11,6 +11,7 @@ export { ChildEntity, Entity, ParentEntity } from './models/entity';
 export { Event } from './models/event';
 export { Module } from './models/module';
 export { Skill } from './models/skill';
+export { Talent, type TalentProps } from './models/talent';
 export { Trait } from './models/trait';
 
 // Inventory
