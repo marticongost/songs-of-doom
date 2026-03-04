@@ -13,10 +13,13 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		IsExpression,
 		NotExpression,
 		OrExpression,
+		plus,
 		Property,
 		result,
 		ScalarOperation,
 		Stat,
+		TALENT_PROFICIENCY_PENALTY,
+		TalentProficiencyExpression,
 		type BooleanExpressionType,
 		type ScalarExpressionType
 	} from '@songsofdoom/game';
@@ -102,6 +105,31 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		<!-- Cash -->
 	{:else if expression instanceof CashExpression}
 		<GoldIcon />
+
+		<!-- Talent proficiency -->
+	{:else if expression instanceof TalentProficiencyExpression}
+		<Text
+			ca="%(exprWithTalent) amb %(talent) %(or) %(exprWithoutTalent) sense"
+			es="%(exprWithTalent) con %(talent) %(or) %(exprWithoutTalent) sin"
+			en="%(exprWithTalent) with %(talent) %(or) %(exprWithoutTalent) without"
+		>
+			{#snippet talent()}
+				<span class="talent-name">
+					<Text {...expression.talent.title} />
+				</span>
+			{/snippet}
+			{#snippet exprWithTalent()}
+				{@render expressionNodeSnippet(plus(expression.stat, expression.modifier))}
+			{/snippet}
+			{#snippet or()}
+				<span class="instruction"><Text ca=" o " es=" o " en=" or " /></span>
+			{/snippet}
+			{#snippet exprWithoutTalent()}
+				{@render expressionNodeSnippet(
+					plus(expression.stat, plus(expression.modifier, TALENT_PROFICIENCY_PENALTY))
+				)}
+			{/snippet}
+		</Text>
 	{/if}
 {/snippet}
 
@@ -123,5 +151,10 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 	.operator {
 		font-weight: bold;
 		color: var(--text-subtle-color);
+	}
+
+	.talent-name {
+		font-weight: bold;
+		color: var(--talent-color);
 	}
 </style>

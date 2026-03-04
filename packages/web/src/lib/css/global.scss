@@ -182,6 +182,9 @@ body {
 	--instruction-font: var(--heading-font);
 	--variable-color: #{$palette-chatelle};
 	--variable-font: var(--instruction-font);
+
+	// Talents
+	--talent-color: #{$palette-brandy-punch};
 }
 
 @include rz.reset-elements;

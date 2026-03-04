@@ -31,6 +31,7 @@ export { resolveEncounter, ResolveEncounterEffect } from './resolveencounter';
 export { ResultsTableEffect, type ResultsTableEntry } from './resultstable';
 export { SanityLossEffect } from './sanityloss';
 export { TestEffect } from './test';
+export { TalentEffect, type TalentEffectProps } from './talenteffect';
 export { TransformFocusEffect } from './transformfocus';
 export { TriggerAttackEffect } from './triggerattack';
 export { WoundEffect } from './wound';

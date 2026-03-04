@@ -31,6 +31,7 @@
 		SanityLossEffect,
 		TestEffect,
 		TransformFocusEffect,
+		TalentEffect,
 		TriggerAttackEffect,
 		WoundEffect,
 		GoTowardsEffect,
@@ -71,6 +72,7 @@
 	import SanityLossEffectChip from './SanityLossEffectChip.svelte';
 	import TestEffectChip from './TestEffectChip.svelte';
 	import TransformFocusEffectChip from './TransformFocusEffectChip.svelte';
+	import TalentEffectChip from './TalentEffectChip.svelte';
 	import TriggerAttackEffectChip from './TriggerAttackEffectChip.svelte';
 	import WoundEffectChip from './WoundEffectChip.svelte';
 	import GoTowardsEffectChip from './GoTowardsEffectChip.svelte';
@@ -153,5 +155,7 @@
 		<WoundEffectChip {effect} />
 	{:else if effect instanceof GoTowardsEffect}
 		<GoTowardsEffectChip {effect} />
+	{:else if effect instanceof TalentEffect}
+		<TalentEffectChip {effect} />
 	{/if}
 </span>

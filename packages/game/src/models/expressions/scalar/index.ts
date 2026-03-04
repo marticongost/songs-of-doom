@@ -13,6 +13,12 @@ export { count, CountExpression, type CountExpressionProps } from './count';
 export { distance, DistanceExpression } from './distance';
 export { effectiveDefense, EffectiveDefenseExpression } from './effective-defense';
 export { handSize, HandSizeExpression } from './hand-size';
+export {
+	TALENT_PROFICIENCY_PENALTY,
+	talentProficiency,
+	TalentProficiencyExpression,
+	type TalentProficiencyExpressionProps
+} from './talent-proficiency';
 
 /**
  * Returns 1 if the expression is guaranteed to be singular (the number 1),
