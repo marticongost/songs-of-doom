@@ -35,6 +35,7 @@
 		TriggerAttackEffect,
 		WoundEffect,
 		GoTowardsEffect,
+		ImmobilizeEffect,
 		type Effect
 	} from '@songsofdoom/game';
 	import { AddChargesEffect } from '@songsofdoom/game';
@@ -76,6 +77,7 @@
 	import TriggerAttackEffectChip from './TriggerAttackEffectChip.svelte';
 	import WoundEffectChip from './WoundEffectChip.svelte';
 	import GoTowardsEffectChip from './GoTowardsEffectChip.svelte';
+	import ImmobilizeEffectChip from './ImmobilizeEffectChip.svelte';
 
 	interface Props extends StandardAttributeProps {
 		effect: Effect;
@@ -157,5 +159,7 @@
 		<GoTowardsEffectChip {effect} />
 	{:else if effect instanceof TalentEffect}
 		<TalentEffectChip {effect} />
+	{:else if effect instanceof ImmobilizeEffect}
+		<ImmobilizeEffectChip {effect} />
 	{/if}
 </span>

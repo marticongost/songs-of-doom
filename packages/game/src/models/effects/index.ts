@@ -15,6 +15,7 @@ export { equip, EquipEffect } from './equip';
 export { exhaust, ExhaustEffect } from './exhaust';
 export { GoTowardsEffect } from './gotowards';
 export { HealEffect } from './heal';
+export { immobilize, ImmobilizeEffect } from './immobilize';
 export { LooseGoldEffect } from './loosegold';
 export { ModifyCapabilityCostEffect } from './modifycapabilitycost';
 export { ModifyCarryingCapacityEffect } from './modifycarryingcapacity';
