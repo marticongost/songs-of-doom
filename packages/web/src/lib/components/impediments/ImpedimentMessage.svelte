@@ -129,8 +129,8 @@
 			>
 				{#snippet archetype()}
 					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- entityUrl.get() uses resolve() -->
-					<a href={entityUrl.get(impediment.archetype)} target="_blank">
-						<Text {...impediment.archetype.title} />
+					<a href={entityUrl.get(impediment.dependency)} target="_blank">
+						<Text {...impediment.dependency.title} />
 					</a>
 				{/snippet}
 			</Text>
@@ -157,8 +157,8 @@
 			>
 				{#snippet discipline()}
 					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- entityUrl.get() uses resolve() -->
-					<a href={entityUrl.get(impediment.discipline)} target="_blank">
-						<Text {...impediment.discipline.title} />
+					<a href={entityUrl.get(impediment.dependency)} target="_blank">
+						<Text {...impediment.dependency.title} />
 					</a>
 				{/snippet}
 			</Text>

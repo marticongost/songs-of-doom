@@ -1,15 +1,17 @@
 import { goto } from '$app/navigation';
 import { page } from '$app/state';
-import { SvelteMap } from 'svelte/reactivity';
 import { translate, type LocalisedText } from '@songsofdoom/common/localisation';
 import {
 	entities as allEntities,
+	DependencyImpediment,
 	entityTypes,
 	ParentEntity,
+	type CharacterState,
 	type Entity,
 	type EntityType,
 	type EntityTypeId
 } from '@songsofdoom/game';
+import { SvelteMap } from 'svelte/reactivity';
 
 import { getLocale } from '$lib/context/locale';
 import {
@@ -33,6 +35,16 @@ const viewTypes: ViewType[] = ['card', 'button'];
 export type VersionFilter = 'all' | 'base' | 'upgraded';
 const versionFilters: VersionFilter[] = ['all', 'base', 'upgraded'];
 
+/** Character status filter options */
+export type CharacterFilter = 'any' | 'unlocked' | 'owned' | 'purchaseable' | 'upgradeable';
+const characterFilters: CharacterFilter[] = [
+	'any',
+	'unlocked',
+	'owned',
+	'purchaseable',
+	'upgradeable'
+];
+
 /** Option for the view Switch component */
 export interface ViewOption {
 	value: ViewType;
@@ -53,6 +65,10 @@ export interface EntitySearchStateOptions {
 	defaultView?: ViewType;
 	/** Sync state with URL params (defaults to true) */
 	syncUrl?: boolean;
+	/** CharacterState to enable character-specific filtering. If omitted, the filter is hidden. */
+	characterState?: CharacterState;
+	/** Default character filter value (defaults to 'any') */
+	defaultCharacterFilter?: CharacterFilter;
 }
 
 export type SortedResult =
@@ -106,12 +122,15 @@ export class EntitySearchState {
 	private _set = $state<ParentEntity | null>(null);
 	private _version = $state<VersionFilter>('all');
 	private _setOptions = $state<Array<{ value: string; label: LocalisedText }>>([]);
+	private _characterState = $state<CharacterState | undefined>(undefined);
+	private _characterFilter = $state<CharacterFilter>('any');
 
 	// Dropdown options (computed once from configuration)
 	readonly typeOptions: Array<{ value: EntityTypeId | ''; label: LocalisedText }>;
 	readonly sortOptions: Array<{ value: SortCriteriaType; label: LocalisedText }>;
 	readonly viewOptions: ViewOption[];
 	readonly versionOptions: Array<{ value: VersionFilter; label: LocalisedText }>;
+	readonly characterFilterOptions: Array<{ value: CharacterFilter; label: LocalisedText }> | null;
 
 	constructor(options?: EntitySearchStateOptions) {
 		// Normalize configuration
@@ -172,6 +191,32 @@ export class EntitySearchState {
 			}
 		];
 
+		// Build character filter options (only if characterState was provided)
+		const hasCharacterState = options !== undefined && 'characterState' in options;
+		this._characterState = options?.characterState;
+		this._characterFilter = options?.defaultCharacterFilter ?? 'any';
+		this.characterFilterOptions = hasCharacterState
+			? [
+					{
+						value: 'any',
+						label: { ca: 'Qualsevol estat', es: 'Cualquier estado', en: 'Any status' }
+					},
+					{
+						value: 'unlocked',
+						label: { ca: 'Desbloquejades', es: 'Desbloqueadas', en: 'Unlocked' }
+					},
+					{ value: 'owned', label: { ca: 'Posseïdes', es: 'En posesión', en: 'Owned' } },
+					{
+						value: 'purchaseable',
+						label: { ca: 'Adquiribles', es: 'Adquiribles', en: 'Purchaseable' }
+					},
+					{
+						value: 'upgradeable',
+						label: { ca: 'Millorables', es: 'Mejorables', en: 'Upgradeable' }
+					}
+				]
+			: null;
+
 		// Initialize from URL if syncing
 		if (this.syncUrl) {
 			this.initFromUrl();
@@ -205,6 +250,10 @@ export class EntitySearchState {
 
 	get setOptions(): Array<{ value: string; label: LocalisedText }> {
 		return this._setOptions;
+	}
+
+	get characterFilter(): CharacterFilter {
+		return this._characterFilter;
 	}
 
 	/** Sets the search query */
@@ -281,6 +330,16 @@ export class EntitySearchState {
 		}
 	}
 
+	/** Updates the character state for filtering */
+	setCharacterState(state: CharacterState | undefined): void {
+		this._characterState = state;
+	}
+
+	/** Sets the character status filter */
+	setCharacterFilter(value: CharacterFilter): void {
+		this._characterFilter = characterFilters.includes(value) ? value : 'any';
+	}
+
 	/**
 	 * Updates the available set options from the entities being displayed.
 	 * Call this whenever the entities list changes (e.g., via $effect in EntityCatalog).
@@ -335,11 +394,37 @@ export class EntitySearchState {
 					? setFiltered.filter((entity) => entity.level >= 2)
 					: setFiltered;
 
+		// Apply character filter
+		const cs = this._characterState;
+		const characterFiltered = (() => {
+			if (!cs) return versionFiltered;
+			switch (this._characterFilter) {
+				case 'unlocked':
+					return versionFiltered.filter((entity) => {
+						const imp = cs.getEntityAcquisitionImpediment(entity);
+						return !(imp instanceof DependencyImpediment);
+					});
+				case 'owned':
+					return versionFiltered.filter((entity) => cs.getNumberOfOwnedCopies(entity) >= 1);
+				case 'purchaseable':
+					return versionFiltered.filter((entity) => !cs.getEntityAcquisitionImpediment(entity));
+				case 'upgradeable':
+					return versionFiltered.filter((entity) => {
+						if (cs.getNumberOfOwnedCopies(entity) < 1) return false;
+						const next = entity.nextVariant;
+						if (!next) return false;
+						return !cs.getEntityAcquisitionImpediment(next);
+					});
+				default:
+					return versionFiltered;
+			}
+		})();
+
 		// Apply sorting
 		if (this._sort instanceof GroupingCriteria) {
-			return { groupedEntities: this._sort.group(versionFiltered, locale) };
+			return { groupedEntities: this._sort.group(characterFiltered, locale) };
 		}
-		return { entities: this._sort.sort(versionFiltered, locale) };
+		return { entities: this._sort.sort(characterFiltered, locale) };
 	}
 
 	/** Initializes state from URL parameters */

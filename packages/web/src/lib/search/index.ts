@@ -1,6 +1,7 @@
 export { filterByTitle, matchesAllTerms, normalizeForSearch, parseSearchQuery } from './search';
 export {
 	EntitySearchState,
+	type CharacterFilter,
 	type EntitySearchStateOptions,
 	type EntityTypeInput,
 	type SortCriteriaInput,

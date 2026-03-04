@@ -59,7 +59,16 @@
 		.all()
 		.filter((e) => allowedTypes.includes(e.type.id) && !e.isStandard());
 
-	const searchState = new EntitySearchState({ allowedTypes, syncUrl: false });
+	const searchState = new EntitySearchState({
+		allowedTypes,
+		syncUrl: false,
+		characterState: characterState,
+		defaultCharacterFilter: 'unlocked'
+	});
+
+	$effect(() => {
+		searchState.setCharacterState(characterState);
+	});
 
 	let catalogRef: EntityCatalog | undefined;
 

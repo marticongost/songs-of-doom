@@ -18,8 +18,8 @@ import {
 	type EntityAcquisitionImpediment
 } from './entityacquisitionimpediments';
 import {
-	PermanentTraitRemovalImpediment,
 	MinimumAmountReachedRemovalImpediment,
+	PermanentTraitRemovalImpediment,
 	StandardTraitRemovalImpediment,
 	type EntityRemovalImpediment
 } from './entityremovalimpediments';
