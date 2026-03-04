@@ -22,7 +22,7 @@ export default new Archetype({
 			triggers: ['receivingAttack'],
 			effects: [
 				new ModifyRollEffect({
-					modifier: -1
+					modifier: 1
 				})
 			]
 		})
