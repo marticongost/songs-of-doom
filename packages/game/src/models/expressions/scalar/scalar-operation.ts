@@ -32,12 +32,33 @@ export class ScalarOperation extends ScalarExpression {
 	}
 }
 
-// Helper functions for creating scalar operations
-export const plus = (a: ScalarExpressionType, b: ScalarExpressionType): ScalarOperation =>
-	new ScalarOperation(a, '+', b);
-export const minus = (a: ScalarExpressionType, b: ScalarExpressionType): ScalarOperation =>
-	new ScalarOperation(a, '-', b);
-export const mult = (a: ScalarExpressionType, b: ScalarExpressionType): ScalarOperation =>
-	new ScalarOperation(a, '*', b);
-export const div = (a: ScalarExpressionType, b: ScalarExpressionType): ScalarOperation =>
-	new ScalarOperation(a, '/', b);
+// Helper functions for creating scalar operations.
+// Numeric literals are folded at construction time, and identity elements are eliminated.
+
+export function plus(a: ScalarExpressionType, b: ScalarExpressionType): ScalarExpressionType {
+	if (a === 0) return b;
+	if (b === 0) return a;
+	if (typeof a === 'number' && typeof b === 'number') return a + b;
+	return typeof b === 'number' && b < 0
+		? new ScalarOperation(a, '-', -b)
+		: new ScalarOperation(a, '+', b);
+}
+
+export function minus(a: ScalarExpressionType, b: ScalarExpressionType): ScalarExpressionType {
+	if (b === 0) return a;
+	if (typeof a === 'number' && typeof b === 'number') return a - b;
+	return new ScalarOperation(a, '-', b);
+}
+
+export function mult(a: ScalarExpressionType, b: ScalarExpressionType): ScalarExpressionType {
+	if (a === 1) return b;
+	if (b === 1) return a;
+	if (typeof a === 'number' && typeof b === 'number') return a * b;
+	return new ScalarOperation(a, '*', b);
+}
+
+export function div(a: ScalarExpressionType, b: ScalarExpressionType): ScalarExpressionType {
+	if (b === 1) return a;
+	if (typeof a === 'number' && typeof b === 'number') return a / b;
+	return new ScalarOperation(a, '/', b);
+}
