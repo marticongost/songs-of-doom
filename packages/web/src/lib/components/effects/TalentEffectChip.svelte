@@ -1,6 +1,8 @@
 <script lang="ts">
-	import Text from '$lib/components/localisation/Text.svelte';
 	import type { TalentEffect } from '@songsofdoom/game';
+
+	import Text from '$lib/components/localisation/Text.svelte';
+	import TalentChip from '$lib/components/talents/TalentChip.svelte';
 
 	interface Props {
 		effect: TalentEffect;
@@ -15,15 +17,6 @@
 	en="Possesses the talent %(talent)"
 >
 	{#snippet talent()}
-		<span class="talent-name">
-			<Text {...effect.talent.title} />
-		</span>
+		<TalentChip talent={effect.talent} />
 	{/snippet}
 </Text>
-
-<style lang="scss">
-	.talent-name {
-		font-weight: bold;
-		color: var(--talent-color);
-	}
-</style>

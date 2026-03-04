@@ -29,6 +29,7 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 	import PropertyChip from '../properties/PropertyChip.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import StatIcon from '../stats/StatIcon.svelte';
+	import TalentChip from '../talents/TalentChip.svelte';
 	import TargetChip from '../targets/TargetChip.svelte';
 
 	interface Props extends StandardAttributeProps {
@@ -114,9 +115,7 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 			en="%(exprWithTalent) with %(talent) %(or) %(exprWithoutTalent) without"
 		>
 			{#snippet talent()}
-				<span class="talent-name">
-					<Text {...expression.talent.title} />
-				</span>
+				<TalentChip talent={expression.talent} />
 			{/snippet}
 			{#snippet exprWithTalent()}
 				{@render expressionNodeSnippet(plus(expression.stat, expression.modifier))}
@@ -151,10 +150,5 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 	.operator {
 		font-weight: bold;
 		color: var(--text-subtle-color);
-	}
-
-	.talent-name {
-		font-weight: bold;
-		color: var(--talent-color);
 	}
 </style>
