@@ -25,9 +25,9 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 
 <script lang="ts">
 	import { getLocale } from '$lib/context/locale';
+	import { entityUrl } from '$lib/urls';
 	import { translate } from '@songsofdoom/common';
 	import { fade } from 'svelte/transition';
-	import { entityUrl } from '$lib/urls';
 	import IconButton from '../IconButton.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import Toolbar from '../toolbar/Toolbar.svelte';
@@ -313,6 +313,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 					icon="open.svg"
 					href={entityUrl.get(currentEntity)}
 					label={{ ca: 'Obrir', es: 'Abrir', en: 'Open' }}
+					target="_blank"
 				/>
 			</Toolbar>
 		{/if}

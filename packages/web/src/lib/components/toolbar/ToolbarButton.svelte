@@ -22,12 +22,23 @@
 		href?: string;
 		onclick?: (e: MouseEvent) => void;
 		anchor?: string;
+		target?: string;
 		/** Snippet to display in a popover when the button is disabled */
 		disabledReason?: Snippet;
 	}
 
-	const { icon, label, disabled, busy, href, onclick, anchor, disabledReason, ...rest }: Props =
-		$props();
+	const {
+		icon,
+		label,
+		disabled,
+		busy,
+		href,
+		onclick,
+		anchor,
+		target,
+		disabledReason,
+		...rest
+	}: Props = $props();
 
 	const busyDotIndices = Array.from({ length: 5 }, (_, index) => index);
 
@@ -54,7 +65,7 @@
 	this={href ? 'a' : 'button'}
 	{href}
 	{onclick}
-	target={href ? '_blank' : undefined}
+	target={href ? target : undefined}
 	{...standardAttributes(rest, 'toolbar-button')}
 	disabled={isDisabled}
 	style:anchor-name={anchorName}

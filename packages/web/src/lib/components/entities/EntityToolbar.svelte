@@ -92,6 +92,7 @@
 			icon="open.svg"
 			href={entityUrl.get(entity)}
 			label={{ ca: 'Obrir', es: 'Abrir', en: 'Open' }}
+			target="_blank"
 		/>
 	</Toolbar>
 </div>
