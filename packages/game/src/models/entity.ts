@@ -1,12 +1,19 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
 import { getEntryMetadata } from '../catalog';
 import { standard } from '../data/properties';
+import type { Ally } from './ally';
 import { type Archetype } from './archetype';
 import type { Capability } from './capability';
+import type { Creature } from './creature';
 import { type Discipline } from './discipline';
 import type { Effect } from './effects';
+import type { Encounter } from './encounter';
+import type { Item } from './inventory';
+import type { Module } from './module';
 import type { Property } from './properties';
 import type { EntityType } from './properties/entitytypes';
+import type { Skill } from './skill';
+import type { Trait } from './trait';
 
 export interface EntityProps<T> {
 	title: LocalisedText;
@@ -224,30 +231,30 @@ export const isDiscipline = (entity: Entity): entity is Discipline => {
 	return entity.type.id === 'discipline';
 };
 
-export const isTrait = (entity: Entity): entity is Entity => {
+export const isTrait = (entity: Entity): entity is Trait => {
 	return entity.type.id === 'trait';
 };
 
-export const isSkill = (entity: Entity): entity is Entity => {
+export const isSkill = (entity: Entity): entity is Skill => {
 	return entity.type.id === 'skill';
 };
 
-export const isItem = (entity: Entity): entity is Entity => {
+export const isItem = (entity: Entity): entity is Item => {
 	return entity.type.id === 'item';
 };
 
-export const isCreature = (entity: Entity): entity is Entity => {
+export const isCreature = (entity: Entity): entity is Creature => {
 	return entity.type.id === 'creature';
 };
 
-export const isAlly = (entity: Entity): entity is Entity => {
+export const isAlly = (entity: Entity): entity is Ally => {
 	return entity.type.id === 'ally';
 };
 
-export const isEncounter = (entity: Entity): entity is Entity => {
+export const isEncounter = (entity: Entity): entity is Encounter => {
 	return entity.type.id === 'encounter';
 };
 
-export const isModule = (entity: Entity): entity is Entity => {
+export const isModule = (entity: Entity): entity is Module => {
 	return entity.type.id === 'module';
 };
