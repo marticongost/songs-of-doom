@@ -13,10 +13,7 @@ export default new Archetype({
 	xpCost: 5,
 	capabilities: [
 		new Constant({
-			effects: [
-				new TalentEffect({ talent: lightArmour }),
-				new TalentEffect({ talent: mediumArmour })
-			]
+			effects: [new TalentEffect({ talents: [lightArmour, mediumArmour] })]
 		}),
 		new Opportunity({
 			triggers: ['payingCapability'],

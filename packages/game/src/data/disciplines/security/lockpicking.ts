@@ -8,7 +8,7 @@ export default new Trait({
 	xpCost: 2,
 	capabilities: [
 		new Constant({
-			effects: [new TalentEffect({ talent: disarmTrap })]
+			effects: [new TalentEffect({ talents: [disarmTrap] })]
 		})
 	]
 });

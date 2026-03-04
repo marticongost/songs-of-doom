@@ -6,7 +6,7 @@ import { Effect } from './effect';
  */
 export interface TalentEffectProps {
 	/** The talent possessed by the character. */
-	talent: Talent;
+	talents: Talent[];
 }
 
 /**
@@ -14,10 +14,10 @@ export interface TalentEffectProps {
  */
 export class TalentEffect extends Effect {
 	/** The talent possessed by the character. */
-	readonly talent: Talent;
+	readonly talents: Talent[];
 
-	constructor({ talent }: TalentEffectProps) {
+	constructor({ talents }: TalentEffectProps) {
 		super();
-		this.talent = talent;
+		this.talents = talents;
 	}
 }

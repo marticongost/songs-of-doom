@@ -13,7 +13,7 @@ export default new Archetype({
 	disciplines: ['dexterity', 'guile', 'security'],
 	capabilities: [
 		new Constant({
-			effects: [new TalentEffect({ talent: lightArmour })]
+			effects: [new TalentEffect({ talents: [lightArmour] })]
 		}),
 		new Opportunity({
 			triggers: ['payingCapability'],
