@@ -15,7 +15,9 @@
 		EngageEffect,
 		EquipEffect,
 		ExhaustEffect,
+		GatherCluesEffect,
 		HealEffect,
+		InvestigateEffect,
 		ModifyCapabilityCostEffect,
 		ModifyCarryingCapacityEffect,
 		ModifyDamageEffect,
@@ -58,6 +60,7 @@
 	import EquipEffectChip from './EquipEffectChip.svelte';
 	import ExhaustEffectChip from './ExhaustEffectChip.svelte';
 	import HealEffectChip from './HealEffectChip.svelte';
+	import InvestigateEffectChip from './InvestigateEffectChip.svelte';
 	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
 	import ModifyCarryingCapacityEffectChip from './ModifyCarryingCapacityEffectChip.svelte';
 	import ModifyDamageEffectChip from './ModifyDamageEffectChip.svelte';
@@ -76,6 +79,7 @@
 	import TalentEffectChip from './TalentEffectChip.svelte';
 	import TriggerAttackEffectChip from './TriggerAttackEffectChip.svelte';
 	import WoundEffectChip from './WoundEffectChip.svelte';
+	import GatherCluesEffectChip from './GatherCluesEffectChip.svelte';
 	import GoTowardsEffectChip from './GoTowardsEffectChip.svelte';
 	import ImmobilizeEffectChip from './ImmobilizeEffectChip.svelte';
 
@@ -123,6 +127,8 @@
 		<ExhaustEffectChip {effect} />
 	{:else if effect instanceof HealEffect}
 		<HealEffectChip {effect} />
+	{:else if effect instanceof InvestigateEffect}
+		<InvestigateEffectChip {effect} />
 	{:else if effect instanceof ConferPropertiesEffect}
 		<ConferPropertiesEffectChip {effect} />
 	{:else if effect instanceof ModifyDamageEffect}
@@ -155,6 +161,8 @@
 		<TransformFocusEffectChip {effect} />
 	{:else if effect instanceof WoundEffect}
 		<WoundEffectChip {effect} />
+	{:else if effect instanceof GatherCluesEffect}
+		<GatherCluesEffectChip {effect} />
 	{:else if effect instanceof GoTowardsEffect}
 		<GoTowardsEffectChip {effect} />
 	{:else if effect instanceof TalentEffect}

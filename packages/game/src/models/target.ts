@@ -135,3 +135,5 @@ export class Target<T extends TargetType = TargetType> extends TargetDiscriminat
 		}
 	}
 }
+
+export const currentLocation = new Target({ type: 'location', selection: 'closest' });

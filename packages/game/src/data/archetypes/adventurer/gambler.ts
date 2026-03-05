@@ -1,8 +1,8 @@
 import { Action } from '../../../models/capabilities';
-import { currentLocation } from '../../../models/common';
 import { exhaust, LooseGoldEffect, TestEffect } from '../../../models/effects';
 import { and, cash, engaged, gt, is, minus, not } from '../../../models/expressions';
 import { will } from '../../../models/stats';
+import { currentLocation } from '../../../models/target';
 import { Trait } from '../../../models/trait';
 import { flaw, town } from '../../properties';
 

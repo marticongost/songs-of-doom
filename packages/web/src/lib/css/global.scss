@@ -24,6 +24,7 @@ body {
 	$palette-thatch: #bd9898;
 	$palette-hurricane: #857a7a;
 	$palette-scorpion: #665f5f;
+	$palette-pablo: #807460;
 	$palette-silk: #d9cccc;
 	$palette-green: #55a155;
 	$palette-old-gold: #d2b532;
@@ -185,6 +186,9 @@ body {
 
 	// Talents
 	--talent-color: #{$palette-brandy-punch};
+
+	// Clues
+	--clue-color: #{$palette-pablo};
 }
 
 @include rz.reset-elements;

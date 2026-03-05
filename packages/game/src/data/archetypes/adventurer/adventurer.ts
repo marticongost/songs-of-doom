@@ -1,7 +1,7 @@
 import { Archetype } from '../../../models/archetype';
 import { Action } from '../../../models/capabilities';
-import { AttackEffect } from '../../../models/effects';
-import { strength } from '../../../models/stats';
+import { AttackEffect, InvestigateEffect } from '../../../models/effects';
+import { intelligence, strength } from '../../../models/stats';
 import standard from '../../properties/standard';
 
 export default new Archetype({
@@ -20,6 +20,17 @@ export default new Archetype({
 				new AttackEffect({
 					expression: strength,
 					results: { 1: 1, 2: 2, 3: 3 }
+				})
+			]
+		}),
+		new Action({
+			cost: {
+				intelligence: 1
+			},
+			effects: [
+				new InvestigateEffect({
+					expression: intelligence,
+					results: { '1-2': 1, 3: 2 }
 				})
 			]
 		})
