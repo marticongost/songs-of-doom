@@ -6,6 +6,7 @@ export type EventType =
 	| 'receivingAttack'
 	| 'afterDefending'
 	| 'afterReceivedAttackResolved'
+	| 'investigating'
 	| 'enemyDefeated'
 	| 'payingCapability'
 	| 'acquired'
@@ -39,6 +40,10 @@ export const events: Record<EventType, Event> = {
 			es: 'Antes de ser enfrentado por un enemigo',
 			en: 'Before being engaged by an enemy'
 		}
+	}),
+	investigating: new Event({
+		type: 'investigating',
+		name: { ca: 'En investigar', es: 'Al investigar', en: 'When investigating' }
 	}),
 	attacking: new Event({
 		type: 'attacking',
