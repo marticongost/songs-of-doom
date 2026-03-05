@@ -20,21 +20,35 @@ export interface ResultsTableEntry {
 	readonly effects: Effect[];
 }
 
+const resultSortKey = (result: ResultSelector): number => {
+	if (result === 'CF') return -1;
+	if (typeof result === 'number') return result;
+	if (Array.isArray(result)) return Math.min(...result.map((r) => (r === 'CF' ? -1 : r)));
+	return result.min ?? 0;
+};
+
+const sortedEntries = (entries: ResultsTableEntry[]): ResultsTableEntry[] =>
+	entries.sort((a, b) => resultSortKey(a.result) - resultSortKey(b.result));
+
 export class ResultsTableEffect extends Effect {
 	readonly entries: ResultsTableEntry[];
 
 	constructor(props: ResultsTableEffectProps) {
 		super();
 		if ('entries' in props) {
-			this.entries = props.entries.map((entry) => ({
-				result: resolveResultExpression(entry.result),
-				effects: entry.effects
-			}));
+			this.entries = sortedEntries(
+				props.entries.map((entry) => ({
+					result: resolveResultExpression(entry.result),
+					effects: entry.effects
+				}))
+			);
 		} else {
-			this.entries = Object.entries(props).map(([result, effects]) => ({
-				result: resolveResultExpression(result as ResultString),
-				effects
-			}));
+			this.entries = sortedEntries(
+				Object.entries(props).map(([result, effects]) => ({
+					result: resolveResultExpression(result as ResultString),
+					effects
+				}))
+			);
 		}
 	}
 }
