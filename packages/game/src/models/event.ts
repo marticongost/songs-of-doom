@@ -18,7 +18,8 @@ export type EventType =
 	| 'takingDamage'
 	| 'fateDrawn'
 	| 'revealed'
-	| 'moving';
+	| 'moving'
+	| 'resolvingEncounter';
 
 export type EventProps = { type: EventType; name: LocalisedText };
 
@@ -128,5 +129,13 @@ export const events: Record<EventType, Event> = {
 	moving: new Event({
 		type: 'moving',
 		name: { ca: "En moure's", es: 'Al moverse', en: 'When moving' }
+	}),
+	resolvingEncounter: new Event({
+		type: 'resolvingEncounter',
+		name: {
+			ca: 'En resoldre un encontre',
+			es: 'Al resolver un encuentro',
+			en: 'When resolving an encounter'
+		}
 	})
 };
