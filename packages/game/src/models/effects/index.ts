@@ -23,6 +23,7 @@ export { ModifyCapabilityCostEffect } from './modifycapabilitycost';
 export { ModifyCarryingCapacityEffect } from './modifycarryingcapacity';
 export { ModifyDamageEffect } from './modifydamage';
 export { ModifyGatheredCluesEffect } from './modifygatheredclues';
+export { move, MoveEffect } from './move';
 export { ModifyRollEffect } from './modifyroll';
 export { negateDamage, NegateDamageEffect } from './negatedamage';
 export { ReceiveOpportunityAttacksEffect } from './receiveopportunityattacks';

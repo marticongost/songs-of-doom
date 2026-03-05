@@ -19,6 +19,7 @@
 		HealEffect,
 		ImmobilizeEffect,
 		InvestigateEffect,
+		MoveEffect,
 		LooseGoldEffect,
 		ModifyCapabilityCostEffect,
 		ModifyCarryingCapacityEffect,
@@ -63,6 +64,7 @@
 	import GoTowardsEffectChip from './GoTowardsEffectChip.svelte';
 	import HealEffectChip from './HealEffectChip.svelte';
 	import ImmobilizeEffectChip from './ImmobilizeEffectChip.svelte';
+	import MoveEffectChip from './MoveEffectChip.svelte';
 	import InvestigateEffectChip from './InvestigateEffectChip.svelte';
 	import LooseGoldEffectChip from './LooseGoldEffectChip.svelte';
 	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
@@ -173,5 +175,7 @@
 		<TalentEffectChip {effect} />
 	{:else if effect instanceof ImmobilizeEffect}
 		<ImmobilizeEffectChip {effect} />
+	{:else if effect instanceof MoveEffect}
+		<MoveEffectChip {effect} />
 	{/if}
 </span>
