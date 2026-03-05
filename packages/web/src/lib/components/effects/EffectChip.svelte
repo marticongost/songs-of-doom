@@ -1,8 +1,8 @@
 <script lang="ts">
 	import {
+		AddChargesEffect,
 		AttachEffect,
 		AttackEffect,
-		LooseGoldEffect,
 		ChangeStatsEffect,
 		ChaseEffect,
 		ConditionalEffect,
@@ -15,12 +15,15 @@
 		EngageEffect,
 		EquipEffect,
 		ExhaustEffect,
-		GatherCluesEffect,
+		GoTowardsEffect,
 		HealEffect,
+		ImmobilizeEffect,
 		InvestigateEffect,
+		LooseGoldEffect,
 		ModifyCapabilityCostEffect,
 		ModifyCarryingCapacityEffect,
 		ModifyDamageEffect,
+		ModifyGatheredCluesEffect,
 		ModifyRollEffect,
 		NegateDamageEffect,
 		ReceiveOpportunityAttacksEffect,
@@ -31,22 +34,19 @@
 		ResolveEncounterEffect,
 		ResultsTableEffect,
 		SanityLossEffect,
+		TalentEffect,
 		TestEffect,
 		TransformFocusEffect,
-		TalentEffect,
 		TriggerAttackEffect,
 		WoundEffect,
-		GoTowardsEffect,
-		ImmobilizeEffect,
 		type Effect
 	} from '@songsofdoom/game';
-	import { AddChargesEffect } from '@songsofdoom/game';
 
+	import { GatherCluesEffect } from '../../../../../game/src/models/effects/gatherclues';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import AddChargeEffectChip from './AddChargeEffectChip.svelte';
 	import AttachEffectChip from './AttachEffectChip.svelte';
 	import AttackEffectChip from './AttackEffectChip.svelte';
-	import LooseGoldEffectChip from './LooseGoldEffectChip.svelte';
 	import ChangeStatsEffectChip from './ChangeStatsEffectChip.svelte';
 	import ChaseEffectChip from './ChaseEffectChip.svelte';
 	import ConditionalEffectChip from './ConditionalEffectChip.svelte';
@@ -59,11 +59,16 @@
 	import EngageEffectChip from './EngageEffectChip.svelte';
 	import EquipEffectChip from './EquipEffectChip.svelte';
 	import ExhaustEffectChip from './ExhaustEffectChip.svelte';
+	import GatherCluesEffectChip from './GatherCluesEffectChip.svelte';
+	import GoTowardsEffectChip from './GoTowardsEffectChip.svelte';
 	import HealEffectChip from './HealEffectChip.svelte';
+	import ImmobilizeEffectChip from './ImmobilizeEffectChip.svelte';
 	import InvestigateEffectChip from './InvestigateEffectChip.svelte';
+	import LooseGoldEffectChip from './LooseGoldEffectChip.svelte';
 	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
 	import ModifyCarryingCapacityEffectChip from './ModifyCarryingCapacityEffectChip.svelte';
 	import ModifyDamageEffectChip from './ModifyDamageEffectChip.svelte';
+	import ModifyGatheredCluesEffectChip from './ModifyGatheredCluesEffectChip.svelte';
 	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
 	import NegateDamageEffectChip from './NegateDamageEffectChip.svelte';
 	import ReceiveOpportunityAttacksEffectChip from './ReceiveOpportunityAttacksEffectChip.svelte';
@@ -74,14 +79,11 @@
 	import ResolveEncounterEffectChip from './ResolveEncounterEffectChip.svelte';
 	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
 	import SanityLossEffectChip from './SanityLossEffectChip.svelte';
+	import TalentEffectChip from './TalentEffectChip.svelte';
 	import TestEffectChip from './TestEffectChip.svelte';
 	import TransformFocusEffectChip from './TransformFocusEffectChip.svelte';
-	import TalentEffectChip from './TalentEffectChip.svelte';
 	import TriggerAttackEffectChip from './TriggerAttackEffectChip.svelte';
 	import WoundEffectChip from './WoundEffectChip.svelte';
-	import GatherCluesEffectChip from './GatherCluesEffectChip.svelte';
-	import GoTowardsEffectChip from './GoTowardsEffectChip.svelte';
-	import ImmobilizeEffectChip from './ImmobilizeEffectChip.svelte';
 
 	interface Props extends StandardAttributeProps {
 		effect: Effect;
@@ -133,6 +135,8 @@
 		<ConferPropertiesEffectChip {effect} />
 	{:else if effect instanceof ModifyDamageEffect}
 		<ModifyDamageEffectChip {effect} />
+	{:else if effect instanceof ModifyGatheredCluesEffect}
+		<ModifyGatheredCluesEffectChip {effect} />
 	{:else if effect instanceof NegateDamageEffect}
 		<NegateDamageEffectChip {effect} />
 	{:else if effect instanceof ConditionalEffect}

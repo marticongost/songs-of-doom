@@ -22,6 +22,7 @@ export { LooseGoldEffect } from './loosegold';
 export { ModifyCapabilityCostEffect } from './modifycapabilitycost';
 export { ModifyCarryingCapacityEffect } from './modifycarryingcapacity';
 export { ModifyDamageEffect } from './modifydamage';
+export { ModifyGatheredCluesEffect } from './modifygatheredclues';
 export { ModifyRollEffect } from './modifyroll';
 export { negateDamage, NegateDamageEffect } from './negatedamage';
 export { ReceiveOpportunityAttacksEffect } from './receiveopportunityattacks';
