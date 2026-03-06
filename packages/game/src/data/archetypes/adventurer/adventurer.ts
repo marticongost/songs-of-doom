@@ -1,6 +1,6 @@
 import { Archetype } from '../../../models/archetype';
 import { Action } from '../../../models/capabilities';
-import { AttackEffect, InvestigateEffect, move } from '../../../models/effects';
+import { AttackEffect, equip, InvestigateEffect, move } from '../../../models/effects';
 import { intelligence, strength } from '../../../models/stats';
 import standard from '../../properties/standard';
 
@@ -39,6 +39,9 @@ export default new Archetype({
 					results: { '1-2': 1, 3: 2 }
 				})
 			]
+		}),
+		new Action({
+			effects: [equip]
 		})
 	]
 });
