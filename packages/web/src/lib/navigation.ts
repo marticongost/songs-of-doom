@@ -107,11 +107,19 @@ export const siteTree = new Section({
 			}
 		},
 		{
+			name: 'manual',
+			title: {
+				ca: 'Manual',
+				es: 'Manual',
+				en: 'Manual'
+			}
+		},
+		{
 			name: 'rules-reference',
 			title: {
-				ca: 'Regles',
-				es: 'Reglas',
-				en: 'Rules'
+				ca: 'Referència',
+				es: 'Referencia',
+				en: 'Reference'
 			}
 		}
 	]
