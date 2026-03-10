@@ -3,6 +3,33 @@
 	A login form with username and password fields.
 	Posts to the login endpoint and displays error messages on failure.
 -->
+
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+	import { cx } from '@emotion/css';
+
+	const styles = css.styles({
+		loginForm: {
+			...css.column('md')
+		},
+		formField: {
+			...css.column('xs'),
+			label: {
+				fontWeight: 'bold',
+				color: css.text.headingColor
+			}
+		},
+		errorMessage: {
+			...css.vpadding('sm'),
+			...css.hpadding('md'),
+			background: 'rgba(161, 85, 85, 0.2)',
+			border: `1px solid ${css.palette.red}`,
+			borderRadius: css.spacing.xs,
+			color: css.palette.red
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
@@ -33,7 +60,7 @@
 </script>
 
 <form
-	{...standardAttributes(attributes, 'login-form')}
+	{...standardAttributes(attributes, cx('login-form', styles.loginForm))}
 	method="POST"
 	action={resolve(loginPath, { locale })}
 	use:enhance={() => {
@@ -46,10 +73,10 @@
 	}}
 >
 	{#if errorMessage}
-		<div class="error-message">{errorMessage}</div>
+		<div class={styles.errorMessage}>{errorMessage}</div>
 	{/if}
 
-	<div class="form-field">
+	<div class={styles.formField}>
 		<label for="username">
 			<Text ca="Nom d'usuari" es="Nombre de usuario" en="Username" />
 		</label>
@@ -64,7 +91,7 @@
 		/>
 	</div>
 
-	<div class="form-field">
+	<div class={styles.formField}>
 		<label for="password">
 			<Text ca="Contrasenya" es="Contraseña" en="Password" />
 		</label>
@@ -82,28 +109,3 @@
 		<Text ca="Entrar" es="Entrar" en="Log in" />
 	</Button>
 </form>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.login-form {
-		@include rz.column(md);
-	}
-
-	.form-field {
-		@include rz.column(xs);
-
-		label {
-			font-weight: bold;
-			color: var(--text-heading-color);
-		}
-	}
-
-	.error-message {
-		@include rz.padding(sm md);
-		background: rgba(161, 85, 85, 0.2);
-		border: 1px solid var(--stat-health-color);
-		border-radius: rz.size(xs);
-		color: var(--stat-health-color);
-	}
-</style>

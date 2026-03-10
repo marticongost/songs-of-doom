@@ -1,7 +1,41 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		capabilityChip: {
+			...css.row('xs'),
+			alignItems: 'flex-start'
+		},
+		capabilityIcon: {
+			flex: '0 0 auto',
+			position: 'relative',
+			top: css.spacing.xs,
+			color: css.text.subtleColor
+		},
+		capabilityCostParameters: {
+			marginLeft: css.spacing.xs
+		},
+		moment: {
+			fontWeight: 'bold',
+			color: css.text.highlightColor
+		},
+		colon: {
+			color: css.text.subtleColor
+		},
+		capabilityContent: {
+			lineHeight: '1.5em'
+		},
+		capabilityEffects: {
+			flex: '1 1 auto',
+			marginLeft: '1.2em'
+		}
+	});
+</script>
+
 <script lang="ts">
-	import { Action, Constant, Reaction } from '@songsofdoom/game';
-	import type { Capability } from '@songsofdoom/game';
 	import Text from '$lib/components/localisation/Text.svelte';
+	import type { Capability } from '@songsofdoom/game';
+	import { Action, Constant, Reaction } from '@songsofdoom/game';
 	import InlineSvg from '../InlineSvg.svelte';
 	import EffectList from '../effects/EffectList.svelte';
 	import TextList from '../localisation/TextList.svelte';
@@ -33,14 +67,14 @@
 	};
 </script>
 
-<div {...standardAttributes(attributes, 'capability-chip')}>
+<div {...standardAttributes(attributes, styles.capabilityChip)}>
 	<!-- Icon -->
-	<InlineSvg class="capability-icon" src={getIconSrc()} />
+	<InlineSvg class={styles.capabilityIcon} src={getIconSrc()} />
 
-	<div class="capability-content">
-		<span class="capability-activation">
+	<div class={styles.capabilityContent}>
+		<span class={styles.capabilityActivation}>
 			<!-- Moment -->
-			<span class="moment">
+			<span class={styles.moment}>
 				{#if capability instanceof Action}
 					{#if capability.prioritary}
 						<Text ca="Acció prioritària" es="Acción prioritaria" en="Prioritary action" />
@@ -62,52 +96,16 @@
 			</span><!--
 				-->{#if !capability.cost.isFree()}<!--
 					--><Parameters
-					class="capability-cost-parameters"
+					class={styles.capabilityCostParameters}
 					><!--
 						--><CapabilityCostList cost={capability.cost} /><!--
 					--></Parameters
 				><!--
 				-->{/if}<!--
-			--><span class="colon">:</span>
+			--><span class={styles.colon}>:</span>
 		</span>
 
 		<!-- Effects -->
-		<EffectList style="flex: 1 1 auto; margin-left: 1.2em;" effects={capability.effects} />
+		<EffectList class={styles.capabilityEffects} effects={capability.effects} />
 	</div>
 </div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.capability-chip {
-		@include rz.row(xs);
-		align-items: flex-start;
-
-		:global(.capability-icon) {
-			flex: 0 0 auto;
-			position: relative;
-			top: rz.size(xs);
-			color: var(--text-subtle-color);
-		}
-
-		:global(.capability-cost-parameters) {
-			margin-left: #{rz.size(xs)};
-		}
-	}
-
-	.moment {
-		font-weight: bold;
-	}
-
-	.moment {
-		color: var(--text-highlight);
-	}
-
-	.colon {
-		color: var(--text-subtle-color);
-	}
-
-	.capability-content {
-		line-height: 1.5em;
-	}
-</style>

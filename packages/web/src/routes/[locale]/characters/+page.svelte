@@ -1,3 +1,21 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		toolbar: {
+			marginBottom: css.spacing.lg
+		},
+		resultsCount: {
+			color: css.text.subtleColor,
+			marginBottom: css.spacing.md
+		},
+		emptyMessage: {
+			color: css.text.subtleColor,
+			fontStyle: 'italic'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
@@ -16,13 +34,13 @@
 	}
 </script>
 
-<div class="toolbar">
+<div class={styles.toolbar}>
 	<Button href={newCharacterUrl.get(locale)}>
 		<Text ca="Nou personatge" es="Nuevo personaje" en="New character" />
 	</Button>
 </div>
 
-<p class="results-count">
+<p class={styles.resultsCount}>
 	<Text
 		ca="%(count) personatges"
 		es="%(count) personajes"
@@ -52,7 +70,7 @@
 	]}
 	<Table rows={characters} {columns} onClickRow={openCharacter} />
 {:else}
-	<p class="empty-message">
+	<p class={styles.emptyMessage}>
 		<Text
 			ca="Encara no hi ha cap personatge."
 			es="Todavía no hay ningún personaje."
@@ -60,21 +78,3 @@
 		/>
 	</p>
 {/if}
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.toolbar {
-		margin-bottom: rz.size(lg);
-	}
-
-	.results-count {
-		color: var(--text-subtle-color);
-		margin-bottom: rz.size(md);
-	}
-
-	.empty-message {
-		color: var(--text-subtle-color);
-		font-style: italic;
-	}
-</style>

@@ -12,6 +12,38 @@
 	</Popover>
 	```
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		popover: {
+			padding: css.spacing.md,
+			position: 'fixed',
+			margin: '0',
+			background: css.palette.black,
+			border: `2px solid ${css.palette.darkSteel}`,
+			borderRadius: css.spacing.sm,
+			boxShadow: `0 0 ${css.spacing.md} rgba(0, 0, 0, 0.5)`,
+			color: 'inherit',
+			'&::backdrop': {
+				background: 'transparent'
+			},
+			"&[data-position='top']": {
+				top: `-${css.spacing.sm}`
+			},
+			"&[data-position='bottom']": {
+				top: css.spacing.sm
+			},
+			"&[data-position='left']": {
+				left: `-${css.spacing.sm}`
+			},
+			"&[data-position='right']": {
+				left: css.spacing.sm
+			}
+		}
+	});
+</script>
+
 <script lang="ts">
 	import {
 		standardAttributes,
@@ -58,7 +90,7 @@
 </script>
 
 <div
-	{...standardAttributes(attributes, 'popover')}
+	{...standardAttributes(attributes, styles.popover)}
 	{id}
 	popover={mode}
 	style:position-anchor={resolvedAnchor}
@@ -67,38 +99,3 @@
 >
 	{@render children()}
 </div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.popover {
-		@include rz.padding(md);
-		position: fixed;
-		margin: 0;
-		background: var(--popover-background);
-		border: var(--popover-border);
-		border-radius: rz.size(sm);
-		box-shadow: 0 0 rz.size(md) rgba(black, 0.5);
-		color: inherit;
-
-		&::backdrop {
-			background: transparent;
-		}
-
-		&[data-position='top'] {
-			top: calc(#{rz.size(sm)} * -1);
-		}
-
-		&[data-position='bottom'] {
-			top: rz.size(sm);
-		}
-
-		&[data-position='left'] {
-			left: calc(#{rz.size(sm)} * -1);
-		}
-
-		&[data-position='right'] {
-			left: rz.size(sm);
-		}
-	}
-</style>

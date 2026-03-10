@@ -1,3 +1,5 @@
+import { cx } from '@emotion/css';
+
 // Base interface for components that accept standard HTML attributes
 export interface StandardAttributeProps {
 	id?: string;
@@ -18,7 +20,7 @@ export const standardAttributes = <T extends Record<string | symbol, any>>(
 	// Use Object.assign to ensure Symbol-keyed properties (attachments) are preserved
 	return Object.assign(
 		{
-			class: `${baseClass} ${userClass}`.trim(),
+			class: cx(baseClass, userClass),
 			style: userStyle
 		},
 		rest

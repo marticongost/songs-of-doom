@@ -3,6 +3,16 @@
 Renders a TestEffect that causes a target to perform a test with a certain proficiency level.
 Displays the test expression followed by the results table.
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		results: {
+			marginLeft: css.spacing.sm
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { TestEffect } from '@songsofdoom/game';
 	import Parameters from '../capabilities/Parameters.svelte';
@@ -21,11 +31,4 @@ Displays the test expression followed by the results table.
 <Parameters>
 	<ExpressionChip expression={effect.expression} />
 </Parameters>
-<ResultsTableEffectChip class="test-results-table" effect={effect.results} />
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-	:global(.test-results-table) {
-		margin-left: rz.size(sm);
-	}
-</style>
+<ResultsTableEffectChip class={styles.results} effect={effect.results} />

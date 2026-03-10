@@ -4,6 +4,25 @@
 	Shows a language icon that, when clicked, displays links to switch
 	between supported locales while staying on the current page.
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		languageButton: {
+			display: 'inline-block'
+		},
+		localeList: {
+			...css.column('sm'),
+			listStyle: 'none',
+			margin: 0,
+			padding: 0
+		},
+		current: {
+			fontWeight: 'bold'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { page } from '$app/state';
 	import IconButton from '$lib/components/IconButton.svelte';
@@ -33,10 +52,10 @@
 	}
 </script>
 
-<div {...standardAttributes(rest, 'language-button')}>
+<div {...standardAttributes(rest, styles.languageButton)}>
 	<IconButton src="language.svg" popovertarget={popoverId} anchor={anchorName} />
 	<Popover id={popoverId} class="language-popover" anchor={anchorName}>
-		<ul class="locale-list">
+		<ul class={styles.localeList}>
 			{#each locales as locale (locale)}
 				<li class:current={locale === page.params.locale}>
 					<Link href={getLocaleHref(locale)} data-sveltekit-reload>
@@ -47,22 +66,3 @@
 		</ul>
 	</Popover>
 </div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.language-button {
-		display: inline-block;
-	}
-
-	.locale-list {
-		@include rz.column(sm);
-		list-style: none;
-		margin: 0;
-		padding: 0;
-	}
-
-	.current {
-		font-weight: bold;
-	}
-</style>

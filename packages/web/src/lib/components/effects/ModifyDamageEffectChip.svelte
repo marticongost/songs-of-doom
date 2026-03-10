@@ -1,3 +1,15 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		icon: {
+			width: '1.25em',
+			height: '1.25em',
+			color: 'var(--stat-health-color)'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { ModifyDamageEffect } from '@songsofdoom/game';
 	import ExpressionChip from '../expressions/ExpressionChip.svelte';
@@ -11,17 +23,7 @@
 	const { effect, ...attributes }: Props = $props();
 </script>
 
-<span {...standardAttributes(attributes, 'modify-damage-effect-chip')}>
-	<InlineSvg class="damage-icon" src="effects/damage.svg" />
+<span {...standardAttributes(attributes, styles.modifyDamageEffectChip)}>
+	<InlineSvg class={styles.icon} src="effects/damage.svg" />
 	<ExpressionChip expression={effect.amount} relative={true} />
 </span>
-
-<style lang="scss">
-	.modify-damage-effect-chip {
-		& > :global(.damage-icon) {
-			width: 1.25em;
-			height: 1.25em;
-			color: var(--stat-health-color);
-		}
-	}
-</style>

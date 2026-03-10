@@ -7,6 +7,20 @@ A styled anchor element.
 <Link href="#section">Jump to section</Link>
 ```
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		link: {
+			textDecoration: 'underline',
+			color: css.text.linkColor,
+			'&:hover': {
+				color: css.text.linkHoverColor
+			}
+		}
+	});
+</script>
+
 <script lang="ts">
 	import {
 		standardAttributes,
@@ -24,17 +38,4 @@ A styled anchor element.
 </script>
 
 <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- href is pre-resolved by the caller -->
-<a {href} {...standardAttributes(attributes, 'link')}>{@render children()}</a>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.link {
-		text-decoration: underline;
-		color: var(--link-color);
-
-		&:hover {
-			color: var(--link-hover-color);
-		}
-	}
-</style>
+<a {href} {...standardAttributes(attributes, styles.link)}>{@render children()}</a>

@@ -4,6 +4,26 @@
 	Shows a user icon that, when clicked, displays either user details with logout
 	(if authenticated) or a login form (if not authenticated).
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		userButton: {
+			display: 'inline-block'
+		},
+		loggedInCue: {
+			position: 'absolute',
+			positionAnchor: '--user-popover',
+			positionArea: 'x-end y-end',
+			borderRadius: '100%',
+			backgroundColor: 'var(--positive-color)',
+			width: css.spacing.sm,
+			height: css.spacing.sm,
+			top: '-0.5em'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import IconButton from '$lib/components/IconButton.svelte';
 	import Popover from '$lib/components/Popover.svelte';
@@ -30,10 +50,10 @@
 	}
 </script>
 
-<div {...standardAttributes(attributes, 'user-button')}>
+<div {...standardAttributes(attributes, styles.userButton)}>
 	<IconButton src="user.svg" popovertarget={popoverId} anchor={anchorName} />
 	{#if user}
-		<div class="logged-in-cue"></div>
+		<div class={styles.loggedInCue}></div>
 	{/if}
 	<Popover id={popoverId} class="user-popover" anchor={anchorName}>
 		{#if user}
@@ -43,26 +63,3 @@
 		{/if}
 	</Popover>
 </div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.user-button {
-		display: inline-block;
-	}
-
-	:global(.user-popover) {
-		width: 20em;
-	}
-
-	.logged-in-cue {
-		position: absolute;
-		position-anchor: --user-popover;
-		position-area: x-end y-end;
-		border-radius: 100%;
-		background-color: var(--positive-color);
-		width: rz.size(sm);
-		height: rz.size(sm);
-		top: -0.5em;
-	}
-</style>

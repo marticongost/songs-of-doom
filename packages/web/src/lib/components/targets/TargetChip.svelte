@@ -180,6 +180,7 @@
 	import ExpressionChip from '../expressions/ExpressionChip.svelte';
 	import Text from '../localisation/Text.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
+	import Variable from '../structured-text/Variable.svelte';
 
 	interface Props extends StandardAttributeProps {
 		target?: Target | TargetDiscriminator;
@@ -214,9 +215,7 @@
 					<Text ca="a" es="a" en="to" />
 				{/if}
 			{/if}
-			<span class="variable">
-				{target.variable}
-			</span>
+			<Variable class="variable">{target.variable}</Variable>
 		{/if}
 		<ExpressionChip expression={target.condition} />
 		{#if target instanceof Target}
@@ -254,11 +253,3 @@
 		{/if}
 	</span>
 {/if}
-
-<style lang="scss">
-	.variable {
-		font-weight: bold;
-		font-family: var(--variable-font);
-		color: var(--variable-color);
-	}
-</style>

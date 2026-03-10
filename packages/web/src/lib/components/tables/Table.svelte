@@ -26,6 +26,41 @@ method.
 </Table>
 ```
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		table: {
+			width: '100%',
+			borderCollapse: 'collapse',
+			fontSize: 'inherit',
+			'th, td': {
+				...css.vpadding('sm'),
+				...css.hpadding('md'),
+				verticalAlign: 'middle'
+			},
+			th: {
+				fontWeight: 'bold',
+				color: css.text.headingColor,
+				borderBottom: `2px solid ${css.palette.cinder}`,
+				textAlign: 'left'
+			},
+			'tbody tr': {
+				backgroundColor: css.palette.cocoaBrown
+			},
+			'&.striped tbody tr:nth-child(even)': {
+				backgroundColor: css.palette.lightCocoaBrown
+			},
+			'&.hoverable tbody tr': {
+				cursor: 'pointer',
+				'&:hover': {
+					backgroundColor: css.palette.buccaneer
+				}
+			}
+		}
+	});
+</script>
+
 <script lang="ts" generics="T">
 	import { getLocale } from '$lib/context/locale';
 	import { translate } from '@songsofdoom/common/localisation';
@@ -63,7 +98,7 @@ method.
 	const hoverable = $derived(onClickRow !== undefined);
 </script>
 
-<table {...standardAttributes(attributes, 'table')} class:striped class:hoverable>
+<table {...standardAttributes(attributes, styles.table)} class:striped class:hoverable>
 	{#if showHeader}
 		<thead>
 			<tr>
@@ -93,43 +128,3 @@ method.
 		{/each}
 	</tbody>
 </table>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.table {
-		width: 100%;
-		border-collapse: collapse;
-		font-size: inherit;
-
-		th,
-		td {
-			@include rz.vpadding(sm);
-			@include rz.hpadding(md);
-			vertical-align: middle;
-		}
-
-		th {
-			font-weight: bold;
-			color: var(--table-heading-color);
-			border-bottom: var(--table-heading-separator);
-			text-align: left;
-		}
-
-		tbody tr {
-			background-color: var(--table-background-color);
-		}
-
-		&.striped tbody tr:nth-child(even) {
-			background-color: var(--table-stripe-background-color);
-		}
-
-		&.hoverable tbody tr {
-			cursor: pointer;
-
-			&:hover {
-				background-color: var(--table-hover-background-color);
-			}
-		}
-	}
-</style>

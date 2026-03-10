@@ -4,12 +4,34 @@
 	Dots up to the current level are filled; the rest are translucent.
 	Renders nothing if the entity has only a single variant (no upgrades).
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		cardLevel: {
+			...css.row('xs')
+		},
+		dot: {
+			display: 'block',
+			width: '0.5em',
+			height: '0.5em',
+			borderRadius: '50%',
+			backgroundColor: css.text.highlightColor,
+			opacity: '0.25'
+		},
+		filledDot: {
+			opacity: '1'
+		}
+	});
+</script>
+
 <script lang="ts">
-	import type { Entity } from '@songsofdoom/game';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
+	import { cx } from '@emotion/css';
+	import type { Entity } from '@songsofdoom/game';
 
 	interface Props extends StandardAttributeProps {
 		/** The entity whose level to display. */
@@ -21,31 +43,9 @@
 </script>
 
 {#if hasMultipleVariants}
-	<span {...standardAttributes(attributes, 'card-level')}>
+	<span {...standardAttributes(attributes, styles.cardLevel)}>
 		{#each entity.variants as _, i (i)}
-			<span class="dot" class:filled={i < entity.level}></span>
+			<span class={cx(styles.dot, { [styles.filledDot]: i < entity.level })}></span>
 		{/each}
 	</span>
 {/if}
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.card-level {
-		@include rz.row(xs);
-		align-items: center;
-	}
-
-	.dot {
-		display: block;
-		width: 0.5em;
-		height: 0.5em;
-		border-radius: 50%;
-		background-color: var(--text-highlight);
-		opacity: 0.25;
-
-		&.filled {
-			opacity: 1;
-		}
-	}
-</style>

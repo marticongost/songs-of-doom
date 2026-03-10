@@ -1,4 +1,207 @@
 <script lang="ts" module>
+	import cardHeadingBackground from '$lib/assets/img/card-heading.png?url';
+	import cardSubheadingBackground from '$lib/assets/img/card-subheading.png?url';
+	import * as css from '$lib/styles';
+
+	const cardPrintWidth = 64;
+	const cardPrintHeight = 89;
+	const cardScreenWidth = 24;
+	const cardContentScale = 2.3;
+	const headerPadding = css.spacing.sm;
+
+	const styles = css.styles({
+		card: {
+			position: 'relative',
+			border: css.separators.regularBorder,
+			borderRadius: '0.5em',
+			backgroundColor: css.palette.somber,
+			fontSize: `${(cardScreenWidth / cardPrintWidth) * cardContentScale}em`,
+			width: `${cardPrintWidth / cardContentScale}em`,
+			height: `${cardPrintHeight / cardContentScale}em`,
+			overflow: 'clip',
+			...css.colorBindings.cardBackgrounds.rules('data-type', (color) => ({
+				'--main-background': color.main.background,
+				'--secondary-background': color.secondary.background
+			})),
+			'@media print': {
+				fontSize: `${cardContentScale}mm`
+			},
+			'--card-toolbar-container-offset': '100%',
+			'&:focus-within': {
+				'--card-toolbar-container-offset': 0,
+				borderColor: css.focus.outlineColor,
+				outline: 'none'
+			}
+		},
+		discardReward: {
+			position: 'absolute',
+			top: css.spacing.sm,
+			left: css.spacing.sm,
+			fontSize: '1.4em',
+			boxShadow: '0 0 1em rgba(0, 0, 0, 0.5)'
+		},
+		content: {
+			...css.column(),
+			alignItems: 'stretch',
+			height: '100%'
+		},
+		imageRow: {
+			...css.row(),
+			alignItems: 'stretch',
+			position: 'relative'
+		},
+		image: {
+			flex: 1,
+			minWidth: 0,
+			height: `${(cardPrintWidth / cardContentScale) * (9 / 16)}em`,
+			objectFit: 'cover',
+			objectPosition: 'center'
+		},
+		dimmedImage: {
+			filter: 'grayscale(100%) brightness(0.8)',
+			opacity: '0.7'
+		},
+		header: {
+			...css.row(),
+			position: 'relative',
+			borderBottom: css.separators.regularBorder,
+			background: `url('${cardHeadingBackground}') center / cover`,
+			'&::before': {
+				content: "''",
+				position: 'absolute',
+				inset: '0',
+				backgroundImage: 'var(--main-background)',
+				opacity: '0.7'
+			},
+			'> *': {
+				position: 'relative'
+			}
+		},
+		title: {
+			padding: headerPadding,
+			fontFamily: css.fonts.heading,
+			fontSize: '1.4em',
+			fontWeight: 'bold',
+			color: css.text.headingColor,
+			textShadow: '0 0 0.5em rgba(0, 0, 0, 0.8)'
+		},
+		setFrame: {
+			backgroundColor: 'rgba(0, 0, 0, 0.2)',
+			borderRight: '1px solid rgba(0, 0, 0, 0.1)',
+			width: '3em',
+			height: '100%',
+			flex: '0 0 auto',
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'center'
+		},
+		setIcon: {
+			height: '2.1em',
+			filter: 'drop-shadow(0 0 0.8rem black)',
+			color: 'rgba(255, 255, 255, 0.7)'
+		},
+		acquisition: {
+			...css.row('sm'),
+			padding: headerPadding,
+			marginLeft: 'auto'
+		},
+		requiredEntity: {
+			fontSize: '0.9em',
+			opacity: '0.7'
+		},
+		indicators: {
+			...css.row('xs'),
+			position: 'absolute',
+			bottom: css.spacing.xs,
+			right: css.spacing.xs,
+			fontSize: '1.5em'
+		},
+		entityManagerIndicators: {
+			fontSize: '1.2em'
+		},
+		details: {
+			...css.row('sm'),
+			padding: css.spacing.sm,
+			position: 'relative',
+			borderTop: 'var(--panel-separator)',
+			borderBottom: 'var(--panel-separator)',
+			background: `url('${cardSubheadingBackground}') center / cover`,
+			'&::before': {
+				content: "''",
+				position: 'absolute',
+				inset: '0',
+				backgroundImage: 'var(--secondary-background)',
+				opacity: '0.7'
+			},
+			'> *': {
+				position: 'relative'
+			}
+		},
+		body: {
+			...css.column('sm'),
+			alignItems: 'flex-start',
+			flex: '1 1 auto'
+		},
+		capabilities: {
+			padding: css.spacing.sm,
+			flex: '1 1 auto'
+		},
+		disciplines: {
+			padding: css.spacing.sm,
+			paddingBottom: '0'
+		},
+		requiredTalent: {
+			padding: css.spacing.sm,
+			paddingBottom: '0'
+		},
+		acquisitionIndicator: {
+			fontSize: '1.1em',
+			alignSelf: 'center'
+		},
+		disciplinesTitle: {
+			fontWeight: 'bold',
+			color: css.text.highlightColor,
+			'--svg-color': css.text.subtleColor,
+			svg: {
+				flex: '0 0 auto',
+				position: 'relative',
+				top: `calc(${css.spacing.xs} * -0.5)`,
+				color: css.text.subtleColor
+			}
+		},
+		requiredTalentTitle: {
+			fontWeight: 'bold',
+			color: css.text.highlightColor
+		},
+		requiredTalentIcon: {
+			color: css.text.subtleColor,
+			flex: '0 0 auto',
+			position: 'relative',
+			top: `calc(${css.spacing.xs} * -0.5)`
+		},
+		attachment: {
+			padding: css.spacing.sm,
+			marginTop: 'auto',
+			backgroundColor: 'rgba(0, 0, 0, 0.2)',
+			flex: '0 0 auto'
+		},
+		attachmentTitle: {
+			fontWeight: 'bold',
+			fontFamily: css.fonts.heading,
+			color: css.text.headingColor,
+			marginBottom: css.spacing.sm
+		},
+		toolbarContainer: {
+			position: 'absolute',
+			bottom: '0',
+			left: '0',
+			right: '0',
+			transform: 'translateY(var(--card-toolbar-container-offset))',
+			transition: 'transform 0.2s ease-out',
+			willChange: 'transform'
+		}
+	});
+
 	import { Archetype, Discipline, Module } from '@songsofdoom/game';
 	const getSetIcon = (set: Archetype | Discipline | Module): string => {
 		if (set instanceof Archetype) {
@@ -22,6 +225,7 @@
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
 	import { entityUrl } from '$lib/urls';
+	import { cx } from '@emotion/css';
 	import type { Entity } from '@songsofdoom/game';
 	import { Ally, attributeTypes, Creature, Item, Skill } from '@songsofdoom/game';
 	import { isArchetype, isItem } from '../../../../../game/src/models/entity';
@@ -84,87 +288,86 @@
 <svelte:element
 	this={elementType}
 	bind:this={cardElement}
-	class:dimmed
 	href={elementType === 'a' ? entityUrl.get(entity) : undefined}
 	type={elementType === 'button' ? 'button' : undefined}
 	tabindex={elementType === 'div' && entityManager ? -1 : undefined}
 	{onclick}
-	{...standardAttributes(rest, 'card')}
+	{...standardAttributes(rest, styles.card)}
 	data-type={entity.type.id}
 	data-entity={entity.id}
 	onfocus={hasToolbar ? passFocusToToolbar : undefined}
 >
-	<div class="content">
-		<div class="header">
+	<div class={styles.content}>
+		<div class={styles.header}>
 			{#if entity.set}
-				<div class="set-frame">
-					<InlineSvg class="set-icon" src={getSetIcon(entity.set)} />
+				<div class={styles.setFrame}>
+					<InlineSvg class={styles.setIcon} src={getSetIcon(entity.set)} />
 				</div>
 			{/if}
-			<div class="title"><Text {...entity.title} /></div>
+			<div class={styles.title}><Text {...entity.title} /></div>
 			<CardLevel {entity} />
-			<div class="acquisition">
+			<div class={styles.acquisition}>
 				{#if entity.requiredEntity}
-					<div class="required-entity">
+					<div class={styles.requiredEntity}>
 						<Text {...entity.requiredEntity.title} />
 					</div>
 				{/if}
 				{#if entity.xpCost !== undefined}
-					<ExperienceIndicator
-						amount={entity.xpCost}
-						style="font-size: 1.1em; align-self: center"
-					/>
+					<ExperienceIndicator amount={entity.xpCost} class={styles.acquisitionIndicator} />
 				{/if}
 				{#if entity.goldCost !== undefined}
-					<GoldIndicator amount={entity.goldCost} style="font-size: 1.1em; align-self: center" />
+					<GoldIndicator amount={entity.goldCost} class={styles.acquisitionIndicator} />
 				{/if}
 				{#if entityManager}
-					<div class="entity-manager-indicators">
+					<div class={styles.entityManagerIndicators}>
 						<CardCopiesIndicator amount={entityManager.getNumberOfOwnedCopies(entity)} />
 					</div>
 				{/if}
 			</div>
 		</div>
-		<div class="image-row">
+		<div class={styles.imageRow}>
 			{#if entity instanceof Creature || entity instanceof Ally}
-				<AttributesSheet stats={entity.stats} statTypes={attributeTypes} class="attributes" />
-				<div class="indicators">
+				<AttributesSheet stats={entity.stats} statTypes={attributeTypes} />
+				<div class={styles.indicators}>
 					<HealthIndicator amount={entity.stats.health} contrast={true} />
 					{#if entity instanceof Ally}
 						<SanityIndicator amount={entity.stats.sanity} contrast={true} />
 					{/if}
 				</div>
 			{/if}
-			<Image class="image" src="cards/{entity.id}.jpg" />
+			<Image
+				class={cx(styles.image, { [styles.dimmedImage]: dimmed })}
+				src="cards/{entity.id}.jpg"
+			/>
 			{#if discardReward && !discardReward.empty()}
-				<CapabilityCostList class="discard-reward" cost={discardReward} layout="column" />
+				<CapabilityCostList class={styles.discardReward} cost={discardReward} layout="column" />
 			{/if}
 		</div>
-		<div class="details">
+		<div class={styles.details}>
 			<PropertyList style="margin-right: auto" properties={entity.properties} />
 			{#if entity.maxCharges}
 				<ChargesChip charges={entity.maxCharges} />
 			{/if}
 			{#if entity instanceof Item && entity.slot}
-				<InlineSvg class="slot" src="slots/{entity.slot.type}.svg" />
+				<InlineSvg src="slots/{entity.slot.type}.svg" />
 			{/if}
 		</div>
-		<div class="body">
+		<div class={styles.body}>
 			{#if entity.description}
-				<div class="description">{entity.description}</div>
+				<div>{entity.description}</div>
 			{/if}
 
 			{#if isItem(entity) && entity.requiredTalent}
-				<div class="required-talent">
-					<span class="required-talent-title">
-						<InlineSvg src="lock.svg" />
+				<div class={styles.requiredTalent}>
+					<span class={styles.requiredTalentTitle}>
+						<InlineSvg class={styles.requiredTalentIcon} src="lock.svg" />
 						<Text ca="Requereix:" es="Requiere:" en="Requires:" />
 					</span>
 					<TalentChip talent={entity.requiredTalent} />
 				</div>
 			{:else if isArchetype(entity) && entity.disciplines.length}
-				<div class="disciplines">
-					<span class="disciplines-title">
+				<div class={styles.disciplines}>
+					<span class={styles.disciplinesTitle}>
 						<InlineSvg src="unlock.svg" />
 						<Text ca="Disciplines:" es="Disciplinas:" en="Disciplines:" />
 					</span>
@@ -172,10 +375,10 @@
 				</div>
 			{/if}
 
-			<CapabilityList class="capabilities" capabilities={entity.capabilities} />
+			<CapabilityList class={styles.capabilities} capabilities={entity.capabilities} />
 			{#if entity.attachmentCapabilities.length > 0}
-				<div class="attachment">
-					<div class="attachment-title">
+				<div class={styles.attachment}>
+					<div class={styles.attachmentTitle}>
 						<Text ca="Mentre estigui vinculada" es="Mientras esté vinculada" en="While attached" />
 					</div>
 					<CapabilityList capabilities={entity.attachmentCapabilities} />
@@ -184,249 +387,8 @@
 		</div>
 	</div>
 	{#if entityManager && hasToolbar}
-		<div class="toolbar-container">
+		<div class={styles.toolbarContainer}>
 			<EntityToolbar {entity} {entityManager} />
 		</div>
 	{/if}
 </svelte:element>
-
-<style lang="scss">
-	@use 'sass:math';
-	@use '@reguitzell/styles' as rz;
-
-	$card-print-width: 64;
-	$card-print-height: 89;
-	$card-screen-width: 24;
-	$card-content-scale: 2.3;
-	$header-padding: sm;
-
-	.card {
-		position: relative;
-		border: var(--panel-border);
-		border-radius: 0.5em;
-		background-color: var(--panel-background-color);
-		font-size: #{math.div($card-screen-width, $card-print-width) * $card-content-scale}em;
-		width: #{math.div($card-print-width, $card-content-scale)}em;
-		height: #{math.div($card-print-height, $card-content-scale)}em;
-		overflow: clip;
-
-		@each $type in archetype, trait, skill, ally, item, creature, encounter {
-			&[data-type='#{$type}'] {
-				--main-background: var(--card-type-#{$type}-main-background);
-				--secondary-background: var(--card-type-#{$type}-secondary-background);
-			}
-		}
-
-		@media print {
-			font-size: #{$card-content-scale}mm;
-		}
-
-		:global(.discard-reward) {
-			position: absolute;
-			top: rz.size(sm);
-			left: rz.size(sm);
-			font-size: 1.4em;
-			box-shadow: 0 0 1em rgba(black, 0.5);
-		}
-
-		&:focus-within {
-			border-color: var(--focus-outline-color);
-			outline: none;
-		}
-	}
-
-	.content {
-		@include rz.column;
-		align-items: stretch;
-		height: 100%;
-	}
-
-	div[tabindex] {
-		cursor: pointer;
-	}
-
-	div[tabindex]:hover,
-	a.card:hover,
-	button.card:hover {
-		border-color: var(--text-highlight);
-	}
-
-	button.card {
-		cursor: pointer;
-		padding: 0;
-		color: inherit;
-		font-family: inherit;
-		text-align: left;
-	}
-
-	.image-row {
-		@include rz.row;
-		align-items: stretch;
-		position: relative;
-	}
-
-	:global(.card .image) {
-		flex: 1;
-		min-width: 0;
-		height: #{math.div($card-print-width, $card-content-scale) * math.div(9, 16)}em;
-		object-fit: cover;
-		object-position: center;
-	}
-
-	.dimmed :global(.image) {
-		filter: grayscale(100%) brightness(0.8);
-		opacity: 0.7;
-	}
-
-	.header {
-		@include rz.row;
-		position: relative;
-		border-bottom: var(--panel-separator);
-		background: url('../../assets/img/card-heading.png') center / cover;
-
-		&::before {
-			content: '';
-			position: absolute;
-			inset: 0;
-			background-image: var(--main-background);
-			opacity: 0.7;
-		}
-
-		> :global(*) {
-			position: relative;
-		}
-	}
-
-	.title {
-		@include rz.padding($header-padding);
-		font-family: var(--heading-font);
-		font-size: 1.4em;
-		font-weight: bold;
-		color: var(--text-heading-color);
-		text-shadow: 0 0 0.5em rgba(0, 0, 0, 0.8);
-	}
-
-	.set-frame {
-		background-color: rgba(black, 0.2);
-		border-right: 1px solid rgba(black, 0.1);
-		width: 3em;
-		height: 100%;
-		flex: 0 0 auto;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-
-		:global(.set-icon) {
-			height: 2.1em;
-			filter: drop-shadow(0 0 0.8rem black);
-			color: rgba(white, 0.7);
-		}
-	}
-
-	.acquisition {
-		@include rz.row(sm);
-		@include rz.padding($header-padding);
-		margin-left: auto;
-	}
-
-	.required-entity {
-		font-size: 0.9em;
-		opacity: 0.7;
-	}
-
-	:global(.attributes) {
-		background-image: linear-gradient(to right, transparent, rgba(black, 0.1));
-		border-right: var(--panel-separator);
-	}
-
-	.indicators {
-		@include rz.row(xs);
-		position: absolute;
-		bottom: rz.size(xs);
-		right: rz.size(xs);
-		font-size: 1.5em;
-	}
-
-	.entity-manager-indicators {
-		font-size: 1.2em;
-	}
-
-	.details {
-		@include rz.row(sm);
-		@include rz.padding(sm);
-		position: relative;
-		border-top: var(--panel-separator);
-		border-bottom: var(--panel-separator);
-		background: url('../../assets/img/card-subheading.png') center / cover;
-
-		&::before {
-			content: '';
-			position: absolute;
-			inset: 0;
-			background-image: var(--secondary-background);
-			opacity: 0.7;
-		}
-
-		> :global(*) {
-			position: relative;
-		}
-	}
-
-	.body {
-		@include rz.column(sm);
-		flex: 1 1 auto;
-
-		:global(.capabilities) {
-			@include rz.padding(sm);
-			flex: 1 1 auto;
-		}
-	}
-
-	.disciplines,
-	.required-talent {
-		padding: rz.size(sm);
-		padding-bottom: 0;
-	}
-
-	.disciplines-title,
-	.required-talent-title {
-		font-weight: bold;
-		color: var(--text-highlight);
-		--svg-color: var(--text-subtle-color);
-
-		:global(svg) {
-			flex: 0 0 auto;
-			position: relative;
-			top: calc(#{rz.size(xs)} * -0.5);
-			color: var(--text-subtle-color);
-		}
-	}
-
-	.attachment {
-		@include rz.padding(sm);
-		margin-top: auto;
-		background-color: rgba(black, 0.2);
-		flex: 0 0 auto;
-	}
-
-	.attachment-title {
-		font-weight: bold;
-		font-family: var(--heading-font);
-		color: var(--text-heading-color);
-		margin-bottom: rz.size(sm);
-	}
-
-	.toolbar-container {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		transform: translateY(100%);
-		transition: transform 0.2s ease-out;
-		will-change: transform;
-	}
-
-	.card:focus-within .toolbar-container {
-		transform: translateY(0);
-	}
-</style>

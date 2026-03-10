@@ -3,6 +3,24 @@
 Displays the list of disciplines unlocked by an archetype, showing each discipline's
 icon and title.
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		discipline: {
+			display: 'inline-flex',
+			gap: css.spacing.xs,
+			alignItems: 'baseline',
+			whiteSpace: 'nowrap'
+		},
+		icon: {
+			color: css.text.highlightColor,
+			height: '1.2em',
+			alignSelf: 'center'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import InlineSvg from '$lib/components/InlineSvg.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
@@ -25,28 +43,11 @@ icon and title.
 	<span {...standardAttributes(attributes, 'discipline-list')}>
 		<TextList items={disciplines} type="commas">
 			{#snippet entry(discipline)}
-				<span class="discipline">
-					<InlineSvg class="discipline-icon" src="disciplines/{discipline.id}.svg" />
+				<span class={styles.discipline}>
+					<InlineSvg class={styles.icon} src="disciplines/{discipline.id}.svg" />
 					<Text {...discipline.title} />
 				</span>
 			{/snippet}
 		</TextList>
 	</span>
 {/if}
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.discipline {
-		display: inline-flex;
-		gap: rz.size(xs);
-		align-items: baseline;
-		white-space: nowrap;
-		--svg-color: var(--text-highlight);
-
-		:global(.discipline-icon) {
-			height: 1.2em;
-			align-self: center;
-		}
-	}
-</style>

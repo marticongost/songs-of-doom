@@ -7,12 +7,55 @@ A styled text input with optional leading icon.
 <Input type="text" placeholder="Enter text..." bind:value />
 ```
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		inputWrapper: {
+			position: 'relative',
+			display: 'inline-block'
+		},
+		input: {
+			...css.vpadding('sm'),
+			...css.hpadding('md'),
+			width: '100%',
+			height: css.forms.controlHeight,
+			fontFamily: 'inherit',
+			fontSize: 'inherit',
+			color: css.text.regularColor,
+			backgroundColor: css.forms.controlBackgroundColor,
+			border: css.forms.controlBorder,
+			borderRadius: css.spacing.sm,
+			'&:focus': {
+				border: css.focus.outline,
+				outline: 'none'
+			},
+			'&::placeholder': {
+				color: 'inherit',
+				opacity: '0.6'
+			}
+		},
+		inputWithIcon: {
+			paddingLeft: css.spacing.lg
+		},
+		icon: {
+			position: 'absolute',
+			left: css.spacing.md,
+			top: '50%',
+			transform: 'translate(-25%, -50%)',
+			pointerEvents: 'none',
+			opacity: '0.6'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import InlineSvg from '$lib/components/InlineSvg.svelte';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
+	import { cx } from '@emotion/css';
 
 	interface Props extends StandardAttributeProps {
 		/** Input type (text, search, email, etc.) */
@@ -60,64 +103,19 @@ A styled text input with optional leading icon.
 	}
 </script>
 
-<span {...standardAttributes(attributes, 'input-wrapper')} class:has-icon={!!icon}>
+<span {...standardAttributes(attributes, styles.inputWrapper)}>
 	{#if icon}
-		<InlineSvg class="input-icon" src={icon} />
+		<InlineSvg class={styles.icon} src={icon} />
 	{/if}
 	<input
 		bind:this={inputElement}
 		{type}
 		{name}
 		bind:value
+		class={cx(styles.input, { [styles.inputWithIcon]: !!icon })}
 		{placeholder}
 		{autofocus}
 		aria-label={ariaLabel}
 		{oninput}
 	/>
 </span>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.input-wrapper {
-		position: relative;
-		display: inline-block;
-
-		input {
-			width: 100%;
-			height: var(--input-height);
-			padding: rz.size(sm) rz.size(md);
-			font-family: inherit;
-			font-size: inherit;
-			color: var(--text-color);
-			background-color: var(--input-background-color);
-			border: var(--input-border);
-			border-radius: rz.size(sm);
-
-			&:focus {
-				border: var(--focus-outline);
-				outline: none;
-			}
-
-			&::placeholder {
-				color: inherit;
-				opacity: 0.6;
-			}
-		}
-
-		&.has-icon {
-			:global(.input-icon) {
-				position: absolute;
-				left: calc(rz.size(lg) / 2);
-				top: 50%;
-				transform: translate(-25%, -50%);
-				pointer-events: none;
-				opacity: 0.6;
-			}
-
-			input {
-				padding-left: rz.size(lg);
-			}
-		}
-	}
-</style>

@@ -1,4 +1,77 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		toolbarButton: {
+			...css.column('sm'),
+			padding: css.spacing.md,
+			'--svg-height': '1.5em',
+			'--svg-width': 'auto',
+			color: 'var(--toolbar-button-color)',
+			fontWeight: 'bold',
+			svg: {
+				transition: 'transform 0.1s linear',
+				opacity: '0.6',
+				filter: 'grayscale(20%) drop-shadow(0 0 0.1em black)'
+			},
+			'&[disabled]': {
+				opacity: '0.5',
+				cursor: 'not-allowed'
+			},
+			'&:hover': {
+				backgroundColor: 'var(--toolbar-button-hover-background-color)',
+				color: 'var(--toolbar-button-hover-color)',
+				svg: {
+					transform: 'scale(1.2)'
+				}
+			},
+			'&:focus': {
+				outline: 'none',
+				backgroundColor: 'var(--toolbar-button-focus-background-color)',
+				color: 'var(--toolbar-button-focus-color)'
+			}
+		},
+		orbitContainer: {
+			position: 'absolute',
+			inset: '0',
+			pointerEvents: 'none',
+			'--orbit-radius': '1.3em',
+			animation: 'spin 1s linear infinite'
+		},
+		iconContainer: {
+			position: 'relative',
+			display: 'grid',
+			placeItems: 'center',
+			width: '1.5em',
+			height: '1.5em',
+			marginInline: 'auto',
+			svg: {
+				width: '100%',
+				height: '100%'
+			}
+		},
+		dot: {
+			position: 'absolute',
+			top: '50%',
+			left: '50%',
+			'--arc-turn': '0.5turn',
+			'--arc-start': '-0.25turn',
+			'--max-dot-size': '0.35em',
+			'--dot-size-factor': 'calc((var(--dot-index) + 1) / var(--dot-count))',
+			'--dot-angle':
+				'calc(var(--arc-start) + var(--arc-turn) * var(--dot-index) / (var(--dot-count) - 1))',
+			'--dot-size': 'calc(var(--max-dot-size) * var(--dot-size-factor))',
+			width: 'var(--dot-size)',
+			height: 'var(--dot-size)',
+			backgroundColor: 'currentColor',
+			borderRadius: '50%',
+			opacity: '0.85',
+			transform: 'translate(-50%, -50%) rotate(var(--dot-angle)) translateX(var(--orbit-radius))'
+		},
+		impedimentPopover: {
+			minWidth: '12em'
+		}
+	});
 	let idCounter = 0;
 </script>
 
@@ -66,17 +139,21 @@
 	{href}
 	{onclick}
 	target={href ? target : undefined}
-	{...standardAttributes(rest, 'toolbar-button')}
+	{...standardAttributes(rest, styles.toolbarButton)}
 	disabled={isDisabled}
 	style:anchor-name={anchorName}
 	{...popoverHandlers}
 >
-	<div class="icon-container">
+	<div class={styles.iconContainer}>
 		<InlineSvg src={icon} />
 		{#if busy}
-			<div class="orbit-container" style:--dot-count={busyDotIndices.length} aria-hidden="true">
+			<div
+				class={styles.orbitContainer}
+				style:--dot-count={busyDotIndices.length}
+				aria-hidden="true"
+			>
 				{#each busyDotIndices as i (i)}
-					<span class="dot" style:--dot-index={i}></span>
+					<span class={styles.dot} style:--dot-index={i}></span>
 				{/each}
 			</div>
 		{/if}
@@ -87,7 +164,7 @@
 {#if disabled && disabledReason}
 	<Popover
 		id={popoverId!}
-		class="impediment-popover"
+		class={styles.impedimentPopover}
 		anchor={anchorName}
 		mode="manual"
 		position="top"
@@ -96,97 +173,3 @@
 		{@render disabledReason()}
 	</Popover>
 {/if}
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.toolbar-button {
-		@include rz.column(sm);
-		@include rz.padding(md);
-		--svg-height: 1.5em;
-		--svg-width: auto;
-		color: var(--toolbar-button-color);
-		font-weight: bold;
-
-		:global(svg) {
-			transition: transform 0.1s linear;
-			opacity: 0.6;
-			filter: grayscale(20%) drop-shadow(0 0 0.1em black);
-		}
-
-		&[disabled] {
-			opacity: 0.5;
-			cursor: not-allowed;
-		}
-
-		&:hover {
-			background-color: var(--toolbar-button-hover-background-color);
-			color: var(--toolbar-button-hover-color);
-
-			:global(svg) {
-				transform: scale(1.2);
-			}
-		}
-
-		&:focus {
-			outline: none;
-			background-color: var(--toolbar-button-focus-background-color);
-			color: var(--toolbar-button-focus-color);
-		}
-	}
-
-	.orbit-container {
-		position: absolute;
-		inset: 0;
-		pointer-events: none;
-		--orbit-radius: 1.3em;
-		animation: spin 1s linear infinite;
-	}
-
-	.icon-container {
-		position: relative;
-		display: grid;
-		place-items: center;
-		width: 1.5em;
-		height: 1.5em;
-		margin-inline: auto;
-
-		:global(svg) {
-			width: 100%;
-			height: 100%;
-		}
-	}
-
-	.dot {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		--arc-turn: 0.5turn;
-		--arc-start: -0.25turn;
-		--max-dot-size: 0.35em;
-		--dot-size-factor: calc((var(--dot-index) + 1) / var(--dot-count));
-		--dot-angle: calc(
-			var(--arc-start) + var(--arc-turn) * var(--dot-index) / (var(--dot-count) - 1)
-		);
-		--dot-size: calc(var(--max-dot-size) * var(--dot-size-factor));
-		width: var(--dot-size);
-		height: var(--dot-size);
-		background-color: currentColor;
-		border-radius: 50%;
-		opacity: 0.85;
-		transform: translate(-50%, -50%) rotate(var(--dot-angle)) translateX(var(--orbit-radius));
-	}
-
-	@keyframes spin {
-		from {
-			transform: rotate(0deg);
-		}
-		to {
-			transform: rotate(360deg);
-		}
-	}
-
-	:global(.impediment-popover) {
-		min-width: 12em;
-	}
-</style>

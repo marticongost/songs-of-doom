@@ -2,6 +2,22 @@
 	@component
 	Displays the current user's username with a logout button.
 -->
+
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	export const styles = css.styles({
+		loggedUserDetails: {
+			...css.column('sm'),
+			alignItems: 'center'
+		},
+		username: {
+			color: css.text.subtleColor,
+			fontWeight: 'bold'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
@@ -28,8 +44,8 @@
 	const logoutPath = '/[locale]/auth/logout' as const;
 </script>
 
-<div {...standardAttributes(attributes, 'logged-user-details')}>
-	<span class="username">{user.username}</span>
+<div {...standardAttributes(attributes, styles.loggedUserDetails)}>
+	<span class={styles.username}>{user.username}</span>
 	<form
 		method="POST"
 		action={resolve(logoutPath, { locale })}
@@ -47,17 +63,3 @@
 		</Button>
 	</form>
 </div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.logged-user-details {
-		@include rz.column(sm);
-		align-items: center;
-	}
-
-	.username {
-		color: var(--text-subtle-color);
-		font-weight: bold;
-	}
-</style>

@@ -2,6 +2,21 @@
 @component
 Displays the current user's username with a logout button, or a login link if not authenticated.
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		userMenu: {
+			...css.row('sm'),
+			alignItems: 'center'
+		},
+		username: {
+			color: css.text.subtleColor,
+			fontWeight: 'bold'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { resolve } from '$app/paths';
@@ -23,9 +38,9 @@ Displays the current user's username with a logout button, or a login link if no
 	const logoutPath = '/[locale]/auth/logout' as const;
 </script>
 
-<div {...standardAttributes(rest, 'user-menu')}>
+<div {...standardAttributes(rest, styles.userMenu)}>
 	{#if user}
-		<span class="username">{user.username}</span>
+		<span class={styles.username}>{user.username}</span>
 		<form method="POST" action={resolve(logoutPath, { locale })} use:enhance>
 			<Button type="submit">
 				<Text ca="Sortir" es="Salir" en="Log out" />
@@ -37,17 +52,3 @@ Displays the current user's username with a logout button, or a login link if no
 		</Button>
 	{/if}
 </div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.user-menu {
-		@include rz.row(sm);
-		align-items: center;
-	}
-
-	.username {
-		color: var(--text-subtle-color);
-		font-weight: bold;
-	}
-</style>

@@ -1,3 +1,18 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		blockQuote: {
+			margin: 0,
+			marginTop: css.spacing.sm,
+			...css.vpadding('xs'),
+			paddingLeft: css.spacing.md,
+			borderLeft: `4px solid rgba(255, 255, 255, 0.1)`,
+			backgroundColor: `rgba(255, 255, 255, 0.05)`
+		}
+	});
+</script>
+
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
@@ -9,19 +24,6 @@
 	const { children, ...attributes }: Props = $props();
 </script>
 
-<blockquote {...standardAttributes(attributes, 'block-quote')}>
+<blockquote {...standardAttributes(attributes, styles.blockQuote)}>
 	{@render children()}
 </blockquote>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	blockquote {
-		margin: 0;
-		margin-top: rz.size(sm);
-		@include rz.vpadding(xs);
-		padding-left: rz.size(md);
-		border-left: 4px solid rgba(white, 0.1);
-		background-color: rgba(white, 0.05);
-	}
-</style>

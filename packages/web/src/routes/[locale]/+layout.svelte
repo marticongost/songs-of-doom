@@ -1,3 +1,48 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	import pageHeaderUrl from '$lib/assets/img/page-header.png?url';
+
+	const styles = css.styles({
+		gameLogo: {
+			height: '5em',
+			alignSelf: 'center'
+		},
+		header: {
+			...css.row('xl'),
+			...css.hpadding('md'),
+			backgroundImage: `linear-gradient(
+				to bottom,
+				color-mix(in srgb, var(--header-background-color) 80%, transparent),
+				color-mix(in srgb, var(--page-background-color) 80%, transparent)
+			),
+			linear-gradient(to bottom, transparent, var(--page-background-color)),
+			url('${pageHeaderUrl}')`,
+			backgroundSize: '100% 100%,	100% 100%, 128px',
+			backgroundPosition: 'center, center, center top'
+		},
+		appControls: {
+			'--svg-height': '1.5em',
+			marginLeft: 'auto',
+			alignSelf: 'center'
+		},
+		main: {
+			...css.hpadding('md'),
+			paddingTop: css.spacing.md
+		},
+		pageHeading: {
+			...css.row('md'),
+			alignItems: 'center',
+			marginBottom: css.spacing.lg
+		},
+		pageTitle: {
+			fontFamily: css.fonts.heading,
+			fontSize: '3rem',
+			color: css.text.headingColor
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { page } from '$app/state';
 	import UserButton from '$lib/components/auth/UserButton.svelte';
@@ -15,86 +60,29 @@
 	<title>{getDocumentTitle(page.data.title)}</title>
 </svelte:head>
 
-<header>
-	<InlineSvg class="game-logo" src="logo.svg" />
+<header class={styles.header}>
+	<InlineSvg class={styles.gameLogo} src="logo.svg" />
 	<Navigation
 		root={siteTree}
 		includeRoot={true}
 		currentPath={getSectionPathName(page.url.pathname, data.locale)}
 	/>
-	<div class="app-controls">
+	<div class={styles.appControls}>
 		<LanguageButton class="language-button" />
 		<UserButton class="user-button" user={data.user ?? null} />
 	</div>
 </header>
 
-<main>
+<main class={styles.main}>
 	{#if page.data.heading !== null}
-		<div class="page-heading">
+		<div class={styles.pageHeading}>
 			{#if page.data.heading}
 				{@const Heading = page.data.heading}
 				<Heading />
 			{:else}
-				<h1 class="page-title">{page.data.title}</h1>
+				<h1 class={styles.pageTitle}>{page.data.title}</h1>
 			{/if}
 		</div>
 	{/if}
 	{@render children()}
 </main>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	:global(body) {
-		--page-hpadding: #{rz.size(md)};
-	}
-
-	:global(.game-logo) {
-		height: 5em;
-		align-self: center;
-	}
-
-	header {
-		@include rz.row(xl);
-		@include rz.hpadding(var(--page-hpadding));
-		background-image:
-			linear-gradient(
-				to bottom,
-				color-mix(in srgb, var(--header-background-color) 80%, transparent),
-				color-mix(in srgb, var(--page-background-color) 80%, transparent)
-			),
-			linear-gradient(to bottom, transparent, var(--page-background-color)),
-			url('../../lib/assets/img/page-header.png');
-		background-size:
-			100% 100%,
-			100% 100%,
-			128px;
-		background-position:
-			center,
-			center,
-			center top;
-	}
-
-	.app-controls {
-		--svg-height: 1.5em;
-		margin-left: auto;
-		align-self: center;
-	}
-
-	main {
-		@include rz.hpadding(var(--page-hpadding));
-		padding-top: rz.size(md);
-	}
-
-	.page-heading {
-		@include rz.row(md);
-		align-items: center;
-		margin-bottom: rz.size(lg);
-	}
-
-	:global(.page-title) {
-		font-family: var(--heading-font);
-		font-size: 3rem;
-		color: var(--text-heading-color);
-	}
-</style>

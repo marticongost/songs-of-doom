@@ -1,10 +1,24 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		statIcon: {
+			alignSelf: 'center'
+		},
+		colorCoded: {
+			...css.colorBindings.stats.rules('data-stat', (color) => ({ color }))
+		}
+	});
+</script>
+
 <script lang="ts">
-	import { stats, type Stat, type StatType } from '@songsofdoom/game';
 	import InlineSvg from '$lib/components/InlineSvg.svelte';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
+	import { cx } from '@emotion/css';
+	import { stats, type Stat, type StatType } from '@songsofdoom/game';
 
 	interface Props extends StandardAttributeProps {
 		stat: Stat | StatType;
@@ -17,22 +31,8 @@
 </script>
 
 <InlineSvg
-	{...standardAttributes(attributes, `stat-icon${colorCoded ? ' color-coded' : ''}`)}
+	{...standardAttributes(attributes, cx(styles.statIcon, { [styles.colorCoded]: colorCoded }))}
 	data-color-coded={colorCoded ? 'true' : 'false'}
 	data-stat={statObject.type}
 	src="stats/{statObject.type}.svg"
 />
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	:global(.stat-icon) {
-		align-self: center;
-	}
-
-	@each $stat in strength, agility, intelligence, charisma, will, health, sanity {
-		:global(.stat-icon.color-coded[data-stat='#{$stat}']) {
-			color: var(--stat-#{$stat}-color);
-		}
-	}
-</style>

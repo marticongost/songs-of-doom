@@ -1,3 +1,16 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		rulesReference: {
+			width: '50em'
+		},
+		rulesContainer: {
+			...css.column('md')
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { KeyboardNavigation } from '$lib/attachments/keyboard-nav';
 	import RuleEntryComponent from '$lib/components/rules-reference/RuleEntry.svelte';
@@ -48,7 +61,7 @@
 	});
 </script>
 
-<div class="rules-reference">
+<div class={styles.rulesReference}>
 	<RuleSearch
 		{@attach nav.searchInputAttachment()}
 		entries={data.entries}
@@ -56,7 +69,7 @@
 		onFilter={handleFilter}
 	/>
 
-	<div class="rules-container" bind:this={container} {@attach nav.resultsAttachment()}>
+	<div class={styles.rulesContainer} bind:this={container} {@attach nav.resultsAttachment()}>
 		{#each visibleEntries as entry (entry.slug)}
 			<RuleEntryComponent {entry} />
 		{/each}
@@ -72,15 +85,3 @@
 		{/if}
 	</div>
 </div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.rules-reference {
-		width: 50em;
-	}
-
-	.rules-container {
-		@include rz.column(md);
-	}
-</style>

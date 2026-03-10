@@ -1,3 +1,14 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		cluesIndicator: {
+			'--indicator-icon-size': '1.5em',
+			'--indicator-color': css.colorBindings.clueColor
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import Indicator from './Indicator.svelte';
@@ -10,14 +21,7 @@
 </script>
 
 <Indicator
-	{...standardAttributes(attributes, 'clues-indicator')}
+	{...standardAttributes(attributes, styles.cluesIndicator)}
 	{amount}
 	icon="effects/clue.svg"
 />
-
-<style lang="scss">
-	:global(.clues-indicator) {
-		--indicator-icon-size: 1.5em;
-		--indicator-color: var(--clue-color);
-	}
-</style>

@@ -1,3 +1,15 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		goldIndicator: {
+			'--indicator-color': css.colorBindings.goldColor,
+			'--indicator-value-color': css.palette.wornWhite,
+			'--indicator-value-text-shadow': '0 0 0.2em black'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import Indicator from './Indicator.svelte';
@@ -9,12 +21,4 @@
 	const { amount, ...attributes }: Props = $props();
 </script>
 
-<Indicator {...standardAttributes(attributes, 'gold-indicator')} {amount} icon="gold.svg" />
-
-<style lang="scss">
-	:global(.gold-indicator) {
-		--indicator-color: var(--gold-background-color);
-		--indicator-value-color: var(--gold-foreground-color);
-		--indicator-value-text-shadow: 0 0 0.2em black;
-	}
-</style>
+<Indicator {...standardAttributes(attributes, styles.goldIndicator)} {amount} icon="gold.svg" />

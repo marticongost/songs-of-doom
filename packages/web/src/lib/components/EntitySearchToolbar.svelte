@@ -8,6 +8,18 @@ entity type filter dropdown, and sort criteria dropdown.
 <EntitySearchToolbar state={searchState} autofocus />
 ```
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		entitySearchToolbar: {
+			...css.row('md'),
+			marginBottom: css.spacing.lg,
+			alignItems: 'center'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import type { KeyboardNavigation } from '$lib/attachments/keyboard-nav';
 	import Dropdown from '$lib/components/forms/Dropdown.svelte';
@@ -69,7 +81,7 @@ entity type filter dropdown, and sort criteria dropdown.
 	}
 </script>
 
-<div {...standardAttributes(attributes, 'entity-search-toolbar')}>
+<div {...standardAttributes(attributes, styles.entitySearchToolbar)}>
 	<SearchInput
 		bind:this={searchInput}
 		{@attach keyboardNav?.searchInputAttachment()}
@@ -99,13 +111,3 @@ entity type filter dropdown, and sort criteria dropdown.
 		/>
 	{/if}
 </div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.entity-search-toolbar {
-		@include rz.row(md);
-		margin-bottom: rz.size(lg);
-		align-items: center;
-	}
-</style>

@@ -1,8 +1,30 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		propertyChip: {
+			whiteSpace: 'nowrap',
+			fontStyle: 'italic'
+		},
+		type: {
+			fontWeight: 'bold'
+		},
+		rule: {
+			color: css.text.highlightColor
+		}
+	});
+</script>
+
 <script lang="ts">
-	import { EntityType, type Property } from '@songsofdoom/game';
-	import { ParametricRuleInstance, ScalarRule, type ScalarRuleParams } from '@songsofdoom/game';
-	import { Rule } from '@songsofdoom/game';
 	import Text from '$lib/components/localisation/Text.svelte';
+	import {
+		EntityType,
+		ParametricRuleInstance,
+		Rule,
+		ScalarRule,
+		type Property,
+		type ScalarRuleParams
+	} from '@songsofdoom/game';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
 	interface Props extends StandardAttributeProps {
@@ -13,7 +35,7 @@
 </script>
 
 <span
-	{...standardAttributes(attributes, 'property-chip')}
+	{...standardAttributes(attributes, styles.propertyChip)}
 	class:type={property instanceof EntityType}
 	class:rule={property instanceof Rule}
 	><!--
@@ -27,17 +49,3 @@
 			.value})<!--
 	-->{/if}</span
 >
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-	.property-chip {
-		white-space: nowrap;
-		font-style: italic;
-	}
-	.type {
-		font-weight: bold;
-	}
-	.rule {
-		color: var(--text-highlight);
-	}
-</style>

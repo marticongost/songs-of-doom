@@ -1,9 +1,27 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		inlineSvg: {
+			display: 'inline-block',
+			width: 'var(--svg-width, auto)',
+			height: 'var(--svg-height, 1em)',
+			verticalAlign: 'middle',
+			fill: 'var(--svg-color, currentColor)'
+		},
+		missing: {
+			outline: '2px solid red'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { svgs } from '$lib/assets/svg';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
+	import { cx } from '@emotion/css';
 
 	interface Props extends StandardAttributeProps {
 		src: string;
@@ -21,7 +39,7 @@
 	}
 
 	const svg = $derived.by(() => {
-		const attrs = standardAttributes(attributes, 'inline-svg');
+		const attrs = standardAttributes(attributes, styles.inlineSvg);
 		const rawSvg = svgs.get(src);
 		return rawSvg ? decorate(rawSvg, attrs) : null;
 	});
@@ -31,18 +49,5 @@
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -- Rendering trusted SVG from internal asset map -->
 	{@html svg}
 {:else}
-	<span class="inline-svg missing" data-src={src}></span>
+	<span class={cx(styles.inlineSvg, styles.missing)} data-src={src}></span>
 {/if}
-
-<style>
-	:global(.inline-svg) {
-		display: inline-block;
-		width: var(--svg-width, auto);
-		height: var(--svg-height, 1em);
-		vertical-align: middle;
-		fill: var(--svg-color, currentColor);
-	}
-	:global(.inline-svg.missing) {
-		outline: 2px solid red;
-	}
-</style>

@@ -1,3 +1,42 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		statsSheet: {
+			...css.column(),
+			alignItems: 'flex-start'
+		},
+		stat: {
+			flex: '1',
+			...css.row('sm'),
+			...css.hpadding('sm'),
+			justifyContent: 'center',
+			alignItems: 'center',
+			'--svg-width': '1.4em',
+			'--svg-height': 'auto',
+			'& + .stat': {
+				borderTop: '1px solid rgba(white, 0.05)'
+			}
+		},
+		statLabel: {
+			width: '7em',
+			fontFamily: css.fonts.heading,
+			fontSize: '1.2em',
+			fontWeight: 'bold',
+			color: css.text.highlightColor
+		},
+		statValue: {
+			fontWeight: 'bold',
+			fontSize: '1.5em',
+			fontFamily: css.fonts.number
+		},
+		statIcon: {
+			color: css.text.subtleColor,
+			filter: 'drop-shadow(0 0 0.5em black)'
+		}
+	});
+</script>
+
 <script lang="ts" generics="T extends StatType = StatType">
 	import { Stat, statTypes as allStatTypes, stats, type StatType } from '@songsofdoom/game';
 	import { mapToRecord } from '../../../../common/src/utils';
@@ -27,57 +66,15 @@
 	);
 </script>
 
-<div {...standardAttributes(rest, 'stats-sheet')}>
+<div {...standardAttributes(rest, styles.statsSheet)}>
 	{#each statTypes as statType (statType)}
 		{@const value = statsRecord[statType]}
-		<span class="stat" data-stat={statType}>
-			<StatIcon class="stat-icon" stat={statType as StatType} />
+		<span class={styles.stat} data-stat={statType}>
+			<StatIcon class={styles.statIcon} stat={statType as StatType} />
 			{#if showLabels}
-				<span class="stat-label"><Text {...stats[statType].name} /></span>
+				<span class={styles.statLabel}><Text {...stats[statType].name} /></span>
 			{/if}
-			<span class="stat-value">{value}</span>
+			<span class={styles.statValue}>{value}</span>
 		</span>
 	{/each}
 </div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.stats-sheet {
-		@include rz.column;
-		align-items: flex-start;
-
-		:global(.stat-icon) {
-			color: var(--text-subtle-color);
-			filter: drop-shadow(0 0 0.5em black);
-		}
-	}
-
-	.stat {
-		flex: 1;
-		@include rz.row(sm);
-		@include rz.hpadding(sm);
-		justify-content: center;
-		align-items: center;
-		--svg-width: 1.4em;
-		--svg-height: auto;
-
-		& + .stat {
-			border-top: 1px solid rgba(white, 0.05);
-		}
-	}
-
-	.stat-label {
-		width: 7em;
-		font-family: var(--heading-font);
-		font-size: 1.2em;
-		font-weight: bold;
-		color: var(--text-highlight);
-	}
-
-	.stat-value {
-		font-weight: bold;
-		font-size: 1.5em;
-		font-family: var(--number-font);
-	}
-</style>

@@ -1,3 +1,34 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		authLayout: {
+			minHeight: '100vh',
+			...css.column('xl'),
+			alignItems: 'center',
+			paddingTop: css.spacing.xl
+		},
+		gameLogo: {
+			height: '5em'
+		},
+		authMain: {
+			...css.column('lg'),
+			width: 'min(400px, 90vw)',
+			background: 'var(--panel-background-color)',
+			border: 'var(--panel-border)',
+			borderRadius: css.spacing.sm,
+			padding: css.spacing.lg
+		},
+		pageTitle: {
+			fontFamily: css.fonts.heading,
+			fontSize: '2rem',
+			color: css.text.headingColor,
+			textAlign: 'center',
+			margin: '0'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
@@ -15,47 +46,15 @@
 	<title>{getDocumentTitle(page.data.title)}</title>
 </svelte:head>
 
-<div class="auth-layout">
+<div class={styles.authLayout}>
 	<header>
 		<a href={resolve(homePath, { locale: data.locale })}>
-			<InlineSvg class="game-logo" src="logo.svg" />
+			<InlineSvg class={styles.gameLogo} src="logo.svg" />
 		</a>
 	</header>
 
-	<main class="auth-main">
-		<h1 class="page-title">{page.data.title}</h1>
+	<main class={styles.authMain}>
+		<h1 class={styles.pageTitle}>{page.data.title}</h1>
 		{@render children()}
 	</main>
 </div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.auth-layout {
-		min-height: 100vh;
-		@include rz.column(xl);
-		align-items: center;
-		padding-top: rz.size(xl);
-	}
-
-	:global(.game-logo) {
-		height: 5em;
-	}
-
-	.auth-main {
-		@include rz.column(lg);
-		width: min(400px, 90vw);
-		background: var(--panel-background-color);
-		border: var(--panel-border);
-		border-radius: rz.size(sm);
-		@include rz.padding(lg);
-	}
-
-	:global(.page-title) {
-		font-family: var(--heading-font);
-		font-size: 2rem;
-		color: var(--text-heading-color);
-		text-align: center;
-		margin: 0;
-	}
-</style>

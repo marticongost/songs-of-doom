@@ -1,3 +1,17 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		damageIndicator: {
+			'--indicator-icon-size': '1.5em',
+			'--indicator-color': css.colorBindings.stats.colors.health,
+			'--indicator-value-y-offset': '0.1em',
+			'--indicator-value-font-weight': 'normal',
+			'--indicator-value-text-shadow': 'none'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import Indicator from './Indicator.svelte';
@@ -10,17 +24,7 @@
 </script>
 
 <Indicator
-	{...standardAttributes(attributes, 'damage-indicator')}
+	{...standardAttributes(attributes, styles.damageIndicator)}
 	{amount}
 	icon="effects/damage.svg"
 />
-
-<style lang="scss">
-	:global(.damage-indicator) {
-		--indicator-icon-size: 1.5em;
-		--indicator-color: var(--stat-health-color);
-		--indicator-value-y-offset: 0.1em;
-		--indicator-value-font-weight: normal;
-		--indicator-value-text-shadow: none;
-	}
-</style>

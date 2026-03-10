@@ -29,6 +29,8 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 	import PropertyChip from '../properties/PropertyChip.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import StatIcon from '../stats/StatIcon.svelte';
+	import Instruction from '../structured-text/Instruction.svelte';
+	import Operator from '../structured-text/Operator.svelte';
 	import TalentChip from '../talents/TalentChip.svelte';
 	import TargetChip from '../targets/TargetChip.svelte';
 
@@ -56,32 +58,30 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		<!-- Scalar arithmetic operations -->
 	{:else if expression instanceof ScalarOperation}
 		{@render expressionNodeSnippet(expression.left)}
-		<span class="operator">{expression.operator}</span>
+		<Operator>{expression.operator}</Operator>
 		{@render expressionNodeSnippet(expression.right)}
 
 		<!-- Comparisons -->
 	{:else if expression instanceof ComparisonExpression}
 		{@render expressionNodeSnippet(expression.left)}
-		<span class="operator">{expression.operator}</span>
+		<Operator>{expression.operator}</Operator>
 		{@render expressionNodeSnippet(expression.right)}
 
 		<!-- Logical operators -->
 	{:else if expression instanceof AndExpression}
 		{#each expression.operands as operand, index (index)}
 			{#if index > 0}
-				<span class="instruction">
-					<Text ca=" i " es=" y " en=" and " />
-				</span>
+				<Instruction><Text ca=" i " es=" y " en=" and " /></Instruction>
 			{/if}
 			{@render expressionNodeSnippet(operand)}
 		{/each}
 	{:else if expression instanceof OrExpression}
 		{#each expression.operands as operand, index (index)}
-			{#if index > 0}<span class="instruction"><Text ca=" o " es=" o " en=" or " /></span>{/if}
+			{#if index > 0}<Instruction><Text ca=" o " es=" o " en=" or " /></Instruction>{/if}
 			{@render expressionNodeSnippet(operand)}
 		{/each}
 	{:else if expression instanceof NotExpression}
-		<span class="instruction"><Text ca="no " es="no " en="not " /></span>
+		<Instruction><Text ca="no " es="no " en="not " /></Instruction>
 		{@render expressionNodeSnippet(expression.operand)}
 
 		<!-- IsExpression -->
@@ -121,7 +121,7 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 				{@render expressionNodeSnippet(plus(expression.stat, expression.modifier))}
 			{/snippet}
 			{#snippet or()}
-				<span class="instruction"><Text ca=" o " es=" o " en=" or " /></span>
+				<Instruction><Text ca=" o " es=" o " en=" or " /></Instruction>
 			{/snippet}
 			{#snippet exprWithoutTalent()}
 				{@render expressionNodeSnippet(
@@ -137,18 +137,3 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		{@render expressionNodeSnippet(expression)}
 	</span>
 {/if}
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.instruction {
-		font-weight: bold;
-		color: var(--instruction-color);
-		font-family: var(--instruction-font);
-	}
-
-	.operator {
-		font-weight: bold;
-		color: var(--text-subtle-color);
-	}
-</style>

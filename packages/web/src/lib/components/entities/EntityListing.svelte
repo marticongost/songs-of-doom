@@ -1,7 +1,50 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		flatGrid: {
+			...css.grid('lg')
+		},
+		groups: {
+			...css.column('xl')
+		},
+		grid: {
+			...css.grid('lg')
+		},
+		columns: {
+			columnGap: css.spacing.md,
+			columnWidth: '20em',
+			'& > * + *': {
+				marginTop: css.spacing.md
+			}
+		},
+		group: {
+			...css.column('md')
+		},
+		entity: {
+			breakInside: 'avoid',
+			WebkitColumnBreakInside: 'avoid'
+		},
+		groupHeading: {
+			fontFamily: css.fonts.heading,
+			fontSize: '1.5em',
+			color: css.text.headingColor,
+			display: 'flex',
+			alignItems: 'baseline',
+			gap: css.spacing.sm
+		},
+		groupCount: {
+			fontSize: '0.6em',
+			color: css.text.subtleColor
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { page } from '$app/state';
 	import type { KeyboardNavigation } from '$lib/attachments/keyboard-nav';
 	import type { GroupingResult } from '$lib/sorting';
+	import { cx } from '@emotion/css';
 	import { translate, type Locale } from '@songsofdoom/common/localisation';
 	import { type Entity } from '@songsofdoom/game';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
@@ -117,29 +160,33 @@
 {/snippet}
 
 <div
-	{...standardAttributes(attributes, 'entity-listing')}
-	class:flat-grid={!groupedEntities && appearance === 'card-grid'}
-	class:groups={groupedEntities}
+	{...standardAttributes(
+		attributes,
+		cx({
+			[styles.flatGrid]: !groupedEntities && appearance === 'card-grid',
+			[styles.groups]: !!groupedEntities
+		})
+	)}
 	{@attach keyboardNav?.resultsAttachment()}
 >
 	{#if groupedEntities}
 		{#each groupedEntities as { group, entities: groupEntities }, groupIndex (group.id)}
 			{@const groupStartIndex = getGroupStartIndex(groupIndex)}
-			<section class="group">
-				<h2 class="group-heading">
+			<section class={styles.group}>
+				<h2 class={styles.groupHeading}>
 					{translate(group.title, locale)}
-					<span class="group-count">({groupEntities.length})</span>
+					<span class={styles.groupCount}>({groupEntities.length})</span>
 				</h2>
 				{#if appearance === 'button-columns'}
-					<div class="entities columns">
+					<div class={styles.columns}>
 						{#each groupEntities as entity, i (entity.variantId)}
-							<div class="entity">
+							<div class={styles.entity}>
 								{@render renderEntity(entity, groupStartIndex + i)}
 							</div>
 						{/each}
 					</div>
 				{:else}
-					<div class="entities grid">
+					<div class={styles.grid}>
 						{#each groupEntities as entity, i (entity.variantId)}
 							{@render renderEntity(entity, groupStartIndex + i)}
 						{/each}
@@ -149,9 +196,9 @@
 		{/each}
 	{:else if entities && entities.length > 0}
 		{#if appearance === 'button-columns'}
-			<div class="entities columns">
+			<div class={styles.columns}>
 				{#each entities as entity, i (entity.variantId)}
-					<div class="entity">
+					<div class={styles.entity}>
 						{@render renderEntity(entity, i)}
 					</div>
 				{/each}
@@ -172,51 +219,3 @@
 		{dimLocked}
 	/>
 {/if}
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.flat-grid {
-		@include rz.grid(lg);
-	}
-
-	.groups {
-		@include rz.column(xl);
-	}
-
-	.entities.grid {
-		@include rz.grid(lg);
-	}
-
-	.group {
-		@include rz.column(md);
-	}
-
-	.entities.columns {
-		column-gap: rz.size(md);
-		column-width: 20em;
-
-		.entity + .entity {
-			margin-top: rz.size(md);
-		}
-	}
-
-	.entity {
-		break-inside: avoid;
-		-webkit-column-break-inside: avoid;
-	}
-
-	.group-heading {
-		font-family: var(--heading-font);
-		font-size: 1.5em;
-		color: var(--text-heading-color);
-		display: flex;
-		align-items: baseline;
-		gap: rz.size(sm);
-	}
-
-	.group-count {
-		font-size: 0.6em;
-		color: var(--text-subtle-color);
-	}
-</style>

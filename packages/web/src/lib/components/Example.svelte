@@ -8,6 +8,22 @@ A blockquote used to display examples, with a darker background and italic text.
 </Example>
 ```
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		example: {
+			margin: 0,
+			marginTop: css.spacing.sm,
+			padding: css.spacing.sm,
+			paddingLeft: css.spacing.md,
+			borderLeft: '4px solid rgba(255, 255, 255, 0.15)',
+			backgroundColor: 'rgba(255, 255, 255, 0.1)',
+			fontStyle: 'italic'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import {
 		standardAttributes,
@@ -22,20 +38,6 @@ A blockquote used to display examples, with a darker background and italic text.
 	const { children, ...attributes }: Props = $props();
 </script>
 
-<blockquote {...standardAttributes(attributes, 'example')}>
+<blockquote {...standardAttributes(attributes, styles.example)}>
 	{@render children()}
 </blockquote>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.example {
-		margin: 0;
-		margin-top: rz.size(sm);
-		@include rz.padding(sm);
-		padding-left: rz.size(md);
-		border-left: 4px solid rgba(white, 0.15);
-		background-color: rgba(white, 0.1);
-		font-style: italic;
-	}
-</style>

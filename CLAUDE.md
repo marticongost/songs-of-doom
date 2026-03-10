@@ -152,7 +152,7 @@ Svelte 5 components in `packages/web/` follow these patterns:
   - `*List.svelte` - Display collections
   - `*Icon.svelte` - SVG icon wrappers
 - **Props**: Define a `Props` interface extending `StandardAttributeProps` from [packages/web/src/lib/components/standardattributes.ts](packages/web/src/lib/components/standardattributes.ts)
-- **Styles**: Use SCSS with `@reguitzell/styles` (imported as `rz`)
+- **Styles**: Use Emotion CSS-in-JS via `$lib/styles` (no `<style>` tags or SCSS)
 - **Svelte 5**: Use runes (`$props`, `$state`) not Svelte 4 syntax
 - **Path aliases**: `$lib` = `packages/web/src/lib`, `$app` for SvelteKit internals
 - **Game imports**: Import from `@songsofdoom/game` for models and data, `@songsofdoom/common/localisation` for localization helpers

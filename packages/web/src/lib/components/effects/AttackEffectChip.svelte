@@ -1,3 +1,13 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		results: {
+			marginLeft: css.spacing.sm
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { AttackEffect } from '@songsofdoom/game';
 	import Parameters from '../capabilities/Parameters.svelte';
@@ -14,7 +24,7 @@
 	const { effect, ...attributes }: Props = $props();
 </script>
 
-<span {...standardAttributes(attributes, 'attack-effect-chip')}>
+<span {...standardAttributes(attributes)}>
 	<Text ca="Atacar" es="Atacar" en="Attack" />
 	<Parameters
 		><!--
@@ -24,14 +34,5 @@
 		/><!--
 				--></Parameters
 	>
-	<ResultsTableEffectChip class="attack-results" effect={effect.results} />
+	<ResultsTableEffectChip class={styles.results} effect={effect.results} />
 </span>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-	.attack-effect-chip {
-		:global(.attack-results) {
-			margin-left: rz.size(sm);
-		}
-	}
-</style>

@@ -20,7 +20,3 @@
 			><PropertyList properties={effect.properties} /></Parameters
 		>{/if}
 </span>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-</style>

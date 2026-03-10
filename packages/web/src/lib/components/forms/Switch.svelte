@@ -16,6 +16,66 @@ Each segment can display an icon, text, or both.
 ```
 -->
 <script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		switch: {
+			display: 'inline-flex',
+			overflow: 'hidden'
+		},
+		button: {
+			display: 'inline-flex',
+			alignItems: 'center',
+			justifyContent: 'center',
+			gap: css.spacing.xs,
+			...css.hpadding('md'),
+			...css.vpadding('sm'),
+			backgroundColor: css.forms.controlBackgroundColor,
+			border: css.forms.controlBorder,
+			fontFamily: 'inherit',
+			fontSize: 'inherit',
+			color: css.palette.scorpion,
+			cursor: 'pointer',
+			height: css.forms.controlHeight,
+			'&:first-child': {
+				borderTopLeftRadius: css.spacing.sm,
+				borderBottomLeftRadius: css.spacing.sm
+			},
+			'&:last-child': {
+				borderTopRightRadius: css.spacing.sm,
+				borderBottomRightRadius: css.spacing.sm
+			},
+			'& + &': {
+				marginLeft: '-2px'
+			},
+			'&:hover:not(:disabled):not([aria-checked="true"])': {
+				backgroundColor: css.palette.ash
+			},
+			'&:focus': {
+				outline: 'none',
+				borderColor: css.focus.outlineColor,
+				position: 'relative',
+				zIndex: 2
+			},
+			'&:disabled': {
+				cursor: 'not-allowed'
+			},
+			'&[aria-checked="true"]': {
+				backgroundColor: css.palette.lightCocoaBrown,
+				color: css.palette.opium
+			}
+		},
+		disabledSwitch: {
+			opacity: '0.5'
+		},
+		icon: {
+			flexShrink: '0'
+		},
+		label: {
+			whiteSpace: 'nowrap'
+		}
+	});
+
 	import type { LocalisedText } from '@songsofdoom/common/localisation';
 
 	/**
@@ -42,6 +102,7 @@ Each segment can display an icon, text, or both.
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
 	import { getLocale } from '$lib/context/locale';
+	import { cx } from '@emotion/css';
 	import { translate } from '@songsofdoom/common/localisation';
 
 	interface Props extends StandardAttributeProps {
@@ -130,11 +191,10 @@ Each segment can display an icon, text, or both.
 
 <div
 	bind:this={containerRef}
-	{...standardAttributes(attributes, 'switch')}
+	{...standardAttributes(attributes, cx(styles.switch, { [styles.disabledSwitch]: disabled }))}
 	role="radiogroup"
 	aria-label={ariaLabel ? translate(ariaLabel, locale) : undefined}
 	aria-labelledby={ariaLabelledBy}
-	class:disabled
 >
 	{#each options as option, index (option.value)}
 		{@const isSelected = option.value === value}
@@ -146,89 +206,16 @@ Each segment can display an icon, text, or both.
 			tabindex={isSelected ? 0 : -1}
 			disabled={disabled || undefined}
 			{name}
-			class:selected={isSelected}
-			class:has-icon={!!option.icon}
-			class:has-label={!!option.label}
+			class={styles.button}
 			onclick={() => handleSelect(option.value)}
 			onkeydown={(e) => handleKeydown(e, index)}
 		>
 			{#if option.icon}
-				<InlineSvg class="switch-icon" src={option.icon} />
+				<InlineSvg class={styles.icon} src={option.icon} />
 			{/if}
 			{#if option.label}
-				<span class="switch-label">{translate(option.label, locale)}</span>
+				<span class={styles.label}>{translate(option.label, locale)}</span>
 			{/if}
 		</button>
 	{/each}
 </div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.switch {
-		display: inline-flex;
-		overflow: hidden;
-
-		button {
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			gap: rz.size(xs);
-			@include rz.hpadding(md);
-			@include rz.vpadding(sm);
-			background-color: var(--input-background-color);
-			border: var(--input-border);
-			font-family: inherit;
-			font-size: inherit;
-			color: var(--switch-color);
-			cursor: pointer;
-			height: var(--input-height);
-
-			&:first-child {
-				border-top-left-radius: rz.size(sm);
-				border-bottom-left-radius: rz.size(sm);
-			}
-
-			&:last-child {
-				border-top-right-radius: rz.size(sm);
-				border-bottom-right-radius: rz.size(sm);
-			}
-
-			& + & {
-				margin-left: -2px; // Collapse borders
-			}
-
-			&:hover:not(:disabled):not(.selected) {
-				background-color: var(--switch-hover-color);
-			}
-
-			&:focus {
-				outline: none;
-				border-color: var(--focus-outline-color);
-				position: relative;
-				z-index: 2; // Ensure the border of the focused option is above its siblings
-			}
-
-			&.selected {
-				background-color: var(--switch-selected-background);
-				color: var(--switch-selected-color);
-			}
-
-			&:disabled {
-				cursor: not-allowed;
-			}
-		}
-
-		&.disabled {
-			opacity: 0.5;
-		}
-
-		:global(.switch-icon) {
-			flex-shrink: 0;
-		}
-
-		.switch-label {
-			white-space: nowrap;
-		}
-	}
-</style>

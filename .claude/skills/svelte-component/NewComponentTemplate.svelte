@@ -1,3 +1,13 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		'css-class-name-for-the-component': {
+			// styles for the component
+		}
+	});
+</script>
+
 <script lang="ts">
 	import {
 		standardAttributes,
@@ -13,7 +23,3 @@
 </script>
 
 <div {...standardAttributes(attributes, 'css-class-name-for-the-component')}></div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-</style>

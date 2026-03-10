@@ -1,3 +1,27 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		resultSelectorChip: {
+			position: 'relative',
+			whiteSpace: 'nowrap',
+			fontSize: '1.2em'
+		},
+		die: {
+			"&[data-result='CF']": {
+				color: 'var(--critical-failure-color)'
+			},
+			'& + &': {
+				marginLeft: css.spacing.xs
+			}
+		},
+		plus: {
+			height: '0.5em',
+			color: 'var(--positive-color)'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import type { Result, ResultSelector } from '@songsofdoom/game';
 	import InlineSvg from './InlineSvg.svelte';
@@ -12,13 +36,13 @@
 
 {#snippet resultSnippet(result: Result)}
 	<InlineSvg
-		class="die"
+		class={styles.die}
 		data-result={result}
 		src="dice/{result === 'CF' ? 'critical-failure' : `success-${result}`}.svg"
 	/>
 {/snippet}
 
-<span {...standardAttributes(attributes, 'result-selector-chip')}>
+<span {...standardAttributes(attributes, styles.resultSelectorChip)}>
 	{#if typeof result === 'number' || result === 'CF'}
 		{@render resultSnippet(result)}
 	{:else if result instanceof Array}
@@ -31,29 +55,6 @@
 		{/each}
 	{:else if result.min}
 		{@render resultSnippet(result.min)}
-		<InlineSvg class="plus" src="plus.svg" />
+		<InlineSvg class={styles.plus} src="plus.svg" />
 	{/if}
 </span>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.result-selector-chip {
-		position: relative;
-		white-space: nowrap;
-		font-size: 1.2em;
-
-		:global(.die[data-result='CF']) {
-			color: var(--critical-failure-color);
-		}
-
-		:global(.die + .die) {
-			margin-left: rz.size(xs);
-		}
-
-		:global(.plus) {
-			height: 0.5em;
-			color: var(--positive-color);
-		}
-	}
-</style>

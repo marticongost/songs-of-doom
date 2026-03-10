@@ -1,3 +1,13 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		propertyList: {
+			display: 'inline'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { type Property } from '@songsofdoom/game';
 	import TextList from '../localisation/TextList.svelte';
@@ -12,7 +22,7 @@
 </script>
 
 {#if properties.length}
-	<div {...standardAttributes(attributes, 'property-list')}>
+	<div {...standardAttributes(attributes, styles.propertyList)}>
 		<TextList items={properties} type="commas">
 			{#snippet entry(property)}
 				<PropertyChip {property} />
@@ -20,11 +30,3 @@
 		</TextList>
 	</div>
 {/if}
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	:global(.property-list) {
-		display: inline;
-	}
-</style>

@@ -1,3 +1,44 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		cardButton: {
+			...css.row('sm'),
+			...css.vpadding('sm'),
+			...css.hpadding('md'),
+			width: '100%',
+			height: '2.8em',
+			border: css.separators.regularBorder,
+			borderRadius: css.spacing.sm,
+			cursor: 'pointer',
+			fontFamily: 'inherit',
+			fontSize: 'inherit',
+			textAlign: 'left',
+			...css.colorBindings.cardBackgrounds.rules('data-type', (color) => ({
+				background: color.main.background
+			})),
+			'&:hover': {
+				borderColor: css.text.highlightColor
+			},
+			'&:focus': {
+				borderColor: css.focus.outlineColor,
+				outline: 'none'
+			}
+		},
+		dimmed: {
+			opacity: '0.6',
+			filter: 'grayscale(30%) brightness(80%)'
+		},
+		title: {
+			fontFamily: css.fonts.heading,
+			fontWeight: 'bold',
+			color: css.text.headingColor,
+			textShadow: '0 0 0.5em rgba(0, 0, 0, 0.8)',
+			marginRight: 'auto'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import type { EntityManager } from '$lib/components/entities/entitymanager';
 	import { entityUrl } from '$lib/urls';
@@ -31,13 +72,13 @@
 
 <svelte:element
 	this={onclick ? 'button' : 'a'}
-	{...standardAttributes(attributes, 'card-button')}
+	{...standardAttributes(attributes, styles.cardButton)}
 	class:dimmed
 	data-type={entity.type.id}
 	data-entity={entity.id}
 	{...attr}
 >
-	<div class="title"><Text {...entity.title} /></div>
+	<div class={styles.title}><Text {...entity.title} /></div>
 	<CardLevel {entity} />
 	{#if entity.xpCost !== undefined}
 		<ExperienceIndicator amount={entity.xpCost} />
@@ -46,49 +87,3 @@
 		<CardCopiesIndicator amount={entityManager.getNumberOfOwnedCopies(entity)} />
 	{/if}
 </svelte:element>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.card-button {
-		@include rz.row(sm);
-		@include rz.vpadding(sm);
-		@include rz.hpadding(md);
-		width: 100%;
-		height: 2.8em;
-		border: var(--panel-border);
-		border-radius: rz.size(sm);
-		cursor: pointer;
-		font-family: inherit;
-		font-size: inherit;
-		text-align: left;
-
-		@each $type in archetype, discipline, trait, skill, ally, item, creature, encounter {
-			&[data-type='#{$type}'] {
-				background-image: var(--card-type-#{$type}-main-background);
-			}
-		}
-
-		&:hover {
-			border-color: var(--text-highlight);
-		}
-
-		&:focus {
-			border-color: var(--focus-outline-color);
-			outline: none;
-		}
-	}
-
-	.dimmed {
-		opacity: 0.6;
-		filter: grayscale(30%) brightness(80%);
-	}
-
-	.title {
-		font-family: var(--heading-font);
-		font-weight: bold;
-		color: var(--text-heading-color);
-		text-shadow: 0 0 0.5em rgba(0, 0, 0, 0.8);
-		margin-right: auto;
-	}
-</style>

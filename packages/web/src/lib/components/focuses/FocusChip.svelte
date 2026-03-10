@@ -1,10 +1,26 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		focusChip: {
+			...css.row('xs'),
+			display: 'inline-flex',
+			alignItems: 'baseline',
+			...css.colorBindings.focus.rules('data-focus', (color) => ({ color }))
+		},
+		focusName: {
+			fontWeight: 'bold'
+		}
+	});
+</script>
+
 <script lang="ts">
-	import { focuses, type Focus, type FocusType } from '@songsofdoom/game';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
+	import { focuses, type Focus, type FocusType } from '@songsofdoom/game';
 	import FocusIcon from './FocusIcon.svelte';
 
 	interface Props extends StandardAttributeProps {
@@ -16,27 +32,7 @@
 	const focusObject = $derived(typeof focus === 'string' ? focuses[focus] : focus);
 </script>
 
-<span {...standardAttributes(attributes, 'focus-chip')} data-focus={focusObject.type}>
+<span {...standardAttributes(attributes, styles.focusChip)} data-focus={focusObject.type}>
 	<FocusIcon focus={focusObject} />
-	<span class="focus-name"><Text {...focusObject.title} /></span>
+	<span class={styles.focusName}><Text {...focusObject.title} /></span>
 </span>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.focus-chip {
-		@include rz.row(xs);
-		display: inline-flex;
-		align-items: baseline;
-
-		@each $focus in strength, agility, intelligence, charisma, will, health, sanity, heroism, any {
-			&[data-focus='#{$focus}'] {
-				color: var(--focus-#{$focus}-color);
-			}
-		}
-	}
-
-	.focus-name {
-		font-weight: bold;
-	}
-</style>

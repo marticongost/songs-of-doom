@@ -1,3 +1,16 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		toolbar: {
+			...css.row(),
+			backgroundColor: css.palette.lightCocoaBrown,
+			border: `2px solid ${css.palette.extraLightCocoaBrown}`,
+			borderRadius: css.spacing.sm
+		}
+	});
+</script>
+
 <script lang="ts">
 	import {
 		standardAttributes,
@@ -12,17 +25,6 @@
 	const { children, ...rest }: Props = $props();
 </script>
 
-<div {...standardAttributes(rest, 'toolbar')}>
+<div {...standardAttributes(rest, styles.toolbar)}>
 	{@render children()}
 </div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.toolbar {
-		@include rz.row;
-		background-color: var(--toolbar-background-color);
-		border: var(--toolbar-border);
-		border-radius: rz.size(sm);
-	}
-</style>

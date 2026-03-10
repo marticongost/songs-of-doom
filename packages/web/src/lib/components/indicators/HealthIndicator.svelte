@@ -1,3 +1,13 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		healthIndicator: {
+			'--indicator-color': css.colorBindings.stats.colors.health
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import Indicator from './Indicator.svelte';
@@ -11,14 +21,8 @@
 </script>
 
 <Indicator
-	{...standardAttributes(attributes, 'health-indicator')}
+	{...standardAttributes(attributes, styles.healthIndicator)}
 	{amount}
 	{contrast}
 	icon="stats/health.svg"
 />
-
-<style lang="scss">
-	:global(.health-indicator) {
-		--indicator-color: var(--stat-health-color);
-	}
-</style>

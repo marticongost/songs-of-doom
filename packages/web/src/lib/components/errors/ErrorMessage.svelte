@@ -1,3 +1,15 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		errorMessage: {
+			...css.hpadding('md'),
+			...css.vpadding('sm'),
+			backgroundColor: css.palette.red
+		}
+	});
+</script>
+
 <script lang="ts">
 	import {
 		standardAttributes,
@@ -13,16 +25,6 @@
 	const { children, ...attributes }: Props = $props();
 </script>
 
-<div {...standardAttributes(attributes, 'error-message')}>
+<div {...standardAttributes(attributes, styles.errorMessage)}>
 	{@render children()}
 </div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.error-message {
-		@include rz.hpadding(md);
-		@include rz.vpadding(sm);
-		background-color: var(--negative-color);
-	}
-</style>

@@ -3,6 +3,25 @@
 	A transparent button containing an icon. Combines Button with InlineSvg
 	for icon-only actions with hover state color changes.
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		iconButton: {
+			padding: css.spacing.xs,
+			color: css.palette.white,
+			cursor: 'pointer',
+			'&:hover:not(:disabled)': {
+				color: css.palette.thatch
+			},
+			'&:focus': {
+				outline: 'none',
+				color: css.palette.thatch
+			}
+		}
+	});
+</script>
+
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte';
 	import InlineSvg from '$lib/components/InlineSvg.svelte';
@@ -51,7 +70,7 @@
 </script>
 
 <Button
-	{...standardAttributes(attributes, 'icon-button')}
+	{...standardAttributes(attributes, styles.iconButton)}
 	appearance="transparent"
 	{type}
 	{disabled}
@@ -63,22 +82,3 @@
 >
 	<InlineSvg {src} />
 </Button>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	:global(.button.icon-button) {
-		@include rz.padding(xs);
-		color: var(--icon-button-color, currentColor);
-		cursor: pointer;
-
-		&:hover:not(:disabled) {
-			color: var(--icon-button-hover-color, var(--accent-color));
-		}
-
-		&:focus {
-			outline: none;
-			color: var(--icon-focus-color);
-		}
-	}
-</style>

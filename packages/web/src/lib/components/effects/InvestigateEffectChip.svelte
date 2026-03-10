@@ -1,3 +1,13 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		results: {
+			marginLeft: css.spacing.sm
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { InvestigateEffect } from '@songsofdoom/game';
 	import Parameters from '../capabilities/Parameters.svelte';
@@ -14,7 +24,7 @@
 	const { effect, ...attributes }: Props = $props();
 </script>
 
-<span {...standardAttributes(attributes, 'investigate-effect-chip')}>
+<span {...standardAttributes(attributes, styles.investigateEffectChip)}>
 	<Text ca="Investigar" es="Investigar" en="Investigate" />
 	<Parameters
 		><!--
@@ -24,14 +34,5 @@
 		/><!--
 				--></Parameters
 	>
-	<ResultsTableEffectChip class="investigate-results" effect={effect.results} />
+	<ResultsTableEffectChip class={styles.results} effect={effect.results} />
 </span>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-	.investigate-effect-chip {
-		:global(.investigate-results) {
-			margin-left: rz.size(sm);
-		}
-	}
-</style>

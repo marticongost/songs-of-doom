@@ -1,3 +1,31 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		cardPage: {
+			'&:not([data-entity-type="module"]):not([data-entity-type="discipline"])': {
+				...css.row('xl'),
+				alignItems: 'flex-start'
+			}
+		},
+		cardSet: {
+			'& + &': {
+				marginTop: css.spacing.lg
+			}
+		},
+		cardSetGrid: {
+			width: '20em',
+			...css.column('sm'),
+			alignItems: 'stretch'
+		},
+		cardSetTitle: {
+			fontFamily: css.fonts.heading,
+			fontSize: '1.2em',
+			marginBottom: css.spacing.sm
+		}
+	});
+</script>
+
 <script lang="ts">
 	import Card from '$lib/components/entities/Card.svelte';
 	import CardButton from '$lib/components/entities/CardButton.svelte';
@@ -9,12 +37,12 @@
 </script>
 
 {#snippet cardSet(title: LocalisedText, entities: Array<Entity>)}
-	<section class="card-set">
-		<h1 class="card-set-title"><Text {...title} /></h1>
+	<section class={styles.cardSet}>
+		<h1 class={styles.cardSetTitle}><Text {...title} /></h1>
 		{#if entities.length === 0}
 			<p><Text ca="Cap." es="Nada" en="None" /></p>
 		{:else}
-			<div class="card-set-grid">
+			<div class={styles.cardSetGrid}>
 				{#each entities as entity (entity.variantId)}
 					<CardButton {entity} />
 				{/each}
@@ -23,11 +51,7 @@
 	</section>
 {/snippet}
 
-<div
-	class="card-page"
-	class:module={data.entity instanceof Module}
-	class:discipline={data.entity instanceof Discipline}
->
+<div class={styles.cardPage} data-entity-type={data.entity.type.id}>
 	{#if data.entity instanceof Module}
 		{@render cardSet(
 			{ ca: 'Encontres', es: 'Encuentros', en: 'Encounters' },
@@ -99,30 +123,3 @@
 		</aside>
 	{/if}
 </div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.card-page:not(.module):not(.discipline) {
-		@include rz.row(xl);
-		align-items: flex-start;
-	}
-
-	.card-set {
-		& + & {
-			margin-top: rz.size(lg);
-		}
-	}
-
-	.card-set-grid {
-		width: 20em;
-		@include rz.column(sm);
-		align-items: stretch;
-	}
-
-	.card-set-title {
-		font-family: var(--heading-font);
-		font-size: 1.2em;
-		margin-bottom: rz.size(sm);
-	}
-</style>

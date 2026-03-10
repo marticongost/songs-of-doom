@@ -3,6 +3,23 @@
 	A form for creating a new character.
 	Posts to the current page and displays error messages on failure.
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		createCharacterForm: {
+			...css.column('md')
+		},
+		formField: {
+			...css.column('xs'),
+			label: {
+				fontWeight: 'bold',
+				color: css.text.headingColor
+			}
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
@@ -25,12 +42,12 @@
 	const { errorMessage, autofocus = false, ...attributes }: Props = $props();
 </script>
 
-<form {...standardAttributes(attributes, 'create-character-form')} method="POST" use:enhance>
+<form {...standardAttributes(attributes, styles.createCharacterForm)} method="POST" use:enhance>
 	{#if errorMessage}
 		<ErrorMessage>{errorMessage}</ErrorMessage>
 	{/if}
 
-	<div class="form-field">
+	<div class={styles.formField}>
 		<label for="name">
 			<Text ca="Nom" es="Nombre" en="Name" />
 		</label>
@@ -41,20 +58,3 @@
 		<Text ca="Crear" es="Crear" en="Create" />
 	</Button>
 </form>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.create-character-form {
-		@include rz.column(md);
-	}
-
-	.form-field {
-		@include rz.column(xs);
-
-		label {
-			font-weight: bold;
-			color: var(--text-heading-color);
-		}
-	}
-</style>

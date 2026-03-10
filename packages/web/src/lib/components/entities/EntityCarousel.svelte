@@ -14,6 +14,101 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 ```
 -->
 <script lang="ts" module>
+	import * as css from '$lib/styles';
+	import { keyframes } from '@emotion/css';
+
+	const fadeIn = keyframes`
+		from {
+			opacity: 0;
+		}
+	`;
+
+	const styles = css.styles({
+		entityCarousel: {
+			position: 'fixed',
+			inset: '0',
+			margin: 'auto',
+			width: '100vw',
+			height: '100vh',
+			maxWidth: '100vw',
+			maxHeight: '100vh',
+			background: 'transparent',
+			border: 'none',
+			display: 'flex',
+			flexDirection: 'column',
+			alignItems: 'center',
+			justifyContent: 'center',
+			gap: css.spacing.lg,
+			padding: css.spacing.lg,
+			fontFamily: css.fonts.text,
+			color: css.text.regularColor,
+
+			'&::backdrop': {
+				background: 'rgba(0, 0, 0, 0.9)'
+			},
+
+			'&:not([open])': {
+				display: 'none'
+			}
+		},
+		navButton: {
+			fontSize: '2em'
+		},
+		closeButton: {
+			fontSize: '2em',
+			position: 'absolute',
+			top: css.spacing.lg,
+			right: css.spacing.lg
+		},
+		controls: {
+			...css.row('lg'),
+			alignItems: 'center',
+			justifyContent: 'center'
+		},
+		positionIndicator: {
+			fontFamily: css.fonts.heading,
+			fontSize: '1.2em',
+			color: css.text.headingColor,
+			minWidth: '3em',
+			textAlign: 'center'
+		},
+		carouselStage: {
+			position: 'relative',
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'center',
+			width: '100%',
+			flex: '1',
+			minHeight: '0',
+			perspective: '1000px',
+			pointerEvents: 'none'
+		},
+		carouselCardSlot: {
+			position: 'absolute',
+			backgroundColor: 'black',
+			pointerEvents: 'auto',
+			transform: `
+			translateX(calc(var(--offset) * 12em))
+			translateY(calc(var(--abs-offset) * var(--abs-offset) * 0.5em))
+			rotateY(calc(var(--offset) * -3deg)) scale(calc(1 - var(--abs-offset) * 0.15))`,
+			zIndex: 'calc(10 - var(--abs-offset))',
+			transition: 'transform 0.3s ease-out, z-index 0s 0.15s',
+			animation: `${fadeIn} 0.3s ease-out`
+		},
+		carouselCard: {
+			opacity: 'calc(1 - var(--abs-offset) * 0.35)',
+			transition: 'opacity 0.3s ease-out',
+			textAlign: 'left',
+			'&:hover': {
+				opacity: '1'
+			}
+		},
+		suppressTransitions: {
+			transition: 'none',
+			animation: 'none'
+		}
+	});
+
 	import type { Entity } from '@songsofdoom/game';
 
 	export interface EntityCarouselApi {
@@ -26,6 +121,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 <script lang="ts">
 	import { getLocale } from '$lib/context/locale';
 	import { entityUrl } from '$lib/urls';
+	import { cx } from '@emotion/css';
 	import { translate } from '@songsofdoom/common';
 	import { fade } from 'svelte/transition';
 	import IconButton from '../IconButton.svelte';
@@ -245,7 +341,7 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 </script>
 
 <dialog
-	{...standardAttributes(attributes, 'entity-carousel')}
+	{...standardAttributes(attributes, styles.entityCarousel)}
 	bind:this={dialogElement}
 	onclose={handleDialogClose}
 	onclick={handleDialogClick}
@@ -255,26 +351,26 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 	{#if currentEntity}
 		<!-- Close button -->
 		<IconButton
-			class="close-button"
+			class={styles.closeButton}
 			src="close-dialog.svg"
 			onclick={closeCarousel}
 			aria-label={translate({ ca: 'Tancar', es: 'Cerrar', en: 'Close' }, getLocale())}
 		/>
 
 		<!-- Navigation controls -->
-		<div class="controls">
+		<div class={styles.controls}>
 			<IconButton
-				class="nav-button"
+				class={styles.navButton}
 				src="previous.svg"
 				onclick={goToPrevious}
 				disabled={currentIndex === 0}
 				aria-label={translate({ ca: 'Anterior', es: 'Anterior', en: 'Previous' }, getLocale())}
 			/>
-			<span class="position-indicator">
+			<span class={styles.positionIndicator}>
 				{currentIndex + 1} / {totalCount}
 			</span>
 			<IconButton
-				class="nav-button"
+				class={styles.navButton}
 				src="next.svg"
 				onclick={goToNext}
 				disabled={currentIndex === entities.length - 1}
@@ -283,15 +379,15 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 		</div>
 
 		<!-- Card stage with arc positioning -->
-		<div class="carousel-stage" class:suppress-transitions={suppressTransitions}>
+		<div class={cx(styles.carouselStage, { [styles.suppressTransitions]: suppressTransitions })}>
 			{#each visibleCards as { entity, offset } (entity.variantId)}
 				<div
-					class="carousel-card-slot"
+					class={cx(styles.carouselCardSlot, { [styles.suppressTransitions]: suppressTransitions })}
 					style="--offset:{offset};--abs-offset:{absOffset(offset)}"
 					out:fade={{ duration: 300 }}
 				>
 					<Card
-						class="carousel-card"
+						class={cx(styles.carouselCard, { [styles.suppressTransitions]: suppressTransitions })}
 						{entity}
 						onclick={() => {
 							if (offset !== 0) {
@@ -320,117 +416,3 @@ Shows the current entity with arc-positioned sibling cards and navigation contro
 		{/if}
 	{/if}
 </dialog>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	dialog.entity-carousel {
-		position: fixed;
-		inset: 0;
-		margin: auto;
-		width: 100vw;
-		height: 100vh;
-		max-width: 100vw;
-		max-height: 100vh;
-		background: transparent;
-		border: none;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: rz.size(lg);
-		padding: rz.size(lg);
-		font-family: var(--text-font);
-		color: var(--text-color);
-
-		&::backdrop {
-			background: rgba(0, 0, 0, 0.9);
-		}
-
-		&:not([open]) {
-			display: none;
-		}
-
-		:global(.nav-button) {
-			font-size: 2em;
-		}
-
-		:global(.close-button) {
-			font-size: 2em;
-			position: absolute;
-			top: rz.size(lg);
-			right: rz.size(lg);
-		}
-	}
-
-	.controls {
-		@include rz.row(lg);
-		align-items: center;
-		justify-content: center;
-	}
-
-	.position-indicator {
-		font-family: var(--heading-font);
-		font-size: 1.2em;
-		color: var(--text-heading-color);
-		min-width: 3em;
-		text-align: center;
-	}
-
-	.carousel-stage {
-		position: relative;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 100%;
-		flex: 1;
-		min-height: 0;
-		perspective: 1000px;
-		pointer-events: none;
-	}
-
-	.carousel-card-slot {
-		position: absolute;
-		background-color: black;
-		pointer-events: auto;
-
-		// Arc positioning using CSS custom properties
-		// --offset: distance from center (-2, -1, 0, 1, 2)
-		// --abs-offset: absolute value of offset (for browsers without CSS abs())
-		transform: translateX(calc(var(--offset) * 12em))
-			translateY(calc(var(--abs-offset) * var(--abs-offset) * 0.5em))
-			rotateY(calc(var(--offset) * -3deg)) scale(calc(1 - var(--abs-offset) * 0.15));
-		// Higher z-index for cards closer to center
-		z-index: calc(10 - var(--abs-offset));
-		transition:
-			transform 0.3s ease-out,
-			z-index 0s 0.15s;
-		// Fade in new cards via CSS animation (can be suppressed unlike Svelte transitions)
-		animation: carousel-fade-in 0.3s ease-out;
-
-		.suppress-transitions & {
-			transition: none;
-			animation: none;
-		}
-	}
-
-	@keyframes carousel-fade-in {
-		from {
-			opacity: 0;
-		}
-	}
-
-	.carousel-card-slot > :global(.carousel-card) {
-		// Opacity based on offset (separate from wrapper to not conflict with fade transition)
-		opacity: calc(1 - var(--abs-offset) * 0.35);
-		transition: opacity 0.3s ease-out;
-
-		.suppress-transitions & {
-			transition: none;
-		}
-
-		&:hover {
-			opacity: 1;
-		}
-	}
-</style>

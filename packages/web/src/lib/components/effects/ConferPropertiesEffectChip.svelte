@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { ConferPropertiesEffect } from '@songsofdoom/game';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
+	import type { ConferPropertiesEffect } from '@songsofdoom/game';
 	import Text from '../localisation/Text.svelte';
 	import PropertyList from '../properties/PropertyList.svelte';
 
@@ -18,7 +18,3 @@
 	<Text ca="Proporciona" es="Proporciona" en="Gain" />
 	<PropertyList properties={effect.properties} />
 </span>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-</style>

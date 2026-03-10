@@ -1,10 +1,20 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		icon: {
+			color: css.colorBindings.proficiencyColor
+		}
+	});
+</script>
+
 <script lang="ts">
-	import type { ScalarExpressionType } from '@songsofdoom/game';
 	import ExpressionChip from '$lib/components/expressions/ExpressionChip.svelte';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
+	import type { ScalarExpressionType } from '@songsofdoom/game';
 	import InlineSvg from './InlineSvg.svelte';
 
 	interface Props extends StandardAttributeProps {
@@ -15,21 +25,11 @@
 	const { expression, relative, ...attributes }: Props = $props();
 </script>
 
-<span {...standardAttributes(attributes, 'proficiency-chip')}
+<span {...standardAttributes(attributes)}
 	><!--
     --><InlineSvg
-		class="proficiency-icon"
+		class={styles.icon}
 		src="effects/proficiency.svg"
 	/><!--
     --><ExpressionChip {expression} {relative} />
 </span>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.proficiency-chip {
-		:global(.proficiency-icon) {
-			color: var(--profiency-color);
-		}
-	}
-</style>

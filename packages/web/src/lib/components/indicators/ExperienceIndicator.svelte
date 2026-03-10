@@ -1,3 +1,20 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+	import { cx } from '@emotion/css';
+
+	const styles = css.styles({
+		experienceIndicator: {
+			'--indicator-color': css.palette.ivory,
+			'--indicator-value-color': css.palette.somber,
+			'--indicator-value-text-shadow': 'none'
+		},
+		negative: {
+			'--indicator-color': css.palette.ivory,
+			'--indicator-value-color': css.palette.red
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import Indicator from './Indicator.svelte';
@@ -10,19 +27,10 @@
 </script>
 
 <Indicator
-	{...standardAttributes(attributes, `experience-indicator${amount < 0 ? ' negative' : ''}`)}
+	{...standardAttributes(
+		attributes,
+		cx(styles.experienceIndicator, { [styles.negative]: amount < 0 })
+	)}
 	{amount}
 	icon="experience.svg"
 />
-
-<style lang="scss">
-	:global(.experience-indicator) {
-		--indicator-color: var(--experience-background-color);
-		--indicator-value-color: var(--experience-foreground-color);
-		--indicator-value-text-shadow: none;
-	}
-	:global(.experience-indicator.negative) {
-		--indicator-color: var(--experience-negative-background-color);
-		--indicator-value-color: var(--experience-negative-foreground-color);
-	}
-</style>

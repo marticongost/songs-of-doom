@@ -96,7 +96,3 @@
 		/>
 	</Toolbar>
 </div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-</style>

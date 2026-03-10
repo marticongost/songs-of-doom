@@ -1,6 +1,8 @@
 <script lang="ts">
-	import '$lib/css/global.scss';
 	import favicon from '$lib/assets/favicon.svg?url';
+	import { globalStyles } from '$lib/styles';
+	import { injectGlobal } from '@emotion/css';
+	injectGlobal(globalStyles);
 	let { children } = $props();
 </script>
 

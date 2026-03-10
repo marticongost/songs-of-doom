@@ -1,3 +1,20 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		cardCopiesIndicator: {
+			'--indicator-value-text-shadow': '0 0 0.2em black',
+			'--indicator-color': css.palette.hurricane,
+			"&[data-amount='0']": {
+				opacity: '0.4'
+			},
+			"&[data-amount='0'] svg": {
+				filter: 'grayscale(100%)'
+			}
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import Indicator from './Indicator.svelte';
@@ -10,23 +27,8 @@
 </script>
 
 <Indicator
-	{...standardAttributes(attributes, 'card-copies-indicator')}
+	{...standardAttributes(attributes, styles.cardCopiesIndicator)}
 	{amount}
 	icon="cards.svg"
 	data-amount={amount}
 />
-
-<style lang="scss">
-	:global(.card-copies-indicator) {
-		--indicator-value-text-shadow: 0 0 0.2em black;
-		--indicator-color: var(--card-copies-indicator-color);
-	}
-
-	:global(.card-copies-indicator[data-amount='0']) {
-		opacity: 0.4;
-	}
-
-	:global(.card-copies-indicator[data-amount='0'] svg) {
-		filter: grayscale(100%);
-	}
-</style>

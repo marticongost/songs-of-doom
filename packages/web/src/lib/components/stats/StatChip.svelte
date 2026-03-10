@@ -1,10 +1,29 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		statChip: {
+			...css.row('xs'),
+			display: 'inline-flex',
+			alignItems: 'baseline'
+		},
+		colorCoded: {
+			...css.colorBindings.stats.rules('data-stat', (color) => ({ color }))
+		},
+		statName: {
+			fontWeight: 'bold'
+		}
+	});
+</script>
+
 <script lang="ts">
-	import { stats, type Stat, type StatType } from '@songsofdoom/game';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
+	import { cx } from '@emotion/css';
+	import { stats, type Stat, type StatType } from '@songsofdoom/game';
 	import StatIcon from './StatIcon.svelte';
 
 	interface Props extends StandardAttributeProps {
@@ -18,32 +37,9 @@
 </script>
 
 <span
-	{...standardAttributes(attributes, 'stat-chip')}
+	{...standardAttributes(attributes, cx(styles.statChip, [styles.colorCoded], colorCoded))}
 	data-stat={statObject.type}
-	class:color-coded={colorCoded}
 >
 	<StatIcon stat={statObject} {colorCoded} />
-	<span class="stat-name"><Text {...statObject.name} /></span>
+	<span class={styles.statName}><Text {...statObject.name} /></span>
 </span>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.stat-chip {
-		@include rz.row(xs);
-		display: inline-flex;
-		align-items: baseline;
-	}
-
-	.color-coded {
-		@each $stat in strength, agility, intelligence, charisma, will, health, sanity {
-			&[data-stat='#{$stat}'] {
-				color: var(--stat-#{$stat}-color);
-			}
-		}
-	}
-
-	.stat-name {
-		font-weight: bold;
-	}
-</style>

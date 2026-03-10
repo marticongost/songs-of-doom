@@ -1,17 +1,21 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		manual: {
+			h1: {
+				fontFamily: css.fonts.heading,
+				fontSize: '2.5rem',
+				marginBottom: '1rem'
+			}
+		}
+	});
+</script>
+
 <script lang="ts">
 	const { children } = $props();
 </script>
 
-<div class="manual">
+<div class={styles.manual}>
 	{@render children()}
 </div>
-
-<style lang="scss">
-	.manual {
-		:global(h1) {
-			font-family: var(--heading-font);
-			font-size: 2.5rem;
-			margin-bottom: 1rem;
-		}
-	}
-</style>

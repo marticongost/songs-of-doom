@@ -2,6 +2,17 @@
 @component
 Displays a talent name with appropriate styling.
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		talentChip: {
+			fontWeight: 'bold',
+			color: css.colorBindings.talentColor
+		}
+	});
+</script>
+
 <script lang="ts">
 	import type { Talent } from '@songsofdoom/game';
 
@@ -19,13 +30,6 @@ Displays a talent name with appropriate styling.
 	const { talent, ...attributes }: Props = $props();
 </script>
 
-<span {...standardAttributes(attributes, 'talent-chip')}>
+<span {...standardAttributes(attributes, styles.talentChip)}>
 	<Text {...talent.title} />
 </span>
-
-<style lang="scss">
-	.talent-chip {
-		font-weight: bold;
-		color: var(--talent-color);
-	}
-</style>

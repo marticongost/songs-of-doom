@@ -9,11 +9,7 @@
 	const { charges, ...attributes }: Props = $props();
 </script>
 
-<span {...standardAttributes(attributes, 'charges-chip')}>
-	<InlineSvg class="icon" src="capabilities/charge.svg" />
-	<span class="label">{charges}</span>
+<span {...standardAttributes(attributes)}>
+	<InlineSvg src="capabilities/charge.svg" />
+	<span>{charges}</span>
 </span>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-</style>

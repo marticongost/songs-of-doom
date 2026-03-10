@@ -45,24 +45,51 @@ be extended (e.g. add additional CSS classes, set data-_ or aria-_ attributes, e
 
 ## Styles
 
-Use SCSS for all styles (i.e. `<script lang="scss"></script>). Styles use the
-`@reguitzell/styles`library. By convention, it is imported as`rz`, for convenience.
+Use Emotion CSS-in-JS for all styles. **Do not use `<style>` tags, SCSS, or `@reguitzell/styles`.**
 
-Refrain from attempting to define styles on your own.
+Import the style helpers as `* as css from '$lib/styles'` in the **module script block**,
+then define class names with `css.styles({...})` (returns a `Record<string, string>`):
 
-IF the user requests aid with creating or modifying styles for the component, follow
-these rules.
+```svelte
+<script lang="ts" module>
+	import * as css from '$lib/styles';
 
-- Take care of using the `rz.row` and `rz.column` mixins instead of explicitly assigning
-  flex displays
-- Use the defined grid sizes (xs, sm, md, lg, xl) wherever possible:
-  - Set paddings using `rz.padding`, `rz.hpadding`, `rz.vpadding`
-    ✅ `@include rz.padding(sm)`)
-    ❌ `padding: 1em`
-  - Same for margins, with `rz.margin`, `rz.hmargin` and `rz.vmargin`
-  - To create rows, columns and grids with gaps, using `rz.row`,`rz.column` and
-    `rz.grid`, respectively (e.g. `@include rz.row(md)`)
-  - On arbitrary CSS properties, using `rz.size` (e.g. `top: rz.size(lg)`)
+	const styles = css.styles({
+		root: {
+			...css.row('sm'),
+			...css.hpadding('md'),
+			color: css.palette.buccaneer
+		}
+	});
+</script>
+```
+
+Apply the generated class name via `standardAttributes`:
+
+```svelte
+<div {...standardAttributes(attributes, styles.root)}></div>
+```
+
+Available helpers (all imported via `* as css from '$lib/styles'`):
+
+- **Layout**: `css.row(gap?)`, `css.column(gap?)`, `css.grid(gap?)` — return `CSSObject`
+- **Spacing**: `css.hpadding(value)`, `css.vpadding(value)`, `css.hmargin(value)`, `css.vmargin(value)` — return `CSSObject`; spread with `...`
+- **Spacing tokens** (`xs` | `sm` | `md` | `lg` | `xl`): `css.spacing.sm` etc. for raw values; `css.getSpacing(spec)` to resolve a token or pass through a literal
+- **Palette**: `css.palette.*` — named colour values (e.g. `css.palette.buccaneer`)
+- **Fonts**: `css.fonts.text`, `css.fonts.heading`, `css.fonts.number`
+- **Focus**: `css.focus.outline` — standard focus ring
+- **Merging**: `css.mergeRules(...rules)` — deep-merges multiple `CSSObject` values
+
+Nest selectors with `&` just like SCSS (Emotion supports it):
+
+```typescript
+const styles = css.styles({
+	chip: {
+		...css.row('xs'),
+		'&:hover': { color: css.palette.red }
+	}
+});
+```
 
 ## Imports
 

@@ -3,6 +3,50 @@
 	A button component that renders as either a `<button>` or `<a>` element.
 	When `href` is provided, renders as a link; otherwise renders as a button.
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		button: {
+			'&:not([data-appearance="transparent"])': {
+				...css.hpadding('md'),
+				...css.vpadding('sm'),
+				backgroundColor: css.palette.buccaneer,
+				color: css.palette.white,
+				border: 'none',
+				borderRadius: css.spacing.sm,
+				fontFamily: css.fonts.text,
+				fontWeight: 'bold',
+				cursor: 'pointer',
+				textDecoration: 'none',
+				display: 'inline-block',
+				'&:hover:not(:disabled, [aria-disabled="true"])': {
+					backgroundColor: css.palette.red,
+					color: css.palette.white
+				},
+				'&:focus': {
+					backgroundColor: css.palette.red,
+					color: css.palette.white,
+					outline: css.focus.outline
+				},
+				'&:disabled, [aria-disabled=true]': {
+					opacity: '0.5',
+					cursor: 'not-allowed'
+				}
+			},
+			'&[data-appearance="transparent"]': {
+				border: 'none',
+				padding: '0',
+				background: 'none',
+				fontSize: 'inherit',
+				'&:focus': {
+					outline: css.focus.outline
+				}
+			}
+		}
+	});
+</script>
+
 <script lang="ts">
 	import {
 		standardAttributes,
@@ -56,12 +100,10 @@
 {#if href}
 	<!-- eslint-disable svelte/no-navigation-without-resolve -- href is pre-resolved by the caller -->
 	<a
-		{...standardAttributes(attributes, 'button')}
+		{...standardAttributes(attributes, styles.button)}
 		{href}
-		class:disabled
-		class:primary={appearance === 'primary'}
-		class:transparent={appearance === 'transparent'}
 		aria-disabled={disabled || undefined}
+		data-appearance={appearance}
 		onclick={disabled ? undefined : onclick}
 	>
 		{@render children()}
@@ -69,62 +111,15 @@
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 {:else}
 	<button
-		{...standardAttributes(attributes, 'button')}
+		{...standardAttributes(attributes, styles.button)}
 		{type}
 		{disabled}
 		{onclick}
 		{popovertarget}
 		{popovertargetaction}
-		class:primary={appearance === 'primary'}
-		class:transparent={appearance === 'transparent'}
+		data-appearance={appearance}
 		style:anchor-name={anchor}
 	>
 		{@render children()}
 	</button>
 {/if}
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.button:not(.transparent) {
-		@include rz.hpadding(md);
-		@include rz.vpadding(sm);
-		background-color: var(--button-background-color);
-		color: var(--button-foreground-color);
-		border: none;
-		border-radius: rz.size(sm);
-		font-family: var(--text-font);
-		font-weight: bold;
-		cursor: pointer;
-		text-decoration: none;
-		display: inline-block;
-
-		&:hover:not(:disabled, .disabled) {
-			background-color: var(--button-hover-background-color);
-			color: var(--button-hover-foreground-color);
-		}
-
-		&:focus {
-			background-color: var(--button-hover-background-color);
-			color: var(--button-hover-foreground-color);
-			outline: var(--focus-outline);
-		}
-
-		&:disabled,
-		&.disabled {
-			opacity: 0.5;
-			cursor: not-allowed;
-		}
-	}
-
-	.transparent {
-		border: none;
-		padding: 0;
-		background: none;
-		font-size: inherit;
-
-		&:focus {
-			outline: var(--focus-outline);
-		}
-	}
-</style>

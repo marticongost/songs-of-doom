@@ -3,6 +3,42 @@
 	A reusable dropdown (`<select>`) with localised option labels and an optional
 	leading icon rendered via `InlineSvg`.
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		dropdown: {
+			position: 'relative',
+			display: 'inline-block',
+			select: {
+				padding: css.spacing.sm,
+				height: css.forms.controlHeight,
+				fontFamily: 'inherit',
+				fontSize: 'inherit',
+				color: css.text.regularColor,
+				backgroundColor: css.forms.controlBackgroundColor,
+				border: css.forms.controlBorder,
+				borderRadius: css.spacing.sm,
+				'&:focus': {
+					outline: css.focus.outline
+				}
+			}
+		},
+		dropdownWithIcon: {
+			'.dropdown-icon': {
+				position: 'absolute',
+				left: css.spacing.md,
+				top: '50%',
+				transform: 'translate(-25%, -50%)',
+				pointerEvents: 'none'
+			},
+			select: {
+				paddingLeft: css.spacing.lg
+			}
+		}
+	});
+</script>
+
 <script lang="ts">
 	import InlineSvg from '$lib/components/InlineSvg.svelte';
 	import {
@@ -10,6 +46,7 @@
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
 	import { getLocale } from '$lib/context/locale';
+	import { cx } from '@emotion/css';
 	import { translate, type LocalisedText } from '@songsofdoom/common/localisation';
 
 	interface Option {
@@ -33,7 +70,9 @@
 	const locale = getLocale();
 </script>
 
-<span {...standardAttributes(attributes, 'dropdown')} class:has-icon={!!icon}>
+<span
+	{...standardAttributes(attributes, cx(styles.dropdown, { [styles.dropdownWithIcon]: !!icon }))}
+>
 	{#if icon}
 		<InlineSvg class="dropdown-icon" src={icon} />
 	{/if}
@@ -43,41 +82,3 @@
 		{/each}
 	</select>
 </span>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.dropdown {
-		position: relative;
-		display: inline-block;
-
-		select {
-			@include rz.padding(sm);
-			height: var(--input-height);
-			font-family: inherit;
-			font-size: inherit;
-			color: var(--text-color);
-			background-color: var(--input-background-color);
-			border: var(--input-border);
-			border-radius: rz.size(sm);
-
-			&:focus {
-				outline: var(--focus-outline);
-			}
-		}
-
-		&.has-icon {
-			:global(.dropdown-icon) {
-				position: absolute;
-				left: calc(rz.size(lg) / 2);
-				top: 50%;
-				transform: translate(-25%, -50%);
-				pointer-events: none;
-			}
-
-			select {
-				padding-left: rz.size(lg);
-			}
-		}
-	}
-</style>

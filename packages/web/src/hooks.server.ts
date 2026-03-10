@@ -1,4 +1,7 @@
 import type { Handle } from '@sveltejs/kit';
+import { sequence } from '@sveltejs/kit/hooks';
+import { cache } from '@emotion/css';
+import createEmotionServer from '@emotion/server/create-instance';
 import {
 	getSessionIdFromCookie,
 	validateSession,
@@ -6,7 +9,9 @@ import {
 	deleteSessionCookie
 } from '$lib/server/auth';
 
-export const handle: Handle = async ({ event, resolve }) => {
+const { extractCritical } = createEmotionServer(cache);
+
+const authHandle: Handle = async ({ event, resolve }) => {
 	const sessionId = getSessionIdFromCookie(event.cookies);
 
 	if (!sessionId) {
@@ -30,3 +35,18 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	return resolve(event);
 };
+
+const emotionHandle: Handle = ({ event, resolve }) =>
+	resolve(event, {
+		transformPageChunk: ({ html, done }) => {
+			if (!done) return html;
+			const { css, ids } = extractCritical(html);
+			if (!css) return html;
+			return html.replace(
+				'</head>',
+				`<style data-emotion="${cache.key} ${ids.join(' ')}">${css}</style></head>`
+			);
+		}
+	});
+
+export const handle = sequence(authHandle, emotionHandle);

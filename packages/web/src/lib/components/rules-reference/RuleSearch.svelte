@@ -7,6 +7,19 @@ Search input that filters rule entries by title and body content.
 <RuleSearch {entries} {bodyTexts} {onFilter} />
 ```
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		ruleSearch: {
+			marginBottom: css.spacing.lg
+		},
+		searchInput: {
+			width: '100%'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import SearchInput from '$lib/components/forms/SearchInput.svelte';
 	import {
@@ -14,9 +27,9 @@ Search input that filters rule entries by title and body content.
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
 	import { getLocale } from '$lib/context/locale';
-	import { translate } from '@songsofdoom/common/localisation';
 	import type { RuleEntry } from '$lib/rules-reference/types';
 	import { matchesAllTerms, parseSearchQuery } from '$lib/search';
+	import { translate } from '@songsofdoom/common/localisation';
 
 	interface Props extends StandardAttributeProps {
 		/** All rule entries to search through */
@@ -48,23 +61,12 @@ Search input that filters rule entries by title and body content.
 	});
 </script>
 
-<div class="rule-search">
+<div class={styles.ruleSearch}>
 	<SearchInput
 		{...standardAttributes(attributes)}
 		bind:value={query}
+		class={styles.searchInput}
 		autofocus={true}
 		placeholder={{ ca: 'Cercar regles...', es: 'Buscar reglas...', en: 'Search rules...' }}
 	/>
 </div>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.rule-search {
-		margin-bottom: rz.size(lg);
-
-		:global(.input-wrapper) {
-			width: 100%;
-		}
-	}
-</style>

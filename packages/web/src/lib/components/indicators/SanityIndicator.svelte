@@ -1,3 +1,13 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		sanityIndicator: {
+			'--indicator-color': css.colorBindings.stats.colors.sanity
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import Indicator from './Indicator.svelte';
@@ -11,14 +21,8 @@
 </script>
 
 <Indicator
-	{...standardAttributes(attributes, 'sanity-indicator')}
+	{...standardAttributes(attributes, styles.sanityIndicator)}
 	{amount}
 	{contrast}
 	icon="stats/sanity.svg"
 />
-
-<style lang="scss">
-	:global(.sanity-indicator) {
-		--indicator-color: var(--stat-sanity-color);
-	}
-</style>

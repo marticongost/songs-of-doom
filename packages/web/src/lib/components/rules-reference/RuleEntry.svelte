@@ -7,11 +7,57 @@ Renders a single rule entry with a heading anchor and localised SVX body.
 <RuleEntry entry={ruleEntry} />
 ```
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		ruleEntry: {
+			scrollMarginTop: css.spacing.xl,
+			backgroundColor: 'var(--panel-background-color)',
+			lineHeight: '1.5em',
+			padding: css.spacing.md,
+			p: {
+				...css.vmargin('md')
+			},
+			ul: {
+				listStyleType: 'disc'
+			},
+			li: {
+				marginLeft: css.spacing.md,
+				marginTop: css.spacing.sm
+			}
+		},
+		ruleTitle: {
+			fontFamily: css.fonts.heading,
+			fontSize: '1.5em',
+			color: css.text.headingColor,
+			marginBottom: css.spacing.sm,
+			a: {
+				color: 'inherit',
+				textDecoration: 'none',
+				'&:hover': {
+					color: css.text.highlightColor
+				},
+				'&:hover:after': {
+					content: "'#'",
+					marginLeft: css.spacing.xs,
+					fontWeight: 'normal',
+					color: css.text.mutedColor
+				}
+			}
+		},
+		ruleMissing: {
+			fontStyle: 'italic',
+			opacity: '0.6'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { getLocale } from '$lib/context/locale';
-	import { translate } from '@songsofdoom/common/localisation';
 	import type { RuleEntry } from '$lib/rules-reference/types';
+	import { translate } from '@songsofdoom/common/localisation';
 
 	interface Props {
 		entry: RuleEntry;
@@ -23,15 +69,15 @@ Renders a single rule entry with a heading anchor and localised SVX body.
 	const BodyComponent = $derived(entry.bodies[locale]);
 </script>
 
-<section class="rule-entry" id={entry.slug}>
-	<h1 class="rule-title">
+<section class={styles.ruleEntry} id={entry.slug}>
+	<h1 class={styles.ruleTitle}>
 		<a href="#{entry.slug}">{title}</a>
 	</h1>
 	<div class="rule-body">
 		{#if BodyComponent}
 			<BodyComponent />
 		{:else}
-			<p class="rule-missing">
+			<p class={styles.ruleMissing}>
 				<Text
 					ca="Contingut no disponible en aquest idioma."
 					es="Contenido no disponible en este idioma."
@@ -41,54 +87,3 @@ Renders a single rule entry with a heading anchor and localised SVX body.
 		{/if}
 	</div>
 </section>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.rule-entry {
-		scroll-margin-top: rz.size(xl);
-		background-color: var(--panel-background-color);
-		line-height: 1.5em;
-		@include rz.padding(md);
-
-		:global(p) {
-			@include rz.vmargin(md);
-		}
-
-		:global(ul) {
-			list-style-type: disc;
-		}
-		:global(li) {
-			margin-left: rz.size(md);
-			margin-top: rz.size(sm);
-		}
-	}
-
-	.rule-title {
-		font-family: var(--heading-font);
-		font-size: 1.5em;
-		color: var(--text-heading-color);
-		margin-bottom: rz.size(sm);
-	}
-
-	.rule-title a {
-		color: inherit;
-		text-decoration: none;
-
-		&:hover {
-			color: var(--text-highlight);
-		}
-
-		&:hover:after {
-			content: '#';
-			margin-left: rz.size(xs);
-			font-weight: normal;
-			color: var(--text-muted-color);
-		}
-	}
-
-	.rule-missing {
-		font-style: italic;
-		opacity: 0.6;
-	}
-</style>

@@ -4,6 +4,7 @@
 	import Parameters from '../capabilities/Parameters.svelte';
 	import ExpressionChip from '../expressions/ExpressionChip.svelte';
 	import Text from '../localisation/Text.svelte';
+	import Instruction from '../structured-text/Instruction.svelte';
 	import EffectList from './EffectList.svelte';
 
 	interface Props {
@@ -14,27 +15,13 @@
 </script>
 
 {#each effect.cases as conditionCase, i (i)}
-	<span class="instruction">
-		<Text ca="Si" es="Si" en="If" />
-	</span>
+	<Instruction><Text ca="Si" es="Si" en="If" /></Instruction>
 	<Parameters><ExpressionChip expression={conditionCase.condition} /></Parameters>
 	<ArrowIcon />
 	<EffectList effects={conditionCase.effects} />
 {/each}
 {#if effect.default?.length}
-	<span class="instruction">
-		<Text ca="En cas contrari" es="En caso contrario" en="Otherwise" />
-	</span>
+	<Instruction><Text ca="En cas contrari" es="En caso contrario" en="Otherwise" /></Instruction>
 	<ArrowIcon />
 	<EffectList effects={effect.default} />
 {/if}
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.instruction {
-		font-weight: bold;
-		color: var(--instruction-color);
-		font-family: var(--instruction-font);
-	}
-</style>

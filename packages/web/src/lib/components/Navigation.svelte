@@ -1,3 +1,34 @@
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		label: {
+			fontWeight: 'bold',
+			fontFamily: css.fonts.heading,
+			fontSize: '1.5em'
+		},
+		list: css.row(),
+		link: {
+			...css.column('sm'),
+			...css.focus.mixin,
+			padding: css.spacing.md,
+			color: css.palette.hurricane,
+			borderBottomLeftRadius: css.spacing.sm,
+			borderBottomRightRadius: css.spacing.sm,
+			svg: {
+				filter: 'drop-shadow(0 0 0.5em black)',
+				height: '3em',
+				transition: 'transform 0.2s'
+			},
+			'&:hover': { color: css.palette.ivory },
+			'&:hover svg': { transform: 'scale(1.1)' },
+			"&[data-match='selected'], &[data-match='ancestor']:not([data-path='/'])": {
+				color: css.palette.silk
+			}
+		}
+	});
+</script>
+
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { getLocale } from '$lib/context/locale';
@@ -29,7 +60,7 @@
 </script>
 
 {#snippet sectionChildren(parent: Section, level: number)}
-	<ul data-level={parent.depth}>
+	<ul class={styles.list} data-level={parent.depth}>
 		{#if includeRoot && parent === root}
 			{@render sectionEntry(root, level + 1, false)}
 		{/if}
@@ -43,13 +74,14 @@
 	{@const match = getMatch(section)}
 	<li data-match={match} data-level={level} data-path={section.path}>
 		<a
+			class={styles.link}
 			href={resolve(('/[locale]' + section.path) as '/[locale]', { locale })}
 			data-match={match}
 			data-level={level}
 			data-path={section.path}
 		>
 			<InlineSvg src="navigation/{section.getQualifiedName('--') || 'home'}.svg" />
-			<span class="label">
+			<span class={styles.label}>
 				<Text {...section.title} />
 			</span>
 		</a>
@@ -60,50 +92,7 @@
 {/snippet}
 
 {#if root.children.length > 0 && (maxDepth === undefined || maxDepth > 0)}
-	<nav {...standardAttributes(attributes, 'navigation')}>
+	<nav {...standardAttributes(attributes)}>
 		{@render sectionChildren(root, 0)}
 	</nav>
 {/if}
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-	ul[data-level='0'] {
-		@include rz.row;
-	}
-	a[data-level='1'] {
-		@include rz.column(sm);
-		@include rz.padding(md);
-		color: var(--nav-color);
-		border-bottom-left-radius: rz.size(sm);
-		border-bottom-right-radius: rz.size(sm);
-
-		&:focus {
-			outline: var(--focus-outline);
-		}
-
-		:global(svg) {
-			filter: drop-shadow(0 0 0.5em black);
-			height: 3em;
-			transition: transform 0.2s;
-		}
-
-		&:hover {
-			color: var(--nav-hover-color);
-		}
-
-		&:hover :global(svg) {
-			transform: scale(1.1);
-		}
-
-		.label {
-			font-weight: bold;
-			font-family: var(--heading-font);
-			font-size: 1.5em;
-		}
-
-		&[data-match='selected'],
-		&[data-match='ancestor']:not([data-path='/']) {
-			color: var(--nav-selected-color);
-		}
-	}
-</style>

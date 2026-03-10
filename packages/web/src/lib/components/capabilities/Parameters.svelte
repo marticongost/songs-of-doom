@@ -1,4 +1,15 @@
 <script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		symbol: {
+			color: css.text.subtleColor
+		},
+		parameterItems: {
+			'& > * + *:before': { content: '" "' }
+		}
+	});
+
 	type SymbolType = 'parens' | 'angleBrackets';
 	const symbols: Record<SymbolType, [string, string]> = {
 		parens: ['(', ')'],
@@ -18,23 +29,13 @@
 	const { symbolType = 'parens', children, ...attributes }: Props = $props();
 </script>
 
-<span {...standardAttributes(attributes, 'parameters')}
+<span {...standardAttributes(attributes)}
 	><!--
-	--><span class="symbol">{symbols[symbolType][0]}</span><!--
-	--><span class="parameter-items">
+	--><span class={styles.symbol}>{symbols[symbolType][0]}</span><!--
+	--><span
+		class={styles.parameterItems}
+	>
 		{@render children()}
 	</span><!--
-	--><span class="symbol">{symbols[symbolType][1]}</span>
+	--><span class={styles.symbol}>{symbols[symbolType][1]}</span>
 </span>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	:global(.parameter-items > * + *:before) {
-		content: ' ';
-	}
-
-	.symbol {
-		color: var(--text-subtle-color);
-	}
-</style>

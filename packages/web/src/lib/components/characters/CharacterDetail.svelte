@@ -11,6 +11,103 @@ Used by both the read-only character view and the edit view.
 @prop toolbarActions - Snippet rendered between the character name and resources.
 @prop catalog - When provided, renders an "Add cards" section after the build area.
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	type CardSetsLayout = 'single-column' | 'multi-column';
+
+	const styles = css.styles({
+		characterName: {
+			fontFamily: css.fonts.heading,
+			color: css.text.headingColor,
+			padding: css.spacing.md,
+			marginRight: css.spacing.lg
+		},
+		cardSetHeader: {
+			...css.row('sm'),
+			paddingBottom: css.spacing.sm,
+			borderBottom: css.separators.regularBorder,
+			marginBottom: css.spacing.md
+		},
+		cardSetFilterButton: {
+			position: 'relative',
+			top: '-0.1em',
+			'--svg-height': '0.8em',
+			opacity: '0.3',
+			'&:hover': {
+				opacity: '1'
+			}
+		},
+		cardSetSize: {
+			marginLeft: 'auto',
+			fontFamily: css.fonts.number,
+			fontWeight: 'bold'
+		},
+		sectionTitle: {
+			fontFamily: css.fonts.heading,
+			fontSize: '1.3em',
+			color: css.text.headingColor,
+			marginBottom: css.spacing.md
+		},
+		resources: {
+			...css.row('sm'),
+			marginLeft: 'auto',
+			padding: css.spacing.md,
+			fontSize: '1.5em'
+		},
+		content: {
+			...css.row('xl'),
+			...css.hpadding('md'),
+			border: '2px solid transparent',
+			marginTop: css.spacing.lg,
+			alignItems: 'flex-start'
+		},
+		statsSheet: {
+			...css.column(),
+			'& > * + *': {
+				marginTop: css.spacing.md,
+				paddingTop: css.spacing.md,
+				borderTop: css.separators.regularBorder
+			}
+		},
+		focuses: {
+			marginTop: css.spacing.lg
+		},
+		details: {
+			flex: '0 0 auto'
+		},
+		catalog: {
+			flex: '1 1 auto'
+		},
+		cardColumn: {
+			...css.column('lg'),
+			width: '20em'
+		},
+		cardSetTitle: {
+			fontFamily: css.fonts.heading,
+			fontSize: '1.3em',
+			color: css.text.headingColor,
+			marginBottom: 0
+		}
+	});
+
+	const cardSetsLayoutStyles: Record<CardSetsLayout, ReturnType<typeof css.styles>> = {
+		'single-column': css.styles({
+			cardSets: {
+				...css.column('lg'),
+				flex: '0 0 20em'
+			}
+		}),
+		'multi-column': css.styles({
+			cardSets: {
+				...css.row('xl'),
+				alignItems: 'start',
+				flex: '0 0 auto'
+			}
+		})
+	};
+</script>
+
 <script lang="ts">
 	import EntityListing from '$lib/components/entities/EntityListing.svelte';
 	import type { EntityManager } from '$lib/components/entities/entitymanager';
@@ -66,27 +163,27 @@ Used by both the read-only character view and the edit view.
 </script>
 
 <Toolbar>
-	<h1 class="character-name">{character.name}</h1>
+	<h1 class={styles.characterName}>{character.name}</h1>
 	{@render toolbarActions?.()}
-	<div class="resources">
+	<div class={styles.resources}>
 		<GoldIndicator amount={characterState.gold} />
 		<ExperienceIndicator amount={characterState.availableXp} />
 	</div>
 </Toolbar>
 
-<div class="content">
-	<div class="details">
+<div class={styles.content}>
+	<div class={styles.details}>
 		<section class="stats">
-			<h1 class="section-title">
+			<h1 class={styles.sectionTitle}>
 				<Text ca="Característiques" es="Características" en="Stats" />
 			</h1>
-			<div class="stats-sheet">
+			<div class={styles.statsSheet}>
 				<StatsSheet stats={baseStats} statTypes={attributeTypes} showLabels={true} />
 				<StatsSheet stats={baseStats} statTypes={indicatorTypes} showLabels={true} />
 			</div>
 		</section>
-		<section class="focuses">
-			<h1 class="section-title">
+		<section class={styles.focuses}>
+			<h1 class={styles.sectionTitle}>
 				<Text ca="Bossa de focus" es="Bolsa de focos" en="Focuses bag" />
 			</h1>
 			<div class="focuses-list">
@@ -94,8 +191,8 @@ Used by both the read-only character view and the edit view.
 			</div>
 		</section>
 	</div>
-	<div class="card-sets" data-layout={cardSetsLayout}>
-		<div class="card-column">
+	<div class={cardSetsLayoutStyles[cardSetsLayout].cardSets}>
+		<div class={styles.cardColumn}>
 			{@render cardSet(
 				{ ca: 'Arquetips', es: 'Arquetipos', en: 'Archetypes' },
 				characterState.archetypes(),
@@ -107,7 +204,7 @@ Used by both the read-only character view and the edit view.
 				'trait'
 			)}
 		</div>
-		<div class="card-column">
+		<div class={styles.cardColumn}>
 			{@render cardSet(
 				{ ca: 'Aliats', es: 'Aliados', en: 'Allies' },
 				characterState.allies(),
@@ -119,7 +216,7 @@ Used by both the read-only character view and the edit view.
 				'item'
 			)}
 		</div>
-		<div class="card-column">
+		<div class={styles.cardColumn}>
 			{@render cardSet(
 				{ ca: 'Habilitats', es: 'Habilidades', en: 'Skills' },
 				characterState.skills(),
@@ -129,8 +226,8 @@ Used by both the read-only character view and the edit view.
 		</div>
 	</div>
 	{#if catalog}
-		<section class="catalog">
-			<h1 class="section-title">
+		<section class={styles.catalog}>
+			<h1 class={styles.sectionTitle}>
 				<Text ca="Afegir cartes" es="Añadir cartas" en="Add cards" />
 			</h1>
 			{@render catalog()}
@@ -144,10 +241,10 @@ Used by both the read-only character view and the edit view.
 	entityTypeId: EntityTypeId,
 	expectedSize?: number
 )}
-	<section class="card-set" data-type={entityTypeId}>
-		<div class="card-set-header">
-			<h1 class="section-title"><Text {...title} /></h1>
-			<span class="card-set-size">
+	<section data-type={entityTypeId}>
+		<div class={styles.cardSetHeader}>
+			<h1 class={styles.cardSetTitle}><Text {...title} /></h1>
+			<span class={styles.cardSetSize}>
 				{sumCopiesOfEntities(entities)}
 				{#if expectedSize !== undefined}
 					/ {expectedSize}
@@ -155,6 +252,7 @@ Used by both the read-only character view and the edit view.
 			</span>
 			{#if onFilterClick}
 				<IconButton
+					class={styles.cardSetFilterButton}
 					src="funnel.svg"
 					aria-label={{
 						ca: `Filtrar ${title.ca}`,
@@ -173,108 +271,3 @@ Used by both the read-only character view and the edit view.
 		/>
 	</section>
 {/snippet}
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.character-name {
-		font-family: var(--heading-font);
-		color: var(--text-heading-color);
-		padding: rz.size(md);
-		margin-right: rz.size(lg);
-	}
-
-	.card-set-header {
-		@include rz.row(sm);
-		padding-bottom: rz.size(sm);
-		border-bottom: var(--panel-separator);
-		margin-bottom: rz.size(md);
-	}
-
-	.card-set-header .section-title {
-		margin-bottom: 0;
-	}
-
-	.card-set-header :global(.icon-button) {
-		position: relative;
-		top: -0.1em;
-		--svg-height: 0.8em;
-		opacity: 0.3;
-
-		&:hover {
-			opacity: 1;
-		}
-	}
-
-	.card-set-size {
-		margin-left: auto;
-		font-family: var(--number-font);
-		font-weight: bold;
-	}
-
-	.section-title {
-		font-family: var(--heading-font);
-		font-size: 1.3em;
-		color: var(--text-heading-color);
-		margin-bottom: rz.size(md);
-	}
-
-	.resources {
-		@include rz.row(sm);
-		margin-left: auto;
-		padding: rz.size(md);
-		font-size: 1.5em;
-	}
-
-	.content {
-		@include rz.row(xl);
-		@include rz.hpadding(md);
-		border: 2px solid transparent;
-		margin-top: rz.size(lg);
-		align-items: flex-start;
-	}
-
-	.stats-sheet {
-		@include rz.column;
-
-		& > :global(* + *) {
-			margin-top: rz.size(md);
-			padding-top: rz.size(md);
-			border-top: var(--panel-separator);
-		}
-	}
-
-	.focuses {
-		margin-top: rz.size(lg);
-	}
-
-	.details {
-		flex: 0 0 auto;
-	}
-
-	.catalog {
-		flex: 1 1 auto;
-	}
-
-	.card-sets :global(.entities.columns) {
-		column-count: 1;
-	}
-
-	.card-sets {
-		&[data-layout='multi-column'] {
-			@include rz.row(xl);
-			align-items: start;
-			flex: 0 0 auto;
-		}
-
-		&[data-layout='single-column'] {
-			@include rz.column(lg);
-			flex: 0 0 20em;
-		}
-	}
-
-	.card-column {
-		@include rz.column(lg);
-		width: 20em;
-	}
-</style>

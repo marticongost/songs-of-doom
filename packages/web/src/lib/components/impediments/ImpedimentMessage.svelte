@@ -11,6 +11,24 @@
 	For {@link DisciplineRequiredImpediment}, when `entityManager` is provided, shows one button per
 	unlocking archetype to acquire that archetype (and its dep chain) to unlock the discipline.
 -->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		missingDiscipline: {
+			marginBottom: css.spacing.md
+		},
+		missingDisciplineButtons: {
+			...css.column('sm')
+		},
+		addAllElements: {
+			...css.row('sm'),
+			whiteSpace: 'nowrap',
+			fontSize: '0.9em'
+		}
+	});
+</script>
+
 <script lang="ts">
 	import type { EntityManager } from '$lib/components/entities/entitymanager';
 	import {
@@ -36,6 +54,7 @@
 	import Button from '../Button.svelte';
 	import ExperienceIndicator from '../indicators/ExperienceIndicator.svelte';
 	import GoldIndicator from '../indicators/GoldIndicator.svelte';
+	import Link from '../Link.svelte';
 	import Text from '../localisation/Text.svelte';
 
 	interface Props extends StandardAttributeProps {
@@ -113,7 +132,7 @@
 	}
 </script>
 
-<span {...standardAttributes(attributes, 'impediment-message')}>
+<span {...standardAttributes(attributes, styles.impedimentMessage)}>
 	{#if impediment instanceof InnateTraitImpediment}
 		<Text
 			ca="Aquest tret és innat i només es pot adquirir durant la creació del personatge."
@@ -121,7 +140,7 @@
 			en="This trait is innate and can only be acquired during character creation."
 		/>
 	{:else if impediment instanceof ArchetypeRequiredImpediment}
-		<div class="missing-archetypes">
+		<div>
 			<Text
 				ca="Requereix l'arquetip %(archetype)."
 				es="Requiere el arquetipo %(archetype)."
@@ -129,15 +148,15 @@
 			>
 				{#snippet archetype()}
 					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- entityUrl.get() uses resolve() -->
-					<a href={entityUrl.get(impediment.dependency)} target="_blank">
+					<Link href={entityUrl.get(impediment.dependency)} target="_blank">
 						<Text {...impediment.dependency.title} />
-					</a>
+					</Link>
 				{/snippet}
 			</Text>
 		</div>
 		{#if dependencyChainInfo?.canAcquireAll}
 			<Button onclick={handleAddAll}>
-				<div class="add-all-elements">
+				<div class={styles.addAllElements}>
 					<Text ca="Afegir-ho tot" es="Añadir todo" en="Add all" />
 					{#if dependencyChainInfo.totalXpCost > 0}
 						<ExperienceIndicator amount={dependencyChainInfo.totalXpCost} />
@@ -149,7 +168,7 @@
 			</Button>
 		{/if}
 	{:else if impediment instanceof DisciplineRequiredImpediment}
-		<div class="missing-discipline">
+		<div class={styles.missingDiscipline}>
 			<Text
 				ca="Requereix la disciplina %(discipline)."
 				es="Requiere la disciplina %(discipline)."
@@ -163,12 +182,12 @@
 				{/snippet}
 			</Text>
 		</div>
-		<div class="missing-discipline-buttons">
+		<div class={styles.missingDisciplineButtons}>
 			{#if disciplineArchetypeInfos}
 				{#each disciplineArchetypeInfos as archetypeInfo (archetypeInfo.archetype.variantId)}
 					{#if archetypeInfo.canAcquire}
 						<Button onclick={() => handleAddArchetype(archetypeInfo.toAcquire)}>
-							<div class="add-all-elements">
+							<div class={styles.addAllElements}>
 								<Text ca="Adquirir via" es="Adquirir mediante" en="Acquire via" />
 								<Text {...archetypeInfo.archetype.title} />
 								{#if archetypeInfo.totalXpCost > 0}
@@ -239,32 +258,3 @@
 		/>
 	{/if}
 </span>
-
-<style lang="scss">
-	@use '@reguitzell/styles' as rz;
-
-	.impediment-message {
-		a {
-			color: var(--accent-color);
-			text-decoration: underline;
-
-			&:hover {
-				color: var(--accent-hover-color);
-			}
-		}
-	}
-
-	.missing-discipline {
-		margin-bottom: rz.size(md);
-	}
-
-	.missing-discipline-buttons {
-		@include rz.column(sm);
-	}
-
-	.add-all-elements {
-		@include rz.row(sm);
-		white-space: nowrap;
-		font-size: 0.9em;
-	}
-</style>
