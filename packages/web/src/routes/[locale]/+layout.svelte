@@ -11,13 +11,14 @@
 		header: {
 			...css.row('xl'),
 			...css.hpadding('md'),
-			backgroundImage: `linear-gradient(
-				to bottom,
-				color-mix(in srgb, var(--header-background-color) 80%, transparent),
-				color-mix(in srgb, var(--page-background-color) 80%, transparent)
-			),
-			linear-gradient(to bottom, transparent, var(--page-background-color)),
-			url('${pageHeaderUrl}')`,
+			backgroundImage: `
+				linear-gradient(
+					to bottom,
+					color-mix(in srgb, ${css.site.headerBackgroundColor} 80%, transparent),
+					color-mix(in srgb, ${css.site.pageBackgroundColor} 80%, transparent)
+				),
+				linear-gradient(to bottom, transparent, ${css.site.pageBackgroundColor}),
+				url('${pageHeaderUrl}')`,
 			backgroundSize: '100% 100%,	100% 100%, 128px',
 			backgroundPosition: 'center, center, center top'
 		},
