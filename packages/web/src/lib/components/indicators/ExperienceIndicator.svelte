@@ -9,8 +9,8 @@
 			'--indicator-value-text-shadow': 'none'
 		},
 		negative: {
-			'--indicator-color': css.palette.ivory,
-			'--indicator-value-color': css.palette.red
+			'--indicator-color': css.palette.red,
+			'--indicator-value-color': css.palette.ivory
 		}
 	});
 </script>
