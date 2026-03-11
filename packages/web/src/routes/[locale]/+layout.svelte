@@ -6,7 +6,13 @@
 	const styles = css.styles({
 		gameLogo: {
 			height: '5em',
-			alignSelf: 'center'
+			alignSelf: 'center',
+			...css.viewport.xs.then({
+				position: 'absolute',
+				height: '3em',
+				left: css.site.smallScreenMargin,
+				bottom: css.site.smallScreenMargin
+			})
 		},
 		header: {
 			...css.row('xl'),
@@ -20,12 +26,31 @@
 				linear-gradient(to bottom, transparent, ${css.site.pageBackgroundColor}),
 				url('${pageHeaderUrl}')`,
 			backgroundSize: '100% 100%,	100% 100%, 128px',
-			backgroundPosition: 'center, center, center top'
+			backgroundPosition: 'center, center, center top',
+			...css.viewport.xs.then({
+				height: `calc(3em + ${css.site.smallScreenMargin} * 2)`,
+				...css.hpadding('xs'),
+				justifyContent: 'center',
+				gap: css.spacing.sm,
+				borderTop: `4px solid ${css.site.headerBackgroundColor}`,
+				backgroundSize: '100% 100%,	100% 100%, 64px',
+				position: 'fixed',
+				zIndex: 2,
+				left: 0,
+				right: 0,
+				bottom: 0
+			})
 		},
 		appControls: {
 			'--svg-height': '1.5em',
 			marginLeft: 'auto',
-			alignSelf: 'center'
+			alignSelf: 'center',
+			...css.viewport.xs.then({
+				position: 'absolute',
+				right: css.site.smallScreenMargin,
+				bottom: '50%',
+				transform: 'translateY(50%)'
+			})
 		},
 		main: {
 			...css.hpadding('md'),

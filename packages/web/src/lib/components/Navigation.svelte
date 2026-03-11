@@ -5,7 +5,8 @@
 		label: {
 			fontWeight: 'bold',
 			fontFamily: css.fonts.heading,
-			fontSize: '1.5em'
+			fontSize: '1.5em',
+			...css.viewport.xs.hide()
 		},
 		list: css.row(),
 		link: {
@@ -15,10 +16,16 @@
 			color: css.palette.hurricane,
 			borderBottomLeftRadius: css.spacing.sm,
 			borderBottomRightRadius: css.spacing.sm,
+			...css.viewport.xs.then({
+				padding: css.spacing.sm
+			}),
 			svg: {
 				filter: 'drop-shadow(0 0 0.5em black)',
 				height: '3em',
-				transition: 'transform 0.2s'
+				transition: 'transform 0.2s',
+				...css.viewport.xs.then({
+					height: '1.5em'
+				})
 			},
 			'&:hover': { color: css.palette.ivory },
 			'&:hover svg': { transform: 'scale(1.1)' },
