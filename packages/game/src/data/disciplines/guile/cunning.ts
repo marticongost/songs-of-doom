@@ -4,7 +4,7 @@ import { Trait } from '../../../models/trait';
 
 export default new Trait({
 	title: { ca: 'Enginy', es: 'Ingenio', en: 'Cunning' },
-	xpCost: 4,
+	xpCost: 3,
 	capabilities: [
 		new Constant({
 			effects: [new ChangeStatsEffect({ intelligence: 1 })]

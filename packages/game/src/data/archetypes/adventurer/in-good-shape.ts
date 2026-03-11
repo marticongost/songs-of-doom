@@ -4,11 +4,11 @@ import { Trait } from '../../../models/trait';
 
 export default new Trait({
 	title: {
-		ca: 'Corpulència',
-		es: 'Corpulencia',
-		en: 'Brawn'
+		ca: 'Forma física',
+		es: 'Forma física',
+		en: 'In good shape'
 	},
-	xpCost: 3,
+	xpCost: 4,
 	capabilities: [
 		new Constant({
 			effects: [new ChangeStatsEffect({ strength: 1 })]

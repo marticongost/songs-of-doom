@@ -4,14 +4,14 @@ import { Trait } from '../../../models/trait';
 
 export default new Trait({
 	title: {
-		ca: 'Corpulència',
-		es: 'Corpulencia',
-		en: 'Brawn'
+		ca: 'Coordinació',
+		es: 'Coordinación',
+		en: 'Coordination'
 	},
-	xpCost: 3,
+	xpCost: 4,
 	capabilities: [
 		new Constant({
-			effects: [new ChangeStatsEffect({ strength: 1 })]
+			effects: [new ChangeStatsEffect({ agility: 1 })]
 		})
 	]
 });
