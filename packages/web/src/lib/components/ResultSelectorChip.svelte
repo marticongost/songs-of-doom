@@ -9,7 +9,7 @@
 		},
 		die: {
 			"&[data-result='CF']": {
-				color: 'var(--critical-failure-color)'
+				color: css.palette.opium
 			},
 			'& + &': {
 				marginLeft: css.spacing.xs
