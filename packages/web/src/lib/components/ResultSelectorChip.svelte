@@ -17,7 +17,7 @@
 		},
 		plus: {
 			height: '0.5em',
-			color: 'var(--positive-color)'
+			color: css.text.positiveColor
 		}
 	});
 </script>

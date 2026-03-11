@@ -139,7 +139,7 @@
 		},
 		body: {
 			...css.column('sm'),
-			alignItems: 'flex-start',
+			alignItems: 'stretch',
 			flex: '1 1 auto'
 		},
 		capabilities: {
