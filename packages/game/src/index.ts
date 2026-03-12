@@ -4,12 +4,16 @@ export { entities, EntityCatalog, getEntryMetadata, type EntryMetadata } from '.
 // Core entity types
 export { Ally } from './models/ally';
 export { Archetype } from './models/archetype';
+export { Campaign } from './models/campaign';
 export { Creature } from './models/creature';
 export { Discipline } from './models/discipline';
 export { Encounter } from './models/encounter';
 export { ChildEntity, Entity, ParentEntity } from './models/entity';
 export { Event } from './models/event';
+export { Mission } from './models/mission';
 export { Module } from './models/module';
+export { Scenario } from './models/scenario';
+export { Threat } from './models/threat';
 export { Skill } from './models/skill';
 export { Talent, type TalentProps } from './models/talent';
 export { Trait } from './models/trait';

@@ -3,13 +3,17 @@ import { getEntryMetadata } from '../catalog';
 import { standard } from '../data/properties';
 import type { Ally } from './ally';
 import { type Archetype } from './archetype';
+import type { Campaign } from './campaign';
 import type { Capability } from './capability';
 import type { Creature } from './creature';
 import { type Discipline } from './discipline';
 import type { Effect } from './effects';
 import type { Encounter } from './encounter';
 import type { Item } from './inventory';
+import type { Mission } from './mission';
 import type { Module } from './module';
+import type { Scenario } from './scenario';
+import type { Threat } from './threat';
 import type { Property } from './properties';
 import type { EntityType } from './properties/entitytypes';
 import type { Skill } from './skill';
@@ -173,8 +177,10 @@ export abstract class ChildEntity<C extends ParentEntity> extends Entity {
 		if (this._parent === NOT_COMPUTED) {
 			const metadata = getEntryMetadata(this);
 			if (metadata.path.length >= 2) {
-				const archetypeId = metadata.path[metadata.path.length - 2];
-				return (this._parent = metadata.catalog.require(archetypeId) as C);
+				const parentId = metadata.qualifiedPaths
+					? metadata.path.slice(0, -1).join('-')
+					: metadata.path[metadata.path.length - 2];
+				return (this._parent = metadata.catalog.require(parentId) as C);
 			}
 			throw new Error(`${this.constructor.name} ${this.id} is not inside a parent`);
 		}
@@ -257,4 +263,20 @@ export const isEncounter = (entity: Entity): entity is Encounter => {
 
 export const isModule = (entity: Entity): entity is Module => {
 	return entity.type.id === 'module';
+};
+
+export const isCampaign = (entity: Entity): entity is Campaign => {
+	return entity.type.id === 'campaign';
+};
+
+export const isScenario = (entity: Entity): entity is Scenario => {
+	return entity.type.id === 'scenario';
+};
+
+export const isThreat = (entity: Entity): entity is Threat => {
+	return entity.type.id === 'threat';
+};
+
+export const isMission = (entity: Entity): entity is Mission => {
+	return entity.type.id === 'mission';
 };

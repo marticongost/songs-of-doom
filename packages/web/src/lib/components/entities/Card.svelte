@@ -202,12 +202,14 @@
 		}
 	});
 
-	import { Archetype, Discipline, Module } from '@songsofdoom/game';
+	import { Archetype, Discipline, Module, Scenario } from '@songsofdoom/game';
 	const getSetIcon = (set: Archetype | Discipline | Module): string => {
 		if (set instanceof Archetype) {
 			return `archetypes/${set.id}.svg`;
 		} else if (set instanceof Discipline) {
 			return `disciplines/${set.id}.svg`;
+		} else if (set instanceof Scenario) {
+			return `campaigns/${set.parent!.id}/${set.id}.svg`;
 		} else {
 			return `modules/${set.id}.svg`;
 		}
@@ -272,6 +274,8 @@
 	const elementType = $derived(onclick ? 'button' : linked ? 'a' : 'div');
 	const discardReward = $derived(entity instanceof Skill ? entity.discardReward : undefined);
 	const hasToolbar = $derived(entityManager && !onclick);
+	const hasImage = $derived(!(entity instanceof Scenario));
+	const hasDetails = $derived(!(entity instanceof Scenario));
 
 	let cardElement: HTMLElement | undefined;
 
@@ -325,33 +329,37 @@
 				{/if}
 			</div>
 		</div>
-		<div class={styles.imageRow}>
-			{#if entity instanceof Creature || entity instanceof Ally}
-				<AttributesSheet stats={entity.stats} statTypes={attributeTypes} />
-				<div class={styles.indicators}>
-					<HealthIndicator amount={entity.stats.health} contrast={true} />
-					{#if entity instanceof Ally}
-						<SanityIndicator amount={entity.stats.sanity} contrast={true} />
-					{/if}
-				</div>
-			{/if}
-			<Image
-				class={cx(styles.image, { [styles.dimmedImage]: dimmed })}
-				src="cards/{entity.id}.jpg"
-			/>
-			{#if discardReward && !discardReward.empty()}
-				<CapabilityCostList class={styles.discardReward} cost={discardReward} layout="column" />
-			{/if}
-		</div>
-		<div class={styles.details}>
-			<PropertyList style="margin-right: auto" properties={entity.properties} />
-			{#if entity.maxCharges}
-				<ChargesChip charges={entity.maxCharges} />
-			{/if}
-			{#if entity instanceof Item && entity.slot}
-				<InlineSvg src="slots/{entity.slot.type}.svg" />
-			{/if}
-		</div>
+		{#if hasImage}
+			<div class={styles.imageRow}>
+				{#if entity instanceof Creature || entity instanceof Ally}
+					<AttributesSheet stats={entity.stats} statTypes={attributeTypes} />
+					<div class={styles.indicators}>
+						<HealthIndicator amount={entity.stats.health} contrast={true} />
+						{#if entity instanceof Ally}
+							<SanityIndicator amount={entity.stats.sanity} contrast={true} />
+						{/if}
+					</div>
+				{/if}
+				<Image
+					class={cx(styles.image, { [styles.dimmedImage]: dimmed })}
+					src="cards/{entity.id}.jpg"
+				/>
+				{#if discardReward && !discardReward.empty()}
+					<CapabilityCostList class={styles.discardReward} cost={discardReward} layout="column" />
+				{/if}
+			</div>
+		{/if}
+		{#if hasDetails}
+			<div class={styles.details}>
+				<PropertyList style="margin-right: auto" properties={entity.properties} />
+				{#if entity.maxCharges}
+					<ChargesChip charges={entity.maxCharges} />
+				{/if}
+				{#if entity instanceof Item && entity.slot}
+					<InlineSvg src="slots/{entity.slot.type}.svg" />
+				{/if}
+			</div>
+		{/if}
 		<div class={styles.body}>
 			{#if entity.description}
 				<div>{entity.description}</div>

@@ -3,10 +3,11 @@
 
 	const styles = css.styles({
 		cardPage: {
-			'&:not([data-entity-type="module"]):not([data-entity-type="discipline"])': {
-				...css.row('xl'),
-				alignItems: 'flex-start'
-			}
+			'&:not([data-entity-type="module"]):not([data-entity-type="discipline"]):not([data-entity-type="campaign"])':
+				{
+					...css.row('xl'),
+					alignItems: 'flex-start'
+				}
 		},
 		cardSet: {
 			'& + &': {
@@ -31,7 +32,15 @@
 	import CardButton from '$lib/components/entities/CardButton.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { type LocalisedText } from '@songsofdoom/common/localisation';
-	import { Archetype, Discipline, Entity, entityTypes, Module } from '@songsofdoom/game';
+	import {
+		Archetype,
+		Campaign,
+		Discipline,
+		Entity,
+		entityTypes,
+		Module,
+		Scenario
+	} from '@songsofdoom/game';
 	import type { PageProps } from './$types';
 	let { data }: PageProps = $props();
 </script>
@@ -52,7 +61,16 @@
 {/snippet}
 
 <div class={styles.cardPage} data-entity-type={data.entity.type.id}>
-	{#if data.entity instanceof Module}
+	{#if data.entity instanceof Campaign}
+		{@render cardSet(
+			{ ca: 'Escenaris', es: 'Escenarios', en: 'Scenarios' },
+			data.entity.getChildrenOfType(entityTypes.scenario)
+		)}
+		{@render cardSet(
+			{ ca: 'Mòduls', es: 'Módulos', en: 'Modules' },
+			data.entity.getChildrenOfType(entityTypes.module)
+		)}
+	{:else if data.entity instanceof Module}
 		{@render cardSet(
 			{ ca: 'Encontres', es: 'Encuentros', en: 'Encounters' },
 			data.entity.getChildrenOfType(entityTypes.encounter)
@@ -94,6 +112,20 @@
 				{@render cardSet({ ca: 'Arquetip', es: 'Arquetipo', en: 'Archetype' }, [
 					data.entity.requiredArchetype
 				])}
+			{/if}
+			{#if data.entity instanceof Scenario}
+				{@render cardSet(
+					{ ca: 'Amenaces', es: 'Amenazas', en: 'Threats' },
+					data.entity.getChildrenOfType(entityTypes.threat)
+				)}
+				{@render cardSet(
+					{ ca: 'Missions', es: 'Misiones', en: 'Missions' },
+					data.entity.getChildrenOfType(entityTypes.mission)
+				)}
+				{@render cardSet(
+					{ ca: 'Encontres', es: 'Encuentros', en: 'Encounters' },
+					data.entity.getChildrenOfType(entityTypes.encounter)
+				)}
 			{/if}
 			{#if data.entity instanceof Archetype}
 				{@const archetype = data.entity as Archetype}

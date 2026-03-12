@@ -2,6 +2,10 @@ import type { LocalisedText } from '@songsofdoom/common/localisation';
 import { Property } from './property';
 
 export type EntityTypeId =
+	| 'campaign'
+	| 'scenario'
+	| 'threat'
+	| 'mission'
 	| 'module'
 	| 'archetype'
 	| 'discipline'
@@ -23,6 +27,26 @@ export class EntityType extends Property {
 	}
 }
 
+export const campaign = new EntityType(
+	'campaign',
+	{ ca: 'Campanya', es: 'Campaña', en: 'Campaign' },
+	{ ca: 'Campanyes', es: 'Campañas', en: 'Campaigns' }
+);
+export const scenario = new EntityType(
+	'scenario',
+	{ ca: 'Escenari', es: 'Escenario', en: 'Scenario' },
+	{ ca: 'Escenaris', es: 'Escenarios', en: 'Scenarios' }
+);
+export const threat = new EntityType(
+	'threat',
+	{ ca: 'Amenaça', es: 'Amenaza', en: 'Threat' },
+	{ ca: 'Amenaces', es: 'Amenazas', en: 'Threats' }
+);
+export const mission = new EntityType(
+	'mission',
+	{ ca: 'Missió', es: 'Misión', en: 'Mission' },
+	{ ca: 'Missions', es: 'Misiones', en: 'Missions' }
+);
 export const module = new EntityType(
 	'module',
 	{ ca: 'Mòdul', es: 'Módulo', en: 'Module' },
@@ -70,6 +94,10 @@ export const encounter = new EntityType(
 );
 
 export const entityTypes: Record<EntityTypeId, EntityType> = {
+	campaign,
+	scenario,
+	threat,
+	mission,
 	module,
 	archetype,
 	discipline,

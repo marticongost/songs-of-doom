@@ -1,10 +1,14 @@
 import type { Entity } from './models/entity';
 import type { Ally } from './models/ally';
+import type { Campaign } from './models/campaign';
 import type { Creature } from './models/creature';
 import type { Encounter } from './models/encounter';
 import type { Item } from './models/inventory';
+import type { Mission } from './models/mission';
 import type { Module } from './models/module';
+import type { Scenario } from './models/scenario';
 import type { Skill } from './models/skill';
+import type { Threat } from './models/threat';
 import type { Trait } from './models/trait';
 
 export interface EntryMetadata {
@@ -12,25 +16,43 @@ export interface EntryMetadata {
 	variantId: string;
 	path: Array<string>;
 	catalog: EntityCatalog;
+	/**
+	 * Whether this entry uses path-qualified IDs (all path segments joined with `-`).
+	 * Used by child entities to resolve their parent's ID correctly.
+	 */
+	qualifiedPaths: boolean;
 }
 
 const metadataCache = new WeakMap<object, EntryMetadata>();
 
+class QualifiedEntries {
+	constructor(
+		readonly entries: Record<string, Entity>,
+		readonly qualifyIds: boolean = true
+	) {}
+}
+
+type EntrySetInput = Record<string, Entity> | QualifiedEntries;
+
 export class EntityCatalog {
 	private readonly entries: Record<string, Entity>;
 
-	constructor(...entrySets: Array<Record<string, Entity>>) {
+	constructor(...entrySets: Array<EntrySetInput>) {
 		this.entries = {};
 		for (const entrySet of entrySets) {
-			Object.entries(entrySet).forEach(([key, entry]) => {
-				const id = getEntryIdFromFileName(key);
+			const qualifyIds = entrySet instanceof QualifiedEntries ? entrySet.qualifyIds : false;
+			const rawEntries = entrySet instanceof QualifiedEntries ? entrySet.entries : entrySet;
+
+			Object.entries(rawEntries).forEach(([key, entry]) => {
 				const path = getEntryPathFromFileName(key);
+				const id = qualifyIds ? getQualifiedId(path) : getEntryIdFromFileName(key);
 				for (const variant of entry.variants) {
-					const variantMetadata = {
+					const variantMetadata: EntryMetadata = {
 						id,
 						variantId: entry.variants.length > 1 ? `${id}-${variant.level}` : id,
 						path: path,
-						catalog: this
+						catalog: this,
+						qualifiedPaths: qualifyIds
 					};
 					metadataCache.set(variant as object, variantMetadata);
 					this.entries[variantMetadata.variantId] = variant;
@@ -74,6 +96,18 @@ const getEntryIdFromFileName = (fileName: string): string => {
 	return fileWithExtension.split('.')[0];
 };
 
+/**
+ * Returns a path-qualified ID by joining all path segments with `-`.
+ * When the file is "self-named" (filename equals its parent folder), the duplicate
+ * trailing segment is collapsed — so `SoHH/sc1/sc1` becomes `SoHH-sc1`, not `SoHH-sc1-sc1`.
+ */
+const getQualifiedId = (path: string[]): string => {
+	if (path.length >= 2 && path[path.length - 1] === path[path.length - 2]) {
+		return path.slice(0, -1).join('-');
+	}
+	return path.join('-');
+};
+
 const getEntryPathFromFileName = (fileName: string): Array<string> => {
 	if (fileName.startsWith('./')) {
 		fileName = fileName.slice(2);
@@ -115,5 +149,11 @@ export const entities = new EntityCatalog(
 	import.meta.glob<Module | Encounter | Creature>(`./data/modules/**/*.ts`, {
 		eager: true,
 		import: 'default'
-	})
+	}),
+	new QualifiedEntries(
+		import.meta.glob<Campaign | Scenario | Threat | Mission | Encounter>(
+			`./data/campaigns/**/*.ts`,
+			{ eager: true, import: 'default' }
+		)
+	)
 );

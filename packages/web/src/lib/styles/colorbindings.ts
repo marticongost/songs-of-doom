@@ -98,5 +98,21 @@ export const cardBackgrounds = new ColorCoding<
 	discipline: {
 		main: new CardBackground('#111', '#000'),
 		secondary: new CardBackground('#222', '#111')
+	},
+	campaign: {
+		main: new CardBackground('#111', '#000'),
+		secondary: new CardBackground('#222', '#111')
+	},
+	scenario: {
+		main: new CardBackground('#4a3d5c', '#0d0a14'),
+		secondary: new CardBackground('#1e1a26', '#090909')
+	},
+	threat: {
+		main: new CardBackground('#7a3030', '#1a0505'),
+		secondary: new CardBackground('#2e1515', '#090909')
+	},
+	mission: {
+		main: new CardBackground('#3a5c3a', '#071207'),
+		secondary: new CardBackground('#1a2e1a', '#090909')
 	}
 });

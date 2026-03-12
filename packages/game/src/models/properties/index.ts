@@ -1,6 +1,10 @@
 export {
 	EntityType,
 	entityTypes,
+	campaign,
+	scenario,
+	threat,
+	mission,
 	archetype,
 	discipline,
 	trait,
