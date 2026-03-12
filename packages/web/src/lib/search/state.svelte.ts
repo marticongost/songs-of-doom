@@ -28,7 +28,7 @@ export type EntityTypeInput = EntityTypeId | EntityType;
 export type SortCriteriaInput = SortCriteriaType | SortCriteria;
 
 /** Type group for multi-type filtering */
-export type TypeGroupId = 'player-cards' | 'danger-cards' | 'narrative-cards';
+export type TypeGroupId = 'player-cards' | 'danger-cards';
 
 interface TypeGroup {
 	id: TypeGroupId;
@@ -46,11 +46,6 @@ const typeGroups: Record<TypeGroupId, TypeGroup> = {
 		id: 'danger-cards',
 		label: { ca: 'Cartes de perill', es: 'Cartas de peligro', en: 'Danger cards' },
 		typeIds: ['encounter', 'creature']
-	},
-	'narrative-cards': {
-		id: 'narrative-cards',
-		label: { ca: 'Cartes narratives', es: 'Cartas narrativas', en: 'Narrative cards' },
-		typeIds: ['mission', 'threat']
 	}
 };
 

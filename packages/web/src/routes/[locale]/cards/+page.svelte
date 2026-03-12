@@ -8,8 +8,7 @@
 	const searchState = new EntitySearchState({
 		allowedTypes: [
 			'scenario',
-			'threat',
-			'mission',
+			'story',
 			'archetype',
 			'trait',
 			'skill',

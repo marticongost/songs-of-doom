@@ -107,12 +107,8 @@ export const cardBackgrounds = new ColorCoding<
 		main: new CardBackground('#4a3d5c', '#0d0a14'),
 		secondary: new CardBackground('#1e1a26', '#090909')
 	},
-	threat: {
-		main: new CardBackground('#7a3030', '#1a0505'),
-		secondary: new CardBackground('#2e1515', '#090909')
-	},
-	mission: {
-		main: new CardBackground('#3a5c3a', '#071207'),
-		secondary: new CardBackground('#1a2e1a', '#090909')
+	story: {
+		main: new CardBackground('#5c4a1a', '#0d0a02'),
+		secondary: new CardBackground('#2a2210', '#090909')
 	}
 });

@@ -10,10 +10,9 @@ import { type Discipline } from './discipline';
 import type { Effect } from './effects';
 import type { Encounter } from './encounter';
 import type { Item } from './inventory';
-import type { Mission } from './mission';
 import type { Module } from './module';
 import type { Scenario } from './scenario';
-import type { Threat } from './threat';
+import type { Story } from './story';
 import type { Property } from './properties';
 import type { EntityType } from './properties/entitytypes';
 import type { Skill } from './skill';
@@ -273,10 +272,6 @@ export const isScenario = (entity: Entity): entity is Scenario => {
 	return entity.type.id === 'scenario';
 };
 
-export const isThreat = (entity: Entity): entity is Threat => {
-	return entity.type.id === 'threat';
-};
-
-export const isMission = (entity: Entity): entity is Mission => {
-	return entity.type.id === 'mission';
+export const isStory = (entity: Entity): entity is Story => {
+	return entity.type.id === 'story';
 };

@@ -115,12 +115,8 @@
 			{/if}
 			{#if data.entity instanceof Scenario}
 				{@render cardSet(
-					{ ca: 'Amenaces', es: 'Amenazas', en: 'Threats' },
-					data.entity.getChildrenOfType(entityTypes.threat)
-				)}
-				{@render cardSet(
-					{ ca: 'Missions', es: 'Misiones', en: 'Missions' },
-					data.entity.getChildrenOfType(entityTypes.mission)
+					{ ca: 'Històries', es: 'Historias', en: 'Stories' },
+					data.entity.getChildrenOfType(entityTypes.story)
 				)}
 				{@render cardSet(
 					{ ca: 'Encontres', es: 'Encuentros', en: 'Encounters' },

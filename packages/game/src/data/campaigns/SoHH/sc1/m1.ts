@@ -1,6 +1,6 @@
-import { Mission } from '../../../../models/mission';
+import { Story } from '../../../../models/story';
 
-export default new Mission({
+export default new Story({
 	title: {
 		ca: 'Una audiència amb el duc',
 		es: 'Una audiencia con el duque',

@@ -4,8 +4,7 @@ import { Property } from './property';
 export type EntityTypeId =
 	| 'campaign'
 	| 'scenario'
-	| 'threat'
-	| 'mission'
+	| 'story'
 	| 'module'
 	| 'archetype'
 	| 'discipline'
@@ -37,15 +36,10 @@ export const scenario = new EntityType(
 	{ ca: 'Escenari', es: 'Escenario', en: 'Scenario' },
 	{ ca: 'Escenaris', es: 'Escenarios', en: 'Scenarios' }
 );
-export const threat = new EntityType(
-	'threat',
-	{ ca: 'Amenaça', es: 'Amenaza', en: 'Threat' },
-	{ ca: 'Amenaces', es: 'Amenazas', en: 'Threats' }
-);
-export const mission = new EntityType(
-	'mission',
-	{ ca: 'Missió', es: 'Misión', en: 'Mission' },
-	{ ca: 'Missions', es: 'Misiones', en: 'Missions' }
+export const story = new EntityType(
+	'story',
+	{ ca: 'Història', es: 'Historia', en: 'Story' },
+	{ ca: 'Històries', es: 'Historias', en: 'Stories' }
 );
 export const module = new EntityType(
 	'module',
@@ -96,8 +90,7 @@ export const encounter = new EntityType(
 export const entityTypes: Record<EntityTypeId, EntityType> = {
 	campaign,
 	scenario,
-	threat,
-	mission,
+	story,
 	module,
 	archetype,
 	discipline,

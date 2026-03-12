@@ -4,11 +4,10 @@ import type { Campaign } from './models/campaign';
 import type { Creature } from './models/creature';
 import type { Encounter } from './models/encounter';
 import type { Item } from './models/inventory';
-import type { Mission } from './models/mission';
 import type { Module } from './models/module';
 import type { Scenario } from './models/scenario';
 import type { Skill } from './models/skill';
-import type { Threat } from './models/threat';
+import type { Story } from './models/story';
 import type { Trait } from './models/trait';
 
 export interface EntryMetadata {
@@ -151,9 +150,9 @@ export const entities = new EntityCatalog(
 		import: 'default'
 	}),
 	new QualifiedEntries(
-		import.meta.glob<Campaign | Scenario | Threat | Mission | Encounter>(
-			`./data/campaigns/**/*.ts`,
-			{ eager: true, import: 'default' }
-		)
+		import.meta.glob<Campaign | Scenario | Story | Encounter>(`./data/campaigns/**/*.ts`, {
+			eager: true,
+			import: 'default'
+		})
 	)
 );

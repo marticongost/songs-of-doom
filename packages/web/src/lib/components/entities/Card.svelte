@@ -279,7 +279,7 @@
 
 	// Determine the element type: button if onclick, anchor if linked, div otherwise
 	const elementType = $derived(onclick ? 'button' : linked ? 'a' : 'div');
-	const ispostcard = $derived(entity.type.id === 'threat' || entity.type.id === 'mission');
+	const ispostcard = $derived(entity.type.id === 'story');
 	const discardReward = $derived(entity instanceof Skill ? entity.discardReward : undefined);
 	const hasToolbar = $derived(entityManager && !onclick);
 	const hasImage = $derived(!(entity instanceof Scenario));
