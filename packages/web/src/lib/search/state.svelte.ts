@@ -27,6 +27,35 @@ import { filterByTitle } from './search';
 export type EntityTypeInput = EntityTypeId | EntityType;
 export type SortCriteriaInput = SortCriteriaType | SortCriteria;
 
+/** Type group for multi-type filtering */
+export type TypeGroupId = 'player-cards' | 'danger-cards' | 'narrative-cards';
+
+interface TypeGroup {
+	id: TypeGroupId;
+	label: LocalisedText;
+	typeIds: EntityTypeId[];
+}
+
+const typeGroups: Record<TypeGroupId, TypeGroup> = {
+	'player-cards': {
+		id: 'player-cards',
+		label: { ca: 'Cartes de jugador', es: 'Cartas de jugador', en: 'Player cards' },
+		typeIds: ['archetype', 'skill', 'trait', 'ally', 'item']
+	},
+	'danger-cards': {
+		id: 'danger-cards',
+		label: { ca: 'Cartes de perill', es: 'Cartas de peligro', en: 'Danger cards' },
+		typeIds: ['encounter', 'creature']
+	},
+	'narrative-cards': {
+		id: 'narrative-cards',
+		label: { ca: 'Cartes narratives', es: 'Cartas narrativas', en: 'Narrative cards' },
+		typeIds: ['mission', 'threat']
+	}
+};
+
+const defaultTypeGroup = typeGroups['player-cards'];
+
 /** View mode for entity display */
 export type ViewType = 'card' | 'button';
 const viewTypes: ViewType[] = ['card', 'button'];
@@ -108,6 +137,7 @@ export class EntitySearchState {
 
 	// Configuration
 	readonly allowedTypes: EntityType[] | undefined;
+	private readonly defaultGroup: TypeGroup | null;
 	readonly allowedSorts: SortCriteria[];
 	readonly defaultSort: SortCriteria;
 	readonly allowedViews: ViewType[];
@@ -116,7 +146,7 @@ export class EntitySearchState {
 
 	// Reactive state
 	private _search = $state('');
-	private _type = $state<EntityType | null>(null);
+	private _type = $state<EntityType | TypeGroup | null>(null);
 	private _sort = $state<SortCriteria>(sortCriteria.alpha);
 	private _view = $state<ViewType>('card');
 	private _set = $state<ParentEntity | null>(null);
@@ -126,7 +156,7 @@ export class EntitySearchState {
 	private _characterFilter = $state<CharacterFilter>('any');
 
 	// Dropdown options (computed once from configuration)
-	readonly typeOptions: Array<{ value: EntityTypeId | ''; label: LocalisedText }>;
+	readonly typeOptions: Array<{ value: string; label: LocalisedText }>;
 	readonly sortOptions: Array<{ value: SortCriteriaType; label: LocalisedText }>;
 	readonly viewOptions: ViewOption[];
 	readonly versionOptions: Array<{ value: VersionFilter; label: LocalisedText }>;
@@ -152,10 +182,26 @@ export class EntitySearchState {
 
 		// Build type filter options
 		const types = this.allowedTypes ?? Object.values(entityTypes);
-		this.typeOptions = [
-			{ value: '', label: { ca: 'Tots els tipus', es: 'Todos los tipos', en: 'All types' } },
-			...types.map((type) => ({ value: type.id, label: type.pluralTitle }))
-		];
+		const locale = getLocale();
+		const sortedTypes = [...types].sort((a, b) =>
+			(translate(a.pluralTitle, locale) ?? '').localeCompare(translate(b.pluralTitle, locale) ?? '')
+		);
+		const applicableGroups = Object.values(typeGroups).filter((group) =>
+			group.typeIds.every((id) => !this.allowedTypes || this.allowedTypes.some((t) => t.id === id))
+		);
+		if (applicableGroups.length > 0) {
+			this.typeOptions = [
+				...applicableGroups.map((g) => ({ value: g.id, label: g.label })),
+				...sortedTypes.map((type) => ({ value: type.id, label: type.pluralTitle }))
+			];
+		} else {
+			this.typeOptions = [
+				{ value: '', label: { ca: 'Tots els tipus', es: 'Todos los tipos', en: 'All types' } },
+				...sortedTypes.map((type) => ({ value: type.id, label: type.pluralTitle }))
+			];
+		}
+		this.defaultGroup =
+			applicableGroups.find((g) => g.id === defaultTypeGroup.id) ?? applicableGroups[0] ?? null;
 
 		// Build sort options
 		this.sortOptions = this.allowedSorts.map((criteria) => ({
@@ -217,6 +263,9 @@ export class EntitySearchState {
 				]
 			: null;
 
+		// Initialize type to default group (if any group is applicable)
+		this._type = this.defaultGroup;
+
 		// Initialize from URL if syncing
 		if (this.syncUrl) {
 			this.initFromUrl();
@@ -228,7 +277,7 @@ export class EntitySearchState {
 		return this._search;
 	}
 
-	get type(): EntityType | null {
+	get type(): EntityType | TypeGroup | null {
 		return this._type;
 	}
 
@@ -264,12 +313,14 @@ export class EntitySearchState {
 		}
 	}
 
-	/** Sets the type filter (null for all types) */
-	setType(value: EntityTypeInput | null | ''): void {
+	/** Sets the type filter */
+	setType(value: EntityTypeInput | TypeGroupId | null | ''): void {
 		if (value === '' || value === null) {
-			this._type = null;
+			this._type = this.defaultGroup;
+		} else if (typeof value === 'string' && value in typeGroups) {
+			this._type = typeGroups[value as TypeGroupId];
 		} else {
-			const type = normalizeEntityType(value);
+			const type = normalizeEntityType(value as EntityTypeInput);
 			// Validate against allowed types
 			if (this.allowedTypes && !this.allowedTypes.includes(type)) {
 				this._type = null;
@@ -278,7 +329,8 @@ export class EntitySearchState {
 			}
 		}
 		if (this.syncUrl) {
-			this.updateUrl({ type: this._type?.id ?? '' });
+			const isDefault = this._type?.id === this.defaultGroup?.id;
+			this.updateUrl({ type: isDefault ? '' : (this._type?.id ?? '') });
 		}
 	}
 
@@ -377,9 +429,14 @@ export class EntitySearchState {
 		const searchFiltered = filterByTitle(entities, this._search, locale);
 
 		// Apply type filter
-		const typeFiltered = this._type
-			? searchFiltered.filter((entity) => entity.type === this._type)
-			: searchFiltered;
+		const typeFiltered = (() => {
+			if (!this._type) return searchFiltered;
+			if ('typeIds' in this._type) {
+				const typeIds = this._type.typeIds;
+				return searchFiltered.filter((entity) => typeIds.includes(entity.type.id));
+			}
+			return searchFiltered.filter((entity) => entity.type === this._type);
+		})();
 
 		// Apply set filter
 		const setFiltered = this._set
@@ -436,7 +493,12 @@ export class EntitySearchState {
 
 		// Parse type
 		const typeParam = url.searchParams.get(this.typeParam);
-		if (typeParam && typeParam in entityTypes) {
+		if (typeParam && typeParam in typeGroups) {
+			this._type = typeGroups[typeParam as TypeGroupId];
+			if (typeParam === this.defaultGroup?.id) {
+				this.updateUrl({ type: '' });
+			}
+		} else if (typeParam && typeParam in entityTypes) {
 			const type = entityTypes[typeParam as EntityTypeId];
 			if (!this.allowedTypes || this.allowedTypes.includes(type)) {
 				this._type = type;

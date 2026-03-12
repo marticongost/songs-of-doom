@@ -33,6 +33,7 @@ entity type filter dropdown, and sort criteria dropdown.
 	import {
 		EntitySearchState,
 		type CharacterFilter,
+		type TypeGroupId,
 		type VersionFilter,
 		type ViewType
 	} from '$lib/search';
@@ -57,7 +58,7 @@ entity type filter dropdown, and sort criteria dropdown.
 	}
 
 	function onTypeChange(value: string) {
-		state.setType(value === '' ? null : (value as EntityTypeId));
+		state.setType(value === '' ? null : (value as EntityTypeId | TypeGroupId));
 	}
 
 	function onSortChange(value: SortCriteriaType) {

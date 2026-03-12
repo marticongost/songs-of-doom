@@ -5,7 +5,20 @@
 
 	let { data }: PageProps = $props();
 
-	const searchState = new EntitySearchState();
+	const searchState = new EntitySearchState({
+		allowedTypes: [
+			'scenario',
+			'threat',
+			'mission',
+			'archetype',
+			'trait',
+			'skill',
+			'item',
+			'creature',
+			'ally',
+			'encounter'
+		]
+	});
 </script>
 
 <EntityCatalog entities={data.entities} search={searchState} autofocus />

@@ -6,6 +6,7 @@ export {
 	type EntityTypeInput,
 	type SortCriteriaInput,
 	type SortedResult,
+	type TypeGroupId,
 	type VersionFilter,
 	type ViewOption,
 	type ViewType
