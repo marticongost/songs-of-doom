@@ -5,6 +5,11 @@
 		cardDetailHeading: {
 			...css.row('md')
 		},
+		heading: {
+			fontFamily: css.fonts.heading,
+			fontSize: '2rem',
+			color: css.text.headingColor
+		},
 		icon: {
 			fontSize: '2.5em',
 			color: css.text.subtleColor
@@ -36,6 +41,6 @@
 	{#if setIcon}
 		<InlineSvg src={setIcon} class={styles.icon} />
 	{/if}
-	<h1>{page.data.title}</h1>
+	<h1 class={styles.heading}>{page.data.title}</h1>
 	<CardLevel entity={page.data.entity as Entity} />
 </div>
