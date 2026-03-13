@@ -27,6 +27,7 @@
 		ModifyRollEffect,
 		MoveEffect,
 		NegateDamageEffect,
+		PlayStoryCardsEffect,
 		ProficiencyTableEffect,
 		ReceiveOpportunityAttacksEffect,
 		RedrawFateEffect,
@@ -75,6 +76,7 @@
 	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
 	import MoveEffectChip from './MoveEffectChip.svelte';
 	import NegateDamageEffectChip from './NegateDamageEffectChip.svelte';
+	import PlayStoryCardsEffectChip from './PlayStoryCardsEffectChip.svelte';
 	import ProficiencyTableEffectChip from './ProficiencyTableEffectChip.svelte';
 	import ReceiveOpportunityAttacksEffectChip from './ReceiveOpportunityAttacksEffectChip.svelte';
 	import RedrawFateEffectChip from './RedrawFateEffectChip.svelte';
@@ -164,6 +166,8 @@
 		<ResolveEncounterEffectChip {effect} />
 	{:else if effect instanceof SanityLossEffect}
 		<SanityLossEffectChip {effect} />
+	{:else if effect instanceof PlayStoryCardsEffect}
+		<PlayStoryCardsEffectChip {effect} />
 	{:else if effect instanceof ProficiencyTableEffect}
 		<ProficiencyTableEffectChip {effect} {compact} />
 	{:else if effect instanceof ResultsTableEffect}

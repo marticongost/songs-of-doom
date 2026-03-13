@@ -33,6 +33,7 @@ export { RemoveChargesEffect } from './removecharges';
 export { repeatCapability, RepeatCapabilityEffect } from './repeatcapability';
 export { replaceEncounter, ReplaceEncounterEffect } from './replaceencounter';
 export { resolveEncounter, ResolveEncounterEffect } from './resolveencounter';
+export { PlayStoryCardsEffect, type PlayStoryCardsEffectProps } from './playstorycards';
 export { ProficiencyTableEffect, type ProficiencyTableEntry } from './proficiencytable';
 export { ResultsTableEffect, type ResultsTableEntry } from './resultstable';
 export { SetRollResultEffect, type SetRollResultEffectProps } from './setrollresult';
