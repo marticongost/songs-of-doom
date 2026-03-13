@@ -237,7 +237,7 @@
 	import { cx } from '@emotion/css';
 	import type { Entity } from '@songsofdoom/game';
 	import { Ally, attributeTypes, Creature, Item, Skill } from '@songsofdoom/game';
-	import { isArchetype, isItem } from '../../../../../game/src/models/entity';
+	import { isArchetype, isItem, isScenario } from '../../../../../game/src/models/entity';
 	import CapabilityCostList from '../capabilities/CapabilityCostList.svelte';
 	import ChargesChip from '../capabilities/ChargesChip.svelte';
 	import Image from '../Image.svelte';
@@ -247,6 +247,7 @@
 	import HealthIndicator from '../indicators/HealthIndicator.svelte';
 	import SanityIndicator from '../indicators/SanityIndicator.svelte';
 	import InlineSvg from '../InlineSvg.svelte';
+	import ScenarioSigils from '../scenarios/ScenarioSigils.svelte';
 	import AttributesSheet from '../StatsSheet.svelte';
 	import TalentChip from '../talents/TalentChip.svelte';
 	import CardLevel from './CardLevel.svelte';
@@ -371,6 +372,10 @@
 		<div class={styles.body}>
 			{#if entity.description}
 				<div>{entity.description}</div>
+			{/if}
+
+			{#if isScenario(entity)}
+				<ScenarioSigils sigils={entity.sigils} />
 			{/if}
 
 			{#if isItem(entity) && entity.requiredTalent}
