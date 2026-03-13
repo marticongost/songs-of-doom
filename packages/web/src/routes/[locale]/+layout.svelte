@@ -10,13 +10,13 @@
 			...css.viewport.xs.then({
 				position: 'absolute',
 				height: '3em',
-				left: css.site.smallScreenMargin,
-				bottom: css.site.smallScreenMargin
+				left: css.site.smallScreenBleed,
+				bottom: css.site.smallScreenBleed
 			})
 		},
 		header: {
 			...css.row('xl'),
-			...css.hpadding('md'),
+			...css.hpadding(css.site.screenBleed),
 			backgroundImage: `
 				linear-gradient(
 					to bottom,
@@ -28,8 +28,8 @@
 			backgroundSize: '100% 100%,	100% 100%, 128px',
 			backgroundPosition: 'center, center, center top',
 			...css.viewport.xs.then({
-				height: `calc(3em + ${css.site.smallScreenMargin} * 2)`,
-				...css.hpadding('xs'),
+				height: `calc(3em + ${css.site.smallScreenBleed} * 2)`,
+				...css.hpadding(css.site.smallScreenBleed),
 				justifyContent: 'center',
 				gap: css.spacing.sm,
 				borderTop: `4px solid ${css.site.headerBackgroundColor}`,
@@ -47,13 +47,13 @@
 			alignSelf: 'center',
 			...css.viewport.xs.then({
 				position: 'absolute',
-				right: css.site.smallScreenMargin,
+				right: css.site.smallScreenBleed,
 				bottom: '50%',
 				transform: 'translateY(50%)'
 			})
 		},
 		main: {
-			...css.hpadding('md'),
+			...css.hpadding(css.site.screenBleed),
 			paddingTop: css.spacing.md
 		},
 		pageHeading: {
