@@ -1,10 +1,13 @@
+import { Obligation } from '../../../../models/capabilities';
 import {
 	DiscardFromHandEffect,
 	DrawCardsEffect,
+	PlayStoryCardsEffect,
 	ProficiencyTableEffect,
 	SetRollResultEffect
 } from '../../../../models/effects';
 import { Scenario } from '../../../../models/scenario';
+import audienceWithTheDuke from './audience-with-the-duke';
 
 export default new Scenario({
 	title: {
@@ -41,5 +44,11 @@ export default new Scenario({
 				'1-2': [new SetRollResultEffect({ result: 'CF' })]
 			})
 		]
-	}
+	},
+	capabilities: [
+		new Obligation({
+			triggers: ['scenarioStart'],
+			effects: [new PlayStoryCardsEffect({ cards: [audienceWithTheDuke] })]
+		})
+	]
 });
