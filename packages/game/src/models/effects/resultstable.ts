@@ -1,5 +1,8 @@
 import {
+	isSigil,
 	resolveResultExpression,
+	sigils,
+	type Result,
 	type ResultSelector,
 	type ResultSpec,
 	type ResultString
@@ -21,10 +24,17 @@ export interface ResultsTableEntry {
 }
 
 const resultSortKey = (result: ResultSelector): number => {
-	if (result === 'CF') return -1;
-	if (typeof result === 'number') return result;
-	if (Array.isArray(result)) return Math.min(...result.map((r) => (r === 'CF' ? -1 : r)));
-	return result.min ?? 0;
+	if (Array.isArray(result)) return Math.min(...result.map(singleResultSortKey));
+	if (typeof result === 'object') {
+		return result.min ?? 0;
+	}
+	return singleResultSortKey(result);
+};
+
+const singleResultSortKey = (result: Result): number => {
+	if (result === 'CF') return -Infinity;
+	if (isSigil(result)) return -sigils.indexOf(result);
+	return result;
 };
 
 const sortedEntries = (entries: ResultsTableEntry[]): ResultsTableEntry[] =>
