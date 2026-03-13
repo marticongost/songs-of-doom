@@ -12,8 +12,8 @@ export { ChildEntity, Entity, ParentEntity } from './models/entity';
 export { Event } from './models/event';
 export { Module } from './models/module';
 export { Scenario } from './models/scenario';
-export { Story } from './models/story';
 export { Skill } from './models/skill';
+export { Story } from './models/story';
 export { Talent, type TalentProps } from './models/talent';
 export { Trait } from './models/trait';
 
@@ -75,16 +75,29 @@ export {
 	type StatType
 } from './models/stats';
 
+// Proficiency
+export {
+	parseProficiencyString,
+	resolveProficiencySpec,
+	type ProficiencyLevel,
+	type ProficiencyRange,
+	type ProficiencySelector,
+	type ProficiencySpec,
+	type ProficiencyString
+} from './models/proficiency';
+
 // Results and Targets
 export {
 	parseResultString,
 	resolveResultExpression,
+	sigils,
 	type CriticalFailure,
 	type NumericResult,
 	type Result,
 	type ResultRange,
 	type ResultSelector,
-	type ResultSpec
+	type ResultSpec,
+	type Sigil
 } from './models/results';
 export {
 	Target,

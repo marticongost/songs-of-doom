@@ -19,14 +19,15 @@
 		HealEffect,
 		ImmobilizeEffect,
 		InvestigateEffect,
-		MoveEffect,
 		LooseGoldEffect,
 		ModifyCapabilityCostEffect,
 		ModifyCarryingCapacityEffect,
 		ModifyDamageEffect,
 		ModifyGatheredCluesEffect,
 		ModifyRollEffect,
+		MoveEffect,
 		NegateDamageEffect,
+		ProficiencyTableEffect,
 		ReceiveOpportunityAttacksEffect,
 		RedrawFateEffect,
 		RemoveChargesEffect,
@@ -35,6 +36,7 @@
 		ResolveEncounterEffect,
 		ResultsTableEffect,
 		SanityLossEffect,
+		SetRollResultEffect,
 		TalentEffect,
 		TestEffect,
 		TransformFocusEffect,
@@ -64,7 +66,6 @@
 	import GoTowardsEffectChip from './GoTowardsEffectChip.svelte';
 	import HealEffectChip from './HealEffectChip.svelte';
 	import ImmobilizeEffectChip from './ImmobilizeEffectChip.svelte';
-	import MoveEffectChip from './MoveEffectChip.svelte';
 	import InvestigateEffectChip from './InvestigateEffectChip.svelte';
 	import LooseGoldEffectChip from './LooseGoldEffectChip.svelte';
 	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
@@ -72,7 +73,9 @@
 	import ModifyDamageEffectChip from './ModifyDamageEffectChip.svelte';
 	import ModifyGatheredCluesEffectChip from './ModifyGatheredCluesEffectChip.svelte';
 	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
+	import MoveEffectChip from './MoveEffectChip.svelte';
 	import NegateDamageEffectChip from './NegateDamageEffectChip.svelte';
+	import ProficiencyTableEffectChip from './ProficiencyTableEffectChip.svelte';
 	import ReceiveOpportunityAttacksEffectChip from './ReceiveOpportunityAttacksEffectChip.svelte';
 	import RedrawFateEffectChip from './RedrawFateEffectChip.svelte';
 	import RemoveChargesEffectChip from './RemoveChargesEffectChip.svelte';
@@ -81,6 +84,7 @@
 	import ResolveEncounterEffectChip from './ResolveEncounterEffectChip.svelte';
 	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
 	import SanityLossEffectChip from './SanityLossEffectChip.svelte';
+	import SetRollResultEffectChip from './SetRollResultEffectChip.svelte';
 	import TalentEffectChip from './TalentEffectChip.svelte';
 	import TestEffectChip from './TestEffectChip.svelte';
 	import TransformFocusEffectChip from './TransformFocusEffectChip.svelte';
@@ -89,9 +93,10 @@
 
 	interface Props extends StandardAttributeProps {
 		effect: Effect;
+		compact?: boolean;
 	}
 
-	const { effect, ...attributes }: Props = $props();
+	const { effect, compact = true, ...attributes }: Props = $props();
 </script>
 
 <span {...standardAttributes(attributes, 'effect-chip')}>
@@ -142,7 +147,7 @@
 	{:else if effect instanceof NegateDamageEffect}
 		<NegateDamageEffectChip {effect} />
 	{:else if effect instanceof ConditionalEffect}
-		<ConditionalEffectChip {effect} />
+		<ConditionalEffectChip {effect} {compact} />
 	{:else if effect instanceof TriggerAttackEffect}
 		<TriggerAttackEffectChip {effect} />
 	{:else if effect instanceof ReceiveOpportunityAttacksEffect}
@@ -159,8 +164,12 @@
 		<ResolveEncounterEffectChip {effect} />
 	{:else if effect instanceof SanityLossEffect}
 		<SanityLossEffectChip {effect} />
+	{:else if effect instanceof ProficiencyTableEffect}
+		<ProficiencyTableEffectChip {effect} {compact} />
 	{:else if effect instanceof ResultsTableEffect}
 		<ResultsTableEffectChip {effect} />
+	{:else if effect instanceof SetRollResultEffect}
+		<SetRollResultEffectChip {effect} />
 	{:else if effect instanceof TestEffect}
 		<TestEffectChip {effect} />
 	{:else if effect instanceof TransformFocusEffect}

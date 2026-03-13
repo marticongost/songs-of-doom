@@ -3,6 +3,7 @@ import { type ScalarExpressionType } from './scalar-expression';
 export { ScalarExpression, type ScalarExpressionType } from './scalar-expression';
 
 // Scalar operations
+export { proficiency, ProficiencyExpression } from './proficiency';
 export { result, ResultExpression } from './result-expression';
 export { div, minus, mult, plus, ScalarOperation, type ScalarOperator } from './scalar-operation';
 

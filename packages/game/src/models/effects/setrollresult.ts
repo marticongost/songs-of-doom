@@ -1,0 +1,23 @@
+import type { Result } from '../results';
+import { Effect } from './effect';
+
+/**
+ * Props for configuring a SetRollResultEffect.
+ */
+export interface SetRollResultEffectProps {
+	/** The result to assign to the current test. */
+	result: Result;
+}
+
+/**
+ * An effect that sets the result of a fate token draw to a given value.
+ */
+export class SetRollResultEffect extends Effect {
+	/** The result to assign to the current test. */
+	readonly result: Result;
+
+	constructor({ result }: SetRollResultEffectProps) {
+		super();
+		this.result = result;
+	}
+}

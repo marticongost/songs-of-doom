@@ -21,6 +21,13 @@ export class ConditionalEffect extends Effect {
 		this.default = defaultEffect;
 	}
 
+	elseIf(condition: BooleanExpressionType, ...effects: Effect[]): ConditionalEffect {
+		return new ConditionalEffect({
+			cases: [...this.cases, { condition, effects }],
+			default: this.default
+		});
+	}
+
 	orElse(...effects: Effect[]): ConditionalEffect {
 		return new ConditionalEffect({
 			cases: this.cases,

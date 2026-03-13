@@ -6,7 +6,7 @@ import type { HexColor } from './types';
 export const clueColor = palette.pablo;
 export const goldColor = palette.gold;
 export const talentColor = palette.brandyPunch;
-export const proficiencyColor = palette.steel;
+export const proficiencyColor = palette.brandyPunch;
 
 export class ColorCoding<T extends string, C> {
 	readonly colors: Record<T, C>;

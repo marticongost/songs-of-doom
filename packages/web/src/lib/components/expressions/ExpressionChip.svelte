@@ -14,6 +14,7 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		NotExpression,
 		OrExpression,
 		plus,
+		ProficiencyExpression,
 		Property,
 		result,
 		ScalarOperation,
@@ -54,6 +55,8 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		<InlineSvg src="dice/successes.svg" />
 	{:else if expression instanceof Stat}
 		<StatIcon stat={expression} />
+	{:else if expression instanceof ProficiencyExpression}
+		<InlineSvg src="effects/proficiency.svg" />
 
 		<!-- Scalar arithmetic operations -->
 	{:else if expression instanceof ScalarOperation}
