@@ -20,10 +20,22 @@
 			color: css.text.positiveColor
 		}
 	});
+	const faces: Record<Result, string> = {
+		0: 'success-0',
+		1: 'success-1',
+		2: 'success-2',
+		3: 'success-3',
+		CF: 'critical-failure',
+		twist: 'twist',
+		peril: 'peril',
+		portent: 'portent',
+		despair: 'despair'
+	};
 </script>
 
 <script lang="ts">
 	import type { Result, ResultSelector } from '@songsofdoom/game';
+	import { isSigil } from '../../../../game/src/models/results';
 	import InlineSvg from './InlineSvg.svelte';
 	import { standardAttributes, type StandardAttributeProps } from './standardattributes';
 
@@ -35,15 +47,11 @@
 </script>
 
 {#snippet resultSnippet(result: Result)}
-	<InlineSvg
-		class={styles.die}
-		data-result={result}
-		src="dice/{result === 'CF' ? 'critical-failure' : `success-${result}`}.svg"
-	/>
+	<InlineSvg class={styles.die} data-result={result} src="dice/{faces[result]}.svg" />
 {/snippet}
 
 <span {...standardAttributes(attributes, styles.resultSelectorChip)}>
-	{#if typeof result === 'number' || result === 'CF'}
+	{#if typeof result === 'number' || result === 'CF' || isSigil(result)}
 		{@render resultSnippet(result)}
 	{:else if result instanceof Array}
 		{#each result as r (r)}
