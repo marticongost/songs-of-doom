@@ -10,6 +10,8 @@ export type EventType =
 	| 'enemyDefeated'
 	| 'payingCapability'
 	| 'acquired'
+	| 'scenarioStart'
+	| 'scenarioEnd'
 	| 'chapterStart'
 	| 'chapterEnd'
 	| 'turnStart'
@@ -89,6 +91,14 @@ export const events: Record<EventType, Event> = {
 	acquired: new Event({
 		type: 'acquired',
 		name: { ca: 'En adquirir', es: 'Al adquirir', en: 'When acquired' }
+	}),
+	scenarioStart: new Event({
+		type: 'scenarioStart',
+		name: { ca: "En començar l'escenari", es: 'Al empezar el escenario', en: 'Start of scenario' }
+	}),
+	scenarioEnd: new Event({
+		type: 'scenarioEnd',
+		name: { ca: "En acabar l'escenari", es: 'Al terminar el escenario', en: 'End of scenario' }
 	}),
 	chapterStart: new Event({
 		type: 'chapterStart',
