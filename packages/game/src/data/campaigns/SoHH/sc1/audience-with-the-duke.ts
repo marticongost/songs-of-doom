@@ -1,3 +1,6 @@
+import multiline from 'multiline-ts';
+import { Obligation } from '../../../../models/capabilities';
+import { NarrationEventEffect } from '../../../../models/effects';
 import { Story } from '../../../../models/story';
 
 export default new Story({
@@ -5,5 +8,21 @@ export default new Story({
 		ca: 'Una audiència amb el duc',
 		es: 'Una audiencia con el duque',
 		en: 'An audience with the duke'
-	}
+	},
+	capabilities: [
+		new Obligation({
+			triggers: ['played'],
+			effects: [
+				new NarrationEventEffect({
+					text: {
+						ca: multiline`
+							El duc de Halendak us observa, en silenci, durant uns segons.
+
+							"Acosteu-vos", us diu finalment.
+							`
+					}
+				})
+			]
+		})
+	]
 });
