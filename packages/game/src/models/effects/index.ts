@@ -25,6 +25,7 @@ export { ModifyDamageEffect } from './modifydamage';
 export { ModifyGatheredCluesEffect } from './modifygatheredclues';
 export { move, MoveEffect } from './move';
 export { ModifyRollEffect } from './modifyroll';
+export { NarrationEventEffect, type NarrationEventEffectProps } from './narrationevent';
 export { negateDamage, NegateDamageEffect } from './negatedamage';
 export { ReceiveOpportunityAttacksEffect } from './receiveopportunityattacks';
 export { AddChargesEffect, type RechargeAmount } from './recharge';

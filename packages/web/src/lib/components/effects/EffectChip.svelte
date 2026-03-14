@@ -26,6 +26,7 @@
 		ModifyGatheredCluesEffect,
 		ModifyRollEffect,
 		MoveEffect,
+		NarrationEventEffect,
 		NegateDamageEffect,
 		PlayStoryCardsEffect,
 		ProficiencyTableEffect,
@@ -75,6 +76,7 @@
 	import ModifyGatheredCluesEffectChip from './ModifyGatheredCluesEffectChip.svelte';
 	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
 	import MoveEffectChip from './MoveEffectChip.svelte';
+	import NarrationEventEffectChip from './NarrationEventEffectChip.svelte';
 	import NegateDamageEffectChip from './NegateDamageEffectChip.svelte';
 	import PlayStoryCardsEffectChip from './PlayStoryCardsEffectChip.svelte';
 	import ProficiencyTableEffectChip from './ProficiencyTableEffectChip.svelte';
@@ -190,5 +192,7 @@
 		<ImmobilizeEffectChip {effect} />
 	{:else if effect instanceof MoveEffect}
 		<MoveEffectChip {effect} />
+	{:else if effect instanceof NarrationEventEffect}
+		<NarrationEventEffectChip {effect} />
 	{/if}
 </span>
