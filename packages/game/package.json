@@ -6,7 +6,8 @@
 		".": "./src/index.ts"
 	},
 	"dependencies": {
-		"@songsofdoom/common": "*"
+		"@songsofdoom/common": "*",
+		"multiline-ts": "^4.0.1"
 	},
 	"devDependencies": {
 		"typescript": "^5.9.3",
