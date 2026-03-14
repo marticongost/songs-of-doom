@@ -2,6 +2,7 @@ import type { LocalisedText } from '@songsofdoom/common/localisation';
 
 export type EventType =
 	| 'beforeEnemyEngagesWithSelf'
+	| 'played'
 	| 'attacking'
 	| 'receivingAttack'
 	| 'afterDefending'
@@ -43,6 +44,10 @@ export const events: Record<EventType, Event> = {
 			es: 'Antes de ser enfrentado por un enemigo',
 			en: 'Before being engaged by an enemy'
 		}
+	}),
+	played: new Event({
+		type: 'played',
+		name: { ca: 'En entrar en joc', es: 'Al entrar en juego', en: 'When played' }
 	}),
 	investigating: new Event({
 		type: 'investigating',
