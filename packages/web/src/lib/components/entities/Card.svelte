@@ -1,6 +1,7 @@
 <script lang="ts" module>
 	import cardHeadingBackground from '$lib/assets/img/card-heading.png?url';
 	import cardSubheadingBackground from '$lib/assets/img/card-subheading.png?url';
+	import storyFrame from '$lib/assets/img/story-frame.png?url';
 	import * as css from '$lib/styles';
 
 	const cardPrintWidth = 64;
@@ -149,6 +150,14 @@
 			alignItems: 'stretch',
 			flex: '1 1 auto'
 		},
+		storyBody: {
+			backgroundRepeat: 'repeat',
+			borderWidth: '10px',
+			borderImageSource: `url('${storyFrame}')`,
+			borderImageSlice: '39 46',
+			borderImageRepeat: 'round',
+			borderStyle: 'solid'
+		},
 		capabilities: {
 			padding: css.spacing.sm,
 			flex: '1 1 auto'
@@ -237,7 +246,7 @@
 	import { cx } from '@emotion/css';
 	import type { Entity } from '@songsofdoom/game';
 	import { Ally, attributeTypes, Creature, Item, Skill } from '@songsofdoom/game';
-	import { isArchetype, isItem, isScenario } from '../../../../../game/src/models/entity';
+	import { isArchetype, isItem, isScenario, isStory } from '../../../../../game/src/models/entity';
 	import CapabilityCostList from '../capabilities/CapabilityCostList.svelte';
 	import ChargesChip from '../capabilities/ChargesChip.svelte';
 	import Image from '../Image.svelte';
@@ -283,8 +292,8 @@
 	const ispostcard = $derived(entity.type.id === 'story');
 	const discardReward = $derived(entity instanceof Skill ? entity.discardReward : undefined);
 	const hasToolbar = $derived(entityManager && !onclick);
-	const hasImage = $derived(!(entity instanceof Scenario));
-	const hasDetails = $derived(!(entity instanceof Scenario));
+	const hasImage = $derived(!isScenario(entity));
+	const hasDetails = $derived(!isScenario(entity) && !isStory(entity));
 
 	let cardElement: HTMLElement | undefined;
 
@@ -369,7 +378,7 @@
 				{/if}
 			</div>
 		{/if}
-		<div class={styles.body}>
+		<div class={cx(styles.body, isStory(entity) && styles.storyBody)}>
 			{#if entity.description}
 				<div>{entity.description}</div>
 			{/if}
