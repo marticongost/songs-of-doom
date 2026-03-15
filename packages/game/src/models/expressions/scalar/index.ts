@@ -9,6 +9,7 @@ export { div, minus, mult, plus, ScalarOperation, type ScalarOperator } from './
 
 // Scalar expressions
 export { cash, CashExpression } from './cash';
+export { variable, VariableExpression, X, type VariableExpressionProps } from './variable';
 export { charges, ChargesExpression, type ChargesExpressionProps } from './charges';
 export { count, CountExpression, type CountExpressionProps } from './count';
 export { distance, DistanceExpression } from './distance';

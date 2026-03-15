@@ -22,7 +22,8 @@ export type EventType =
 	| 'fateDrawn'
 	| 'revealed'
 	| 'moving'
-	| 'resolvingEncounter';
+	| 'resolvingEncounter'
+	| 'beforeOtherPlayerResolvesTest';
 
 export type EventProps = { type: EventType; name: LocalisedText };
 
@@ -151,6 +152,14 @@ export const events: Record<EventType, Event> = {
 			ca: 'En resoldre un encontre',
 			es: 'Al resolver un encuentro',
 			en: 'When resolving an encounter'
+		}
+	}),
+	beforeOtherPlayerResolvesTest: new Event({
+		type: 'beforeOtherPlayerResolvesTest',
+		name: {
+			ca: 'Abans que un altre jugador resolgui una prova',
+			es: 'Antes de que otro jugador resuelva una prueba',
+			en: 'Before another player resolves a test'
 		}
 	})
 };

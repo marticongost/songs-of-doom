@@ -21,6 +21,7 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		Stat,
 		TALENT_PROFICIENCY_PENALTY,
 		TalentProficiencyExpression,
+		VariableExpression,
 		type BooleanExpressionType,
 		type ScalarExpressionType
 	} from '@songsofdoom/game';
@@ -32,6 +33,7 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 	import StatIcon from '../stats/StatIcon.svelte';
 	import Instruction from '../structured-text/Instruction.svelte';
 	import Operator from '../structured-text/Operator.svelte';
+	import Variable from '../structured-text/Variable.svelte';
 	import TalentChip from '../talents/TalentChip.svelte';
 	import TargetChip from '../targets/TargetChip.svelte';
 
@@ -109,6 +111,10 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		<!-- Cash -->
 	{:else if expression instanceof CashExpression}
 		<GoldIcon />
+
+		<!-- Variable -->
+	{:else if expression instanceof VariableExpression}
+		<Variable>{expression.name}</Variable>
 
 		<!-- Talent proficiency -->
 	{:else if expression instanceof TalentProficiencyExpression}
