@@ -1,7 +1,7 @@
 import { Opportunity } from '../../../models/capabilities';
 import { ModifyRollEffect } from '../../../models/effects';
-import { X, type ScalarExpressionType } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
+import { X, type ScalarExpressionType } from '../../../models/expressions';
 import { upgradable } from '../../../models/upgrades';
 
 export default upgradable(Skill, 2, (variants) => ({
@@ -11,7 +11,7 @@ export default upgradable(Skill, 2, (variants) => ({
 		en: 'Helping Hand'
 	},
 	discardReward: {
-		intelligence: variants.level
+		charisma: variants.level
 	},
 	xpCost: variants.values(0, 1),
 	capabilities: [
