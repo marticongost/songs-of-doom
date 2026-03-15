@@ -1,20 +1,20 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
-import { getEntryMetadata } from '../catalog';
-import { standard } from '../data/properties';
+import { getEntryMetadata } from '../../catalog';
+import { standard } from '../../data/properties';
 import type { Ally } from './ally';
 import { type Archetype } from './archetype';
 import type { Campaign } from './campaign';
-import type { Capability } from './capability';
+import type { Capability } from '../capability';
 import type { Creature } from './creature';
 import { type Discipline } from './discipline';
-import type { Effect } from './effects';
+import type { Effect } from '../effects';
 import type { Encounter } from './encounter';
-import type { Item } from './inventory';
+import type { Item } from './item';
 import type { Module } from './module';
 import type { Scenario } from './scenario';
 import type { Story } from './story';
-import type { Property } from './properties';
-import type { EntityType } from './properties/entitytypes';
+import type { Property } from '../properties';
+import type { EntityType } from '../properties/entitytypes';
 import type { Skill } from './skill';
 import type { Trait } from './trait';
 

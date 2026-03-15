@@ -1,7 +1,7 @@
 import { Opportunity } from '../../../models/capabilities';
 import { ModifyRollEffect } from '../../../models/effects';
 import { X, type ScalarExpressionType } from '../../../models/expressions';
-import { Skill } from '../../../models/skill';
+import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 
 export default upgradable(Skill, 2, (variants) => ({

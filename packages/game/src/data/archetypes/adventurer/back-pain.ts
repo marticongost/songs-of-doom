@@ -1,6 +1,6 @@
 import { Constant } from '../../../models/capabilities';
 import { ModifyCarryingCapacityEffect } from '../../../models/effects';
-import { Trait } from '../../../models/trait';
+import { Trait } from '../../../models/entities/trait';
 import { flaw } from '../../properties';
 
 export default new Trait({

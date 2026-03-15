@@ -2,7 +2,7 @@ import { Action } from '../../../models/capabilities';
 import { fullyRechargeOnChapterStart, shootBeforeEngaged } from '../../../models/common';
 import { AttackEffect } from '../../../models/effects';
 import { plus } from '../../../models/expressions';
-import { Item } from '../../../models/inventory';
+import { Item } from '../../../models/entities/item';
 import { agility } from '../../../models/stats';
 import projectile from '../../properties/projectile';
 import weapon from '../../properties/weapon';

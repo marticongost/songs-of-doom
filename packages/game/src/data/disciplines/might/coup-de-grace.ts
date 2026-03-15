@@ -2,7 +2,7 @@ import { Action } from '../../../models/capabilities';
 import { DrawCardsEffect, WoundEffect } from '../../../models/effects';
 import { and, distance, eq, lte } from '../../../models/expressions';
 import { remainingWounds } from '../../../models/expressions/scalar/wounds';
-import { Skill } from '../../../models/skill';
+import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 import piercing from '../../properties/piercing';
 

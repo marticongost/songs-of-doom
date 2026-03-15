@@ -1,7 +1,7 @@
-import type { Effect } from './effects';
+import type { Effect } from '../effects';
 import { ParentEntity, type EntityProps } from './entity';
-import { scenario } from './properties/entitytypes';
-import type { Sigil } from './results';
+import { scenario } from '../properties/entitytypes';
+import type { Sigil } from '../results';
 
 export interface ScenarioProps extends EntityProps<Scenario> {
 	/** Effects of drawing a sigil fate token. */

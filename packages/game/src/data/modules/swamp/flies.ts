@@ -1,7 +1,7 @@
 import { Action, Constant } from '../../../models/capabilities';
 import { attachOrReplaceWithNewEncounterWhenRevealed } from '../../../models/common';
 import { ChangeStatsEffect, discard } from '../../../models/effects';
-import { Encounter } from '../../../models/encounter';
+import { Encounter } from '../../../models/entities/encounter';
 
 export default new Encounter({
 	title: {

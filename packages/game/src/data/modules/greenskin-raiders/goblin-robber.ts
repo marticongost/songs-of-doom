@@ -1,4 +1,4 @@
-import { Creature } from '../../../models/creature';
+import { Creature } from '../../../models/entities/creature';
 
 export default new Creature({
 	title: {

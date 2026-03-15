@@ -1,6 +1,6 @@
 import { Constant } from '../../../models/capabilities';
 import { ConferPropertiesEffect } from '../../../models/effects';
-import { Item } from '../../../models/inventory';
+import { Item } from '../../../models/entities/item';
 import armor from '../../properties/armor';
 import toughness from '../../properties/toughness';
 import { lightArmour } from '../../talents';

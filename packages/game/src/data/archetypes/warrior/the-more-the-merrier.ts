@@ -1,7 +1,7 @@
 import { Opportunity } from '../../../models/capabilities';
 import { DrawFocusEffect } from '../../../models/effects';
 import { count, distance, eq, gte } from '../../../models/expressions';
-import { Trait } from '../../../models/trait';
+import { Trait } from '../../../models/entities/trait';
 
 export default new Trait({
 	title: {

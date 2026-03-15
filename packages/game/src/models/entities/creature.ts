@@ -1,7 +1,7 @@
-import { creature, type EntityType } from '../models/properties/';
+import { creature, type EntityType } from '../properties/';
 import { ChildEntity, type EntityProps } from './entity';
 import type { Module } from './module';
-import type { AttributeType } from './stats';
+import type { AttributeType } from '../stats';
 
 export type CreatureStatType = AttributeType | 'health';
 

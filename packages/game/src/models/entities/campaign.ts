@@ -1,6 +1,6 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
 import { ParentEntity } from './entity';
-import { campaign } from './properties/entitytypes';
+import { campaign } from '../properties/entitytypes';
 
 export interface CampaignProps {
 	title: LocalisedText;

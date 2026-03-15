@@ -1,6 +1,6 @@
 import { Obligation } from '../../../models/capabilities';
 import { DiscardFromHandEffect, TestEffect } from '../../../models/effects';
-import { Encounter } from '../../../models/encounter';
+import { Encounter } from '../../../models/entities/encounter';
 import { handSize, minus } from '../../../models/expressions';
 import { intelligence } from '../../../models/stats';
 

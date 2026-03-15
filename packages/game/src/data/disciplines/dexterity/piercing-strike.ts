@@ -1,6 +1,6 @@
 import { Opportunity } from '../../../models/capabilities';
 import { ConferPropertiesEffect } from '../../../models/effects';
-import { Skill } from '../../../models/skill';
+import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 import piercing from '../../properties/piercing';
 

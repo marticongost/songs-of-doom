@@ -1,6 +1,6 @@
 import { Constant } from '../../../models/capabilities';
 import { TalentEffect } from '../../../models/effects';
-import { Trait } from '../../../models/trait';
+import { Trait } from '../../../models/entities/trait';
 import disarmTrap from './disarm-trap';
 
 export default new Trait({

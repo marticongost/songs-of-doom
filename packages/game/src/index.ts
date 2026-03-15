@@ -2,23 +2,12 @@
 export { entities, EntityCatalog, getEntryMetadata, type EntryMetadata } from './catalog';
 
 // Core entity types
-export { Ally } from './models/ally';
-export { Archetype } from './models/archetype';
-export { Campaign } from './models/campaign';
-export { Creature } from './models/creature';
-export { Discipline } from './models/discipline';
-export { Encounter } from './models/encounter';
-export { ChildEntity, Entity, ParentEntity } from './models/entity';
+export * from './models/entities';
 export { Event } from './models/event';
-export { Module } from './models/module';
-export { Scenario } from './models/scenario';
-export { Skill } from './models/skill';
-export { Story } from './models/story';
 export { Talent, type TalentProps } from './models/talent';
-export { Trait } from './models/trait';
 
-// Inventory
-export * from './models/inventory';
+// Slots
+export * from './models/slots';
 
 // Capabilities
 export * from './models/capabilities';

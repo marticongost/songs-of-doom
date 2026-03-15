@@ -2,7 +2,7 @@ import { Opportunity } from '../../../models/capabilities';
 import { negateDamage, RemoveChargesEffect } from '../../../models/effects';
 import type { ScalarExpressionType } from '../../../models/expressions';
 import { result } from '../../../models/expressions';
-import { Skill } from '../../../models/skill';
+import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 
 export default upgradable(Skill, 2, (variants) => ({

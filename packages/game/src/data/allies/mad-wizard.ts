@@ -1,4 +1,4 @@
-import { Ally } from '../../models/ally';
+import { Ally } from '../../models/entities/ally';
 import { Action } from '../../models/capabilities';
 import { fullyRechargeOnChapterStart } from '../../models/common';
 import { AttackEffect, WoundEffect } from '../../models/effects';

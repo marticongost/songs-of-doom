@@ -3,7 +3,7 @@ import { repeatCapability, ResultsTableEffect, TriggerAttackEffect } from '../..
 import { AddChargesEffect } from '../../../models/effects/recharge';
 import type { ResultsTableEntryProps } from '../../../models/effects/resultstable';
 import { charges, plus } from '../../../models/expressions';
-import { Skill } from '../../../models/skill';
+import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 
 export default upgradable(Skill, 2, (variants) => ({

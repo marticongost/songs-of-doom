@@ -1,4 +1,4 @@
-import { Archetype } from '../../../../models/archetype';
+import { Archetype } from '../../../../models/entities/archetype';
 import { Obligation } from '../../../../models/capabilities';
 import { ModifyRollEffect } from '../../../../models/effects';
 

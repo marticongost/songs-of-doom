@@ -2,7 +2,7 @@ import { Opportunity } from '../../../models/capabilities';
 import { DrawCardsEffect, DrawFocusEffect, ResultsTableEffect } from '../../../models/effects';
 import { AddChargesEffect } from '../../../models/effects/recharge';
 import { and, owned } from '../../../models/expressions';
-import { Skill } from '../../../models/skill';
+import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 import weapon from '../../properties/weapon';
 

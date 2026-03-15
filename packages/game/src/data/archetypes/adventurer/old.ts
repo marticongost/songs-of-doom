@@ -5,7 +5,7 @@ import {
 	RemoveChargesEffect
 } from '../../../models/effects';
 import { charges } from '../../../models/expressions';
-import { Trait } from '../../../models/trait';
+import { Trait } from '../../../models/entities/trait';
 import { flaw, permanent } from '../../properties';
 
 export default new Trait({

@@ -1,6 +1,6 @@
 import { Opportunity } from '../../../../models/capabilities';
 import { DrawCardsEffect } from '../../../../models/effects';
-import { Trait } from '../../../../models/trait';
+import { Trait } from '../../../../models/entities/trait';
 
 export default new Trait({
 	title: {

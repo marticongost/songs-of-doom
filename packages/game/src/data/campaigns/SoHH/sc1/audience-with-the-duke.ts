@@ -1,7 +1,7 @@
 import multiline from 'multiline-ts';
 import { Obligation } from '../../../../models/capabilities';
 import { NarrationEventEffect } from '../../../../models/effects';
-import { Story } from '../../../../models/story';
+import { Story } from '../../../../models/entities/story';
 
 export default new Story({
 	title: {

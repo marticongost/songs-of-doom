@@ -6,7 +6,7 @@ import {
 	RemoveChargesEffect
 } from '../../../models/effects';
 import { charges, distance, eq } from '../../../models/expressions';
-import { Skill } from '../../../models/skill';
+import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 
 export default upgradable(Skill, 2, (variants) => ({

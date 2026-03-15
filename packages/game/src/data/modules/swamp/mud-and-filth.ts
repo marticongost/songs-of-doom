@@ -1,7 +1,7 @@
 import { Obligation } from '../../../models/capabilities';
 import { attachOrReplaceWithNewEncounterWhenRevealed } from '../../../models/common';
 import { discard, ModifyCapabilityCostEffect } from '../../../models/effects';
-import { Encounter } from '../../../models/encounter';
+import { Encounter } from '../../../models/entities/encounter';
 
 export default new Encounter({
 	title: {

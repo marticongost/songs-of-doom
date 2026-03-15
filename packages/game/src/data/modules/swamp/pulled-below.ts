@@ -8,7 +8,7 @@ import {
 	WoundEffect
 } from '../../../models/effects';
 import { AddChargesEffect } from '../../../models/effects/recharge';
-import { Encounter } from '../../../models/encounter';
+import { Encounter } from '../../../models/entities/encounter';
 import { charges, copyAlreadyAttached, minus, plus } from '../../../models/expressions';
 import { agility, strength } from '../../../models/stats';
 

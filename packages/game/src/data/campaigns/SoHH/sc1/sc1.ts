@@ -6,7 +6,7 @@ import {
 	ProficiencyTableEffect,
 	SetRollResultEffect
 } from '../../../../models/effects';
-import { Scenario } from '../../../../models/scenario';
+import { Scenario } from '../../../../models/entities/scenario';
 import audienceWithTheDuke from './audience-with-the-duke';
 
 export default new Scenario({

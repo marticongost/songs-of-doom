@@ -1,4 +1,4 @@
-import { Campaign } from '../../../models/campaign';
+import { Campaign } from '../../../models/entities/campaign';
 
 export default new Campaign({
 	title: {

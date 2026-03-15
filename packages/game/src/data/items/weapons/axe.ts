@@ -2,7 +2,7 @@ import { Action, Opportunity } from '../../../models/capabilities';
 import { fullyRechargeOnChapterStart } from '../../../models/common';
 import { AttackEffect, DefendEffect } from '../../../models/effects';
 import { plus } from '../../../models/expressions';
-import { Item } from '../../../models/inventory';
+import { Item } from '../../../models/entities/item';
 import { strength } from '../../../models/stats';
 import parry from '../../properties/parry';
 import weapon from '../../properties/weapon';

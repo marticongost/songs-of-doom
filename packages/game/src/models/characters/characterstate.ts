@@ -1,13 +1,13 @@
 import { entities } from '../../catalog';
 import { innate, permanent } from '../../data/properties';
-import { Ally } from '../ally';
-import { Archetype } from '../archetype';
-import type { Entity } from '../entity';
+import { Ally } from '../entities/ally';
+import { Archetype } from '../entities/archetype';
+import type { Entity } from '../entities/entity';
 import { FOCUS_TOKENS_FOR_STAT_VALUES, focuses, type Focus, type FocusType } from '../focus';
-import { Item } from '../inventory';
-import { Skill } from '../skill';
+import { Item } from '../entities/item';
+import { Skill } from '../entities/skill';
 import { attributes, stats, type Stat, type StatType } from '../stats';
-import { Trait } from '../trait';
+import { Trait } from '../entities/trait';
 import {
 	ArchetypeRequiredImpediment,
 	DisciplineRequiredImpediment,

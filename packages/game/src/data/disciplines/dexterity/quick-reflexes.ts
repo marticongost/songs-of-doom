@@ -1,6 +1,6 @@
 import { Constant, Opportunity } from '../../../models/capabilities';
 import { ChangeStatsEffect, DefendEffect } from '../../../models/effects';
-import { Trait } from '../../../models/trait';
+import { Trait } from '../../../models/entities/trait';
 
 export default new Trait({
 	title: {

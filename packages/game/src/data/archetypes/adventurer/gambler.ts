@@ -3,7 +3,7 @@ import { exhaust, LooseGoldEffect, TestEffect } from '../../../models/effects';
 import { and, cash, engaged, gt, is, minus, not } from '../../../models/expressions';
 import { will } from '../../../models/stats';
 import { currentLocation } from '../../../models/target';
-import { Trait } from '../../../models/trait';
+import { Trait } from '../../../models/entities/trait';
 import { flaw, town } from '../../properties';
 
 export default new Trait({

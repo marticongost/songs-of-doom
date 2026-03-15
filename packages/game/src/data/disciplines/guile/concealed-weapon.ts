@@ -5,7 +5,7 @@ import {
 	ModifyRollEffect,
 	TriggerAttackEffect
 } from '../../../models/effects';
-import { Skill } from '../../../models/skill';
+import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 import { smallWeapon } from '../../properties';
 

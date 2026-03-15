@@ -2,8 +2,8 @@ import { finalise } from '@songsofdoom/common';
 import type { Archetype } from './archetype';
 import type { Discipline } from './discipline';
 import { ChildEntity, type EntityProps } from './entity';
-import { Focuses, type FocusesProps } from './focus';
-import { skill } from './properties';
+import { Focuses, type FocusesProps } from '../focus';
+import { skill } from '../properties';
 
 export interface SkillProps extends EntityProps<Skill> {
 	discardReward?: Focuses | FocusesProps;

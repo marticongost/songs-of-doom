@@ -1,7 +1,7 @@
-import { getEntryMetadata } from '../catalog';
+import { getEntryMetadata } from '../../catalog';
 import type { Discipline } from './discipline';
 import { ParentEntity, type EntityProps } from './entity';
-import { archetype } from './properties';
+import { archetype } from '../properties';
 
 export interface ArchetypeProps extends EntityProps<Archetype> {
 	disciplines?: ReadonlyArray<string>;

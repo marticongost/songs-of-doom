@@ -1,5 +1,5 @@
 import type { Constructor } from '@songsofdoom/common';
-import type { Entity, EntityProps } from './entity';
+import type { Entity, EntityProps } from './entities/entity';
 
 export const upgradable = <E extends Entity, Props extends EntityProps<E>>(
 	entityType: Constructor<E, Props>,

@@ -1,4 +1,4 @@
-import { Story } from '../story';
+import { Story } from '../entities/story';
 import { Effect } from './effect';
 
 /**

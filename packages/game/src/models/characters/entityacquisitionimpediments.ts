@@ -1,6 +1,6 @@
-import type { Archetype } from '../archetype';
-import type { Discipline } from '../discipline';
-import type { Entity } from '../entity';
+import type { Archetype } from '../entities/archetype';
+import type { Discipline } from '../entities/discipline';
+import type { Entity } from '../entities/entity';
 
 /** An impediment that prevents a character from acquiring an entity. */
 export abstract class EntityAcquisitionImpediment {}

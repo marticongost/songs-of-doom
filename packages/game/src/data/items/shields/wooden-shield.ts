@@ -1,7 +1,7 @@
 import { Opportunity } from '../../../models/capabilities';
 import { fullyRechargeOnChapterStart } from '../../../models/common';
 import { DefendEffect } from '../../../models/effects';
-import { Item } from '../../../models/inventory';
+import { Item } from '../../../models/entities/item';
 import shield from '../../properties/shield';
 
 export default new Item({

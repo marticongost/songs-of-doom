@@ -1,6 +1,6 @@
 import { Obligation } from '../../../models/capabilities';
 import { GoTowardsEffect, TestEffect } from '../../../models/effects';
-import { Encounter } from '../../../models/encounter';
+import { Encounter } from '../../../models/entities/encounter';
 import { strength } from '../../../models/stats';
 
 export default new Encounter({

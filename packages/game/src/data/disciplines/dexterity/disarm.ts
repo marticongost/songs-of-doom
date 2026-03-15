@@ -9,7 +9,7 @@ import {
 	TriggerAttackEffect
 } from '../../../models/effects';
 import { not } from '../../../models/expressions';
-import { Skill } from '../../../models/skill';
+import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 import projectile from '../../properties/projectile';
 

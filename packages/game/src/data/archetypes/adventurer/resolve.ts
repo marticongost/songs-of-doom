@@ -1,6 +1,6 @@
 import { Opportunity } from '../../../models/capabilities';
 import { DrawCardsEffect } from '../../../models/effects';
-import { Skill } from '../../../models/skill';
+import { Skill } from '../../../models/entities/skill';
 
 export default new Skill({
 	title: {

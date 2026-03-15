@@ -7,7 +7,7 @@ import {
 	WoundEffect
 } from '../../../models/effects';
 import { immobilize } from '../../../models/effects/immobilize';
-import { Encounter } from '../../../models/encounter';
+import { Encounter } from '../../../models/entities/encounter';
 import { copyAlreadyAttached, talentProficiency } from '../../../models/expressions';
 import { piercing } from '../../properties';
 import { disarmTrap } from '../../talents';

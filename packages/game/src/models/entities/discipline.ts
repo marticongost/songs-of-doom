@@ -1,7 +1,7 @@
-import { getEntryMetadata } from '../catalog';
+import { getEntryMetadata } from '../../catalog';
 import { type Archetype } from './archetype';
 import { isArchetype, ParentEntity } from './entity';
-import { discipline } from './properties';
+import { discipline } from '../properties';
 
 export class Discipline extends ParentEntity {
 	override readonly type = discipline;

@@ -1,6 +1,6 @@
 import { Constant } from '../../../models/capabilities';
 import { ChangeStatsEffect } from '../../../models/effects';
-import { Trait } from '../../../models/trait';
+import { Trait } from '../../../models/entities/trait';
 import { flaw, innate, permanent } from '../../properties';
 
 export default new Trait({

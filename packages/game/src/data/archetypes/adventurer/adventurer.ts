@@ -1,4 +1,4 @@
-import { Archetype } from '../../../models/archetype';
+import { Archetype } from '../../../models/entities/archetype';
 import { Action } from '../../../models/capabilities';
 import { AttackEffect, equip, InvestigateEffect, move } from '../../../models/effects';
 import { intelligence, strength } from '../../../models/stats';

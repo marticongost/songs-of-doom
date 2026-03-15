@@ -1,6 +1,6 @@
 import { ParentEntity } from './entity';
 import type { LocalisedText } from '@songsofdoom/common/localisation';
-import { module } from './properties/entitytypes';
+import { module } from '../properties/entitytypes';
 
 export interface ModuleProps {
 	title: LocalisedText;

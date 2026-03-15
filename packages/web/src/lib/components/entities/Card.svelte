@@ -245,8 +245,17 @@
 	import { entityUrl } from '$lib/urls';
 	import { cx } from '@emotion/css';
 	import type { Entity } from '@songsofdoom/game';
-	import { Ally, attributeTypes, Creature, Item, Skill } from '@songsofdoom/game';
-	import { isArchetype, isItem, isScenario, isStory } from '../../../../../game/src/models/entity';
+	import {
+		Ally,
+		attributeTypes,
+		Creature,
+		isArchetype,
+		isItem,
+		isScenario,
+		isStory,
+		Item,
+		Skill
+	} from '@songsofdoom/game';
 	import CapabilityCostList from '../capabilities/CapabilityCostList.svelte';
 	import ChargesChip from '../capabilities/ChargesChip.svelte';
 	import Image from '../Image.svelte';

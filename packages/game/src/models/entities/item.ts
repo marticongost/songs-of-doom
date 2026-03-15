@@ -1,7 +1,7 @@
-import { Entity, type EntityProps } from '../entity';
+import { Entity, type EntityProps } from './entity';
 import { item, type EntityType } from '../properties';
 import type { Talent } from '../talent';
-import { slots, type Slot, type SlotType } from './slots';
+import { slots, type Slot, type SlotType } from '../slots';
 
 export interface ItemProps extends EntityProps<Item> {
 	slot: Slot | SlotType;

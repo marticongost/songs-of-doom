@@ -1,4 +1,4 @@
-import { Archetype } from '../../../models/archetype';
+import { Archetype } from '../../../models/entities/archetype';
 import { Constant, Opportunity } from '../../../models/capabilities';
 import { TalentEffect, TransformFocusEffect } from '../../../models/effects';
 import { lightArmour, mediumArmour } from '../../talents';

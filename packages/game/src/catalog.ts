@@ -1,14 +1,16 @@
-import type { Entity } from './models/entity';
-import type { Ally } from './models/ally';
-import type { Campaign } from './models/campaign';
-import type { Creature } from './models/creature';
-import type { Encounter } from './models/encounter';
-import type { Item } from './models/inventory';
-import type { Module } from './models/module';
-import type { Scenario } from './models/scenario';
-import type { Skill } from './models/skill';
-import type { Story } from './models/story';
-import type { Trait } from './models/trait';
+import type {
+	Ally,
+	Campaign,
+	Creature,
+	Encounter,
+	Entity,
+	Item,
+	Module,
+	Scenario,
+	Skill,
+	Story,
+	Trait
+} from './models/entities';
 
 export interface EntryMetadata {
 	id: string;

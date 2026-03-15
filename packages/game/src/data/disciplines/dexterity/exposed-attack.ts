@@ -6,7 +6,7 @@ import {
 	TriggerAttackEffect
 } from '../../../models/effects';
 import { ReceiveOpportunityAttacksEffect } from '../../../models/effects/receiveopportunityattacks';
-import { Skill } from '../../../models/skill';
+import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 
 export default upgradable(Skill, 2, (variants) => ({

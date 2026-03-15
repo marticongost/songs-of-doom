@@ -1,6 +1,6 @@
 import { Action, Obligation } from '../../../models/capabilities';
 import { fullyRechargeOnChapterStart } from '../../../models/common';
-import { Creature } from '../../../models/creature';
+import { Creature } from '../../../models/entities/creature';
 import { AttackEffect, chase, DefendEffect } from '../../../models/effects';
 import { strength } from '../../../models/stats';
 import disruption from '../../properties/disruption';

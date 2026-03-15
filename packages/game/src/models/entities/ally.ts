@@ -1,6 +1,6 @@
 import { Entity, type EntityProps } from './entity';
-import { ally } from './properties';
-import type { StatType } from './stats';
+import { ally } from '../properties';
+import type { StatType } from '../stats';
 
 export interface AllyProps extends EntityProps<Ally> {
 	stats: Record<StatType, number>;
