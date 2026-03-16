@@ -5,7 +5,7 @@
 		icon: {
 			width: '1.25em',
 			height: '1.25em',
-			color: 'var(--stat-health-color)'
+			color: css.colorBindings.stats.colors.health
 		}
 	});
 </script>
