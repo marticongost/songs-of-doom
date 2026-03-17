@@ -38,6 +38,7 @@
 		RemoveChargesEffect,
 		RepeatCapabilityEffect,
 		ReplaceEncounterEffect,
+		ReplacePropertyEffect,
 		ResolveEncounterEffect,
 		ResultsTableEffect,
 		SanityLossEffect,
@@ -91,6 +92,7 @@
 	import RemoveChargesEffectChip from './RemoveChargesEffectChip.svelte';
 	import RepeatCapabilityEffectChip from './RepeatCapabilityEffectChip.svelte';
 	import ReplaceEncounterEffectChip from './ReplaceEncounterEffectChip.svelte';
+	import ReplacePropertyEffectChip from './ReplacePropertyEffectChip.svelte';
 	import ResolveEncounterEffectChip from './ResolveEncounterEffectChip.svelte';
 	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
 	import SanityLossEffectChip from './SanityLossEffectChip.svelte';
@@ -172,6 +174,8 @@
 		<RemoveChargesEffectChip {effect} />
 	{:else if effect instanceof ReplaceEncounterEffect}
 		<ReplaceEncounterEffectChip {effect} />
+	{:else if effect instanceof ReplacePropertyEffect}
+		<ReplacePropertyEffectChip {effect} />
 	{:else if effect instanceof ResolveEncounterEffect}
 		<ResolveEncounterEffectChip {effect} />
 	{:else if effect instanceof SanityLossEffect}

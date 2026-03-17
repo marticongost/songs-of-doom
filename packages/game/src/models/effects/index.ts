@@ -53,6 +53,11 @@ export { redrawFate, RedrawFateEffect } from './redrawfate';
 export { removeCharges, RemoveChargesEffect } from './removecharges';
 export { repeatCapability, RepeatCapabilityEffect } from './repeatcapability';
 export { replaceEncounter, ReplaceEncounterEffect } from './replaceencounter';
+export {
+	replaceProperty,
+	ReplacePropertyEffect,
+	type ReplacePropertyEffectProps
+} from './replaceproperty';
 export { resolveEncounter, ResolveEncounterEffect } from './resolveencounter';
 export { resultsTable, ResultsTableEffect, type ResultsTableEntry } from './resultstable';
 export { sanityLoss, SanityLossEffect } from './sanityloss';
