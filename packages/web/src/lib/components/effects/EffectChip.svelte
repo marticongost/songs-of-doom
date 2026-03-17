@@ -28,6 +28,7 @@
 		MoveEffect,
 		NarrationEventEffect,
 		NegateDamageEffect,
+		OneOfEffect,
 		PlayStoryCardsEffect,
 		ProficiencyTableEffect,
 		ReceiveOpportunityAttacksEffect,
@@ -78,6 +79,7 @@
 	import MoveEffectChip from './MoveEffectChip.svelte';
 	import NarrationEventEffectChip from './NarrationEventEffectChip.svelte';
 	import NegateDamageEffectChip from './NegateDamageEffectChip.svelte';
+	import OneOfEffectChip from './OneOfEffectChip.svelte';
 	import PlayStoryCardsEffectChip from './PlayStoryCardsEffectChip.svelte';
 	import ProficiencyTableEffectChip from './ProficiencyTableEffectChip.svelte';
 	import ReceiveOpportunityAttacksEffectChip from './ReceiveOpportunityAttacksEffectChip.svelte';
@@ -194,5 +196,7 @@
 		<MoveEffectChip {effect} />
 	{:else if effect instanceof NarrationEventEffect}
 		<NarrationEventEffectChip {effect} />
+	{:else if effect instanceof OneOfEffect}
+		<OneOfEffectChip {effect} />
 	{/if}
 </span>
