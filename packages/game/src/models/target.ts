@@ -1,7 +1,13 @@
-import type { BooleanExpressionType, ScalarExpressionType } from './expressions';
+import { finalise } from '@songsofdoom/common';
+import {
+	ScalarExpression,
+	type BooleanExpressionType,
+	type ScalarExpressionType
+} from './expressions';
+import { Stat } from './stats';
 
 /** A subset of {@link TargetType} that can be used to designate players. */
-export type PlayerTargetType = 'owner' | 'active-player';
+export type PlayerTargetType = 'player' | 'owner' | 'active-player';
 
 /** A subset of {@link TargetType} that can be used to designate both characters or creatures. */
 export type ActorTargetType = PlayerTargetType | 'attacker' | 'defender' | 'enemy' | 'ally';
@@ -27,8 +33,68 @@ export type TargetType =
 	| ObjectTargetType
 	| LocationTargetType;
 
-/** Whether a target can designate a single entity or multiple entities. */
-export type TargetCardinality = 'single' | 'multiple';
+/** A specification for a number of targets to select, supporting a variety of formats. */
+export type TargetCardinalitySpec =
+	| TargetCardinality
+	| TargetCardinalityProps
+	| ScalarExpressionType
+	| `${number}+`
+	| `${number}-${number}`
+	| 'every';
+
+/** Parameters for the constructor of {@link TargetCardinality}. */
+export interface TargetCardinalityProps {
+	min: ScalarExpressionType;
+	max: ScalarExpressionType;
+}
+
+/** A number of targets to select. */
+export class TargetCardinality {
+	readonly min: ScalarExpressionType;
+	readonly max: ScalarExpressionType;
+
+	constructor({ min, max }: TargetCardinalityProps) {
+		this.min = min;
+		this.max = max;
+	}
+
+	/** Whether the target cardinality represents a single target. */
+	isSingleTarget(): boolean {
+		return this.min === 1 && this.max === 1;
+	}
+
+	/** Whether the target cardinality represents multiple targets. */
+	isMultipleTargets(): boolean {
+		return typeof this.max !== 'number' || this.max > 1;
+	}
+
+	/** Whether the target cardinality represents every possible target. */
+	isEveryTarget(): boolean {
+		return this.min === Infinity && this.max === Infinity;
+	}
+}
+
+/** Normalises a {@link TargetCardinalitySpec} into a {@link TargetCardinality}. */
+export const normaliseTargetCardinality = (spec: TargetCardinalitySpec): TargetCardinality => {
+	if (typeof spec === 'number') {
+		return new TargetCardinality({ min: spec, max: spec });
+	} else if (typeof spec === 'string') {
+		if (spec.endsWith('+')) {
+			const num = parseInt(spec.slice(0, -1), 10);
+			return new TargetCardinality({ min: num, max: Infinity });
+		} else if (spec.includes('-')) {
+			const [minStr, maxStr] = spec.split('-');
+			return new TargetCardinality({ min: parseInt(minStr, 10), max: parseInt(maxStr, 10) });
+		} else if (spec === 'every') {
+			return new TargetCardinality({ min: Infinity, max: Infinity });
+		} else {
+			throw new Error(`Invalid TargetCardinalitySpec string: ${spec}`);
+		}
+	} else if (spec instanceof ScalarExpression || spec instanceof Stat) {
+		return new TargetCardinality({ min: spec, max: spec });
+	}
+	return finalise(TargetCardinality, spec);
+};
 
 /** A selection method for a target. Used by {@link Target} if more than one target
  * would match a {@link TargetDiscriminator}. */
@@ -93,7 +159,7 @@ export interface TargetProps<
 	T extends TargetType = TargetType
 > extends TargetDiscriminatorProps<T> {
 	/** The number of targets that can be selected. Defaults to 'single'. */
-	cardinality?: TargetCardinality;
+	cardinality?: TargetCardinalitySpec;
 
 	/** The method used to select the target(s). Defaults to 'player-chosen'. */
 	selection?: TargetSelection;
@@ -124,12 +190,12 @@ export class Target<T extends TargetType = TargetType> extends TargetDiscriminat
 	constructor(props: T | ReadonlyArray<T> | ReadonlySet<T> | TargetProps<T>) {
 		super(props);
 		if (typeof props === 'string' || Array.isArray(props) || props instanceof Set) {
-			this.cardinality = 'single';
+			this.cardinality = normaliseTargetCardinality(1);
 			this.selection = 'player-chosen';
 			this.variable = undefined;
 		} else {
 			const p = props as TargetProps<T>;
-			this.cardinality = p.cardinality ?? 'single';
+			this.cardinality = normaliseTargetCardinality(p.cardinality ?? 1);
 			this.selection = p.selection ?? 'player-chosen';
 			this.variable = p.variable;
 		}

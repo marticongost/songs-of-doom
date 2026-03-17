@@ -89,9 +89,12 @@ export {
 	type Sigil
 } from './models/results';
 export {
+	normaliseTargetCardinality,
 	Target,
+	TargetCardinality,
 	TargetDiscriminator,
-	type TargetCardinality,
+	type TargetCardinalityProps,
+	type TargetCardinalitySpec,
 	type TargetDiscriminatorProps,
 	type TargetDiscriminatorSpec,
 	type TargetProps,

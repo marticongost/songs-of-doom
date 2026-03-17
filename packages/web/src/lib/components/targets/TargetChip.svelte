@@ -8,11 +8,45 @@
 		return 'masculine';
 	};
 
+	type TextForm = 'plain' | 'determinate' | 'indeterminate' | 'plural';
+
 	const targetsText: Record<
 		TargetType,
-		{ determinate: LocalisedText; indeterminate?: LocalisedText; plural?: LocalisedText }
+		{
+			plain: LocalisedText;
+			determinate: LocalisedText;
+			indeterminate?: LocalisedText;
+			plural?: LocalisedText;
+		}
 	> = {
+		player: {
+			plain: {
+				ca: 'jugador',
+				es: 'jugador',
+				en: 'player'
+			},
+			determinate: {
+				ca: 'el jugador',
+				es: 'el jugador',
+				en: 'the player'
+			},
+			indeterminate: {
+				ca: 'un jugador',
+				es: 'un jugador',
+				en: 'a player'
+			},
+			plural: {
+				ca: 'jugadors',
+				es: 'jugadores',
+				en: 'players'
+			}
+		},
 		owner: {
+			plain: {
+				ca: 'propietari',
+				es: 'propietario',
+				en: 'owner'
+			},
 			determinate: {
 				ca: 'el propietari',
 				es: 'el propietario',
@@ -20,6 +54,11 @@
 			}
 		},
 		'active-player': {
+			plain: {
+				ca: 'jugador actiu',
+				es: 'jugador activo',
+				en: 'active player'
+			},
 			determinate: {
 				ca: 'el jugador actiu',
 				es: 'el jugador activo',
@@ -27,6 +66,11 @@
 			}
 		},
 		attacker: {
+			plain: {
+				ca: 'atacant',
+				es: 'atacante',
+				en: 'attacker'
+			},
 			determinate: {
 				ca: "l'atacant",
 				es: 'el atacante',
@@ -44,6 +88,11 @@
 			}
 		},
 		defender: {
+			plain: {
+				ca: 'defensor',
+				es: 'defensor',
+				en: 'defender'
+			},
 			determinate: {
 				ca: 'el defensor',
 				es: 'el defensor',
@@ -61,6 +110,11 @@
 			}
 		},
 		enemy: {
+			plain: {
+				ca: 'enemic',
+				es: 'enemigo',
+				en: 'enemy'
+			},
 			determinate: {
 				ca: "l'enemic",
 				es: 'el enemigo',
@@ -78,6 +132,11 @@
 			}
 		},
 		ally: {
+			plain: {
+				ca: 'aliat',
+				es: 'aliado',
+				en: 'ally'
+			},
 			determinate: {
 				ca: "l'aliat",
 				es: 'el aliado',
@@ -95,6 +154,11 @@
 			}
 		},
 		object: {
+			plain: {
+				ca: 'objecte',
+				es: 'objeto',
+				en: 'object'
+			},
 			determinate: {
 				ca: "l'objecte",
 				es: 'el objeto',
@@ -112,6 +176,11 @@
 			}
 		},
 		location: {
+			plain: {
+				ca: 'ubicació',
+				es: 'ubicación',
+				en: 'location'
+			},
 			determinate: {
 				ca: "l'ubicació",
 				es: 'la ubicación',
@@ -130,45 +199,37 @@
 		}
 	};
 
-	interface GetTextOptions {
-		target?: Target | TargetDiscriminator;
-		relation: Props['relation'];
-		isDeterminate: boolean;
-		isPlural: boolean;
-	}
-
-	const getText = ({
-		target,
-		relation,
-		isDeterminate,
-		isPlural
-	}: GetTextOptions): string | undefined => {
+	const getText = (
+		target: Target | TargetDiscriminator | undefined,
+		form: TextForm
+	): string | undefined => {
 		if (!target?.type) return undefined;
 		const fragments: string[] = [];
 		for (const type of target.type) {
 			let typeText: LocalisedText | undefined;
-			if (isDeterminate) {
+			if (form === 'determinate') {
 				typeText = targetsText[type].determinate;
-			} else if (isPlural) {
+			} else if (form === 'plural') {
 				typeText = targetsText[type].plural;
-			} else {
+			} else if (form === 'indeterminate') {
 				typeText = targetsText[type].indeterminate;
+			} else {
+				typeText = targetsText[type].plain;
 			}
 			if (typeText) {
 				fragments.push(translate(typeText, getLocale()));
 			}
 		}
-		return wrapText(fragments.join(', '), relation);
+		return fragments.join(', ');
 	};
 
-	const wrapText = (text: string | LocalisedText, relation: Props['relation']): string => {
-		const localisedTarget = typeof text === 'string' ? text : translate(text, getLocale());
+	const wrapText = (text: string, relation: Props['relation']): string => {
 		if (relation === 'possessive') {
-			return possessiveRelation(localisedTarget, getLocale());
+			return possessiveRelation(text, getLocale());
 		} else if (relation === 'to') {
-			return toRelation(localisedTarget, getLocale());
+			return toRelation(text, getLocale());
 		} else {
-			return localisedTarget;
+			return text;
 		}
 	};
 </script>
@@ -188,24 +249,49 @@
 		cardinality?: TargetCardinality;
 	}
 
-	const { target, relation, cardinality, ...attributes }: Props = $props();
-
-	const isPlural = $derived(
-		!!target && (cardinality ?? ('cardinality' in target && target.cardinality)) === 'multiple'
+	const { target, relation, cardinality: customCardinality, ...attributes }: Props = $props();
+	const cardinality = $derived(
+		customCardinality ?? (target instanceof Target ? target.cardinality : undefined) ?? undefined
 	);
-	const isDeterminate = $derived(
-		target instanceof Target &&
+	const textForm: TextForm = $derived.by(() => {
+		if (!target) return 'indeterminate';
+		if (cardinality?.isEveryTarget()) return 'plain';
+		if (cardinality?.isMultipleTargets()) return 'plural';
+		if (
+			target instanceof Target &&
 			target.selection !== 'random' &&
 			target.selection !== 'player-chosen'
-	);
+		) {
+			return 'determinate';
+		}
+		return 'indeterminate';
+	});
 	const gender = $derived(getGender(target, getLocale()));
-	const text = $derived(getText({ target, relation, isDeterminate, isPlural }));
+	const text = $derived(getText(target, textForm));
 </script>
 
 {#if target}
 	<span {...standardAttributes(attributes, 'target-chip')}>
-		{#if text}
+		{#if cardinality && !cardinality.isSingleTarget()}
+			{#if relation === 'possessive'}
+				<Text ca="de" es="de" en="of" />
+			{:else if relation === 'to'}
+				<Text ca="a" es="a" en="to" />
+			{/if}
+			{#if cardinality.isEveryTarget()}
+				<Text ca="cada" es="cada" en="every" />
+			{:else}
+				<ExpressionChip expression={cardinality.min} />
+				{#if cardinality.max === Infinity}
+					<Text ca="o més" es="o más" en="or more" />
+				{:else if cardinality.min !== cardinality.max}
+					<Text ca="a" es="a" en="to" />
+					<ExpressionChip expression={cardinality.max} />
+				{/if}
+			{/if}
 			{text}
+		{:else}
+			{wrapText(text ?? '', relation)}
 		{/if}
 		{#if target instanceof Target && target.variable}
 			{#if !text && relation}

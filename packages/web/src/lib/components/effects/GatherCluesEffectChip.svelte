@@ -28,7 +28,7 @@ Renders a gather clues effect, displaying the amount of clues gathered and the s
 	{:else}
 		<InlineSvg src="effects/clue.svg" /> = <ExpressionChip expression={effect.amount} />
 	{/if}
-	{#if effect.target.selection !== 'closest' || effect.target.condition || effect.target.cardinality !== 'single'}
+	{#if effect.target.selection !== 'closest' || effect.target.condition || !effect.target.cardinality.isSingleTarget()}
 		<Text ca="a" es="a" en="at" />
 		<TargetChip target={effect.target} />
 	{/if}
