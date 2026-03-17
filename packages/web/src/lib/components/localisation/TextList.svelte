@@ -37,12 +37,21 @@
 	interface Props {
 		items: T[];
 		type?: TextListType;
+		comma?: Snippet<[string]>;
+		conjunction?: Snippet<[string]>;
 		entry: Snippet<[T]>;
 	}
 
-	const { items, type = 'and', entry }: Props = $props();
+	const { items, type = 'and', comma, conjunction, entry }: Props = $props();
+
+	const isConjunction = (index: number) =>
+		index === items.length - 1 && (type === 'and' || type === 'or');
 </script>
 
-{#each items as item, index (index)}{getSeparator(index, items.length, type)}{@render entry(
-		item
-	)}{/each}
+{#each items as item, index (index)}{@const sep = getSeparator(
+		index,
+		items.length,
+		type
+	)}{#if sep}{@const snippet = isConjunction(index)
+			? conjunction
+			: comma}{#if snippet}{@render snippet(sep)}{:else}{sep}{/if}{/if}{@render entry(item)}{/each}
