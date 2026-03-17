@@ -2,6 +2,7 @@ import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
+import { ScalarExpression } from '../expressions';
 
 /**
  * Props for configuring a RecoverSanityEffect.
@@ -29,3 +30,12 @@ export class RecoverSanityEffect extends Effect {
 		this.target = finalise(Target, target);
 	}
 }
+
+const isScalar = (v: ScalarExpressionType | RecoverSanityEffectProps): v is ScalarExpressionType =>
+	typeof v === 'number' || typeof v === 'string' || v instanceof ScalarExpression;
+
+/** Creates a recover sanity effect. */
+export const recoverSanity = (
+	amountOrProps: ScalarExpressionType | RecoverSanityEffectProps
+): RecoverSanityEffect =>
+	new RecoverSanityEffect(isScalar(amountOrProps) ? { amount: amountOrProps } : amountOrProps);

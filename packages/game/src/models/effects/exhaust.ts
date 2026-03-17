@@ -23,5 +23,5 @@ export class ExhaustEffect extends Effect {
 	}
 }
 
-/** Singleton instance for exhausting the default target. */
-export const exhaust = new ExhaustEffect({});
+/** Creates an effect that exhausts a target. */
+export const exhaust = (props: ExhaustEffectProps = {}): ExhaustEffect => new ExhaustEffect(props);

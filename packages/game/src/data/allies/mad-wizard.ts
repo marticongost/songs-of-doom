@@ -1,7 +1,7 @@
 import { Ally } from '../../models/entities/ally';
 import { Action } from '../../models/capabilities';
 import { fullyRechargeOnChapterStart } from '../../models/common';
-import { AttackEffect, WoundEffect } from '../../models/effects';
+import { attack, wound } from '../../models/effects';
 import { will } from '../../models/stats';
 import follower from '../properties/follower';
 import magic from '../properties/magic';
@@ -32,12 +32,12 @@ export default new Ally({
 				charisma: 1
 			},
 			effects: [
-				new AttackEffect({
+				attack({
 					expression: will,
 					properties: [magic, piercing.with({ value: 1 })],
 					results: {
 						CF: [
-							new WoundEffect({
+							wound({
 								damage: 2,
 								target: 'owner',
 								properties: [magic, piercing.with({ value: 1 })]

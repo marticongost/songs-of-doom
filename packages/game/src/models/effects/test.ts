@@ -43,3 +43,6 @@ export class TestEffect extends Effect {
 		this.results = finalise(ResultsTableEffect, results);
 	}
 }
+
+/** Creates a test effect. */
+export const test = (props: TestEffectProps): TestEffect => new TestEffect(props);

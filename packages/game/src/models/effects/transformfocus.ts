@@ -44,3 +44,13 @@ export class TransformFocusEffect extends Effect {
 		this.target = target;
 	}
 }
+
+/** Creates a transform focus effect. */
+export const transformFocus = (
+	targetOrProps: Focus | FocusType | TransformFocusEffectProps
+): TransformFocusEffect =>
+	new TransformFocusEffect(
+		typeof targetOrProps === 'object' && 'target' in (targetOrProps as object)
+			? (targetOrProps as TransformFocusEffectProps)
+			: { target: targetOrProps as Focus | FocusType }
+	);

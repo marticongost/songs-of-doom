@@ -2,6 +2,7 @@ import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
+import { ScalarExpression } from '../expressions';
 
 /**
  * Props for configuring a SanityLossEffect.
@@ -28,3 +29,12 @@ export class SanityLossEffect extends Effect {
 		this.target = finalise(Target, target);
 	}
 }
+
+const isScalar = (v: ScalarExpressionType | SanityLossEffectProps): v is ScalarExpressionType =>
+	typeof v === 'number' || typeof v === 'string' || v instanceof ScalarExpression;
+
+/** Creates a sanity loss effect. */
+export const sanityLoss = (
+	amountOrProps: ScalarExpressionType | SanityLossEffectProps
+): SanityLossEffect =>
+	new SanityLossEffect(isScalar(amountOrProps) ? { amount: amountOrProps } : amountOrProps);

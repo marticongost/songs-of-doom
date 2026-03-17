@@ -1,5 +1,6 @@
 import type { ScalarExpressionType } from '../expressions';
 import { Effect } from './effect';
+import { ScalarExpression } from '../expressions';
 
 /**
  * Props for configuring a ModifyGatheredCluesEffect.
@@ -21,3 +22,16 @@ export class ModifyGatheredCluesEffect extends Effect {
 		this.amount = amount;
 	}
 }
+
+const isScalar = (
+	v: ScalarExpressionType | ModifyGatheredCluesEffectProps
+): v is ScalarExpressionType =>
+	typeof v === 'number' || typeof v === 'string' || v instanceof ScalarExpression;
+
+/** Creates a modify gathered clues effect. */
+export const modifyGatheredClues = (
+	amountOrProps: ScalarExpressionType | ModifyGatheredCluesEffectProps
+): ModifyGatheredCluesEffect =>
+	new ModifyGatheredCluesEffect(
+		isScalar(amountOrProps) ? { amount: amountOrProps } : amountOrProps
+	);

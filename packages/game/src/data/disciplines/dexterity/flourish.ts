@@ -1,6 +1,6 @@
 import { Opportunity } from '../../../models/capabilities';
-import { DrawCardsEffect, DrawFocusEffect, ResultsTableEffect } from '../../../models/effects';
-import { AddChargesEffect } from '../../../models/effects/recharge';
+import { drawCards, drawFocus, resultsTable } from '../../../models/effects';
+import { addCharges } from '../../../models/effects/recharge';
 import { and, owned } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
@@ -19,20 +19,20 @@ export default upgradable(Skill, 2, (variants) => ({
 			triggers: ['attacking'],
 			cost: { agility: 2 },
 			effects: [
-				new ResultsTableEffect({
+				resultsTable({
 					entries: [
 						{
 							result: '2+',
 							effects: [
-								new AddChargesEffect({
+								addCharges({
 									amount: 1,
 									target: {
 										type: 'object',
 										condition: and(owned, weapon)
 									}
 								}),
-								new DrawFocusEffect({ amount: 1 }),
-								...variants.ifMatches(2, new DrawCardsEffect({ amount: 1 }))
+								drawFocus(1),
+								...variants.ifMatches(2, drawCards(1))
 							]
 						}
 					]

@@ -21,3 +21,9 @@ export class PlayStoryCardsEffect extends Effect {
 		this.cards = cards;
 	}
 }
+
+/** Creates a play story cards effect. */
+export const playStoryCards = (
+	cardsOrProps: Story[] | PlayStoryCardsEffectProps
+): PlayStoryCardsEffect =>
+	new PlayStoryCardsEffect(Array.isArray(cardsOrProps) ? { cards: cardsOrProps } : cardsOrProps);

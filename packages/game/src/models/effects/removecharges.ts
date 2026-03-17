@@ -24,3 +24,7 @@ export class RemoveChargesEffect extends Effect {
 		this.target = finalise(Target, target);
 	}
 }
+
+/** Creates an effect that removes charges from a target. */
+export const removeCharges = (props: RemoveChargesEffectProps = {}): RemoveChargesEffect =>
+	new RemoveChargesEffect(props);

@@ -1,5 +1,5 @@
 import { Opportunity } from '../../../models/capabilities';
-import { ModifyRollEffect } from '../../../models/effects';
+import { modifyRoll } from '../../../models/effects';
 import { Skill } from '../../../models/entities/skill';
 import { lte } from '../../../models/expressions';
 import { remainingWounds } from '../../../models/expressions/scalar/wounds';
@@ -19,9 +19,7 @@ export default upgradable(Skill, 2, (variants) => ({
 		new Opportunity({
 			triggers: ['resolvingEncounter'],
 			cost: { will: 2 },
-			effects: [
-				lte(remainingWounds, 3).then(new ModifyRollEffect({ modifier: variants.values(2, 3) }))
-			]
+			effects: [lte(remainingWounds, 3).then(modifyRoll(variants.values(2, 3)))]
 		})
 	]
 }));

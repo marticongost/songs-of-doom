@@ -1,49 +1,64 @@
-export { AttachEffect } from './attach';
-export { AttackEffect } from './attack';
-export { ChangeStatsEffect } from './changestats';
+export { attach, AttachEffect } from './attach';
+export { attack, AttackEffect } from './attack';
+export { changeStats, ChangeStatsEffect } from './changestats';
 export { chase, ChaseEffect } from './chase';
-export { ConditionalEffect, type Case } from './conditional';
-export { ConferPropertiesEffect } from './conferproperties';
-export { DefendEffect } from './defend';
+export { conditional, ConditionalEffect, type Case } from './conditional';
+export { conferProperties, ConferPropertiesEffect } from './conferproperties';
+export { defend, DefendEffect } from './defend';
 export { discard, DiscardEffect } from './discard';
-export { DiscardFromHandEffect } from './discardfromhand';
-export { DrawCardsEffect } from './drawcards';
-export { DrawFocusEffect } from './drawfocuseffect';
+export { discardFromHand, DiscardFromHandEffect } from './discardfromhand';
+export { drawCards, DrawCardsEffect } from './drawcards';
+export { drawFocus, DrawFocusEffect } from './drawfocuseffect';
 export { Effect } from './effect';
 export { engage, EngageEffect } from './engage';
 export { equip, EquipEffect } from './equip';
 export { exhaust, ExhaustEffect } from './exhaust';
-export { GatherCluesEffect, type GatherCluesEffectProps } from './gatherclues';
-export { GoTowardsEffect } from './gotowards';
-export { HealEffect } from './heal';
+export { gatherClues, GatherCluesEffect, type GatherCluesEffectProps } from './gatherclues';
+export { goTowards, GoTowardsEffect } from './gotowards';
+export { heal, HealEffect } from './heal';
 export { immobilize, ImmobilizeEffect } from './immobilize';
-export { InvestigateEffect, type InvestigateEffectProps } from './investigate';
-export { LooseGoldEffect } from './loosegold';
-export { ModifyCapabilityCostEffect } from './modifycapabilitycost';
-export { ModifyCarryingCapacityEffect } from './modifycarryingcapacity';
-export { ModifyDamageEffect } from './modifydamage';
-export { ModifyGatheredCluesEffect } from './modifygatheredclues';
-export { ModifyRollEffect } from './modifyroll';
+export { investigate, InvestigateEffect, type InvestigateEffectProps } from './investigate';
+export { looseGold, LooseGoldEffect } from './loosegold';
+export { modifyCapabilityCost, ModifyCapabilityCostEffect } from './modifycapabilitycost';
+export { modifyCarryingCapacity, ModifyCarryingCapacityEffect } from './modifycarryingcapacity';
+export { modifyDamage, ModifyDamageEffect } from './modifydamage';
+export { modifyGatheredClues, ModifyGatheredCluesEffect } from './modifygatheredclues';
+export { modifyRoll, ModifyRollEffect } from './modifyroll';
 export { move, MoveEffect } from './move';
-export { NarrationEventEffect, type NarrationEventEffectProps } from './narrationevent';
+export {
+	narrationEvent,
+	NarrationEventEffect,
+	type NarrationEventEffectProps
+} from './narrationevent';
 export { negateDamage, NegateDamageEffect } from './negatedamage';
-export { OneOfEffect, type OneOfEffectProps } from './oneof';
-export { PayEffect, type PayEffectProps } from './payeffect';
-export { PlayStoryCardsEffect, type PlayStoryCardsEffectProps } from './playstorycards';
-export { ProficiencyTableEffect, type ProficiencyTableEntry } from './proficiencytable';
-export { ReceiveOpportunityAttacksEffect } from './receiveopportunityattacks';
-export { RecoverSanityEffect, type RecoverSanityEffectProps } from './recoversanity';
-export { AddChargesEffect, type RechargeAmount } from './recharge';
+export { oneOf, OneOfEffect, type OneOfEffectProps } from './oneof';
+export { pay, PayEffect, type PayEffectProps } from './payeffect';
+export {
+	playStoryCards,
+	PlayStoryCardsEffect,
+	type PlayStoryCardsEffectProps
+} from './playstorycards';
+export {
+	proficiencyTable,
+	ProficiencyTableEffect,
+	type ProficiencyTableEntry
+} from './proficiencytable';
+export {
+	receiveOpportunityAttacks,
+	ReceiveOpportunityAttacksEffect
+} from './receiveopportunityattacks';
+export { recoverSanity, RecoverSanityEffect, type RecoverSanityEffectProps } from './recoversanity';
+export { addCharges, AddChargesEffect, type RechargeAmount } from './recharge';
 export { redrawFate, RedrawFateEffect } from './redrawfate';
-export { RemoveChargesEffect } from './removecharges';
+export { removeCharges, RemoveChargesEffect } from './removecharges';
 export { repeatCapability, RepeatCapabilityEffect } from './repeatcapability';
 export { replaceEncounter, ReplaceEncounterEffect } from './replaceencounter';
 export { resolveEncounter, ResolveEncounterEffect } from './resolveencounter';
-export { ResultsTableEffect, type ResultsTableEntry } from './resultstable';
-export { SanityLossEffect } from './sanityloss';
-export { SetRollResultEffect, type SetRollResultEffectProps } from './setrollresult';
-export { TalentEffect, type TalentEffectProps } from './talenteffect';
-export { TestEffect } from './test';
-export { TransformFocusEffect } from './transformfocus';
-export { TriggerAttackEffect } from './triggerattack';
-export { WoundEffect } from './wound';
+export { resultsTable, ResultsTableEffect, type ResultsTableEntry } from './resultstable';
+export { sanityLoss, SanityLossEffect } from './sanityloss';
+export { setRollResult, SetRollResultEffect, type SetRollResultEffectProps } from './setrollresult';
+export { talent, TalentEffect, type TalentEffectProps } from './talenteffect';
+export { test, TestEffect } from './test';
+export { transformFocus, TransformFocusEffect } from './transformfocus';
+export { triggerAttack, TriggerAttackEffect } from './triggerattack';
+export { wound, WoundEffect } from './wound';

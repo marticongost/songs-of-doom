@@ -1,5 +1,5 @@
 import { Action } from '../../../models/capabilities';
-import { exhaust, LooseGoldEffect, TestEffect } from '../../../models/effects';
+import { exhaust, looseGold, test } from '../../../models/effects';
 import { and, cash, engaged, gt, is, minus, not } from '../../../models/expressions';
 import { will } from '../../../models/stats';
 import { currentLocation } from '../../../models/target';
@@ -15,12 +15,12 @@ export default new Trait({
 			prioritary: true,
 			effects: [
 				and(not(engaged), is(currentLocation, town), gt(cash, 0)).then(
-					exhaust,
-					new TestEffect({
+					exhaust(),
+					test({
 						expression: minus(will, 1),
 						results: {
-							CF: [new LooseGoldEffect({ amount: 3 })],
-							0: [new LooseGoldEffect({ amount: 1 })]
+							CF: [looseGold(3)],
+							0: [looseGold(1)]
 						}
 					})
 				)

@@ -1,4 +1,4 @@
-import { ConditionalEffect, type Effect } from '../../effects';
+import { conditional, ConditionalEffect, type Effect } from '../../effects';
 import { Expression } from '../../expressions/expression';
 import type { Property } from '../../properties';
 
@@ -14,14 +14,7 @@ export abstract class BooleanExpression extends Expression {
 	 * @returns A ConditionalEffect that wraps these effects.
 	 */
 	then(...effects: Array<Effect>): ConditionalEffect {
-		return new ConditionalEffect({
-			cases: [
-				{
-					condition: this,
-					effects: effects
-				}
-			]
-		});
+		return conditional([{ condition: this, effects }]);
 	}
 }
 

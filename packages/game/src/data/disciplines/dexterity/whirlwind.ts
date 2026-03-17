@@ -1,6 +1,6 @@
 import { Action } from '../../../models/capabilities';
-import { repeatCapability, ResultsTableEffect, TriggerAttackEffect } from '../../../models/effects';
-import { AddChargesEffect } from '../../../models/effects/recharge';
+import { repeatCapability, resultsTable, triggerAttack } from '../../../models/effects';
+import { addCharges } from '../../../models/effects/recharge';
 import type { ResultsTableEntryProps } from '../../../models/effects/resultstable';
 import { charges, plus } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
@@ -18,17 +18,17 @@ export default upgradable(Skill, 2, (variants) => ({
 		new Action({
 			cost: { agility: plus(1, charges) },
 			effects: [
-				new TriggerAttackEffect({
+				triggerAttack({
 					modifiers: [
-						new ResultsTableEffect({
+						resultsTable({
 							entries: [
 								{
 									result: variants.values('1+', '1-2'),
-									effects: [new AddChargesEffect({ amount: 1 }), repeatCapability]
+									effects: [addCharges(1), repeatCapability()]
 								},
 								...variants.ifMatches(2, {
 									result: 3,
-									effects: [repeatCapability]
+									effects: [repeatCapability()]
 								} as ResultsTableEntryProps)
 							]
 						})

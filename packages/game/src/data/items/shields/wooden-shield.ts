@@ -1,6 +1,6 @@
 import { Opportunity } from '../../../models/capabilities';
 import { fullyRechargeOnChapterStart } from '../../../models/common';
-import { DefendEffect } from '../../../models/effects';
+import { defend } from '../../../models/effects';
 import { Item } from '../../../models/entities/item';
 import shield from '../../properties/shield';
 
@@ -16,7 +16,7 @@ export default new Item({
 			triggers: ['receivingAttack'],
 			cost: { charges: 1, agility: 1 },
 			effects: [
-				new DefendEffect({
+				defend({
 					expression: 2
 				})
 			]

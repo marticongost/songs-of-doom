@@ -21,3 +21,7 @@ export class TalentEffect extends Effect {
 		this.talents = talents;
 	}
 }
+
+/** Creates a talent effect. */
+export const talent = (talentsOrProps: Talent[] | TalentEffectProps): TalentEffect =>
+	new TalentEffect(Array.isArray(talentsOrProps) ? { talents: talentsOrProps } : talentsOrProps);

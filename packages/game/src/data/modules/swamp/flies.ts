@@ -1,6 +1,6 @@
 import { Action, Constant } from '../../../models/capabilities';
 import { attachOrReplaceWithNewEncounterWhenRevealed } from '../../../models/common';
-import { ChangeStatsEffect, discard } from '../../../models/effects';
+import { changeStats, discard } from '../../../models/effects';
 import { Encounter } from '../../../models/entities/encounter';
 
 export default new Encounter({
@@ -13,7 +13,7 @@ export default new Encounter({
 	attachmentCapabilities: [
 		new Constant({
 			effects: [
-				new ChangeStatsEffect({
+				changeStats({
 					strength: -1,
 					agility: -1
 				})
@@ -21,7 +21,7 @@ export default new Encounter({
 		}),
 		new Action({
 			cost: { agility: 1 },
-			effects: [discard]
+			effects: [discard()]
 		})
 	]
 });

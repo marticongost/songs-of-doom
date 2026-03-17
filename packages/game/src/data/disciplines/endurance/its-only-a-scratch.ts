@@ -1,5 +1,5 @@
 import { Opportunity } from '../../../models/capabilities';
-import { DiscardFromHandEffect, negateDamage } from '../../../models/effects';
+import { discardFromHand, negateDamage } from '../../../models/effects';
 import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 
@@ -17,7 +17,7 @@ export default upgradable(Skill, 2, (variants) => ({
 			cost: {
 				will: 2
 			},
-			effects: [negateDamage, ...variants.ifMatches(1, new DiscardFromHandEffect({ amount: 1 }))]
+			effects: [negateDamage(), ...variants.ifMatches(1, discardFromHand({ amount: 1 }))]
 		})
 	]
 }));

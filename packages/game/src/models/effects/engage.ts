@@ -7,6 +7,6 @@ import { Effect } from './effect';
 export class EngageEffect extends Effect {}
 
 /**
- * Singleton instance for engaging an opponent.
+ * Creates an effect that engages an opponent.
  */
-export const engage = new EngageEffect();
+export const engage = (): EngageEffect => new EngageEffect();

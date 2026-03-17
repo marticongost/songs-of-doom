@@ -1,6 +1,6 @@
 import { Archetype } from '../../../../models/entities/archetype';
 import { Obligation } from '../../../../models/capabilities';
-import { ModifyRollEffect } from '../../../../models/effects';
+import { modifyRoll } from '../../../../models/effects';
 
 export default new Archetype({
 	title: {
@@ -13,7 +13,7 @@ export default new Archetype({
 		new Obligation({
 			triggers: ['attacking'],
 			effects: [
-				new ModifyRollEffect({
+				modifyRoll({
 					modifier: 1
 				})
 			]
@@ -21,7 +21,7 @@ export default new Archetype({
 		new Obligation({
 			triggers: ['receivingAttack'],
 			effects: [
-				new ModifyRollEffect({
+				modifyRoll({
 					modifier: 1
 				})
 			]

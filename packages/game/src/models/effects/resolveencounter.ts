@@ -6,6 +6,6 @@ import { Effect } from './effect';
 export class ResolveEncounterEffect extends Effect {}
 
 /**
- * Singleton instance for resolving an encounter.
+ * Creates an effect that draws and resolves an encounter.
  */
-export const resolveEncounter = new ResolveEncounterEffect();
+export const resolveEncounter = (): ResolveEncounterEffect => new ResolveEncounterEffect();

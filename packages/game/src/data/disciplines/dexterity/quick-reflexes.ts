@@ -1,5 +1,5 @@
 import { Constant, Opportunity } from '../../../models/capabilities';
-import { ChangeStatsEffect, DefendEffect } from '../../../models/effects';
+import { changeStats, defend } from '../../../models/effects';
 import { Trait } from '../../../models/entities/trait';
 
 export default new Trait({
@@ -12,7 +12,7 @@ export default new Trait({
 	capabilities: [
 		new Constant({
 			effects: [
-				new ChangeStatsEffect({
+				changeStats({
 					agility: 1
 				})
 			]
@@ -21,7 +21,7 @@ export default new Trait({
 			triggers: ['receivingAttack'],
 			cost: { agility: 1 },
 			effects: [
-				new DefendEffect({
+				defend({
 					expression: 1
 				})
 			]

@@ -29,3 +29,8 @@ export class ReceiveOpportunityAttacksEffect extends Effect {
 		this.effects = effects ?? [];
 	}
 }
+
+/** Creates an effect that causes the target to receive opportunity attacks. */
+export const receiveOpportunityAttacks = (
+	props: ReceiveOpportunityAttacksEffectProps = {}
+): ReceiveOpportunityAttacksEffect => new ReceiveOpportunityAttacksEffect(props);

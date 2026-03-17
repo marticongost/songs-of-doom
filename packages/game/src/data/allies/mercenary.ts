@@ -1,7 +1,7 @@
 import { Ally } from '../../models/entities/ally';
 import { Action, Opportunity } from '../../models/capabilities';
 import { fullyRechargeOnChapterStart } from '../../models/common';
-import { AttackEffect, DefendEffect } from '../../models/effects';
+import { attack, defend } from '../../models/effects';
 import { strength } from '../../models/stats';
 import toughness from '../properties/toughness';
 
@@ -31,7 +31,7 @@ export default new Ally({
 				gold: 1
 			},
 			effects: [
-				new AttackEffect({
+				attack({
 					expression: strength,
 					results: {
 						1: 2,
@@ -46,7 +46,7 @@ export default new Ally({
 			cost: {
 				charges: 1
 			},
-			effects: [new DefendEffect({ expression: 2 })]
+			effects: [defend(2)]
 		})
 	]
 });

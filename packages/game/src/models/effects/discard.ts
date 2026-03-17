@@ -6,6 +6,6 @@ import { Effect } from './effect';
 export class DiscardEffect extends Effect {}
 
 /**
- * Singleton instance for discarding the card triggering the effect.
+ * Creates an effect that discards the card triggering the effect.
  */
-export const discard = new DiscardEffect();
+export const discard = (): DiscardEffect => new DiscardEffect();

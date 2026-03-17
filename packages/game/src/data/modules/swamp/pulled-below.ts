@@ -1,13 +1,13 @@
 import { Action, Obligation } from '../../../models/capabilities';
 import {
-	AttachEffect,
+	attach,
 	discard,
 	replaceEncounter,
-	SanityLossEffect,
-	TestEffect,
-	WoundEffect
+	sanityLoss,
+	test,
+	wound
 } from '../../../models/effects';
-import { AddChargesEffect } from '../../../models/effects/recharge';
+import { addCharges } from '../../../models/effects/recharge';
 import { Encounter } from '../../../models/entities/encounter';
 import { charges, copyAlreadyAttached, minus, plus } from '../../../models/expressions';
 import { agility, strength } from '../../../models/stats';
@@ -22,15 +22,11 @@ export default new Encounter({
 		new Obligation({
 			triggers: ['revealed'],
 			effects: [
-				copyAlreadyAttached.then(replaceEncounter).orElse(
-					new TestEffect({
+				copyAlreadyAttached.then(replaceEncounter()).orElse(
+					test({
 						expression: minus(agility, 1),
 						results: {
-							failed: [
-								new WoundEffect({ damage: 1 }),
-								new SanityLossEffect({ amount: 1 }),
-								new AttachEffect({})
-							]
+							failed: [wound(1), sanityLoss(1), attach({})]
 						}
 					})
 				)
@@ -42,9 +38,9 @@ export default new Encounter({
 			prioritary: true,
 			cost: { strength: 1 },
 			effects: [
-				new TestEffect({
+				test({
 					expression: plus(minus(strength, 1), charges),
-					results: { 0: [new AddChargesEffect({ amount: 1 })], '1+': [discard] }
+					results: { 0: [addCharges(1)], '1+': [discard()] }
 				})
 			]
 		})

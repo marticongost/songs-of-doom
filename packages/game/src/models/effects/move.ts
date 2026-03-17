@@ -7,6 +7,6 @@ import { Effect } from './effect';
 export class MoveEffect extends Effect {}
 
 /**
- * Singleton instance for moving to an adjacent, accessible location.
+ * Creates an effect that moves to an adjacent, accessible location.
  */
-export const move = new MoveEffect();
+export const move = (): MoveEffect => new MoveEffect();

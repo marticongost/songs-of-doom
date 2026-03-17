@@ -1,11 +1,11 @@
 import { Action } from '../../../models/capabilities';
 import {
-	ConferPropertiesEffect,
-	ModifyDamageEffect,
-	ModifyRollEffect,
-	RecoverSanityEffect,
-	ResultsTableEffect,
-	TriggerAttackEffect
+	conferProperties,
+	modifyDamage,
+	modifyRoll,
+	recoverSanity,
+	resultsTable,
+	triggerAttack
 } from '../../../models/effects';
 import { Skill } from '../../../models/entities';
 import { upgradable } from '../../../models/upgrades';
@@ -25,15 +25,12 @@ export default upgradable(Skill, 2, (variants) => ({
 		new Action({
 			cost: { will: 1 },
 			effects: [
-				new TriggerAttackEffect({
+				triggerAttack({
 					modifiers: [
-						new ModifyRollEffect({ modifier: 1 }),
-						new ConferPropertiesEffect({ properties: [holy] }),
-						new ResultsTableEffect({
-							[variants.values('3', '2+')]: [
-								new ModifyDamageEffect({ amount: 1 }),
-								new RecoverSanityEffect({ amount: 1 })
-							]
+						modifyRoll(1),
+						conferProperties([holy]),
+						resultsTable({
+							[variants.values('3', '2+')]: [modifyDamage(1), recoverSanity(1)]
 						})
 					]
 				})

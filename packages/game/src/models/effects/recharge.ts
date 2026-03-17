@@ -19,3 +19,11 @@ export class AddChargesEffect extends Effect {
 		this.target = finalise(Target, target);
 	}
 }
+
+/** Creates an add charges effect. */
+export const addCharges = (amountOrProps: RechargeAmount | RechargeEffectProps): AddChargesEffect =>
+	new AddChargesEffect(
+		typeof amountOrProps === 'number' || amountOrProps === 'max'
+			? { amount: amountOrProps }
+			: amountOrProps
+	);

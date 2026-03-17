@@ -1,11 +1,5 @@
 import { Action, Constant, Obligation } from '../../../models/capabilities';
-import {
-	AttachEffect,
-	discard,
-	replaceEncounter,
-	TestEffect,
-	WoundEffect
-} from '../../../models/effects';
+import { attach, discard, replaceEncounter, test, wound } from '../../../models/effects';
 import { immobilize } from '../../../models/effects/immobilize';
 import { Encounter } from '../../../models/entities/encounter';
 import { copyAlreadyAttached, talentProficiency } from '../../../models/expressions';
@@ -18,14 +12,11 @@ export default new Encounter({
 		new Obligation({
 			triggers: ['revealed'],
 			effects: [
-				copyAlreadyAttached.then(replaceEncounter).orElse(
-					new TestEffect({
+				copyAlreadyAttached.then(replaceEncounter()).orElse(
+					test({
 						expression: talentProficiency(disarmTrap),
 						results: {
-							failed: [
-								new WoundEffect({ damage: 3, properties: [piercing.with({ value: 2 })] }),
-								new AttachEffect({})
-							]
+							failed: [wound({ damage: 3, properties: [piercing.with({ value: 2 })] }), attach({})]
 						}
 					})
 				)
@@ -33,7 +24,7 @@ export default new Encounter({
 		})
 	],
 	attachmentCapabilities: [
-		new Constant({ effects: [immobilize] }),
-		new Action({ cost: { strength: 2 }, effects: [discard] })
+		new Constant({ effects: [immobilize()] }),
+		new Action({ cost: { strength: 2 }, effects: [discard()] })
 	]
 });

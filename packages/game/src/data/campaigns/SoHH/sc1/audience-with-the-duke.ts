@@ -1,6 +1,6 @@
 import multiline from 'multiline-ts';
 import { Obligation } from '../../../../models/capabilities';
-import { NarrationEventEffect } from '../../../../models/effects';
+import { narrationEvent } from '../../../../models/effects';
 import { Story } from '../../../../models/entities/story';
 
 export default new Story({
@@ -13,7 +13,7 @@ export default new Story({
 		new Obligation({
 			triggers: ['played'],
 			effects: [
-				new NarrationEventEffect({
+				narrationEvent({
 					text: {
 						ca: multiline`
 							El duc de Halendak us observa, en silenci, durant uns segons.

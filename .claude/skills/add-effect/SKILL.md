@@ -24,44 +24,69 @@ For effects that require configuration (e.g. amount of damage, target, etc.):
 - **Constructor**: takes a single destructured props object, calls `super()` first
 - **JSDoc**: add doc comments to the interface, the class, and every field
 
-#### Example: effect with parameters
+Every effect exports a **factory function** alongside the class. Use factory functions everywhere — never instantiate effects with `new` directly in data files.
+
+#### Example: effect with a single required property
+
+For effects with a single required property, the factory accepts the value directly (shorthand) or the full props object:
 
 ```typescript
+import { ScalarExpression } from '../expressions';
+import type { ScalarExpressionType } from '../expressions';
 import { Effect } from './effect';
 
-/**
- * Props for configuring a ModifyDamageEffect.
- */
 export interface ModifyDamageEffectProps {
 	/** The amount to modify the damage by. Positive values increase, negative values decrease. */
-	amount: number;
+	amount: ScalarExpressionType;
 }
 
-/**
- * An effect that modifies the damage dealt by an attack.
- */
 export class ModifyDamageEffect extends Effect {
 	/** The amount to modify the damage by. Positive values increase, negative values decrease. */
-	readonly amount: number;
+	readonly amount: ScalarExpressionType;
 
 	constructor({ amount }: ModifyDamageEffectProps) {
 		super();
 		this.amount = amount;
 	}
 }
+
+const isScalar = (v: ScalarExpressionType | ModifyDamageEffectProps): v is ScalarExpressionType =>
+	typeof v === 'number' || typeof v === 'string' || v instanceof ScalarExpression;
+
+/** Creates a modify damage effect. */
+export const modifyDamage = (
+	amountOrProps: ScalarExpressionType | ModifyDamageEffectProps
+): ModifyDamageEffect =>
+	new ModifyDamageEffect(isScalar(amountOrProps) ? { amount: amountOrProps } : amountOrProps);
 ```
 
-If a field requires transformation (e.g. resolving an expression), perform the conversion inside the constructor so the readonly field stores the resolved value.
+Usage:
 
-### Parameterless effects (singletons)
+```typescript
+modifyDamage(1); // shorthand
+modifyDamage(someExpr); // shorthand with expression
+```
 
-For effects that require no configuration, use a simpler pattern with a singleton instance:
+If the single required property is a plain `number`, omit the `isScalar` helper and check `typeof v === 'number'` directly.
 
-- **Class**: extends `Effect` with no constructor, no props interface, no fields
-- **Singleton**: export a `const` instance with a descriptive camelCase name
-- **JSDoc**: add doc comments to both the class and the singleton
+If the single required property is an array (e.g. `talents: Talent[]`), use `Array.isArray()`:
 
-#### Example: parameterless effect with singleton
+```typescript
+export const talent = (talentsOrProps: Talent[] | TalentEffectProps): TalentEffect =>
+	new TalentEffect(Array.isArray(talentsOrProps) ? { talents: talentsOrProps } : talentsOrProps);
+```
+
+#### Example: effect with multiple properties (plain factory)
+
+When an effect has multiple required properties or no obvious shorthand, export a simple factory:
+
+```typescript
+export const attack = (props: FightEffectProps): AttackEffect => new AttackEffect(props);
+```
+
+#### Example: parameterless effect
+
+For effects that require no configuration:
 
 ```typescript
 import { Effect } from './effect';
@@ -73,21 +98,20 @@ import { Effect } from './effect';
 export class EngageEffect extends Effect {}
 
 /**
- * Singleton instance for engaging an opponent.
+ * Creates an effect that engages an opponent.
  */
-export const engage = new EngageEffect();
+export const engage = (): EngageEffect => new EngageEffect();
 ```
 
 Usage in data files:
 
 ```typescript
-// Use the singleton directly instead of instantiating
 import { engage } from '@songsofdoom/game';
 
-effects: [engage]; // NOT: effects: [new EngageEffect()]
+effects: [engage()]; // NOT: effects: [new EngageEffect()] or effects: [engage]
 ```
 
-Existing singletons: `chase`, `discard`, `engage`, `equip`, `negateDamage`, `redrawFate`, `repeatCapability`, `replaceEncounter`, `resolveEncounter`
+If a field requires transformation (e.g. resolving a Target or CapabilityCost), perform the conversion inside the constructor so the readonly field stores the resolved value.
 
 ## Component conventions
 
@@ -126,11 +150,11 @@ Follow the process below exactly. Do NOT inspect the codebase for other examples
 specifically instructed to do so.
 
 1. **Create the model file** in `packages/game/src/models/effects/`:
-   - **If the effect has parameters**: export a `{ClassName}Props` interface and a class with readonly fields, a destructured constructor, and JSDoc
-   - **If the effect has no parameters**: export only the class (no constructor needed) and a singleton instance with a descriptive camelCase name
+   - Export a `{ClassName}Props` interface (for effects with parameters)
+   - Export the class with readonly fields, a destructured constructor, and JSDoc
+   - Export a factory function (camelCase, e.g. `modifyDamage`) — use shorthand support for single-required-property effects
 2. **Barrel-export** from `packages/game/src/models/effects/index.ts`:
-   - Export the class (always)
-   - Export the singleton instance (for parameterless effects)
+   - Export both the factory function and the class
 3. **Create the chip component** `{ClassName}EffectChip.svelte` in `packages/web/src/lib/components/effects/`:
    - Accept an `effect` prop typed to the new class (import from `@songsofdoom/game`)
    - Render localised text using `<Text>` with `ca`/`es`/`en` props

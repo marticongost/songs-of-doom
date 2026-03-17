@@ -1,12 +1,12 @@
 import { Action, Obligation } from '../../../models/capabilities';
 import {
-	AddChargesEffect,
-	AttachEffect,
-	ConferPropertiesEffect,
+	addCharges,
+	attach,
+	conferProperties,
 	discard,
-	ModifyDamageEffect,
-	ModifyRollEffect,
-	TriggerAttackEffect
+	modifyDamage,
+	modifyRoll,
+	triggerAttack
 } from '../../../models/effects';
 import { Skill } from '../../../models/entities';
 import { upgradable } from '../../../models/upgrades';
@@ -26,25 +26,21 @@ export default upgradable(Skill, 2, (variants) => ({
 	capabilities: [
 		new Action({
 			cost: { will: 2 },
-			effects: [new AttachEffect({}), new AddChargesEffect({ amount: variants.values(2, 3) })]
+			effects: [attach({}), addCharges(variants.values(2, 3))]
 		})
 	],
 	attachmentCapabilities: [
 		new Action({
 			cost: { will: 2, charges: 1 },
 			effects: [
-				new TriggerAttackEffect({
-					modifiers: [
-						new ConferPropertiesEffect({ properties: [holy] }),
-						new ModifyRollEffect({ modifier: 2 }),
-						new ModifyDamageEffect({ amount: 2 })
-					]
+				triggerAttack({
+					modifiers: [conferProperties([holy]), modifyRoll(2), modifyDamage(2)]
 				})
 			]
 		}),
 		new Obligation({
 			triggers: ['fullyDischarged'],
-			effects: [discard]
+			effects: [discard()]
 		})
 	]
 }));

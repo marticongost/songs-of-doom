@@ -1,5 +1,5 @@
 import { Opportunity } from '../../../models/capabilities';
-import { ModifyGatheredCluesEffect, ResultsTableEffect } from '../../../models/effects';
+import { modifyGatheredClues, resultsTable } from '../../../models/effects';
 import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 
@@ -16,8 +16,8 @@ export default upgradable(Skill, 2, (variants) => ({
 			triggers: ['investigating'],
 			cost: { intelligence: 1 },
 			effects: [
-				new ResultsTableEffect({
-					[variants.values('3', '2+')]: [new ModifyGatheredCluesEffect({ amount: 1 })]
+				resultsTable({
+					[variants.values('3', '2+')]: [modifyGatheredClues(1)]
 				})
 			]
 		})

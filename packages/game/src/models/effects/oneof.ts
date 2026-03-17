@@ -20,3 +20,7 @@ export class OneOfEffect extends Effect {
 		this.effects = effects;
 	}
 }
+
+/** Creates a one-of effect. */
+export const oneOf = (effectsOrProps: Effect[] | OneOfEffectProps): OneOfEffect =>
+	new OneOfEffect(Array.isArray(effectsOrProps) ? { effects: effectsOrProps } : effectsOrProps);

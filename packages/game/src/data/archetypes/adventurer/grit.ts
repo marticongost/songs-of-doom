@@ -1,5 +1,5 @@
 import { Constant } from '../../../models/capabilities';
-import { ChangeStatsEffect } from '../../../models/effects';
+import { changeStats } from '../../../models/effects';
 import { Trait } from '../../../models/entities/trait';
 
 export default new Trait({
@@ -11,7 +11,7 @@ export default new Trait({
 	xpCost: 4,
 	capabilities: [
 		new Constant({
-			effects: [new ChangeStatsEffect({ will: 1 })]
+			effects: [changeStats({ will: 1 })]
 		})
 	]
 });

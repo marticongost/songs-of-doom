@@ -48,3 +48,7 @@ export class DiscardFromHandEffect extends Effect {
 		this.selection = selection ?? 'owner';
 	}
 }
+
+/** Creates an effect that discards cards from hand. */
+export const discardFromHand = (props: DiscardFromHandEffectProps = {}): DiscardFromHandEffect =>
+	new DiscardFromHandEffect(props);

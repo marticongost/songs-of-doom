@@ -35,3 +35,12 @@ export class ConditionalEffect extends Effect {
 		});
 	}
 }
+
+/** Creates a conditional effect. */
+export const conditional = (
+	casesOrProps: Case[] | ConditionalEffectProps,
+	defaultEffects?: Effect[]
+): ConditionalEffect =>
+	new ConditionalEffect(
+		Array.isArray(casesOrProps) ? { cases: casesOrProps, default: defaultEffects } : casesOrProps
+	);

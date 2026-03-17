@@ -1,5 +1,5 @@
 import { Action } from '../../../models/capabilities';
-import { ModifyRollEffect, TriggerAttackEffect } from '../../../models/effects';
+import { modifyRoll, triggerAttack } from '../../../models/effects';
 import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 
@@ -15,8 +15,8 @@ export default upgradable(Skill, 2, (variants) => ({
 		new Action({
 			fast: true,
 			effects: [
-				new TriggerAttackEffect({
-					modifiers: [new ModifyRollEffect({ modifier: -1 })]
+				triggerAttack({
+					modifiers: [modifyRoll(-1)]
 				})
 			]
 		})

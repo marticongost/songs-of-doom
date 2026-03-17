@@ -22,3 +22,11 @@ export class NarrationEventEffect extends Effect {
 		this.text = text;
 	}
 }
+
+/** Creates a narration event effect. */
+export const narrationEvent = (
+	textOrProps: LocalisedText | NarrationEventEffectProps
+): NarrationEventEffect =>
+	new NarrationEventEffect(
+		'text' in textOrProps ? (textOrProps as NarrationEventEffectProps) : { text: textOrProps }
+	);

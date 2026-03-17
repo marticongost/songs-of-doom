@@ -1,10 +1,10 @@
 import { Action } from '../../../models/capabilities';
 import {
 	engage,
-	ModifyCapabilityCostEffect,
-	ModifyDamageEffect,
-	ModifyRollEffect,
-	TriggerAttackEffect
+	modifyCapabilityCost,
+	modifyDamage,
+	modifyRoll,
+	triggerAttack
 } from '../../../models/effects';
 import { engaged, not } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
@@ -19,12 +19,12 @@ export default upgradable(Skill, 2, (variants) => ({
 			cost: { strength: 2 },
 			effects: [
 				not(engaged).then(
-					engage,
-					new TriggerAttackEffect({
+					engage(),
+					triggerAttack({
 						modifiers: [
-							new ModifyRollEffect({ modifier: 2 }),
-							...variants.ifMatches(2, new ModifyDamageEffect({ amount: 1 })),
-							new ModifyCapabilityCostEffect({ cost: { strength: -2 } })
+							modifyRoll(2),
+							...variants.ifMatches(2, modifyDamage(1)),
+							modifyCapabilityCost({ cost: { strength: -2 } })
 						]
 					})
 				)

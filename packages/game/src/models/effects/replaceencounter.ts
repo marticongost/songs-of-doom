@@ -6,6 +6,6 @@ import { Effect } from './effect';
 export class ReplaceEncounterEffect extends Effect {}
 
 /**
- * Singleton instance for replacing an encounter.
+ * Creates an effect that replaces the current encounter.
  */
-export const replaceEncounter = new ReplaceEncounterEffect();
+export const replaceEncounter = (): ReplaceEncounterEffect => new ReplaceEncounterEffect();

@@ -1,7 +1,7 @@
 import { Action, Obligation } from '../../../models/capabilities';
 import { fullyRechargeOnChapterStart } from '../../../models/common';
 import { Creature } from '../../../models/entities/creature';
-import { AttackEffect, chase, DefendEffect } from '../../../models/effects';
+import { attack, chase, defend } from '../../../models/effects';
 import { strength } from '../../../models/stats';
 import disruption from '../../properties/disruption';
 import piercing from '../../properties/piercing';
@@ -27,12 +27,12 @@ export default new Creature({
 		fullyRechargeOnChapterStart,
 		new Action({
 			cost: { charges: 1 },
-			effects: [chase]
+			effects: [chase()]
 		}),
 		new Action({
 			cost: { charges: 1 },
 			effects: [
-				new AttackEffect({
+				attack({
 					expression: strength,
 					properties: [piercing.with({ value: 1 }), disruption.with({ value: 1 })],
 					results: {
@@ -46,7 +46,7 @@ export default new Creature({
 		new Obligation({
 			triggers: ['receivingAttack'],
 			effects: [
-				new DefendEffect({
+				defend({
 					expression: 1
 				})
 			]

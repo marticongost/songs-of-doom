@@ -1,6 +1,6 @@
 import { Action } from '../../../models/capabilities';
 import { fullyRechargeOnChapterStart, shootBeforeEngaged } from '../../../models/common';
-import { AttackEffect } from '../../../models/effects';
+import { attack } from '../../../models/effects';
 import { plus } from '../../../models/expressions';
 import { Item } from '../../../models/entities/item';
 import { agility } from '../../../models/stats';
@@ -23,7 +23,7 @@ export default new Item({
 		new Action({
 			cost: { agility: 1, charges: 1 },
 			effects: [
-				new AttackEffect({
+				attack({
 					expression: plus(agility, 1),
 					results: { 1: 2, 2: 3, 3: 5 }
 				})

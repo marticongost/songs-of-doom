@@ -1,5 +1,5 @@
 import { Opportunity } from '../../../models/capabilities';
-import { DrawCardsEffect, ModifyRollEffect, ResultsTableEffect } from '../../../models/effects';
+import { drawCards, modifyRoll, resultsTable } from '../../../models/effects';
 import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 
@@ -14,13 +14,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	capabilities: [
 		new Opportunity({
 			triggers: ['resolvingEncounter'],
-			effects: [
-				new ModifyRollEffect({ modifier: 1 }),
-				...variants.ifMatches(
-					2,
-					new ResultsTableEffect({ '2+': [new DrawCardsEffect({ amount: 1 })] })
-				)
-			]
+			effects: [modifyRoll(1), ...variants.ifMatches(2, resultsTable({ '2+': [drawCards(1)] }))]
 		})
 	]
 }));

@@ -47,3 +47,11 @@ export class ModifyCapabilityCostEffect extends Effect {
 		return groups;
 	}
 }
+
+/** Creates a modify capability cost effect. */
+export const modifyCapabilityCost = (
+	costOrProps: CapabilityCost | CapabilityCostProps | ModifyCapabilityCostEffectProps
+): ModifyCapabilityCostEffect =>
+	new ModifyCapabilityCostEffect(
+		'cost' in costOrProps ? (costOrProps as ModifyCapabilityCostEffectProps) : { cost: costOrProps }
+	);

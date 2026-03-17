@@ -1,6 +1,6 @@
 import { Action } from '../../../models/capabilities';
 import { fullyRechargeOnChapterStart, shootBeforeEngaged } from '../../../models/common';
-import { AttackEffect } from '../../../models/effects';
+import { attack } from '../../../models/effects';
 import { plus } from '../../../models/expressions';
 import { Item } from '../../../models/entities/item';
 import { agility } from '../../../models/stats';
@@ -24,7 +24,7 @@ export default new Item({
 		new Action({
 			cost: { agility: 1, strength: 1, charges: 1 },
 			effects: [
-				new AttackEffect({
+				attack({
 					expression: plus(agility, 2),
 					results: { 1: 3, 2: 4, 3: 5 },
 					properties: [piercing.with({ value: 2 })]

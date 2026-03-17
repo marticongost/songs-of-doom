@@ -2,8 +2,8 @@ import type { ScalarExpressionType } from '../expressions';
 import type { Property } from '../properties';
 import { parseResultString, type Result, type ResultRange, type ResultString } from '../results';
 import { Effect } from './effect';
-import { ResultsTableEffect } from './resultstable';
-import { WoundEffect } from './wound';
+import { ResultsTableEffect, resultsTable } from './resultstable';
+import { wound } from './wound';
 
 export interface FightEffectProps {
 	expression: ScalarExpressionType;
@@ -27,13 +27,15 @@ export class AttackEffect extends Effect {
 		this.results =
 			results instanceof ResultsTableEffect
 				? results
-				: new ResultsTableEffect({
+				: resultsTable({
 						entries: Object.entries(results).map(([result, outcome]) => ({
 							result: parseResultString(result as ResultString),
-							effects:
-								typeof outcome === 'number' ? [new WoundEffect({ damage: outcome })] : outcome
+							effects: typeof outcome === 'number' ? [wound(outcome)] : outcome
 						}))
 					});
 		this.properties = properties ?? [];
 	}
 }
+
+/** Creates an attack effect. */
+export const attack = (props: FightEffectProps): AttackEffect => new AttackEffect(props);

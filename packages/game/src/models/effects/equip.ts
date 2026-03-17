@@ -22,6 +22,8 @@ export class EquipEffect extends Effect {
 }
 
 /**
- * Singleton instance for changing active equipment.
+ * Creates an effect that changes active equipment.
  */
-export const equip = new EquipEffect({ target: { type: 'object', cardinality: '1+' } });
+export const equip = (
+	target: TargetSpec<ObjectTargetType> = { type: 'object', cardinality: '1+' }
+): EquipEffect => new EquipEffect({ target });

@@ -1,5 +1,6 @@
 import type { ScalarExpressionType } from '../expressions';
 import { Effect } from './effect';
+import { ScalarExpression } from '../expressions';
 
 /**
  * Props for configuring a ModifyDamageEffect.
@@ -21,3 +22,12 @@ export class ModifyDamageEffect extends Effect {
 		this.amount = amount;
 	}
 }
+
+const isScalar = (v: ScalarExpressionType | ModifyDamageEffectProps): v is ScalarExpressionType =>
+	typeof v === 'number' || typeof v === 'string' || v instanceof ScalarExpression;
+
+/** Creates a modify damage effect. */
+export const modifyDamage = (
+	amountOrProps: ScalarExpressionType | ModifyDamageEffectProps
+): ModifyDamageEffect =>
+	new ModifyDamageEffect(isScalar(amountOrProps) ? { amount: amountOrProps } : amountOrProps);

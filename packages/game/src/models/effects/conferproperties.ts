@@ -27,3 +27,11 @@ export class ConferPropertiesEffect extends Effect {
 		this.properties = properties;
 	}
 }
+
+/** Creates a confer properties effect. */
+export const conferProperties = (
+	propertiesOrProps: Array<Property> | ConferPropertiesEffectProps
+): ConferPropertiesEffect =>
+	new ConferPropertiesEffect(
+		Array.isArray(propertiesOrProps) ? { properties: propertiesOrProps } : propertiesOrProps
+	);

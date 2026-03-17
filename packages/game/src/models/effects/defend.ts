@@ -1,6 +1,7 @@
 import type { ScalarExpressionType } from '../expressions';
 import type { Property } from '../properties';
 import { Effect } from './effect';
+import { ScalarExpression } from '../expressions';
 
 export interface DefendEffectProps {
 	expression: ScalarExpressionType;
@@ -17,3 +18,12 @@ export class DefendEffect extends Effect {
 		this.properties = properties ?? [];
 	}
 }
+
+const isScalar = (v: ScalarExpressionType | DefendEffectProps): v is ScalarExpressionType =>
+	typeof v === 'number' || typeof v === 'string' || v instanceof ScalarExpression;
+
+/** Creates a defend effect. */
+export const defend = (expressionOrProps: ScalarExpressionType | DefendEffectProps): DefendEffect =>
+	new DefendEffect(
+		isScalar(expressionOrProps) ? { expression: expressionOrProps } : expressionOrProps
+	);

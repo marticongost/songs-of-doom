@@ -2,6 +2,7 @@ import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
 import { currentLocation, Target, type LocationTargetType, type TargetSpec } from '../target';
 import { Effect } from './effect';
+import { ScalarExpression } from '../expressions';
 
 /**
  * Props for configuring a GatherCluesEffect.
@@ -30,3 +31,12 @@ export class GatherCluesEffect extends Effect {
 		this.target = (finalise(Target, target) ?? currentLocation) as Target<LocationTargetType>;
 	}
 }
+
+const isScalar = (v: ScalarExpressionType | GatherCluesEffectProps): v is ScalarExpressionType =>
+	typeof v === 'number' || typeof v === 'string' || v instanceof ScalarExpression;
+
+/** Creates a gather clues effect. */
+export const gatherClues = (
+	amountOrProps: ScalarExpressionType | GatherCluesEffectProps
+): GatherCluesEffect =>
+	new GatherCluesEffect(isScalar(amountOrProps) ? { amount: amountOrProps } : amountOrProps);

@@ -1,5 +1,5 @@
 import { Opportunity } from '../../../../models/capabilities';
-import { DrawCardsEffect } from '../../../../models/effects';
+import { drawCards } from '../../../../models/effects';
 import { Trait } from '../../../../models/entities/trait';
 
 export default new Trait({
@@ -16,7 +16,7 @@ export default new Trait({
 				cardTransition: 'exhaust'
 			},
 			effects: [
-				new DrawCardsEffect({
+				drawCards({
 					amount: 1
 				})
 			]

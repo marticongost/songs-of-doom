@@ -1,5 +1,5 @@
 import { Constant } from '../../../models/capabilities';
-import { ChangeStatsEffect } from '../../../models/effects';
+import { changeStats } from '../../../models/effects';
 import { Trait } from '../../../models/entities/trait';
 import { flaw, innate, permanent } from '../../properties';
 
@@ -9,7 +9,7 @@ export default new Trait({
 	properties: [flaw, innate, permanent],
 	capabilities: [
 		new Constant({
-			effects: [new ChangeStatsEffect({ agility: -1 })]
+			effects: [changeStats({ agility: -1 })]
 		})
 	]
 });

@@ -1,9 +1,5 @@
 import { Opportunity } from '../../../models/capabilities';
-import {
-	ConferPropertiesEffect,
-	ModifyDamageEffect,
-	ResultsTableEffect
-} from '../../../models/effects';
+import { conferProperties, modifyDamage, resultsTable } from '../../../models/effects';
 import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 import { piercing } from '../../properties';
@@ -21,10 +17,10 @@ export default upgradable(Skill, 2, (variants) => ({
 			triggers: ['attacking'],
 			cost: { agility: variants.values(2, 3) },
 			effects: [
-				new ResultsTableEffect({
+				resultsTable({
 					'3': [
-						new ModifyDamageEffect({ amount: variants.values(2, 3) }),
-						new ConferPropertiesEffect({ properties: [piercing.with({ value: variants.level })] })
+						modifyDamage(variants.values(2, 3)),
+						conferProperties({ properties: [piercing.with({ value: variants.level })] })
 					]
 				})
 			]

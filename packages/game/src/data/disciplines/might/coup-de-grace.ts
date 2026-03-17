@@ -1,5 +1,5 @@
 import { Action } from '../../../models/capabilities';
-import { DrawCardsEffect, WoundEffect } from '../../../models/effects';
+import { drawCards, wound } from '../../../models/effects';
 import { and, distance, eq, lte } from '../../../models/expressions';
 import { remainingWounds } from '../../../models/expressions/scalar/wounds';
 import { Skill } from '../../../models/entities/skill';
@@ -17,7 +17,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	capabilities: [
 		new Action({
 			effects: [
-				new WoundEffect({
+				wound({
 					target: {
 						type: 'enemy',
 						condition: and(eq(distance, 0), lte(remainingWounds, 2))
@@ -25,7 +25,7 @@ export default upgradable(Skill, 2, (variants) => ({
 					damage: 2,
 					properties: [piercing.with({ value: 4 })]
 				}),
-				...variants.ifMatches(2, new DrawCardsEffect({ amount: 1 }))
+				...variants.ifMatches(2, drawCards(1))
 			]
 		})
 	]

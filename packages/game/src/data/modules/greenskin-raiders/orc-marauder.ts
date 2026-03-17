@@ -1,7 +1,7 @@
 import { Action, Obligation } from '../../../models/capabilities';
 import { fullyRechargeOnChapterStart } from '../../../models/common';
 import { Creature } from '../../../models/entities/creature';
-import { AttackEffect, chase, DefendEffect, ModifyRollEffect } from '../../../models/effects';
+import { attack, chase, defend, modifyRoll } from '../../../models/effects';
 import { wounded } from '../../../models/expressions';
 import { strength } from '../../../models/stats';
 
@@ -24,12 +24,12 @@ export default new Creature({
 		fullyRechargeOnChapterStart,
 		new Action({
 			cost: { charges: 1 },
-			effects: [chase]
+			effects: [chase()]
 		}),
 		new Action({
 			cost: { charges: 1 },
 			effects: [
-				new AttackEffect({
+				attack({
 					expression: strength,
 					results: {
 						'1': 1,
@@ -41,12 +41,12 @@ export default new Creature({
 		}),
 		new Obligation({
 			triggers: ['attacking'],
-			effects: [wounded.then(new ModifyRollEffect({ modifier: 1 }))]
+			effects: [wounded.then(modifyRoll(1))]
 		}),
 		new Obligation({
 			triggers: ['receivingAttack'],
 			effects: [
-				new DefendEffect({
+				defend({
 					expression: 1
 				})
 			]

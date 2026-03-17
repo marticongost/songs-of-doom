@@ -1,5 +1,5 @@
 import { Opportunity } from '../../../models/capabilities';
-import { negateDamage, RemoveChargesEffect } from '../../../models/effects';
+import { negateDamage, removeCharges } from '../../../models/effects';
 import type { ScalarExpressionType } from '../../../models/expressions';
 import { result } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
@@ -20,8 +20,8 @@ export default upgradable(Skill, 2, (variants) => ({
 				strength: 2
 			},
 			effects: [
-				negateDamage,
-				new RemoveChargesEffect({
+				negateDamage(),
+				removeCharges({
 					target: 'defender',
 					amount: variants.values(1 as ScalarExpressionType, result)
 				})

@@ -1,5 +1,5 @@
 import { Opportunity } from '../../../models/capabilities';
-import { ModifyCapabilityCostEffect } from '../../../models/effects';
+import { modifyCapabilityCost } from '../../../models/effects';
 import { Trait } from '../../../models/entities/trait';
 
 export default new Trait({
@@ -16,7 +16,7 @@ export default new Trait({
 				cardTransition: 'exhaust'
 			},
 			effects: [
-				new ModifyCapabilityCostEffect({
+				modifyCapabilityCost({
 					cost: {
 						strength: -1
 					}

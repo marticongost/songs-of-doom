@@ -1,6 +1,6 @@
 import { Archetype } from '../../../models/entities/archetype';
 import { Action } from '../../../models/capabilities';
-import { AttackEffect, equip, InvestigateEffect, move } from '../../../models/effects';
+import { attack, equip, investigate, move } from '../../../models/effects';
 import { intelligence, strength } from '../../../models/stats';
 import standard from '../../properties/standard';
 
@@ -16,14 +16,14 @@ export default new Archetype({
 			cost: {
 				agility: 1
 			},
-			effects: [move]
+			effects: [move()]
 		}),
 		new Action({
 			cost: {
 				strength: 1
 			},
 			effects: [
-				new AttackEffect({
+				attack({
 					expression: strength,
 					results: { 1: 1, 2: 2, 3: 3 }
 				})
@@ -34,14 +34,14 @@ export default new Archetype({
 				intelligence: 1
 			},
 			effects: [
-				new InvestigateEffect({
+				investigate({
 					expression: intelligence,
 					results: { '1-2': 1, 3: 2 }
 				})
 			]
 		}),
 		new Action({
-			effects: [equip]
+			effects: [equip()]
 		})
 	]
 });

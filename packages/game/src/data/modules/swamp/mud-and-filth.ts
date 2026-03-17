@@ -1,6 +1,6 @@
 import { Obligation } from '../../../models/capabilities';
 import { attachOrReplaceWithNewEncounterWhenRevealed } from '../../../models/common';
-import { discard, ModifyCapabilityCostEffect } from '../../../models/effects';
+import { discard, modifyCapabilityCost } from '../../../models/effects';
 import { Encounter } from '../../../models/entities/encounter';
 
 export default new Encounter({
@@ -13,7 +13,7 @@ export default new Encounter({
 	attachmentCapabilities: [
 		new Obligation({
 			triggers: ['moving'],
-			effects: [new ModifyCapabilityCostEffect({ cost: { strength: 2 } }), discard]
+			effects: [modifyCapabilityCost({ cost: { strength: 2 } }), discard()]
 		})
 	]
 });

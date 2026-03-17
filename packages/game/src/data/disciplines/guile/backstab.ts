@@ -1,9 +1,9 @@
 import { Action } from '../../../models/capabilities';
 import {
-	ConferPropertiesEffect,
-	ModifyCapabilityCostEffect,
-	ModifyRollEffect,
-	TriggerAttackEffect
+	conferProperties,
+	modifyCapabilityCost,
+	modifyRoll,
+	triggerAttack
 } from '../../../models/effects';
 import { engaged, not } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
@@ -23,12 +23,12 @@ export default upgradable(Skill, 2, (variants) => ({
 			cost: { intelligence: 1, agility: 1 },
 			effects: [
 				not(engaged).then(
-					new TriggerAttackEffect({
+					triggerAttack({
 						card: { condition: not(projectile) },
 						modifiers: [
-							new ModifyCapabilityCostEffect({ cost: { any: -2 } }),
-							new ModifyRollEffect({ modifier: variants.level }),
-							new ConferPropertiesEffect({
+							modifyCapabilityCost({ cost: { any: -2 } }),
+							modifyRoll(variants.level),
+							conferProperties({
 								properties: [piercing.with({ value: variants.level + 1 })]
 							})
 						]

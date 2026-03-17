@@ -1,5 +1,5 @@
 import { Opportunity } from '../../../models/capabilities';
-import { ModifyDamageEffect, ResultsTableEffect } from '../../../models/effects';
+import { modifyDamage, resultsTable } from '../../../models/effects';
 import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 
@@ -18,10 +18,8 @@ export default upgradable(Skill, 2, (variants) => ({
 			triggers: ['attacking'],
 			cost: { strength: 1 },
 			effects: [
-				new ResultsTableEffect({
-					entries: [
-						{ result: '2+', effects: [new ModifyDamageEffect({ amount: variants.values(1, 2) })] }
-					]
+				resultsTable({
+					entries: [{ result: '2+', effects: [modifyDamage(variants.values(1, 2))] }]
 				})
 			]
 		})

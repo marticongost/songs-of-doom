@@ -6,6 +6,6 @@ import { Effect } from './effect';
 export class ImmobilizeEffect extends Effect {}
 
 /**
- * Singleton instance for immobilizing a character.
+ * Creates an effect that immobilizes a character.
  */
-export const immobilize = new ImmobilizeEffect();
+export const immobilize = (): ImmobilizeEffect => new ImmobilizeEffect();

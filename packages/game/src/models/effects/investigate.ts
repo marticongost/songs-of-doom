@@ -2,8 +2,8 @@ import type { ScalarExpressionType } from '../expressions';
 import type { Property } from '../properties';
 import { parseResultString, type ResultString } from '../results';
 import { Effect } from './effect';
-import { GatherCluesEffect } from './gatherclues';
-import { ResultsTableEffect } from './resultstable';
+import { gatherClues } from './gatherclues';
+import { ResultsTableEffect, resultsTable } from './resultstable';
 
 /**
  * Props for configuring an InvestigateEffect.
@@ -35,13 +35,16 @@ export class InvestigateEffect extends Effect {
 		this.results =
 			results instanceof ResultsTableEffect
 				? results
-				: new ResultsTableEffect({
+				: resultsTable({
 						entries: Object.entries(results).map(([result, outcome]) => ({
 							result: parseResultString(result as ResultString),
-							effects:
-								typeof outcome === 'number' ? [new GatherCluesEffect({ amount: outcome })] : outcome
+							effects: typeof outcome === 'number' ? [gatherClues(outcome)] : outcome
 						}))
 					});
 		this.properties = properties ?? [];
 	}
 }
+
+/** Creates an investigate effect. */
+export const investigate = (props: InvestigateEffectProps): InvestigateEffect =>
+	new InvestigateEffect(props);

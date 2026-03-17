@@ -21,3 +21,7 @@ export class WoundEffect extends Effect {
 		this.properties = properties ?? [];
 	}
 }
+
+/** Creates an effect that inflicts a wound. */
+export const wound = (damageOrProps: number | WoundEffectProps): WoundEffect =>
+	new WoundEffect(typeof damageOrProps === 'number' ? { damage: damageOrProps } : damageOrProps);

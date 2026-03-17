@@ -28,3 +28,11 @@ export class GoTowardsEffect extends Effect {
 		this.destination = finalise(Target, destination)!;
 	}
 }
+
+/** Creates a go-towards effect. */
+export const goTowards = (destinationOrProps: TargetSpec | GoTowardsEffectProps): GoTowardsEffect =>
+	new GoTowardsEffect(
+		'destination' in (destinationOrProps as GoTowardsEffectProps)
+			? (destinationOrProps as GoTowardsEffectProps)
+			: { destination: destinationOrProps as TargetSpec }
+	);

@@ -8,6 +8,6 @@ import { Effect } from './effect';
 export class RedrawFateEffect extends Effect {}
 
 /**
- * Singleton instance for redrawing fate.
+ * Creates an effect that allows a player to redraw fate.
  */
-export const redrawFate = new RedrawFateEffect();
+export const redrawFate = (): RedrawFateEffect => new RedrawFateEffect();

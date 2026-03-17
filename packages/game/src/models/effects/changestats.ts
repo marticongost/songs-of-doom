@@ -67,3 +67,7 @@ export class ChangeStatsEffect extends Effect {
 		return currentValue + this.get(stat);
 	}
 }
+
+/** Creates an effect that changes stats. */
+export const changeStats = (props: ChangeStatsEffectProps): ChangeStatsEffect =>
+	new ChangeStatsEffect(props);

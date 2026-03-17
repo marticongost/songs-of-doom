@@ -1,21 +1,20 @@
 import { Obligation, Opportunity } from './capabilities';
-import { AttachEffect, replaceEncounter, TriggerAttackEffect } from './effects';
-import { AddChargesEffect } from './effects/recharge';
+import { attach, addCharges, replaceEncounter, triggerAttack } from './effects';
 import { copyAlreadyAttached, distance, eq } from './expressions';
 
 export const fullyRechargeOnChapterStart = new Obligation({
 	triggers: ['chapterStart'],
-	effects: [new AddChargesEffect({ amount: 'max' })]
+	effects: [addCharges('max')]
 });
 
 export const shootBeforeEngaged = new Opportunity({
 	triggers: ['beforeEnemyEngagesWithSelf'],
-	effects: [new TriggerAttackEffect({ card: { selection: 'this' } })]
+	effects: [triggerAttack({ card: { selection: 'this' } })]
 });
 
 export const attachOrReplaceWithNewEncounterWhenRevealed = new Obligation({
 	triggers: ['revealed'],
-	effects: [copyAlreadyAttached.then(replaceEncounter).orElse(new AttachEffect({}))]
+	effects: [copyAlreadyAttached.then(replaceEncounter()).orElse(attach())]
 });
 
 export const sameLocation = eq(distance, 0);

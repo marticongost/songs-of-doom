@@ -1,5 +1,5 @@
 import { Constant } from '../../../models/capabilities';
-import { TalentEffect } from '../../../models/effects';
+import { talent } from '../../../models/effects';
 import { Trait } from '../../../models/entities/trait';
 import disarmTrap from './disarm-trap';
 
@@ -8,7 +8,7 @@ export default new Trait({
 	xpCost: 2,
 	capabilities: [
 		new Constant({
-			effects: [new TalentEffect({ talents: [disarmTrap] })]
+			effects: [talent([disarmTrap])]
 		})
 	]
 });

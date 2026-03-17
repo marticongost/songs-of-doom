@@ -1,9 +1,5 @@
 import { Obligation } from '../../../models/capabilities';
-import {
-	AddChargesEffect,
-	ModifyCapabilityCostEffect,
-	RemoveChargesEffect
-} from '../../../models/effects';
+import { addCharges, modifyCapabilityCost, removeCharges } from '../../../models/effects';
 import { charges } from '../../../models/expressions';
 import { Trait } from '../../../models/entities/trait';
 import { flaw, permanent } from '../../properties';
@@ -15,14 +11,11 @@ export default new Trait({
 	capabilities: [
 		new Obligation({
 			triggers: ['moving'],
-			effects: [
-				new ModifyCapabilityCostEffect({ cost: { any: charges } }),
-				new AddChargesEffect({ amount: 1 })
-			]
+			effects: [modifyCapabilityCost({ cost: { any: charges } }), addCharges(1)]
 		}),
 		new Obligation({
 			triggers: ['chapterStart'],
-			effects: [new RemoveChargesEffect({})]
+			effects: [removeCharges({})]
 		})
 	]
 });

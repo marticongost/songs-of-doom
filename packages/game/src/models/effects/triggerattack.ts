@@ -58,3 +58,7 @@ export class TriggerAttackEffect extends Effect {
 		this.card = finalise(Target, card);
 	}
 }
+
+/** Creates an effect that triggers an attack action. */
+export const triggerAttack = (props: TriggerAttackEffectProps = {}): TriggerAttackEffect =>
+	new TriggerAttackEffect(props);

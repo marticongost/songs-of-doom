@@ -60,3 +60,7 @@ export class ProficiencyTableEffect extends Effect {
 		}
 	}
 }
+
+/** Creates a proficiency table effect. */
+export const proficiencyTable = (props: ProficiencyTableEffectProps): ProficiencyTableEffect =>
+	new ProficiencyTableEffect(props);

@@ -1,5 +1,5 @@
 import { Constant } from '../../../models/capabilities';
-import { ConferPropertiesEffect } from '../../../models/effects';
+import { conferProperties } from '../../../models/effects';
 import { Item } from '../../../models/entities/item';
 import armor from '../../properties/armor';
 import toughness from '../../properties/toughness';
@@ -17,7 +17,7 @@ export default new Item({
 	requiredTalent: heavyArmour,
 	capabilities: [
 		new Constant({
-			effects: [new ConferPropertiesEffect({ properties: [toughness.with({ value: 3 })] })]
+			effects: [conferProperties({ properties: [toughness.with({ value: 3 })] })]
 		})
 	]
 });

@@ -22,3 +22,9 @@ export class PayEffect extends Effect {
 		this.cost = finalise(CapabilityCost, cost);
 	}
 }
+
+/** Creates a pay effect. */
+export const pay = (
+	costOrProps: CapabilityCost | CapabilityCostProps | PayEffectProps
+): PayEffect =>
+	new PayEffect('cost' in costOrProps ? (costOrProps as PayEffectProps) : { cost: costOrProps });

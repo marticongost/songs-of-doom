@@ -21,3 +21,13 @@ export class SetRollResultEffect extends Effect {
 		this.result = result;
 	}
 }
+
+/** Creates an effect that sets the roll result. */
+export const setRollResult = (
+	resultOrProps: Result | SetRollResultEffectProps
+): SetRollResultEffect =>
+	new SetRollResultEffect(
+		typeof resultOrProps === 'object' && resultOrProps !== null
+			? (resultOrProps as SetRollResultEffectProps)
+			: { result: resultOrProps as Result }
+	);

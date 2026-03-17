@@ -7,6 +7,6 @@ import { Effect } from './effect';
 export class NegateDamageEffect extends Effect {}
 
 /**
- * Singleton instance for negating damage.
+ * Creates an effect that negates damage.
  */
-export const negateDamage = new NegateDamageEffect();
+export const negateDamage = (): NegateDamageEffect => new NegateDamageEffect();

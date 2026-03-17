@@ -30,3 +30,6 @@ export class AttachEffect extends Effect {
 		this.stacking = stacking;
 	}
 }
+
+/** Creates an effect that attaches the card to a target. */
+export const attach = (props: AttachEffectProps = {}): AttachEffect => new AttachEffect(props);

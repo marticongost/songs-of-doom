@@ -1,5 +1,5 @@
 import { Opportunity } from '../../../models/capabilities';
-import { ModifyRollEffect } from '../../../models/effects';
+import { modifyRoll } from '../../../models/effects';
 import { Skill } from '../../../models/entities/skill';
 import { X, type ScalarExpressionType } from '../../../models/expressions';
 import { upgradable } from '../../../models/upgrades';
@@ -18,7 +18,7 @@ export default upgradable(Skill, 2, (variants) => ({
 		new Opportunity({
 			triggers: ['beforeOtherPlayerResolvesTest'],
 			cost: { charisma: variants.values<ScalarExpressionType>(2, X) },
-			effects: [new ModifyRollEffect({ modifier: variants.values<ScalarExpressionType>(2, X) })]
+			effects: [modifyRoll(variants.values<ScalarExpressionType>(2, X))]
 		})
 	]
 }));

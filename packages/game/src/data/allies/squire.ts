@@ -1,12 +1,7 @@
 import { Ally } from '../../models/entities/ally';
 import { Action, Constant, Opportunity } from '../../models/capabilities';
 import { fullyRechargeOnChapterStart } from '../../models/common';
-import {
-	AttackEffect,
-	DefendEffect,
-	equip,
-	ModifyCarryingCapacityEffect
-} from '../../models/effects';
+import { attack, defend, equip, modifyCarryingCapacity } from '../../models/effects';
 import { strength } from '../../models/stats';
 import follower from '../properties/follower';
 import toughness from '../properties/toughness';
@@ -36,7 +31,7 @@ export default new Ally({
 				charisma: 1
 			},
 			effects: [
-				new AttackEffect({
+				attack({
 					expression: strength,
 					results: {
 						1: 1,
@@ -51,15 +46,15 @@ export default new Ally({
 			cost: {
 				charges: 1
 			},
-			effects: [new DefendEffect({ expression: 2 })]
+			effects: [defend(2)]
 		}),
 		new Constant({
-			effects: [new ModifyCarryingCapacityEffect({ modifier: 1 })]
+			effects: [modifyCarryingCapacity(1)]
 		}),
 		new Action({
 			cost: { charges: 1 },
 			fast: true,
-			effects: [equip]
+			effects: [equip()]
 		})
 	]
 });

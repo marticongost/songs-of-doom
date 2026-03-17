@@ -1,5 +1,5 @@
 import { Opportunity } from '../../../models/capabilities';
-import { redrawFate, ResultsTableEffect } from '../../../models/effects';
+import { redrawFate, resultsTable } from '../../../models/effects';
 import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 
@@ -18,8 +18,8 @@ export default upgradable(Skill, 2, (variants) => ({
 			triggers: ['fateDrawn'],
 			cost: { any: 1 },
 			effects: variants.values(
-				[new ResultsTableEffect({ entries: [{ result: ['CF', 0], effects: [redrawFate] }] })],
-				[...variants.ifMatches(2, redrawFate)]
+				[resultsTable({ entries: [{ result: ['CF', 0], effects: [redrawFate()] }] })],
+				[...variants.ifMatches(2, redrawFate())]
 			)
 		})
 	]

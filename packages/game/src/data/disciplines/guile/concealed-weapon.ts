@@ -1,10 +1,5 @@
 import { Action } from '../../../models/capabilities';
-import {
-	EquipEffect,
-	ModifyCapabilityCostEffect,
-	ModifyRollEffect,
-	TriggerAttackEffect
-} from '../../../models/effects';
+import { equip, modifyCapabilityCost, modifyRoll, triggerAttack } from '../../../models/effects';
 import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 import { smallWeapon } from '../../properties';
@@ -21,13 +16,10 @@ export default upgradable(Skill, 2, (variants) => ({
 		new Action({
 			cost: { intelligence: 1 },
 			effects: [
-				new EquipEffect({ target: { type: 'object', variable: 'X', condition: smallWeapon } }),
-				new TriggerAttackEffect({
+				equip({ type: 'object', variable: 'X', condition: smallWeapon }),
+				triggerAttack({
 					card: { variable: 'X' },
-					modifiers: [
-						new ModifyCapabilityCostEffect({ cost: { any: -2 } }),
-						new ModifyRollEffect({ modifier: 1 })
-					]
+					modifiers: [modifyCapabilityCost({ cost: { any: -2 } }), modifyRoll(1)]
 				})
 			]
 		})

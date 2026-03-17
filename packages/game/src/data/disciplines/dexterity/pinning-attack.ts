@@ -1,12 +1,12 @@
 import { Action, Constant, Obligation } from '../../../models/capabilities';
 import {
-	AddChargesEffect,
-	AttachEffect,
+	addCharges,
+	attach,
 	discard,
 	immobilize,
-	RemoveChargesEffect,
-	ResultsTableEffect,
-	TriggerAttackEffect
+	removeCharges,
+	resultsTable,
+	triggerAttack
 } from '../../../models/effects';
 import { charges, eq } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
@@ -24,13 +24,10 @@ export default upgradable(Skill, 2, (variants) => ({
 		new Action({
 			cost: { agility: 2 },
 			effects: [
-				new TriggerAttackEffect({
+				triggerAttack({
 					modifiers: [
-						new ResultsTableEffect({
-							'2+': [
-								new AttachEffect({ target: 'defender' }),
-								new AddChargesEffect({ amount: variants.level })
-							]
+						resultsTable({
+							'2+': [attach({ target: 'defender' }), addCharges(variants.level)]
 						})
 					]
 				})
@@ -38,10 +35,10 @@ export default upgradable(Skill, 2, (variants) => ({
 		})
 	],
 	attachmentCapabilities: [
-		new Constant({ effects: [immobilize] }),
+		new Constant({ effects: [immobilize()] }),
 		new Obligation({
 			triggers: ['turnEnd'],
-			effects: [new RemoveChargesEffect({ amount: 1 }), eq(charges, 0).then(discard)]
+			effects: [removeCharges({ amount: 1 }), eq(charges, 0).then(discard())]
 		})
 	]
 }));

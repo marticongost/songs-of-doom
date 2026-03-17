@@ -62,3 +62,7 @@ export class ResultsTableEffect extends Effect {
 		}
 	}
 }
+
+/** Creates a results table effect. */
+export const resultsTable = (props: ResultsTableEffectProps): ResultsTableEffect =>
+	new ResultsTableEffect(props);

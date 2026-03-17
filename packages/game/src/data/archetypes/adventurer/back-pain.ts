@@ -1,5 +1,5 @@
 import { Constant } from '../../../models/capabilities';
-import { ModifyCarryingCapacityEffect } from '../../../models/effects';
+import { modifyCarryingCapacity } from '../../../models/effects';
 import { Trait } from '../../../models/entities/trait';
 import { flaw } from '../../properties';
 
@@ -9,7 +9,7 @@ export default new Trait({
 	properties: [flaw],
 	capabilities: [
 		new Constant({
-			effects: [new ModifyCarryingCapacityEffect({ modifier: -1 })]
+			effects: [modifyCarryingCapacity(-1)]
 		})
 	]
 });

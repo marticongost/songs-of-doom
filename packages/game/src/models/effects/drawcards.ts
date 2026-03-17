@@ -12,3 +12,9 @@ export class DrawCardsEffect extends Effect {
 		this.amount = amount;
 	}
 }
+
+/** Creates an effect that draws cards. */
+export const drawCards = (amountOrProps: number | DrawCardsEffectProps): DrawCardsEffect =>
+	new DrawCardsEffect(
+		typeof amountOrProps === 'number' ? { amount: amountOrProps } : amountOrProps
+	);

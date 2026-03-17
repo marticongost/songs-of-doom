@@ -2,6 +2,7 @@ import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
+import { ScalarExpression } from '../expressions';
 
 /**
  * Props for configuring a HealEffect.
@@ -29,3 +30,10 @@ export class HealEffect extends Effect {
 		this.target = finalise(Target, target);
 	}
 }
+
+const isScalar = (v: ScalarExpressionType | HealEffectProps): v is ScalarExpressionType =>
+	typeof v === 'number' || typeof v === 'string' || v instanceof ScalarExpression;
+
+/** Creates a heal effect. */
+export const heal = (amountOrProps: ScalarExpressionType | HealEffectProps): HealEffect =>
+	new HealEffect(isScalar(amountOrProps) ? { amount: amountOrProps } : amountOrProps);

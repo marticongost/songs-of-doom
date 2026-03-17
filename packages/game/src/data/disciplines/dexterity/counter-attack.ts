@@ -1,10 +1,10 @@
 import { Opportunity } from '../../../models/capabilities';
 import {
-	ModifyCapabilityCostEffect,
-	ModifyDamageEffect,
-	ModifyRollEffect,
-	ResultsTableEffect,
-	TriggerAttackEffect
+	modifyCapabilityCost,
+	modifyDamage,
+	modifyRoll,
+	resultsTable,
+	triggerAttack
 } from '../../../models/effects';
 import { effectiveDefense, gte } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
@@ -23,22 +23,19 @@ export default upgradable(Skill, 2, (variants) => ({
 			triggers: ['afterReceivedAttackResolved'],
 			cost: { agility: 1 },
 			effects: [
-				new ResultsTableEffect({
+				resultsTable({
 					entries: [
 						{
 							result: 0,
 							effects: [
 								gte(effectiveDefense, 1).then(
-									new TriggerAttackEffect({
+									triggerAttack({
 										modifiers: [
-											new ModifyRollEffect({
+											modifyRoll({
 												modifier: effectiveDefense
 											}),
-											...variants.ifMatches(
-												2,
-												new ModifyDamageEffect({ amount: effectiveDefense })
-											),
-											new ModifyCapabilityCostEffect({
+											...variants.ifMatches(2, modifyDamage(effectiveDefense)),
+											modifyCapabilityCost({
 												cost: {
 													strength: -1,
 													charges: -1

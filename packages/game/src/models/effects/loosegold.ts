@@ -2,6 +2,7 @@ import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
+import { ScalarExpression } from '../expressions';
 
 /**
  * Props for configuring a LooseGoldEffect.
@@ -30,3 +31,12 @@ export class LooseGoldEffect extends Effect {
 		this.amount = amount;
 	}
 }
+
+const isScalar = (v: ScalarExpressionType | LooseGoldEffectProps): v is ScalarExpressionType =>
+	typeof v === 'number' || typeof v === 'string' || v instanceof ScalarExpression;
+
+/** Creates a loose gold effect. */
+export const looseGold = (
+	amountOrProps: ScalarExpressionType | LooseGoldEffectProps
+): LooseGoldEffect =>
+	new LooseGoldEffect(isScalar(amountOrProps) ? { amount: amountOrProps } : amountOrProps);

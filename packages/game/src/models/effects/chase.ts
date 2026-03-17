@@ -8,6 +8,6 @@ import { Effect } from './effect';
 export class ChaseEffect extends Effect {}
 
 /**
- * Singleton instance for chasing the prey.
+ * Creates an effect that chases the prey.
  */
-export const chase = new ChaseEffect();
+export const chase = (): ChaseEffect => new ChaseEffect();

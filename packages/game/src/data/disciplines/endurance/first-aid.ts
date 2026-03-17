@@ -1,5 +1,5 @@
 import { Action } from '../../../models/capabilities';
-import { HealEffect } from '../../../models/effects';
+import { heal } from '../../../models/effects';
 import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 
@@ -18,7 +18,7 @@ export default upgradable(Skill, 2, (variants) => ({
 			cost: {
 				intelligence: 2
 			},
-			effects: [new HealEffect({ amount: variants.values(2, 3) })]
+			effects: [heal(variants.values(2, 3))]
 		})
 	]
 }));

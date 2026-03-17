@@ -1,5 +1,5 @@
 import { Opportunity } from '../../../models/capabilities';
-import { DrawCardsEffect } from '../../../models/effects';
+import { drawCards } from '../../../models/effects';
 import { Skill } from '../../../models/entities/skill';
 
 export default new Skill({
@@ -14,7 +14,7 @@ export default new Skill({
 	capabilities: [
 		new Opportunity({
 			triggers: ['chapterStart'],
-			effects: [new DrawCardsEffect({ amount: 1 })]
+			effects: [drawCards(1)]
 		})
 	]
 });

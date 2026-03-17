@@ -1,12 +1,12 @@
 import { Action, Obligation } from '../../../models/capabilities';
 import {
-	AttachEffect,
-	ModifyCapabilityCostEffect,
-	ModifyDamageEffect,
-	ModifyRollEffect,
+	attach,
+	modifyCapabilityCost,
+	modifyDamage,
+	modifyRoll,
 	negateDamage,
-	ResultsTableEffect,
-	TriggerAttackEffect
+	resultsTable,
+	triggerAttack
 } from '../../../models/effects';
 import { not } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
@@ -27,17 +27,17 @@ export default upgradable(Skill, 2, (variants) => ({
 				agility: variants.level
 			},
 			effects: [
-				new TriggerAttackEffect({
+				triggerAttack({
 					condition: not(projectile),
 					modifiers: [
-						new ModifyCapabilityCostEffect({ cost: { agility: -variants.level } }),
-						new ResultsTableEffect({
+						modifyCapabilityCost({ cost: { agility: -variants.level } }),
+						resultsTable({
 							entries: [
 								{
 									result: variants.values('2+', '1+'),
 									effects: [
-										negateDamage,
-										new AttachEffect({
+										negateDamage(),
+										attach({
 											target: {
 												type: 'defender'
 											}
@@ -54,7 +54,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	attachmentCapabilities: [
 		new Obligation({
 			triggers: ['attacking'],
-			effects: [new ModifyRollEffect({ modifier: -2 }), new ModifyDamageEffect({ amount: -1 })]
+			effects: [modifyRoll(-2), modifyDamage(-1)]
 		})
 	]
 }));

@@ -1,5 +1,5 @@
 import { Obligation } from '../../../models/capabilities';
-import { GoTowardsEffect, TestEffect } from '../../../models/effects';
+import { goTowards, test } from '../../../models/effects';
 import { Encounter } from '../../../models/entities/encounter';
 import { strength } from '../../../models/stats';
 
@@ -13,10 +13,10 @@ export default new Encounter({
 		new Obligation({
 			triggers: ['revealed'],
 			effects: [
-				new TestEffect({
+				test({
 					expression: strength,
 					results: {
-						failed: [new GoTowardsEffect({ destination: { type: 'enemy', selection: 'closest' } })]
+						failed: [goTowards({ destination: { type: 'enemy', selection: 'closest' } })]
 					}
 				})
 			]

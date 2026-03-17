@@ -1,11 +1,6 @@
 import { Action } from '../../../models/capabilities';
-import {
-	ModifyDamageEffect,
-	ModifyRollEffect,
-	ResultsTableEffect,
-	TriggerAttackEffect
-} from '../../../models/effects';
-import { ReceiveOpportunityAttacksEffect } from '../../../models/effects/receiveopportunityattacks';
+import { modifyDamage, modifyRoll, resultsTable, triggerAttack } from '../../../models/effects';
+import { receiveOpportunityAttacks } from '../../../models/effects/receiveopportunityattacks';
 import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 
@@ -23,19 +18,19 @@ export default upgradable(Skill, 2, (variants) => ({
 		new Action({
 			cost: { agility: 1 },
 			effects: [
-				new TriggerAttackEffect({
+				triggerAttack({
 					modifiers: [
-						new ResultsTableEffect({
+						resultsTable({
 							entries: [
 								{
 									result: '1+',
-									effects: [new ModifyDamageEffect({ amount: 2 })]
+									effects: [modifyDamage(2)]
 								},
 								{
 									result: 0,
 									effects: [
-										new ReceiveOpportunityAttacksEffect({
-											effects: [new ModifyRollEffect({ modifier: variants.values(2, 1) })]
+										receiveOpportunityAttacks({
+											effects: [modifyRoll(variants.values(2, 1))]
 										})
 									]
 								}
