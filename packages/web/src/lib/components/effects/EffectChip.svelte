@@ -33,6 +33,7 @@
 		PlayStoryCardsEffect,
 		ProficiencyTableEffect,
 		ReceiveOpportunityAttacksEffect,
+		RecoverSanityEffect,
 		RedrawFateEffect,
 		RemoveChargesEffect,
 		RepeatCapabilityEffect,
@@ -85,6 +86,7 @@
 	import PlayStoryCardsEffectChip from './PlayStoryCardsEffectChip.svelte';
 	import ProficiencyTableEffectChip from './ProficiencyTableEffectChip.svelte';
 	import ReceiveOpportunityAttacksEffectChip from './ReceiveOpportunityAttacksEffectChip.svelte';
+	import RecoverSanityEffectChip from './RecoverSanityEffectChip.svelte';
 	import RedrawFateEffectChip from './RedrawFateEffectChip.svelte';
 	import RemoveChargesEffectChip from './RemoveChargesEffectChip.svelte';
 	import RepeatCapabilityEffectChip from './RepeatCapabilityEffectChip.svelte';
@@ -144,6 +146,8 @@
 		<ExhaustEffectChip {effect} />
 	{:else if effect instanceof HealEffect}
 		<HealEffectChip {effect} />
+	{:else if effect instanceof RecoverSanityEffect}
+		<RecoverSanityEffectChip {effect} />
 	{:else if effect instanceof InvestigateEffect}
 		<InvestigateEffectChip {effect} />
 	{:else if effect instanceof ConferPropertiesEffect}

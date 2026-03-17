@@ -32,6 +32,7 @@ export { PayEffect, type PayEffectProps } from './payeffect';
 export { PlayStoryCardsEffect, type PlayStoryCardsEffectProps } from './playstorycards';
 export { ProficiencyTableEffect, type ProficiencyTableEntry } from './proficiencytable';
 export { ReceiveOpportunityAttacksEffect } from './receiveopportunityattacks';
+export { RecoverSanityEffect, type RecoverSanityEffectProps } from './recoversanity';
 export { AddChargesEffect, type RechargeAmount } from './recharge';
 export { redrawFate, RedrawFateEffect } from './redrawfate';
 export { RemoveChargesEffect } from './removecharges';
