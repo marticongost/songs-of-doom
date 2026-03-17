@@ -9,7 +9,7 @@ export default new Archetype({
 		es: 'Sacerdote',
 		en: 'Priest'
 	},
-	disciplines: ['might', 'endurance'],
+	disciplines: ['might', 'endurance', 'blessing', 'judgement'],
 	xpCost: 5,
 	capabilities: [
 		new Constant({
