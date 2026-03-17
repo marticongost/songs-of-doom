@@ -23,7 +23,8 @@ export type EventType =
 	| 'revealed'
 	| 'moving'
 	| 'resolvingEncounter'
-	| 'beforeOtherPlayerResolvesTest';
+	| 'beforeOtherPlayerResolvesTest'
+	| 'fullyDischarged';
 
 export type EventProps = { type: EventType; name: LocalisedText };
 
@@ -160,6 +161,14 @@ export const events: Record<EventType, Event> = {
 			ca: 'Abans que un altre jugador resolgui una prova',
 			es: 'Antes de que otro jugador resuelva una prueba',
 			en: 'Before another player resolves a test'
+		}
+	}),
+	fullyDischarged: new Event({
+		type: 'fullyDischarged',
+		name: {
+			ca: 'En perdre totes les càrregues',
+			es: 'Al perder todas las cargas',
+			en: 'When fully discharged'
 		}
 	})
 };
