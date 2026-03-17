@@ -29,6 +29,7 @@
 		NarrationEventEffect,
 		NegateDamageEffect,
 		OneOfEffect,
+		PayEffect,
 		PlayStoryCardsEffect,
 		ProficiencyTableEffect,
 		ReceiveOpportunityAttacksEffect,
@@ -80,6 +81,7 @@
 	import NarrationEventEffectChip from './NarrationEventEffectChip.svelte';
 	import NegateDamageEffectChip from './NegateDamageEffectChip.svelte';
 	import OneOfEffectChip from './OneOfEffectChip.svelte';
+	import PayEffectChip from './PayEffectChip.svelte';
 	import PlayStoryCardsEffectChip from './PlayStoryCardsEffectChip.svelte';
 	import ProficiencyTableEffectChip from './ProficiencyTableEffectChip.svelte';
 	import ReceiveOpportunityAttacksEffectChip from './ReceiveOpportunityAttacksEffectChip.svelte';
@@ -198,5 +200,7 @@
 		<NarrationEventEffectChip {effect} />
 	{:else if effect instanceof OneOfEffect}
 		<OneOfEffectChip {effect} />
+	{:else if effect instanceof PayEffect}
+		<PayEffectChip {effect} />
 	{/if}
 </span>

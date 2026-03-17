@@ -28,6 +28,7 @@ export { move, MoveEffect } from './move';
 export { NarrationEventEffect, type NarrationEventEffectProps } from './narrationevent';
 export { negateDamage, NegateDamageEffect } from './negatedamage';
 export { OneOfEffect, type OneOfEffectProps } from './oneof';
+export { PayEffect, type PayEffectProps } from './payeffect';
 export { PlayStoryCardsEffect, type PlayStoryCardsEffectProps } from './playstorycards';
 export { ProficiencyTableEffect, type ProficiencyTableEntry } from './proficiencytable';
 export { ReceiveOpportunityAttacksEffect } from './receiveopportunityattacks';
