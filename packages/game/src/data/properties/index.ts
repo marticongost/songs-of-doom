@@ -7,6 +7,7 @@ export { default as innate } from './innate';
 export { default as magic } from './magic';
 export { default as parry } from './parry';
 export { default as permanent } from './permanent';
+export { default as physical } from './physical';
 export { default as piercing } from './piercing';
 export { default as projectile } from './projectile';
 export { default as shield } from './shield';

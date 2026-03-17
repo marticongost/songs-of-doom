@@ -2,15 +2,15 @@ import { Action, Obligation } from '../../../models/capabilities';
 import {
 	addCharges,
 	attach,
-	conferProperties,
 	discard,
 	modifyDamage,
 	modifyRoll,
+	replaceProperty,
 	triggerAttack
 } from '../../../models/effects';
 import { Skill } from '../../../models/entities';
 import { upgradable } from '../../../models/upgrades';
-import { holy } from '../../properties';
+import { holy, physical } from '../../properties';
 
 export default upgradable(Skill, 2, (variants) => ({
 	title: {
@@ -34,7 +34,11 @@ export default upgradable(Skill, 2, (variants) => ({
 			cost: { will: 2, charges: 1 },
 			effects: [
 				triggerAttack({
-					modifiers: [conferProperties([holy]), modifyRoll(2), modifyDamage(2)]
+					modifiers: [
+						replaceProperty({ original: physical, replacement: holy }),
+						modifyRoll(2),
+						modifyDamage(2)
+					]
 				})
 			]
 		}),
