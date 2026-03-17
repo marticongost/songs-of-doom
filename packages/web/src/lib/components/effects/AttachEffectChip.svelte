@@ -16,6 +16,10 @@ Renders an attach effect, displaying the target to which the card attaches.
 </script>
 
 <span {...standardAttributes(attributes, 'attach-effect-chip')}>
-	<Text ca="Vincular" es="Vincular" en="Attach" />
+	{#if effect.stacking}
+		<Text ca="Vincular" es="Vincular" en="Attach" />
+	{:else}
+		<Text ca="Vincular (única)" es="Vincular (única)" en="Attach (unique)" />
+	{/if}
 	<TargetChip target={effect.target} relation="to" />
 </span>
