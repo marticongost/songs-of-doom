@@ -7,7 +7,7 @@
 			padding: css.spacing.md,
 			'--svg-height': '1.5em',
 			'--svg-width': 'auto',
-			color: 'var(--toolbar-button-color)',
+			color: css.palette.opium,
 			fontWeight: 'bold',
 			svg: {
 				transition: 'transform 0.1s linear',
@@ -19,16 +19,16 @@
 				cursor: 'not-allowed'
 			},
 			'&:hover': {
-				backgroundColor: 'var(--toolbar-button-hover-background-color)',
-				color: 'var(--toolbar-button-hover-color)',
+				backgroundColor: css.palette.extraLightCocoaBrown,
+				color: css.palette.dustyGray,
 				svg: {
 					transform: 'scale(1.2)'
 				}
 			},
 			'&:focus': {
 				outline: 'none',
-				backgroundColor: 'var(--toolbar-button-focus-background-color)',
-				color: 'var(--toolbar-button-focus-color)'
+				backgroundColor: css.palette.cocoaBrown,
+				color: css.palette.dustyGray
 			}
 		},
 		orbitContainer: {

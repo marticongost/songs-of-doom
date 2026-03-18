@@ -20,7 +20,7 @@ Used by both the read-only character view and the edit view.
 		characterName: {
 			fontFamily: css.fonts.heading,
 			color: css.text.headingColor,
-			padding: css.spacing.md,
+			...css.hpadding('md'),
 			marginRight: css.spacing.lg
 		},
 		cardSetHeader: {
