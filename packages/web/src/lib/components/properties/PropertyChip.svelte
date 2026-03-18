@@ -22,9 +22,10 @@
 		ParametricRuleInstance,
 		Rule,
 		ScalarRule,
-		type Property,
-		type ScalarRuleParams
+		propertyData,
+		type Property
 	} from '@songsofdoom/game';
+	import Parameters from '../capabilities/Parameters.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
 	interface Props extends StandardAttributeProps {
@@ -38,14 +39,12 @@
 	{...standardAttributes(attributes, styles.propertyChip)}
 	class:type={property instanceof EntityType}
 	class:rule={property instanceof Rule}
-	><!--
-	--><Text
-		{...property.title}
-	/><!--
-	-->{#if property instanceof ParametricRuleInstance && property.rule instanceof ScalarRule}<!--
-		-->{@const instance =
-			property as ParametricRuleInstance<ScalarRuleParams>}<!--
-		-->({instance.params
-			.value})<!--
-	-->{/if}</span
+>
+	<Text {...property.title} />
+	{#if property instanceof ParametricRuleInstance && property.rule instanceof ScalarRule}
+		<Parameters>{property.params.value}</Parameters>
+	{:else if property instanceof ParametricRuleInstance && property.rule instanceof propertyData.VulnerableRule}
+		<Parameters><Text {...property.params.attackType.title} />, +{property.params.value}</Parameters
+		>
+	{/if}</span
 >

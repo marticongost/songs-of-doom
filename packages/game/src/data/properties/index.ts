@@ -15,4 +15,5 @@ export { default as smallWeapon } from './small-weapon';
 export { default as standard } from './standard';
 export { default as toughness } from './toughness';
 export { default as town } from './town';
+export { VulnerableRule, type VulnerableParams, default as vulnerable } from './vulnerable';
 export { default as weapon } from './weapon';
