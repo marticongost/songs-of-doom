@@ -33,9 +33,7 @@
 	><!--
 	--><span class={styles.symbol}>{symbols[symbolType][0]}</span><!--
 	--><span
-		class={styles.parameterItems}
-	>
-		{@render children()}
-	</span><!--
+		class={styles.parameterItems}>{@render children()}</span
+	><!--
 	--><span class={styles.symbol}>{symbols[symbolType][1]}</span>
 </span>

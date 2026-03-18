@@ -49,8 +49,8 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 {#snippet expressionNodeSnippet(expression: ScalarExpressionType | BooleanExpressionType)}
 	<!-- Check for custom translations first -->
 	{@const translation = expression instanceof Expression ? expression.translate() : undefined}
-	{#if relative && !(typeof expression === 'number' && expression < 0)}+{/if}
-	{#if translation !== undefined}
+	{#if relative && !(typeof expression === 'number' && expression < 0)}+{/if}<!--
+	-->{#if translation !== undefined}
 		<Text {...translation} />
 	{:else if typeof expression === 'number'}
 		<span class="number">{expression}</span>
