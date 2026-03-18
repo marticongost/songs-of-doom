@@ -19,11 +19,11 @@ export default upgradable(Skill, 2, (variants) => ({
 	},
 	xpCost: variants.values(0, 1),
 	discardReward: {
-		will: variants.level
+		strength: variants.level
 	},
 	capabilities: [
 		new Action({
-			cost: { will: 1 },
+			cost: { strength: 1 },
 			effects: [
 				triggerAttack({
 					modifiers: [
