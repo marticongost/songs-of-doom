@@ -1,3 +1,4 @@
+import { type ScalarExpressionType } from '../expressions/scalar/scalar-expression';
 import { Rule } from './rule';
 
 export class ParametricRule<P> extends Rule {
@@ -23,7 +24,7 @@ export class ParametricRuleInstance<P> extends Rule {
 }
 
 export interface ScalarRuleParams {
-	value: number;
+	value: ScalarExpressionType;
 }
 
 export class ScalarRule extends ParametricRule<ScalarRuleParams> {}

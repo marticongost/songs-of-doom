@@ -26,6 +26,7 @@
 		type Property
 	} from '@songsofdoom/game';
 	import Parameters from '../capabilities/Parameters.svelte';
+	import ExpressionChip from '../expressions/ExpressionChip.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
 	interface Props extends StandardAttributeProps {
@@ -42,7 +43,7 @@
 >
 	<Text {...property.title} />
 	{#if property instanceof ParametricRuleInstance && property.rule instanceof ScalarRule}
-		<Parameters>{property.params.value}</Parameters>
+		<Parameters><ExpressionChip expression={property.params.value} /></Parameters>
 	{:else if property instanceof ParametricRuleInstance && property.rule instanceof propertyData.VulnerableRule}
 		<Parameters><Text {...property.params.attackType.title} />, +{property.params.value}</Parameters
 		>
