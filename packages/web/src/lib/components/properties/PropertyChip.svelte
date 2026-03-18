@@ -47,5 +47,14 @@
 	{:else if property instanceof ParametricRuleInstance && property.rule instanceof propertyData.VulnerableRule}
 		<Parameters><Text {...property.params.attackType.title} />, +{property.params.value}</Parameters
 		>
+	{:else if property instanceof ParametricRuleInstance && property.rule instanceof propertyData.InvulnerableRule}
+		{#if property.params.attackType !== undefined || property.params.value !== undefined}
+			<Parameters
+				>{#if property.params.attackType !== undefined}<Text
+						{...property.params.attackType.title}
+					/>{/if}{#if property.params.value !== undefined}<ExpressionChip
+						expression={property.params.value}
+					/>{/if}</Parameters
+			>{/if}
 	{/if}</span
 >
