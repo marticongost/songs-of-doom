@@ -258,9 +258,11 @@
 		if (cardinality?.isEveryTarget()) return 'plain';
 		if (cardinality?.isMultipleTargets()) return 'plural';
 		if (
-			target instanceof Target &&
-			target.selection !== 'random' &&
-			target.selection !== 'player-chosen'
+			target.matchesType('attacker') ||
+			target.matchesType('defender') ||
+			(target instanceof Target &&
+				target.selection !== 'random' &&
+				target.selection !== 'player-chosen')
 		) {
 			return 'determinate';
 		}

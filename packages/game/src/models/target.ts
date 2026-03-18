@@ -152,6 +152,11 @@ export class TargetDiscriminator<T extends TargetType = TargetType> {
 			this.condition = p.condition;
 		}
 	}
+
+	/** Whether a given target type matches this discriminator. */
+	matchesType(targetType: TargetType): boolean {
+		return this.type === undefined || this.type.has(targetType as T);
+	}
 }
 
 /** Constructor parameters for the {@link Target} class. */
