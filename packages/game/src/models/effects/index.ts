@@ -60,6 +60,11 @@ export {
 } from './replaceproperty';
 export { resolveEncounter, ResolveEncounterEffect } from './resolveencounter';
 export { resultsTable, ResultsTableEffect, type ResultsTableEntry } from './resultstable';
+export {
+	saveTargetToVariable,
+	SaveTargetToVariableEffect,
+	type SaveTargetToVariableEffectProps
+} from './savetargettovariable';
 export { sanityLoss, SanityLossEffect } from './sanityloss';
 export { setRollResult, SetRollResultEffect, type SetRollResultEffectProps } from './setrollresult';
 export { talent, TalentEffect, type TalentEffectProps } from './talenteffect';

@@ -40,6 +40,7 @@
 		ReplaceEncounterEffect,
 		ReplacePropertyEffect,
 		ResolveEncounterEffect,
+		SaveTargetToVariableEffect,
 		ResultsTableEffect,
 		SanityLossEffect,
 		SetRollResultEffect,
@@ -94,6 +95,7 @@
 	import ReplaceEncounterEffectChip from './ReplaceEncounterEffectChip.svelte';
 	import ReplacePropertyEffectChip from './ReplacePropertyEffectChip.svelte';
 	import ResolveEncounterEffectChip from './ResolveEncounterEffectChip.svelte';
+	import SaveTargetToVariableEffectChip from './SaveTargetToVariableEffectChip.svelte';
 	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
 	import SanityLossEffectChip from './SanityLossEffectChip.svelte';
 	import SetRollResultEffectChip from './SetRollResultEffectChip.svelte';
@@ -176,6 +178,8 @@
 		<ReplaceEncounterEffectChip {effect} />
 	{:else if effect instanceof ReplacePropertyEffect}
 		<ReplacePropertyEffectChip {effect} />
+	{:else if effect instanceof SaveTargetToVariableEffect}
+		<SaveTargetToVariableEffectChip {effect} />
 	{:else if effect instanceof ResolveEncounterEffect}
 		<ResolveEncounterEffectChip {effect} />
 	{:else if effect instanceof SanityLossEffect}
