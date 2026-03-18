@@ -24,7 +24,12 @@ export default upgradable(Skill, 2, (variants) => ({
 					invulnerable.with({ value: variants.values<ScalarExpressionType>(2, X) })
 				]),
 				triggerAttack({
-					modifiers: [conferProperties([holy, disruption.with({ value: X })])]
+					modifiers: [
+						conferProperties([
+							holy,
+							disruption.with({ value: variants.values<ScalarExpressionType>(2, X) })
+						])
+					]
 				})
 			]
 		})
