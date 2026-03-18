@@ -22,6 +22,10 @@
 	/>
 	<ExpressionChip expression={effect.condition} />
 	<TargetChip target={effect.card} relation="possessive" />
+	{#if effect.target}
+		<Text ca="contra" es="contra" en="against" />
+		<TargetChip target={effect.target} />
+	{/if}
 	{#if effect.modifiers.length}
 		<Parameters><EffectList effects={effect.modifiers} /></Parameters>{/if}<!--
 --></span

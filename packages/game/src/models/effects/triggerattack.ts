@@ -24,6 +24,12 @@ export interface TriggerAttackEffectProps {
 	 * Specifies which cards are eligible for the triggered attack action.
 	 */
 	card?: TargetSpec;
+
+	/**
+	 * The target(s) of the triggered attack action. If not specified, the attack uses
+	 * regular rules for selecting the target.
+	 */
+	target?: TargetSpec;
 }
 
 /**
@@ -51,11 +57,18 @@ export class TriggerAttackEffect extends Effect {
 	 */
 	readonly card?: Target;
 
-	constructor({ modifiers, condition, card }: TriggerAttackEffectProps = {}) {
+	/**
+	 * The target(s) of the triggered attack action. If not specified, the attack uses
+	 * regular rules for selecting the target.
+	 */
+	target?: Target;
+
+	constructor({ modifiers, condition, card, target }: TriggerAttackEffectProps = {}) {
 		super();
 		this.modifiers = modifiers ?? [];
 		this.condition = condition;
 		this.card = finalise(Target, card);
+		this.target = finalise(Target, target);
 	}
 }
 
