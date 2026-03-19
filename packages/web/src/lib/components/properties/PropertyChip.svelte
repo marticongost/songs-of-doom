@@ -40,9 +40,10 @@
 	{...standardAttributes(attributes, styles.propertyChip)}
 	class:type={property instanceof EntityType}
 	class:rule={property instanceof Rule}
->
-	<Text {...property.title} />
-	{#if property instanceof ParametricRuleInstance && property.rule instanceof ScalarRule}
+	><Text
+		{...property.title}
+	/><!--
+ -->{#if property instanceof ParametricRuleInstance && property.rule instanceof ScalarRule}
 		<Parameters><ExpressionChip expression={property.params.value} /></Parameters>
 	{:else if property instanceof ParametricRuleInstance && property.rule instanceof propertyData.VulnerableRule}
 		<Parameters><Text {...property.params.attackType.title} />, +{property.params.value}</Parameters
