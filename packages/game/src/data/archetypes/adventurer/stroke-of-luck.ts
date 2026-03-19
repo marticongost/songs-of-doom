@@ -15,7 +15,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	xpCost: variants.values(0, 1),
 	capabilities: [
 		new Opportunity({
-			triggers: ['fateDrawn'],
+			triggers: ['afterDrawingFate'],
 			cost: { any: 1 },
 			effects: variants.values(
 				[resultsTable({ entries: [{ result: ['CF', 0], effects: [redrawFate()] }] })],

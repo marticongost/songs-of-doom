@@ -19,11 +19,12 @@ export type EventType =
 	| 'turnEnd'
 	| 'provoked'
 	| 'takingDamage'
-	| 'fateDrawn'
+	| 'beforeDrawingFate'
+	| 'beforeOtherPlayerDrawsFate'
+	| 'afterDrawingFate'
 	| 'revealed'
 	| 'moving'
 	| 'resolvingEncounter'
-	| 'beforeOtherPlayerResolvesTest'
 	| 'fullyDischarged';
 
 export type EventProps = { type: EventType; name: LocalisedText };
@@ -131,12 +132,28 @@ export const events: Record<EventType, Event> = {
 		type: 'takingDamage',
 		name: { ca: 'En rebre dany', es: 'Al recibir daño', en: 'When taking damage' }
 	}),
-	fateDrawn: new Event({
-		type: 'fateDrawn',
+	beforeDrawingFate: new Event({
+		type: 'beforeDrawingFate',
+		name: {
+			ca: 'Abans de robar una fitxa de destí',
+			es: 'Antes de robar una ficha de destino',
+			en: 'Before drawing a fate token'
+		}
+	}),
+	afterDrawingFate: new Event({
+		type: 'afterDrawingFate',
 		name: {
 			ca: 'Després de robar una fitxa de destí',
 			es: 'Después de robar una ficha de destino',
 			en: 'After drawing a fate token'
+		}
+	}),
+	beforeOtherPlayerDrawsFate: new Event({
+		type: 'beforeOtherPlayerDrawsFate',
+		name: {
+			ca: 'Abans que un altre jugador robi una fitxa de destí',
+			es: 'Antes de que otro jugador robe una ficha de destino',
+			en: 'Before another player draws a fate token'
 		}
 	}),
 	revealed: new Event({
@@ -153,14 +170,6 @@ export const events: Record<EventType, Event> = {
 			ca: 'En resoldre un encontre',
 			es: 'Al resolver un encuentro',
 			en: 'When resolving an encounter'
-		}
-	}),
-	beforeOtherPlayerResolvesTest: new Event({
-		type: 'beforeOtherPlayerResolvesTest',
-		name: {
-			ca: 'Abans que un altre jugador resolgui una prova',
-			es: 'Antes de que otro jugador resuelva una prueba',
-			en: 'Before another player resolves a test'
 		}
 	}),
 	fullyDischarged: new Event({

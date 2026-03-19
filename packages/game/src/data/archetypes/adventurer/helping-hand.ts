@@ -16,7 +16,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	xpCost: variants.values(0, 1),
 	capabilities: [
 		new Opportunity({
-			triggers: ['beforeOtherPlayerResolvesTest'],
+			triggers: ['beforeOtherPlayerDrawsFate'],
 			cost: { charisma: variants.values<ScalarExpressionType>(2, X) },
 			effects: [modifyRoll(variants.values<ScalarExpressionType>(2, X))]
 		})
