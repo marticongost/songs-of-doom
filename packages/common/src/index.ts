@@ -1,2 +1,2 @@
 export * from './localisation';
-export { type Constructor, finalise } from './utils';
+export { type Constructor, finalise, mapToRecord, type MapToRecordOptions } from './utils';
