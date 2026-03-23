@@ -44,13 +44,14 @@
 		{...property.title}
 	/><!--
  -->{#if property instanceof ParametricRuleInstance && property.rule instanceof ScalarRule}
-		<Parameters><ExpressionChip expression={property.params.value} /></Parameters>
+		&nbsp;<Parameters><ExpressionChip expression={property.params.value} /></Parameters>
 	{:else if property instanceof ParametricRuleInstance && property.rule instanceof propertyData.VulnerableRule}
-		<Parameters><Text {...property.params.attackType.title} />, +{property.params.value}</Parameters
+		&nbsp;<Parameters
+			><Text {...property.params.attackType.title} />, +{property.params.value}</Parameters
 		>
 	{:else if property instanceof ParametricRuleInstance && property.rule instanceof propertyData.InvulnerableRule}
 		{#if property.params.attackType !== undefined || property.params.value !== undefined}
-			<Parameters
+			&nbsp;<Parameters
 				>{#if property.params.attackType !== undefined}<Text
 						{...property.params.attackType.title}
 					/>{/if}{#if property.params.value !== undefined}<ExpressionChip
