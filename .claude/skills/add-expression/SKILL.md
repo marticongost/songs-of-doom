@@ -147,7 +147,11 @@ export class DistanceExpression extends ScalarExpression {
 		value: ScalarExpressionType
 	): LocalisedText | undefined {
 		if (operator === '=' && value === 0) {
-			return { ca: 'Mateixa ubicació', es: 'Misma ubicación', en: 'Same location' };
+			return {
+				ca: 'a la mateixa ubicació',
+				es: 'en la misma ubicación',
+				en: 'in the same location'
+			};
 		}
 		return undefined;
 	}

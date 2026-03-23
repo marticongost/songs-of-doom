@@ -1,5 +1,5 @@
-import type { ComparisonOperator } from '../../expressions/boolean/comparison';
 import type { LocalisedText } from '@songsofdoom/common/localisation';
+import type { ComparisonOperator } from '../../expressions/boolean/comparison';
 import { ScalarExpression, type ScalarExpressionType } from './scalar-expression';
 
 /**
@@ -29,16 +29,16 @@ export class DistanceExpression extends ScalarExpression {
 	): LocalisedText | undefined {
 		if (operator === '=' && value === 0) {
 			return {
-				ca: 'Mateixa ubicació',
-				es: 'Misma ubicación',
-				en: 'Same location'
+				ca: 'a la mateixa ubicació',
+				es: 'en la misma ubicación',
+				en: 'in the same location'
 			};
 		}
 		if (operator === '=' && value === 1) {
 			return {
-				ca: 'Ubicació adjacent',
-				es: 'Ubicación adyacente',
-				en: 'Adjacent location'
+				ca: 'a una ubicació adjacent',
+				es: 'en una ubicación adyacente',
+				en: 'in an adjacent location'
 			};
 		}
 		return undefined;
