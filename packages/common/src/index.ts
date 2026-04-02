@@ -1,2 +1,3 @@
+export { BaseCounter, Counter, ReadonlyCounter } from './counter';
 export * from './localisation';
-export { type Constructor, finalise, mapToRecord, type MapToRecordOptions } from './utils';
+export { finalise, mapToRecord, type Constructor, type MapToRecordOptions } from './utils';

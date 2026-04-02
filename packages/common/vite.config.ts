@@ -10,5 +10,10 @@ export default defineConfig({
 		},
 		outDir: 'dist',
 		emptyDirBeforeWrite: true
+	},
+	test: {
+		expect: {
+			requireAssertions: true
+		}
 	}
 });
