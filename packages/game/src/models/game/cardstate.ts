@@ -17,6 +17,8 @@ export interface CardStateProps {
 	exhausted?: boolean;
 	charges?: number;
 	attachments?: ReadonlyArray<CardState>;
+	physicalTrauma?: number;
+	mentalTrauma?: number;
 }
 
 export class CardState {
@@ -27,6 +29,8 @@ export class CardState {
 	readonly exhausted: boolean;
 	readonly charges: number;
 	readonly attachments: ReadonlyArray<CardState>;
+	readonly physicalTrauma: number;
+	readonly mentalTrauma: number;
 
 	constructor({
 		id,
@@ -35,7 +39,9 @@ export class CardState {
 		location,
 		exhausted = false,
 		charges = 0,
-		attachments = []
+		attachments = [],
+		physicalTrauma = 0,
+		mentalTrauma = 0
 	}: CardStateProps) {
 		this.id = id;
 		this.card = card;
@@ -44,6 +50,8 @@ export class CardState {
 		this.exhausted = exhausted;
 		this.charges = charges;
 		this.attachments = attachments;
+		this.physicalTrauma = physicalTrauma;
+		this.mentalTrauma = mentalTrauma;
 	}
 
 	getCard(id: number): CardState | undefined {
@@ -106,6 +114,8 @@ export class MutableCardState extends CardState {
 	declare charges: number;
 	declare attachments: Array<MutableCardState>;
 	declare location: CardLocation;
+	declare physicalTrauma: number;
+	declare mentalTrauma: number;
 
 	constructor(cardState: ReadonlyCardState) {
 		super({
@@ -115,7 +125,9 @@ export class MutableCardState extends CardState {
 			location: cardState.location,
 			exhausted: cardState.exhausted,
 			charges: cardState.charges,
-			attachments: cardState.attachments.map((attachment) => attachment.mutable())
+			attachments: cardState.attachments.map((attachment) => attachment.mutable()),
+			physicalTrauma: cardState.physicalTrauma,
+			mentalTrauma: cardState.mentalTrauma
 		});
 	}
 
@@ -135,7 +147,9 @@ export class MutableCardState extends CardState {
 			location: this.location,
 			exhausted: this.exhausted,
 			charges: this.charges,
-			attachments: this.attachments.map((attachment) => attachment.readonly())
+			attachments: this.attachments.map((attachment) => attachment.readonly()),
+			physicalTrauma: this.physicalTrauma,
+			mentalTrauma: this.mentalTrauma
 		});
 	}
 
