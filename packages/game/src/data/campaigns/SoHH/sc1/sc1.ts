@@ -22,7 +22,7 @@ export default new Scenario({
 				'2-3': [setRollResult(1)],
 				'1': [setRollResult(0)]
 			}),
-			discardFromHand({ amount: 1 }),
+			discardFromHand(),
 			drawCards(1)
 		],
 		peril: [

@@ -17,8 +17,8 @@ export default new Encounter({
 				test({
 					expression: minus(intelligence, handSize),
 					results: {
-						CF: [discardFromHand({ amount: 2, selection: 'random' })],
-						0: [discardFromHand({ amount: 1, selection: 'random' })]
+						CF: [discardFromHand({ cards: { cardinality: 2, selection: 'random' } })],
+						0: [discardFromHand({ cards: { cardinality: 1, selection: 'random' } })]
 					}
 				})
 			]

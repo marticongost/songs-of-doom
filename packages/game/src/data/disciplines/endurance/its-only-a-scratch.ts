@@ -17,7 +17,7 @@ export default upgradable(Skill, 2, (variants) => ({
 			cost: {
 				will: 2
 			},
-			effects: [negateDamage(), ...variants.ifMatches(1, discardFromHand({ amount: 1 }))]
+			effects: [negateDamage(), ...variants.ifMatches(1, discardFromHand())]
 		})
 	]
 }));
