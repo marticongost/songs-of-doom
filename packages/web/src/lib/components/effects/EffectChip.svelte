@@ -17,7 +17,6 @@
 		ExhaustEffect,
 		GoTowardsEffect,
 		HealEffect,
-		ImmobilizeEffect,
 		InvestigateEffect,
 		LooseGoldEffect,
 		ModifyCapabilityCostEffect,
@@ -72,7 +71,6 @@
 	import GatherCluesEffectChip from './GatherCluesEffectChip.svelte';
 	import GoTowardsEffectChip from './GoTowardsEffectChip.svelte';
 	import HealEffectChip from './HealEffectChip.svelte';
-	import ImmobilizeEffectChip from './ImmobilizeEffectChip.svelte';
 	import InvestigateEffectChip from './InvestigateEffectChip.svelte';
 	import LooseGoldEffectChip from './LooseGoldEffectChip.svelte';
 	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
@@ -204,8 +202,6 @@
 		<GoTowardsEffectChip {effect} />
 	{:else if effect instanceof TalentEffect}
 		<TalentEffectChip {effect} />
-	{:else if effect instanceof ImmobilizeEffect}
-		<ImmobilizeEffectChip {effect} />
 	{:else if effect instanceof MoveEffect}
 		<MoveEffectChip {effect} />
 	{:else if effect instanceof NarrationEventEffect}

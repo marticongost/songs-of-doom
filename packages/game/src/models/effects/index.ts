@@ -16,7 +16,6 @@ export { exhaust, ExhaustEffect } from './exhaust';
 export { gatherClues, GatherCluesEffect, type GatherCluesEffectProps } from './gatherclues';
 export { goTowards, GoTowardsEffect } from './gotowards';
 export { heal, HealEffect } from './heal';
-export { immobilize, ImmobilizeEffect } from './immobilize';
 export { investigate, InvestigateEffect, type InvestigateEffectProps } from './investigate';
 export { looseGold, LooseGoldEffect } from './loosegold';
 export { modifyCapabilityCost, ModifyCapabilityCostEffect } from './modifycapabilitycost';

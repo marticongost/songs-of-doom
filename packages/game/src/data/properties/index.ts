@@ -3,6 +3,7 @@ export { default as disruption } from './disruption';
 export { default as flaw } from './flaw';
 export { default as follower } from './follower';
 export { default as holy } from './holy';
+export { default as immobilized } from './immobilized';
 export { default as innate } from './innate';
 export { default as magic } from './magic';
 export { default as parry } from './parry';

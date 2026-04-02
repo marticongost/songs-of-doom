@@ -1,9 +1,15 @@
 import { Action, Constant, Obligation } from '../../../models/capabilities';
-import { attach, discard, replaceEncounter, test, wound } from '../../../models/effects';
-import { immobilize } from '../../../models/effects/immobilize';
+import {
+	attach,
+	conferProperties,
+	discard,
+	replaceEncounter,
+	test,
+	wound
+} from '../../../models/effects';
 import { Encounter } from '../../../models/entities/encounter';
 import { copyAlreadyAttached, talentProficiency } from '../../../models/expressions';
-import { piercing } from '../../properties';
+import { immobilized, piercing } from '../../properties';
 import { disarmTrap } from '../../talents';
 
 export default new Encounter({
@@ -24,7 +30,7 @@ export default new Encounter({
 		})
 	],
 	attachmentCapabilities: [
-		new Constant({ effects: [immobilize()] }),
+		new Constant({ effects: [conferProperties([immobilized])] }),
 		new Action({ cost: { strength: 2 }, effects: [discard()] })
 	]
 });

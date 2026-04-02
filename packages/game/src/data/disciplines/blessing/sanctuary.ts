@@ -2,8 +2,8 @@ import { Action, Constant, Obligation, Opportunity } from '../../../models/capab
 import {
 	addCharges,
 	attach,
+	conferProperties,
 	discard,
-	immobilize,
 	negateDamage,
 	oneOf,
 	pay,
@@ -11,6 +11,7 @@ import {
 } from '../../../models/effects';
 import { Skill } from '../../../models/entities';
 import { upgradable } from '../../../models/upgrades';
+import { immobilized } from '../../properties';
 
 export default upgradable(Skill, 2, (variants) => ({
 	title: {
@@ -31,7 +32,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	],
 	attachmentCapabilities: [
 		new Constant({
-			effects: [immobilize()]
+			effects: [conferProperties([immobilized])]
 		}),
 		new Obligation({
 			triggers: ['takingDamage'],

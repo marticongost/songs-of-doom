@@ -2,8 +2,8 @@ import { Action, Constant, Obligation } from '../../../models/capabilities';
 import {
 	addCharges,
 	attach,
+	conferProperties,
 	discard,
-	immobilize,
 	removeCharges,
 	resultsTable,
 	triggerAttack
@@ -11,6 +11,7 @@ import {
 import { charges, eq } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
+import { immobilized } from '../../properties';
 
 export default upgradable(Skill, 2, (variants) => ({
 	title: {
@@ -35,7 +36,7 @@ export default upgradable(Skill, 2, (variants) => ({
 		})
 	],
 	attachmentCapabilities: [
-		new Constant({ effects: [immobilize()] }),
+		new Constant({ effects: [conferProperties([immobilized])] }),
 		new Obligation({
 			triggers: ['turnEnd'],
 			effects: [removeCharges({ amount: 1 }), eq(charges, 0).then(discard())]
