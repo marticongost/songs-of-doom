@@ -121,6 +121,14 @@ export const siteTree = new Section({
 				es: 'Referencia',
 				en: 'Reference'
 			}
+		},
+		{
+			name: 'simulator',
+			title: {
+				ca: 'Simulador',
+				es: 'Simulador',
+				en: 'Simulator'
+			}
 		}
 	]
 });
