@@ -24,6 +24,9 @@ export type ObjectTargetType = 'object';
 /** A subset of {@link TargetType} that can be used to designate locations. */
 export type LocationTargetType = 'location';
 
+/** A subset of {@link TargetType} that can be used to designate skills. */
+export type SkillTargetType = 'skill';
+
 /** A type of target for a game effect. */
 export type TargetType =
 	| PlayerTargetType
@@ -31,7 +34,8 @@ export type TargetType =
 	| EnemyTargetType
 	| AllyTargetType
 	| ObjectTargetType
-	| LocationTargetType;
+	| LocationTargetType
+	| SkillTargetType;
 
 /** A specification for a number of targets to select, supporting a variety of formats. */
 export type TargetCardinalitySpec =

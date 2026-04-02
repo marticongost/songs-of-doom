@@ -4,7 +4,7 @@
 
 	const getGender = (target: Target | TargetDiscriminator | undefined, locale: string) => {
 		if (!target || locale === 'en') return undefined;
-		if (target.type?.has('location')) return 'feminine';
+		if (target.type?.has('location') || target.type?.has('skill')) return 'feminine';
 		return 'masculine';
 	};
 
@@ -195,6 +195,28 @@
 				ca: 'ubicacions',
 				es: 'ubicaciones',
 				en: 'locations'
+			}
+		},
+		skill: {
+			plain: {
+				ca: 'carta de la ma',
+				es: 'carta de la mano',
+				en: 'card in hand'
+			},
+			determinate: {
+				ca: 'la carta de la ma',
+				es: 'la carta de la mano',
+				en: 'the card in hand'
+			},
+			indeterminate: {
+				ca: 'una carta de la ma',
+				es: 'una carta de la mano',
+				en: 'a card in hand'
+			},
+			plural: {
+				ca: 'cartes de la ma',
+				es: 'cartas de la mano',
+				en: 'cards in hand'
 			}
 		}
 	};
