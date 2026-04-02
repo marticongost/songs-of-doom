@@ -1,6 +1,7 @@
 import { finalise } from '@songsofdoom/common';
+import { type GameGraph } from '../game/gamegraph';
 import { Target, type PlayerTargetType, type SkillTargetType, type TargetSpec } from '../target';
-import { Effect } from './effect';
+import { EffectWithOutcome } from './effect';
 
 export type DiscardFromHandSelection = 'owner' | 'random';
 
@@ -15,10 +16,15 @@ export interface DiscardFromHandEffectProps {
 	players?: TargetSpec<PlayerTargetType>;
 }
 
+export interface DiscardFromHandOutcome {
+	/** The cards that were discarded. */
+	readonly cards: number[];
+}
+
 /**
  * An effect that discards cards from the hand of the target.
  */
-export class DiscardFromHandEffect extends Effect {
+export class DiscardFromHandEffect extends EffectWithOutcome<DiscardFromHandOutcome> {
 	/** The cards to discard. */
 	readonly cards: Target<SkillTargetType>;
 
@@ -29,6 +35,13 @@ export class DiscardFromHandEffect extends Effect {
 		super();
 		this.cards = finalise(Target, cards);
 		this.players = finalise(Target, players);
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		gameGraph.effectTriggered<DiscardFromHandEffect>(this, (_state) => {
+			// TODO
+			return { cards: [] };
+		});
 	}
 }
 

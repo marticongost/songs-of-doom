@@ -1,5 +1,6 @@
-import { TargetDiscriminator, type TargetDiscriminatorSpec } from '../../target';
 import { finalise } from '@songsofdoom/common';
+import type { GameState } from '../../game/gamestate';
+import { TargetDiscriminator, type TargetDiscriminatorSpec } from '../../target';
 import { ScalarExpression } from './scalar-expression';
 
 /**
@@ -28,6 +29,11 @@ export class CountExpression extends ScalarExpression {
 	constructor({ target }: CountExpressionProps) {
 		super();
 		this.target = finalise(TargetDiscriminator, target);
+	}
+
+	override evaluate(_state: GameState): number {
+		// TODO
+		return 0;
 	}
 }
 

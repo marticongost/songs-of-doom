@@ -1,4 +1,5 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
+import type { GameState } from '../../game/gamestate';
 import { BooleanExpression } from './boolean-expression';
 
 /**
@@ -12,6 +13,11 @@ export class OwnedExpression extends BooleanExpression {
 			es: 'propio',
 			en: 'owned'
 		};
+	}
+
+	override evaluate(_state: GameState): boolean {
+		// TODO
+		return false;
 	}
 }
 

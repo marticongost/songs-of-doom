@@ -1,4 +1,5 @@
 import { finalise } from '@songsofdoom/common';
+import type { GameState } from '../../game/gamestate';
 import { Target, type TargetSpec } from '../../target';
 import { BooleanExpression, type BooleanExpressionType } from './boolean-expression';
 
@@ -23,6 +24,11 @@ export class IsExpression extends BooleanExpression {
 		super();
 		this.target = finalise(Target, target);
 		this.expression = expression;
+	}
+
+	override evaluate(_state: GameState): boolean {
+		// TODO
+		return false;
 	}
 }
 

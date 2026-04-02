@@ -39,7 +39,10 @@ export {
 	Focuses,
 	focuses,
 	focusTypes,
+	getFocusTokenType,
+	getFocusTokenValue,
 	type FocusesProps,
+	type FocusToken,
 	type FocusType
 } from './models/focus';
 export {

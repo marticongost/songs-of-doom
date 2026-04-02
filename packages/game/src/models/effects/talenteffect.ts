@@ -1,3 +1,5 @@
+import type { GameGraph } from '../game/gamegraph';
+import type { MutableGameState } from '../game/gamestate';
 import type { Talent } from '../talent';
 import { Effect } from './effect';
 
@@ -19,6 +21,12 @@ export class TalentEffect extends Effect {
 	constructor({ talents }: TalentEffectProps) {
 		super();
 		this.talents = talents;
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		gameGraph.effectTriggered<TalentEffect>(this, (_state: MutableGameState) => {
+			// TODO
+		});
 	}
 }
 

@@ -1,9 +1,11 @@
+import type { LocalisedText } from '@songsofdoom/common/localisation';
 import {
 	ScalarExpression,
 	type ScalarExpressionType
 } from '../../expressions/scalar/scalar-expression';
 import { ScalarOperation } from '../../expressions/scalar/scalar-operation';
-import type { LocalisedText } from '@songsofdoom/common/localisation';
+import type { GameState } from '../../game/gamestate';
+import { evaluateScalar } from '../scalar';
 import { BooleanExpression } from './boolean-expression';
 
 /**
@@ -52,6 +54,21 @@ export class ComparisonExpression extends BooleanExpression {
 			return this.left.getComparisonShorthand(this.operator, this.right);
 		}
 		return undefined;
+	}
+
+	override evaluate(state: GameState): boolean {
+		const leftValue = evaluateScalar(this.left, state);
+		const rightValue = evaluateScalar(this.right, state);
+		switch (this.operator) {
+			case '>':
+				return leftValue > rightValue;
+			case '<':
+				return leftValue < rightValue;
+			case '=':
+				return leftValue === rightValue;
+			case '!=':
+				return leftValue !== rightValue;
+		}
 	}
 }
 

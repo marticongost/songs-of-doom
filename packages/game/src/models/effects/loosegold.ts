@@ -1,8 +1,10 @@
 import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
+import { ScalarExpression } from '../expressions';
+import type { GameGraph } from '../game/gamegraph';
+import type { MutableGameState } from '../game/gamestate';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
-import { ScalarExpression } from '../expressions';
 
 /**
  * Props for configuring a LooseGoldEffect.
@@ -29,6 +31,12 @@ export class LooseGoldEffect extends Effect {
 		super();
 		this.target = finalise(Target, target);
 		this.amount = amount;
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		gameGraph.effectTriggered<LooseGoldEffect>(this, (_state: MutableGameState) => {
+			// TODO
+		});
 	}
 }
 

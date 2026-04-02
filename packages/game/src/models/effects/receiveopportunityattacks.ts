@@ -1,3 +1,5 @@
+import type { GameGraph } from '../game/gamegraph';
+import type { MutableGameState } from '../game/gamestate';
 import { Effect } from './effect';
 
 /**
@@ -27,6 +29,12 @@ export class ReceiveOpportunityAttacksEffect extends Effect {
 	constructor({ effects }: ReceiveOpportunityAttacksEffectProps = {}) {
 		super();
 		this.effects = effects ?? [];
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		gameGraph.effectTriggered<ReceiveOpportunityAttacksEffect>(this, (_state: MutableGameState) => {
+			// TODO
+		});
 	}
 }
 

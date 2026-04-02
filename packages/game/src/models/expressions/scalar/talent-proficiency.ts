@@ -1,3 +1,4 @@
+import type { GameState } from '../../game/gamestate';
 import type { Stat } from '../../stats';
 import type { Talent } from '../../talent';
 import { ScalarExpression, type ScalarExpressionType } from './scalar-expression';
@@ -51,6 +52,11 @@ export class TalentProficiencyExpression extends ScalarExpression {
 			throw new Error(`Talent ${this.talent.id} does not have an associated stat`);
 		}
 		return this.talent.stat;
+	}
+
+	override evaluate(_state: GameState): number {
+		// TODO
+		return 0;
 	}
 }
 

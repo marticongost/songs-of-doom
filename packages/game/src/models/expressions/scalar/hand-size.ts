@@ -1,4 +1,5 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
+import type { GameState } from '../../game/gamestate';
 import { ScalarExpression } from './scalar-expression';
 
 export class HandSizeExpression extends ScalarExpression {
@@ -8,6 +9,10 @@ export class HandSizeExpression extends ScalarExpression {
 			es: 'Cartas en la mano',
 			en: 'Cards in hand'
 		};
+	}
+
+	override evaluate(state: GameState): number {
+		return state.requireActivePlayer().hand.length;
 	}
 }
 

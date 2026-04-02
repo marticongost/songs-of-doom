@@ -1,3 +1,4 @@
+import type { GameState } from '../../game/gamestate';
 import { ScalarExpression } from './scalar-expression';
 
 /**
@@ -23,6 +24,11 @@ export class VariableExpression extends ScalarExpression {
 	constructor({ name }: VariableExpressionProps) {
 		super();
 		this.name = name;
+	}
+
+	override evaluate(_state: GameState): number {
+		// TODO
+		return 0;
 	}
 }
 

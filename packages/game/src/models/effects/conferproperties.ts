@@ -1,3 +1,5 @@
+import type { GameGraph } from '../game/gamegraph';
+import type { MutableGameState } from '../game/gamestate';
 import type { Property } from '../properties';
 import { Effect } from './effect';
 
@@ -25,6 +27,12 @@ export class ConferPropertiesEffect extends Effect {
 	constructor({ properties }: ConferPropertiesEffectProps) {
 		super();
 		this.properties = properties;
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		gameGraph.effectTriggered<ConferPropertiesEffect>(this, (_state: MutableGameState) => {
+			// TODO
+		});
 	}
 }
 

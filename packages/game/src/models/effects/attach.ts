@@ -1,6 +1,7 @@
 import { finalise } from '@songsofdoom/common';
+import type { GameGraph } from '../game/gamegraph';
 import { Target, type TargetSpec } from '../target';
-import { Effect } from './effect';
+import { EffectWithOutcome } from './effect';
 
 /**
  * Props for configuring an AttachEffect.
@@ -13,11 +14,16 @@ export interface AttachEffectProps {
 	stacking?: boolean;
 }
 
+export interface AttachOutcome {
+	/** The card that received the attachment. */
+	readonly targetId: number;
+}
+
 /**
  * An effect that attaches the card to a target, conferring its capabilities
  * to that target for the duration.
  */
-export class AttachEffect extends Effect {
+export class AttachEffect extends EffectWithOutcome<AttachOutcome> {
 	/** The card to attach to. */
 	readonly target?: Target;
 
@@ -28,6 +34,16 @@ export class AttachEffect extends Effect {
 		super();
 		this.target = finalise(Target, target);
 		this.stacking = stacking;
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		const targetId = await gameGraph.requestSingleTargetOrActiveCard(this.target);
+		gameGraph.effectTriggered<AttachEffect>(this, (state) => {
+			const target = state.requireCard(targetId);
+			const attachment = state.requireActiveCard();
+			target.addAttachment(state, attachment);
+			return { targetId };
+		});
 	}
 }
 

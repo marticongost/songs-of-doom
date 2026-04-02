@@ -1,4 +1,6 @@
 import { finalise } from '@songsofdoom/common';
+import type { GameGraph } from '../game/gamegraph';
+import type { MutableGameState } from '../game/gamestate';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -17,6 +19,12 @@ export class AddChargesEffect extends Effect {
 		super();
 		this.amount = amount;
 		this.target = finalise(Target, target);
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		gameGraph.effectTriggered<AddChargesEffect>(this, (_state: MutableGameState) => {
+			// TODO
+		});
 	}
 }
 

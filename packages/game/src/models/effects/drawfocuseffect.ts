@@ -1,3 +1,4 @@
+import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
 export interface DrawFocusEffectProps {
@@ -10,6 +11,12 @@ export class DrawFocusEffect extends Effect {
 	constructor(props: DrawFocusEffectProps) {
 		super();
 		this.amount = props.amount;
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		gameGraph.effectTriggered<DrawFocusEffect>(this, (_state) => {
+			// TODO
+		});
 	}
 }
 

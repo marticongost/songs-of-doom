@@ -1,5 +1,6 @@
 import { conditional, ConditionalEffect, type Effect } from '../../effects';
 import { Expression } from '../../expressions/expression';
+import type { GameState } from '../../game/gamestate';
 import type { Property } from '../../properties';
 
 /**
@@ -16,6 +17,12 @@ export abstract class BooleanExpression extends Expression {
 	then(...effects: Array<Effect>): ConditionalEffect {
 		return conditional([{ condition: this, effects }]);
 	}
+
+	/** Obtains the boolean value of the expression for the given game state.
+	 * @param state The game state to evaluate the expression against.
+	 * @return The boolean value of the expression in the given state.
+	 */
+	abstract evaluate(state: GameState): boolean;
 }
 
 /**

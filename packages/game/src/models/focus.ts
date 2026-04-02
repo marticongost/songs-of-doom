@@ -5,6 +5,8 @@ export type FocusType = AttributeType | 'heroism' | 'any';
 
 export const focusTypes: FocusType[] = [...attributeTypes, 'heroism', 'any'];
 
+export type FocusValue = 1 | 2 | 3;
+
 export class Focus {
 	readonly type: FocusType;
 	readonly title: LocalisedText;

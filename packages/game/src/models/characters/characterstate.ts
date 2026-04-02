@@ -366,6 +366,13 @@ export class CharacterState {
 		return baseStats;
 	}
 
+	/** Gets the base value for a given character stat from permanent upgrades (ignores
+	 * transient effects, such as equipment or temporary buffs). */
+	getBaseStat(stat: Stat): number {
+		const baseStats = this.getBaseStats();
+		return baseStats.get(stat) ?? 0;
+	}
+
 	/** Calculates the contents of the character's focus bag. */
 	getFocusTokens(): ReadonlyCounter<FocusToken> {
 		const stats = this.getBaseStats();

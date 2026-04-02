@@ -1,5 +1,7 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
 
+import type { GameGraph } from '../game/gamegraph';
+import type { MutableGameState } from '../game/gamestate';
 import { Effect } from './effect';
 
 /**
@@ -20,6 +22,12 @@ export class NarrationEventEffect extends Effect {
 	constructor({ text }: NarrationEventEffectProps) {
 		super();
 		this.text = text;
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		gameGraph.effectTriggered<NarrationEventEffect>(this, (_state: MutableGameState) => {
+			// TODO
+		});
 	}
 }
 

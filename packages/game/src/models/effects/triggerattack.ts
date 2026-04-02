@@ -1,5 +1,7 @@
 import { finalise } from '@songsofdoom/common';
 import type { BooleanExpressionType } from '../expressions';
+import type { GameGraph } from '../game/gamegraph';
+import type { MutableGameState } from '../game/gamestate';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -69,6 +71,12 @@ export class TriggerAttackEffect extends Effect {
 		this.condition = condition;
 		this.card = finalise(Target, card);
 		this.target = finalise(Target, target);
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		gameGraph.effectTriggered<TriggerAttackEffect>(this, (_state: MutableGameState) => {
+			// TODO
+		});
 	}
 }
 

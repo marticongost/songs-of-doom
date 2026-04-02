@@ -1,6 +1,7 @@
-import type { ComparisonOperator } from '../../expressions/boolean/comparison';
-import type { Stat } from '../../stats';
 import type { LocalisedText } from '@songsofdoom/common/localisation';
+import type { ComparisonOperator } from '../../expressions/boolean/comparison';
+import type { GameState } from '../../game/gamestate';
+import type { Stat } from '../../stats';
 import { Expression } from '../expression';
 
 /**
@@ -22,6 +23,12 @@ export abstract class ScalarExpression extends Expression {
 	): LocalisedText | undefined {
 		return undefined;
 	}
+
+	/** Obtains the value of the expression for the given game state.
+	 * @param state The game state to evaluate the expression against.
+	 * @return The numeric value of the expression in the given state.
+	 */
+	abstract evaluate(state: GameState): number;
 }
 
 /**

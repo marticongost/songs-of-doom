@@ -1,6 +1,8 @@
 import type { ScalarExpressionType } from '../expressions';
-import { Effect } from './effect';
 import { ScalarExpression } from '../expressions';
+import type { GameGraph } from '../game/gamegraph';
+import type { MutableGameState } from '../game/gamestate';
+import { Effect } from './effect';
 
 /**
  * Props for configuring a ModifyCarryingCapacityEffect.
@@ -21,6 +23,12 @@ export class ModifyCarryingCapacityEffect extends Effect {
 	constructor({ modifier }: ModifyCarryingCapacityEffectProps) {
 		super();
 		this.modifier = modifier;
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		gameGraph.effectTriggered<ModifyCarryingCapacityEffect>(this, (_state: MutableGameState) => {
+			// TODO
+		});
 	}
 }
 

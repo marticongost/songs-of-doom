@@ -1,8 +1,9 @@
 import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
+import { evaluateScalar, ScalarExpression } from '../expressions';
+import type { GameGraph } from '../game/gamegraph';
 import { Target, type TargetSpec } from '../target';
-import { Effect } from './effect';
-import { ScalarExpression } from '../expressions';
+import { EffectWithOutcome } from './effect';
 
 /**
  * Props for configuring a HealEffect.
@@ -15,10 +16,18 @@ export interface HealEffectProps {
 	target?: TargetSpec;
 }
 
+export interface HealOutcome {
+	/** The amount of damage that was healed. */
+	readonly amount: number;
+
+	/** The card that received the healing. */
+	readonly targetId?: number;
+}
+
 /**
  * An effect that removes damage from a target.
  */
-export class HealEffect extends Effect {
+export class HealEffect extends EffectWithOutcome<HealOutcome> {
 	/** The amount of damage to remove from the target. */
 	readonly amount: ScalarExpressionType;
 	/** Who benefits from the healing. */
@@ -28,6 +37,14 @@ export class HealEffect extends Effect {
 		super();
 		this.amount = amount;
 		this.target = finalise(Target, target);
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		gameGraph.effectTriggered<HealEffect>(this, (state) => {
+			// TODO: Add helper to gameState to request a target or default to the current subject
+			const amount = evaluateScalar(this.amount, state);
+			return { amount, targetId: undefined };
+		});
 	}
 }
 

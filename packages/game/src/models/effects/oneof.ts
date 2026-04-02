@@ -1,3 +1,4 @@
+import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
 /**
@@ -18,6 +19,10 @@ export class OneOfEffect extends Effect {
 	constructor({ effects }: OneOfEffectProps) {
 		super();
 		this.effects = effects;
+	}
+
+	override async trigger(_gameGraph: GameGraph) {
+		// TODO: prompt the player for the chosen option, and trigger it
 	}
 }
 

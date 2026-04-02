@@ -1,4 +1,6 @@
 import type { Focus, FocusType } from '../focus';
+import type { GameGraph } from '../game/gamegraph';
+import type { MutableGameState } from '../game/gamestate';
 import { Effect } from './effect';
 
 /**
@@ -42,6 +44,12 @@ export class TransformFocusEffect extends Effect {
 		super();
 		this.source = source ?? 'any';
 		this.target = target;
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		gameGraph.effectTriggered<TransformFocusEffect>(this, (_state: MutableGameState) => {
+			// TODO
+		});
 	}
 }
 

@@ -1,4 +1,6 @@
 import { Story } from '../entities/story';
+import type { GameGraph } from '../game/gamegraph';
+import type { MutableGameState } from '../game/gamestate';
 import { Effect } from './effect';
 
 /**
@@ -19,6 +21,12 @@ export class PlayStoryCardsEffect extends Effect {
 	constructor({ cards }: PlayStoryCardsEffectProps) {
 		super();
 		this.cards = cards;
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		gameGraph.effectTriggered<PlayStoryCardsEffect>(this, (_state: MutableGameState) => {
+			// TODO
+		});
 	}
 }
 

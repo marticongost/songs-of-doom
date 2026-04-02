@@ -1,3 +1,5 @@
+import type { GameGraph } from '../game/gamegraph';
+import type { MutableGameState } from '../game/gamestate';
 import {
 	isSigil,
 	resolveResultExpression,
@@ -60,6 +62,12 @@ export class ResultsTableEffect extends Effect {
 				}))
 			);
 		}
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		gameGraph.effectTriggered<ResultsTableEffect>(this, (_state: MutableGameState) => {
+			// TODO
+		});
 	}
 }
 

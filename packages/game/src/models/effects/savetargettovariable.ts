@@ -1,4 +1,6 @@
 import { finalise } from '@songsofdoom/common';
+import type { GameGraph } from '../game/gamegraph';
+import type { MutableGameState } from '../game/gamestate';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -28,6 +30,12 @@ export class SaveTargetToVariableEffect extends Effect {
 		super();
 		this.name = name;
 		this.value = finalise(Target, value);
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		gameGraph.effectTriggered<SaveTargetToVariableEffect>(this, (_state: MutableGameState) => {
+			// TODO
+		});
 	}
 }
 

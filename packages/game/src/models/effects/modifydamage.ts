@@ -1,6 +1,8 @@
 import type { ScalarExpressionType } from '../expressions';
-import { Effect } from './effect';
 import { ScalarExpression } from '../expressions';
+import type { GameGraph } from '../game/gamegraph';
+import type { MutableGameState } from '../game/gamestate';
+import { Effect } from './effect';
 
 /**
  * Props for configuring a ModifyDamageEffect.
@@ -20,6 +22,12 @@ export class ModifyDamageEffect extends Effect {
 	constructor({ amount }: ModifyDamageEffectProps) {
 		super();
 		this.amount = amount;
+	}
+
+	override async trigger(gameGraph: GameGraph) {
+		gameGraph.effectTriggered<ModifyDamageEffect>(this, (_state: MutableGameState) => {
+			// TODO
+		});
 	}
 }
 

@@ -1,5 +1,4 @@
 // Base classes
-import { type ScalarExpressionType } from './scalar-expression';
 export { ScalarExpression, type ScalarExpressionType } from './scalar-expression';
 
 // Scalar operations
@@ -9,7 +8,6 @@ export { div, minus, mult, plus, ScalarOperation, type ScalarOperator } from './
 
 // Scalar expressions
 export { cash, CashExpression } from './cash';
-export { variable, VariableExpression, X, type VariableExpressionProps } from './variable';
 export { charges, ChargesExpression, type ChargesExpressionProps } from './charges';
 export { count, CountExpression, type CountExpressionProps } from './count';
 export { distance, DistanceExpression } from './distance';
@@ -21,14 +19,7 @@ export {
 	TalentProficiencyExpression,
 	type TalentProficiencyExpressionProps
 } from './talent-proficiency';
+export { variable, VariableExpression, X, type VariableExpressionProps } from './variable';
 
-/**
- * Returns 1 if the expression is guaranteed to be singular (the number 1),
- * otherwise returns 2 to indicate potential plurality.
- *
- * This is useful for pluralization where we need to decide between singular
- * and plural forms when the actual value won't be known until runtime.
- */
-export const expressionPlurality = (expr: ScalarExpressionType): 1 | 2 => {
-	return expr === 1 ? 1 : 2;
-};
+// Helper functions
+export { evaluateScalar, expressionPlurality } from './functions';
