@@ -11,7 +11,6 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		CountExpression,
 		Expression,
 		IsExpression,
-		normaliseTargetCardinality,
 		NotExpression,
 		OrExpression,
 		plus,
@@ -107,11 +106,7 @@ Handles primitives, operations, comparisons, logical operators, and custom expre
 		<!-- Count expression -->
 	{:else if expression instanceof CountExpression}
 		<Text ca="Número" es="Número" en="Number" />
-		<TargetChip
-			target={expression.target}
-			cardinality={normaliseTargetCardinality('every')}
-			relation="possessive"
-		/>
+		<TargetChip target={expression.target} cardinality="all" relation="possessive" />
 
 		<!-- Cash -->
 	{:else if expression instanceof CashExpression}

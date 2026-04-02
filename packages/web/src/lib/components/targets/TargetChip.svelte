@@ -1,6 +1,6 @@
 <script lang="ts" module>
 	import type { LocalisedText } from '@songsofdoom/common';
-	import type { TargetType } from '@songsofdoom/game';
+	import type { TargetCardinalitySpec, TargetType } from '@songsofdoom/game';
 
 	const getGender = (target: Target | TargetDiscriminator | undefined, locale: string) => {
 		if (!target || locale === 'en') return undefined;
@@ -259,7 +259,7 @@
 <script lang="ts">
 	import { getLocale } from '$lib/context/locale';
 	import { possessiveRelation, toRelation, translate } from '@songsofdoom/common/localisation';
-	import { Target, type TargetCardinality, type TargetDiscriminator } from '@songsofdoom/game';
+	import { normaliseTargetCardinality, Target, type TargetDiscriminator } from '@songsofdoom/game';
 	import ExpressionChip from '../expressions/ExpressionChip.svelte';
 	import Text from '../localisation/Text.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
@@ -268,16 +268,21 @@
 	interface Props extends StandardAttributeProps {
 		target?: Target | TargetDiscriminator;
 		relation?: 'possessive' | 'to';
-		cardinality?: TargetCardinality;
+		cardinality?: TargetCardinalitySpec | 'all';
 	}
 
 	const { target, relation, cardinality: customCardinality, ...attributes }: Props = $props();
+	const isAllCardinality = $derived(customCardinality === 'all');
 	const cardinality = $derived(
-		customCardinality ?? (target instanceof Target ? target.cardinality : undefined) ?? undefined
+		customCardinality
+			? normaliseTargetCardinality(
+					isAllCardinality ? 'every' : (customCardinality as TargetCardinalitySpec)
+				)
+			: ((target instanceof Target ? target.cardinality : undefined) ?? undefined)
 	);
 	const textForm: TextForm = $derived.by(() => {
 		if (!target) return 'indeterminate';
-		if (cardinality?.isEveryTarget()) return 'plain';
+		if (cardinality?.isEveryTarget()) return isAllCardinality ? 'plural' : 'plain';
 		if (cardinality?.isMultipleTargets()) return 'plural';
 		if (
 			target.matchesType('attacker') ||
@@ -296,14 +301,16 @@
 
 {#if target}
 	<span {...standardAttributes(attributes, 'target-chip')}>
-		{#if cardinality && !cardinality.isSingleTarget()}
+		{#if cardinality && !cardinality.isSingleTarget() && !isAllCardinality}
 			{#if relation === 'possessive'}
 				<Text ca="de" es="de" en="of" />
 			{:else if relation === 'to'}
 				<Text ca="a" es="a" en="to" />
 			{/if}
 			{#if cardinality.isEveryTarget()}
-				<Text ca="cada" es="cada" en="every" />
+				{#if !isAllCardinality}
+					<Text ca="cada" es="cada" en="every" />
+				{/if}
 			{:else}
 				<ExpressionChip expression={cardinality.min} />
 				{#if cardinality.max === Infinity}
