@@ -1,13 +1,14 @@
+import { Counter, type ReadonlyCounter } from '@songsofdoom/common';
 import { entities } from '../../catalog';
 import { innate, permanent } from '../../data/properties';
 import { Ally } from '../entities/ally';
 import { Archetype } from '../entities/archetype';
 import type { Entity } from '../entities/entity';
-import { FOCUS_TOKENS_FOR_STAT_VALUES, focuses, type Focus, type FocusType } from '../focus';
 import { Item } from '../entities/item';
 import { Skill } from '../entities/skill';
-import { attributes, stats, type Stat, type StatType } from '../stats';
 import { Trait } from '../entities/trait';
+import { FOCUS_TOKENS_FOR_STAT_VALUES, focuses, type FocusToken, type FocusType } from '../focus';
+import { attributes, stats, type Stat, type StatType } from '../stats';
 import {
 	ArchetypeRequiredImpediment,
 	DisciplineRequiredImpediment,
@@ -366,16 +367,20 @@ export class CharacterState {
 	}
 
 	/** Calculates the contents of the character's focus bag. */
-	getFocusTokens(): Map<Focus, Record<number, number>> {
+	getFocusTokens(): ReadonlyCounter<FocusToken> {
 		const stats = this.getBaseStats();
-		const bag = new Map<Focus, Record<number, number>>();
-		bag.set(focuses.heroism, { 1: 1 });
+		const bag = new Counter<FocusToken>();
+		bag.add('heroism-1');
 		for (const attribute of Object.values(attributes)) {
 			const focus = focuses[attribute.type as FocusType];
 			const attributeValue = Math.min(stats.get(attribute)!, 6);
-			bag.set(focus, FOCUS_TOKENS_FOR_STAT_VALUES[attributeValue]);
+			for (const [focusValue, count] of Object.entries(
+				FOCUS_TOKENS_FOR_STAT_VALUES[attributeValue] ?? {}
+			)) {
+				bag.add(`${focus.type}-${focusValue}` as FocusToken, count);
+			}
 		}
 		// TODO: Effects that modify the bag
-		return bag;
+		return bag.readonly();
 	}
 }

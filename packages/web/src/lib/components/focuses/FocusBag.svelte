@@ -19,7 +19,13 @@ tokens grouped by focus type and pip value.
 </script>
 
 <script lang="ts">
-	import type { Focus } from '@songsofdoom/game';
+	import { BaseCounter } from '@songsofdoom/common';
+	import {
+		getFocusTokenType,
+		getFocusTokenValue,
+		type FocusToken,
+		type FocusType
+	} from '@songsofdoom/game';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
@@ -29,28 +35,33 @@ tokens grouped by focus type and pip value.
 	interface Props extends StandardAttributeProps {
 		/**
 		 * The focus bag composition, as returned by CharacterState.getFocusTokens().
-		 * Maps each focus to a record of { [pipValue]: copies }.
 		 */
-		focuses: Map<Focus, Record<number, number>>;
+		focuses: BaseCounter<FocusToken>;
 	}
 
 	const { focuses, ...attributes }: Props = $props();
 
-	const rows = $derived(
-		[...focuses.entries()].map(([focus, tokensByValue]) => ({
-			focus,
-			stacks: Object.entries(tokensByValue)
-				.sort(([a], [b]) => +a - +b)
-				.map(([value, copies]) => ({ value: +value, copies }))
-		}))
-	);
+	const rows = $derived.by(() => {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- local scratch variable, not reactive state
+		const byType = new Map<string, { value: number; copies: number }[]>();
+		for (const [token, copies] of focuses.entries()) {
+			const type = getFocusTokenType(token);
+			const value = getFocusTokenValue(token);
+			if (!byType.has(type)) byType.set(type, []);
+			byType.get(type)!.push({ value, copies });
+		}
+		return [...byType.entries()].map(([type, stacks]) => ({
+			type: type as FocusType,
+			stacks: stacks.sort((a, b) => a.value - b.value)
+		}));
+	});
 </script>
 
 <div {...standardAttributes(attributes, styles.focusBag)}>
-	{#each rows as { focus, stacks } (focus.type)}
+	{#each rows as { type, stacks } (type)}
 		<div class={styles.focusRow}>
 			{#each stacks as { value, copies } (value)}
-				<FocusStack {focus} {value} size={copies} />
+				<FocusStack focus={type} {value} size={copies} />
 			{/each}
 		</div>
 	{/each}

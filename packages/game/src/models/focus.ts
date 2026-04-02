@@ -63,7 +63,19 @@ export class Focuses {
 	}
 }
 
-export const FOCUS_TOKENS_FOR_STAT_VALUES: Record<number, Record<number, number>> = {
+export interface FocusTokenProps {
+	focus: Focus | FocusType;
+	value: FocusValue;
+}
+
+export type FocusToken = `${FocusType}-${FocusValue}`;
+
+export const getFocusTokenType = (token: FocusToken): FocusType => token.split('-')[0] as FocusType;
+
+export const getFocusTokenValue = (token: FocusToken): FocusValue =>
+	Number(token.split('-')[1]) as FocusValue;
+
+export const FOCUS_TOKENS_FOR_STAT_VALUES: Record<number, Partial<Record<FocusValue, number>>> = {
 	1: { 1: 1 },
 	2: { 1: 2 },
 	3: { 1: 1, 2: 1 },
