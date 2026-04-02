@@ -1,4 +1,5 @@
 import type { GameGraph } from '../game/gamegraph';
+import type { CardId } from '../game/identifiers';
 import { EffectWithOutcome } from './effect';
 
 export interface DrawCardsEffectProps {
@@ -7,7 +8,7 @@ export interface DrawCardsEffectProps {
 
 export interface DrawCardsOutcome {
 	/** The cards that were drawn. */
-	readonly cards: number[];
+	readonly cards: CardId[];
 }
 
 export class DrawCardsEffect extends EffectWithOutcome<DrawCardsOutcome> {

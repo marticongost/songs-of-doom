@@ -2,6 +2,7 @@ import { finalise } from '@songsofdoom/common';
 import { CapabilityCost, type CapabilityCostProps } from './capabilitycost';
 import type { Effect } from './effects/effect';
 import { CapabilityFinished, CapabilityTriggered, type GameGraph } from './game/gamegraph';
+import type { CardId } from './game/identifiers';
 
 export interface CapabilityProps {
 	cost?: CapabilityCost | CapabilityCostProps;
@@ -10,7 +11,7 @@ export interface CapabilityProps {
 
 export interface TriggerCapabilityProps {
 	gameGraph: GameGraph;
-	cardId: number;
+	cardId: CardId;
 }
 
 export abstract class Capability {

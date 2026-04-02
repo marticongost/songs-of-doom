@@ -8,14 +8,15 @@ import {
 	type ReadonlyCardState
 } from './cardstate';
 import type { MutableGameState } from './gamestate';
+import type { CardId, PlayerId } from './identifiers';
 
 export interface PlayerStateProps {
-	id: number;
+	id: PlayerId;
 	character: CharacterState;
 	deck: ReadonlyArray<CardState>;
 	hand: ReadonlyArray<CardState>;
-	playArea: ReadonlyArray<CardState>;
 	discardPile: ReadonlyArray<CardState>;
+	attachments?: ReadonlyArray<CardState>;
 	focusesBag: ReadonlyMap<Focus, Record<number, number>>;
 	focusesHand: ReadonlyMap<Focus, Record<number, number>>;
 	physicalTrauma: number;
@@ -23,12 +24,12 @@ export interface PlayerStateProps {
 }
 
 export class PlayerState {
-	readonly id: number;
+	readonly id: PlayerId;
 	readonly character: CharacterState;
 	readonly deck: ReadonlyArray<CardState>;
 	readonly hand: ReadonlyArray<CardState>;
-	readonly playArea: ReadonlyArray<CardState>;
 	readonly discardPile: ReadonlyArray<CardState>;
+	readonly attachments: ReadonlyArray<CardState>;
 	readonly physicalTrauma: number;
 	readonly mentalTrauma: number;
 	readonly focusesBag: ReadonlyMap<Focus, Record<number, number>>;
@@ -39,8 +40,8 @@ export class PlayerState {
 		character,
 		deck,
 		hand,
-		playArea,
 		discardPile,
+		attachments = [],
 		focusesBag,
 		focusesHand,
 		physicalTrauma,
@@ -50,8 +51,8 @@ export class PlayerState {
 		this.character = character;
 		this.deck = deck;
 		this.hand = hand;
-		this.playArea = playArea;
 		this.discardPile = discardPile;
+		this.attachments = attachments;
 		this.focusesBag = focusesBag;
 		this.focusesHand = focusesHand;
 		this.physicalTrauma = physicalTrauma;
@@ -59,10 +60,10 @@ export class PlayerState {
 	}
 
 	cards(): Array<CardState> {
-		return [...this.hand, ...this.playArea];
+		return [...this.hand, ...this.attachments];
 	}
 
-	getCard(id: number): CardState | undefined {
+	getCard(id: CardId): CardState | undefined {
 		for (const card of this.cards()) {
 			const found = card.getCard(id);
 			if (found) {
@@ -72,10 +73,10 @@ export class PlayerState {
 		return undefined;
 	}
 
-	requireCard(id: number): CardState {
+	requireCard(id: CardId): CardState {
 		const card = this.getCard(id);
 		if (!card) {
-			throw new Error(`Card with id ${id} not found in player's hand or play area`);
+			throw new Error(`Card with id ${id} not found in player's hand or attachments`);
 		}
 		return card;
 	}
@@ -89,18 +90,18 @@ export class PlayerState {
 export class ReadonlyPlayerState extends PlayerState {
 	declare readonly deck: ReadonlyArray<ReadonlyCardState>;
 	declare readonly hand: ReadonlyArray<ReadonlyCardState>;
-	declare readonly playArea: ReadonlyArray<ReadonlyCardState>;
 	declare readonly discardPile: ReadonlyArray<ReadonlyCardState>;
+	declare readonly attachments: ReadonlyArray<ReadonlyCardState>;
 
 	cards(): Array<ReadonlyCardState> {
-		return [...this.hand, ...this.playArea];
+		return [...this.hand, ...this.attachments];
 	}
 
-	getCard(id: number): ReadonlyCardState | undefined {
+	getCard(id: CardId): ReadonlyCardState | undefined {
 		return super.getCard(id) as ReadonlyCardState | undefined;
 	}
 
-	requireCard(id: number): ReadonlyCardState {
+	requireCard(id: CardId): ReadonlyCardState {
 		return super.requireCard(id) as ReadonlyCardState;
 	}
 
@@ -119,8 +120,8 @@ export class MutablePlayerState extends PlayerState {
 	declare character: CharacterState;
 	declare deck: Array<MutableCardState>;
 	declare hand: Array<MutableCardState>;
-	declare playArea: Array<MutableCardState>;
 	declare discardPile: Array<MutableCardState>;
+	declare attachments: Array<MutableCardState>;
 	declare physicalTrauma: number;
 	declare mentalTrauma: number;
 	declare focusesBag: Map<Focus, Record<number, number>>;
@@ -132,8 +133,8 @@ export class MutablePlayerState extends PlayerState {
 			character: playerState.character,
 			deck: playerState.deck.map((card) => card.mutable()),
 			hand: playerState.hand.map((card) => card.mutable()),
-			playArea: playerState.playArea.map((card) => card.mutable()),
 			discardPile: playerState.discardPile.map((card) => card.mutable()),
+			attachments: playerState.attachments.map((card) => card.mutable()),
 			physicalTrauma: playerState.physicalTrauma,
 			mentalTrauma: playerState.mentalTrauma,
 			focusesBag: new Map(playerState.focusesBag),
@@ -142,14 +143,14 @@ export class MutablePlayerState extends PlayerState {
 	}
 
 	cards(): Array<MutableCardState> {
-		return [...this.hand, ...this.playArea];
+		return [...this.hand, ...this.attachments];
 	}
 
-	getCard(id: number): MutableCardState | undefined {
+	getCard(id: CardId): MutableCardState | undefined {
 		return super.getCard(id) as MutableCardState | undefined;
 	}
 
-	requireCard(id: number): MutableCardState {
+	requireCard(id: CardId): MutableCardState {
 		return super.requireCard(id) as MutableCardState;
 	}
 
@@ -159,13 +160,17 @@ export class MutablePlayerState extends PlayerState {
 			character: this.character,
 			deck: this.deck.map((card) => card.readonly()),
 			hand: this.hand.map((card) => card.readonly()),
-			playArea: this.playArea.map((card) => card.readonly()),
 			discardPile: this.discardPile.map((card) => card.readonly()),
+			attachments: this.attachments.map((card) => card.readonly()),
 			physicalTrauma: this.physicalTrauma,
 			mentalTrauma: this.mentalTrauma,
 			focusesBag: new Map(this.focusesBag),
 			focusesHand: new Map(this.focusesHand)
 		});
+	}
+
+	addAttachment(gameState: MutableGameState, attachment: MutableCardState) {
+		attachment.moveToPlayer(gameState, this.id);
 	}
 
 	drawFromDeck(gameState: MutableGameState, amount: number = 1): Array<MutableCardState> {

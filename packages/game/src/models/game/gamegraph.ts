@@ -3,6 +3,7 @@ import type { Effect } from '../effects';
 import type { EffectOutcome } from '../effects/effect';
 import { Target } from '../target';
 import { ReadonlyGameState, type GameStateProps, type MutableGameState } from './gamestate';
+import type { CardId, TargetId } from './identifiers';
 import type { Field } from './playerinput';
 import { TargetField } from './playerinput';
 
@@ -95,7 +96,7 @@ export class GameGraph {
 		});
 	}
 
-	async requestInput(target: Target): Promise<{ target: number[] }>;
+	async requestInput(target: Target): Promise<{ target: TargetId[] }>;
 	async requestInput<const Fields extends ReadonlyArray<Field<unknown, string>>>(
 		...fields: Fields
 	): Promise<FieldsResult<Fields>>;
@@ -119,7 +120,7 @@ export class GameGraph {
 		}
 	}
 
-	async requestSingleTargetOrActiveCard(target: Target | undefined): Promise<number> {
+	async requestSingleTargetOrActiveCard(target: Target | undefined): Promise<TargetId> {
 		if (target === undefined) {
 			return this._current.state.requireActiveCard().id;
 		}
@@ -186,12 +187,12 @@ export class GameStart extends GameNode {}
 
 export interface CapabilityTriggeredProps extends GameNodeProps {
 	capability: Capability;
-	cardId: number;
+	cardId: CardId;
 }
 
 export class CapabilityTriggered extends GameNode {
 	readonly capability: Capability;
-	readonly cardId: number;
+	readonly cardId: CardId;
 
 	constructor({ capability, cardId, ...baseProps }: CapabilityTriggeredProps) {
 		super(baseProps);
@@ -202,7 +203,7 @@ export class CapabilityTriggered extends GameNode {
 
 export class CapabilityFinished extends GameNode {
 	readonly capability: Capability;
-	readonly cardId: number;
+	readonly cardId: CardId;
 
 	constructor({ capability, cardId, ...baseProps }: CapabilityTriggeredProps) {
 		super(baseProps);

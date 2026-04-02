@@ -1,18 +1,19 @@
 import type { Property } from '../..';
 import type { Entity } from '../entities';
 import type { MutableGameState } from './gamestate';
+import type { CardId, PlayerId } from './identifiers';
 
 export type CardLocation =
-	| { container: 'deck'; playerId: number }
-	| { container: 'hand'; playerId: number }
-	| { container: 'discard'; playerId: number }
-	| { container: 'play'; playerId: number }
-	| { container: 'card'; cardId: number };
+	| { container: 'deck'; playerId: PlayerId }
+	| { container: 'hand'; playerId: PlayerId }
+	| { container: 'discard'; playerId: PlayerId }
+	| { container: 'card'; cardId: CardId }
+	| { container: 'player'; playerId: PlayerId };
 
 export interface CardStateProps {
-	id: number;
+	id: CardId;
 	card: Entity;
-	ownerId: number;
+	ownerId: PlayerId;
 	location: CardLocation;
 	exhausted?: boolean;
 	charges?: number;
@@ -22,9 +23,9 @@ export interface CardStateProps {
 }
 
 export class CardState {
-	readonly id: number;
+	readonly id: CardId;
 	readonly card: Entity;
-	readonly ownerId: number;
+	readonly ownerId: PlayerId;
 	readonly location: CardLocation;
 	readonly exhausted: boolean;
 	readonly charges: number;
@@ -54,7 +55,7 @@ export class CardState {
 		this.mentalTrauma = mentalTrauma;
 	}
 
-	getCard(id: number): CardState | undefined {
+	getCard(id: CardId): CardState | undefined {
 		if (this.id === id) {
 			return this;
 		}
@@ -67,7 +68,7 @@ export class CardState {
 		return undefined;
 	}
 
-	requireCard(id: number): CardState {
+	requireCard(id: CardId): CardState {
 		const card = this.getCard(id);
 		if (!card) {
 			throw new Error(`Card with id ${id} not found`);
@@ -90,11 +91,11 @@ export class CardState {
 export class ReadonlyCardState extends CardState {
 	declare readonly attachments: ReadonlyArray<ReadonlyCardState>;
 
-	getCard(id: number): ReadonlyCardState | undefined {
+	getCard(id: CardId): ReadonlyCardState | undefined {
 		return super.getCard(id) as ReadonlyCardState | undefined;
 	}
 
-	requireCard(id: number): ReadonlyCardState {
+	requireCard(id: CardId): ReadonlyCardState {
 		return super.requireCard(id) as ReadonlyCardState;
 	}
 
@@ -131,11 +132,11 @@ export class MutableCardState extends CardState {
 		});
 	}
 
-	getCard(id: number): MutableCardState | undefined {
+	getCard(id: CardId): MutableCardState | undefined {
 		return super.getCard(id) as MutableCardState | undefined;
 	}
 
-	requireCard(id: number): MutableCardState {
+	requireCard(id: CardId): MutableCardState {
 		return super.requireCard(id) as MutableCardState;
 	}
 
@@ -159,14 +160,14 @@ export class MutableCardState extends CardState {
 		this.attachments.push(attachment);
 	}
 
-	moveToPlayArea(gameState: MutableGameState, playerId: number) {
+	moveToPlayer(gameState: MutableGameState, playerId: PlayerId) {
 		this.removeFromCurrentLocation(gameState);
-		this.location = { container: 'play', playerId };
+		this.location = { container: 'player', playerId };
 		const playerState = gameState.requirePlayer(playerId);
-		playerState.playArea.push(this);
+		playerState.attachments.push(this);
 	}
 
-	moveToTopOfDiscardPile(gameState: MutableGameState, playerId: number | undefined = undefined) {
+	moveToTopOfDiscardPile(gameState: MutableGameState, playerId: PlayerId | undefined = undefined) {
 		playerId = playerId ?? this.ownerId;
 		this.removeFromCurrentLocation(gameState);
 		this.location = { container: 'discard', playerId };
@@ -174,7 +175,10 @@ export class MutableCardState extends CardState {
 		playerState.discardPile.unshift(this);
 	}
 
-	moveToBottomOfDiscardPile(gameState: MutableGameState, playerId: number | undefined = undefined) {
+	moveToBottomOfDiscardPile(
+		gameState: MutableGameState,
+		playerId: PlayerId | undefined = undefined
+	) {
 		playerId = playerId ?? this.ownerId;
 		this.removeFromCurrentLocation(gameState);
 		this.location = { container: 'discard', playerId };
@@ -182,14 +186,14 @@ export class MutableCardState extends CardState {
 		playerState.discardPile.push(this);
 	}
 
-	moveToHand(gameState: MutableGameState, playerId: number) {
+	moveToHand(gameState: MutableGameState, playerId: PlayerId) {
 		this.removeFromCurrentLocation(gameState);
 		this.location = { container: 'hand', playerId };
 		const playerState = gameState.requirePlayer(playerId);
 		playerState.hand.push(this);
 	}
 
-	moveToTopOfDeck(gameState: MutableGameState, playerId: number | undefined = undefined) {
+	moveToTopOfDeck(gameState: MutableGameState, playerId: PlayerId | undefined = undefined) {
 		playerId = playerId ?? this.ownerId;
 		this.removeFromCurrentLocation(gameState);
 		this.location = { container: 'deck', playerId };
@@ -197,7 +201,7 @@ export class MutableCardState extends CardState {
 		playerState.deck.unshift(this);
 	}
 
-	moveToBottomOfDeck(gameState: MutableGameState, playerId: number | undefined = undefined) {
+	moveToBottomOfDeck(gameState: MutableGameState, playerId: PlayerId | undefined = undefined) {
 		playerId = playerId ?? this.ownerId;
 		this.removeFromCurrentLocation(gameState);
 		this.location = { container: 'deck', playerId };
@@ -209,9 +213,9 @@ export class MutableCardState extends CardState {
 		if (this.location.container === 'card') {
 			const previousContainer = gameState.requireCard(this.location.cardId);
 			previousContainer.attachments = previousContainer.attachments.filter((a) => a.id !== this.id);
-		} else if (this.location.container === 'play') {
+		} else if (this.location.container === 'player') {
 			const playerState = gameState.requirePlayer(this.location.playerId);
-			playerState.playArea = playerState.playArea.filter((c) => c.id !== this.id);
+			playerState.attachments = playerState.attachments.filter((a) => a.id !== this.id);
 		} else if (this.location.container === 'discard') {
 			const playerState = gameState.requirePlayer(this.location.playerId);
 			playerState.discardPile = playerState.discardPile.filter((c) => c.id !== this.id);

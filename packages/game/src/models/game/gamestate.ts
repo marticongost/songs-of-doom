@@ -1,16 +1,17 @@
 import { CardState, type MutableCardState, type ReadonlyCardState } from './cardstate';
+import { isCardId, isPlayerId, type CardId, type PlayerId, type TargetId } from './identifiers';
 import { PlayerState, type MutablePlayerState, type ReadonlyPlayerState } from './playerstate';
 
 export interface GameStateProps {
 	players: ReadonlyArray<PlayerState>;
-	activeCardStack?: Array<number>;
-	activePlayerStack?: Array<number>;
+	activeCardStack?: Array<CardId>;
+	activePlayerStack?: Array<PlayerId>;
 }
 
 export class GameState {
 	readonly players: ReadonlyArray<PlayerState>;
-	readonly activeCardStack: Array<number>;
-	readonly activePlayerStack: Array<number>;
+	readonly activeCardStack: Array<CardId>;
+	readonly activePlayerStack: Array<PlayerId>;
 
 	constructor({ players, activeCardStack, activePlayerStack }: GameStateProps) {
 		this.players = players;
@@ -18,7 +19,7 @@ export class GameState {
 		this.activePlayerStack = activePlayerStack ?? [];
 	}
 
-	getCard(cardId: number): CardState | undefined {
+	getCard(cardId: CardId): CardState | undefined {
 		for (const player of this.players) {
 			const found = player.getCard(cardId);
 			if (found) {
@@ -28,7 +29,7 @@ export class GameState {
 		return undefined;
 	}
 
-	requireCard(cardId: number): CardState {
+	requireCard(cardId: CardId): CardState {
 		const card = this.getCard(cardId);
 		if (!card) {
 			throw new Error(`Card with id ${cardId} not found`);
@@ -36,11 +37,11 @@ export class GameState {
 		return card;
 	}
 
-	getPlayer(playerId: number): PlayerState | undefined {
+	getPlayer(playerId: PlayerId): PlayerState | undefined {
 		return this.players.find((player) => player.id === playerId);
 	}
 
-	requirePlayer(playerId: number): PlayerState {
+	requirePlayer(playerId: PlayerId): PlayerState {
 		const player = this.getPlayer(playerId);
 		if (!player) {
 			throw new Error(`Player with id ${playerId} not found`);
@@ -84,19 +85,19 @@ export class GameState {
 export class ReadonlyGameState extends GameState {
 	declare readonly players: ReadonlyArray<ReadonlyPlayerState>;
 
-	getCard(cardId: number): ReadonlyCardState | undefined {
+	getCard(cardId: CardId): ReadonlyCardState | undefined {
 		return super.getCard(cardId) as ReadonlyCardState | undefined;
 	}
 
-	requireCard(cardId: number): ReadonlyCardState {
+	requireCard(cardId: CardId): ReadonlyCardState {
 		return super.requireCard(cardId) as ReadonlyCardState;
 	}
 
-	getPlayer(playerId: number): ReadonlyPlayerState | undefined {
+	getPlayer(playerId: PlayerId): ReadonlyPlayerState | undefined {
 		return super.getPlayer(playerId) as ReadonlyPlayerState | undefined;
 	}
 
-	requirePlayer(playerId: number): ReadonlyPlayerState {
+	requirePlayer(playerId: PlayerId): ReadonlyPlayerState {
 		return super.requirePlayer(playerId) as ReadonlyPlayerState;
 	}
 
@@ -129,8 +130,8 @@ export class ReadonlyGameState extends GameState {
 
 export class MutableGameState extends GameState {
 	declare players: Array<MutablePlayerState>;
-	declare activeCardStack: Array<number>;
-	declare activePlayerStack: Array<number>;
+	declare activeCardStack: Array<CardId>;
+	declare activePlayerStack: Array<PlayerId>;
 
 	constructor(gameState: ReadonlyGameState) {
 		super({
@@ -140,19 +141,28 @@ export class MutableGameState extends GameState {
 		});
 	}
 
-	getCard(cardId: number): MutableCardState | undefined {
+	getCard(cardId: CardId): MutableCardState | undefined {
 		return super.getCard(cardId) as MutableCardState | undefined;
 	}
 
-	requireCard(cardId: number): MutableCardState {
+	requireTarget(id: TargetId): MutableCardState | MutablePlayerState {
+		if (isCardId(id)) {
+			return this.requireCard(id);
+		} else if (isPlayerId(id)) {
+			return this.requirePlayer(id);
+		}
+		throw new Error(`Invalid TargetId: ${id}`);
+	}
+
+	requireCard(cardId: CardId): MutableCardState {
 		return super.requireCard(cardId) as MutableCardState;
 	}
 
-	getPlayer(playerId: number): MutablePlayerState | undefined {
+	getPlayer(playerId: PlayerId): MutablePlayerState | undefined {
 		return super.getPlayer(playerId) as MutablePlayerState | undefined;
 	}
 
-	requirePlayer(playerId: number): MutablePlayerState {
+	requirePlayer(playerId: PlayerId): MutablePlayerState {
 		return super.requirePlayer(playerId) as MutablePlayerState;
 	}
 
