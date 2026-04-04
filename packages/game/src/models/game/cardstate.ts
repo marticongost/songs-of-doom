@@ -1,7 +1,17 @@
-import type { Property } from '../..';
+import { isSkill, Reaction, type Capability, type Property } from '../..';
 import type { Entity } from '../entities';
+import { events, type Event, type EventType } from '../event';
 import type { MutableGameState } from './gamestate';
 import type { CardId, PlayerId } from './identifiers';
+
+export interface CardOptions {
+	ready?: boolean;
+}
+
+export interface CapabilityRef {
+	cardId: CardId;
+	capability: Capability;
+}
 
 export type CardLocation =
 	| { container: 'deck'; playerId: PlayerId }
@@ -85,6 +95,29 @@ export class CardState {
 		// TODO: Apply transient effects that might grant or remove properties beyond the
 		// card's inherent ones
 		return this.card.properties.includes(property);
+	}
+
+	isAttached(): boolean {
+		return this.location.container === 'card' || this.location.container === 'player';
+	}
+
+	getReactionsToEvent(event: Event | EventType): Array<Reaction> {
+		if (typeof event === 'string') {
+			event = events[event];
+		}
+		let capabilities: Array<Capability>;
+		if (isSkill(this.card)) {
+			capabilities = this.isAttached() ? this.card.attachmentCapabilities : this.card.capabilities;
+		} else {
+			capabilities = [
+				...this.card.capabilities,
+				...(this.isAttached() ? this.card.attachmentCapabilities : [])
+			];
+		}
+		const reactions: Reaction[] = capabilities.filter(
+			(capability) => capability instanceof Reaction && capability.triggers.includes(event)
+		) as Reaction[];
+		return reactions;
 	}
 }
 

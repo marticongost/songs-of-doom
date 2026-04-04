@@ -1,11 +1,14 @@
+import { Obligation } from '../capabilities';
 import type { Capability } from '../capability';
 import type { Effect } from '../effects';
 import type { EffectOutcome } from '../effects/effect';
+import { events, type Event, type EventType } from '../event';
 import { Target } from '../target';
+import type { CapabilityRef } from './cardstate';
 import { ReadonlyGameState, type GameStateProps, type MutableGameState } from './gamestate';
 import type { CardId, TargetId } from './identifiers';
 import type { Field } from './playerinput';
-import { TargetField } from './playerinput';
+import { CapabilityChoiceField, TargetField } from './playerinput';
 
 type FieldsResult<Fields extends ReadonlyArray<Field<unknown, string, boolean>>> = {
 	[F in Fields[number] as F['name']]: F extends Field<infer T, string, infer R>
@@ -151,6 +154,43 @@ export class GameGraph {
 		}
 		this._currentParent = this._currentParent.parent;
 	}
+
+	async eventTriggered(eventType: EventType) {
+		const reactiveCapabilities: Set<CapabilityRef> = new Set(
+			this._current.state
+				.cards({ ready: true })
+				.flatMap((card) =>
+					card
+						.getReactionsToEvent(eventType)
+						.map((reaction) => ({ cardId: card.id, capability: reaction }))
+				)
+		);
+
+		if (reactiveCapabilities.size > 0) {
+			this.add(EventTriggered, { event: events[eventType] });
+			this.group(async () => {
+				while (reactiveCapabilities.size > 0) {
+					const { selection } = await this.requestInput(
+						new CapabilityChoiceField({
+							name: 'selection',
+							choices: reactiveCapabilities,
+							required: Array.from(reactiveCapabilities).some(
+								(capabilityRef) => capabilityRef.capability instanceof Obligation
+							)
+						})
+					);
+					if (selection === undefined) {
+						break;
+					}
+					selection.capability.trigger({
+						gameGraph: this,
+						cardId: selection.cardId
+					});
+					reactiveCapabilities.delete(selection);
+				}
+			});
+		}
+	}
 }
 
 export interface GameNodeProps {
@@ -229,6 +269,19 @@ export class EffectTriggered<EffectType extends Effect> extends GameNode {
 		super(baseProps);
 		this.effect = effect;
 		this.outcome = outcome;
+	}
+}
+
+export interface EventTriggeredProps extends GameNodeProps {
+	event: Event;
+}
+
+export class EventTriggered extends GameNode {
+	readonly event: Event;
+
+	constructor({ event, ...baseProps }: EventTriggeredProps) {
+		super(baseProps);
+		this.event = event;
 	}
 }
 

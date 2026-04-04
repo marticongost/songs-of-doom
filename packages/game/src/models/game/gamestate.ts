@@ -1,4 +1,9 @@
-import { CardState, type MutableCardState, type ReadonlyCardState } from './cardstate';
+import {
+	CardState,
+	type CardOptions,
+	type MutableCardState,
+	type ReadonlyCardState
+} from './cardstate';
 import { isCardId, isPlayerId, type CardId, type PlayerId, type TargetId } from './identifiers';
 import { PlayerState, type MutablePlayerState, type ReadonlyPlayerState } from './playerstate';
 
@@ -17,6 +22,10 @@ export class GameState {
 		this.players = players;
 		this.activeCardStack = activeCardStack ?? [];
 		this.activePlayerStack = activePlayerStack ?? [];
+	}
+
+	cards(options?: CardOptions): Array<CardState> {
+		return this.players.flatMap((player) => player.cards(options));
 	}
 
 	getCard(cardId: CardId): CardState | undefined {
@@ -85,6 +94,10 @@ export class GameState {
 export class ReadonlyGameState extends GameState {
 	declare readonly players: ReadonlyArray<ReadonlyPlayerState>;
 
+	cards(options?: CardOptions): Array<ReadonlyCardState> {
+		return super.cards(options) as Array<ReadonlyCardState>;
+	}
+
 	getCard(cardId: CardId): ReadonlyCardState | undefined {
 		return super.getCard(cardId) as ReadonlyCardState | undefined;
 	}
@@ -139,6 +152,10 @@ export class MutableGameState extends GameState {
 			activeCardStack: [...gameState.activeCardStack],
 			activePlayerStack: [...gameState.activePlayerStack]
 		});
+	}
+
+	cards(options?: CardOptions): Array<MutableCardState> {
+		return super.cards(options) as Array<MutableCardState>;
 	}
 
 	getCard(cardId: CardId): MutableCardState | undefined {

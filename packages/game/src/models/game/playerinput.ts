@@ -1,6 +1,7 @@
 import type { ReadonlyCounter } from '@songsofdoom/common';
 import type { FocusToken, FocusType } from '../focus';
 import type { Target } from '../target';
+import type { CapabilityRef } from './cardstate';
 
 export interface FieldProps<N extends string = string, R extends boolean = true> {
 	name: N;
@@ -63,3 +64,22 @@ export class BooleanField<N extends string = string, R extends boolean = true> e
 	N,
 	R
 > {}
+
+export interface CapabilityChoiceFieldProps<
+	N extends string = string,
+	R extends boolean = true
+> extends FieldProps<N, R> {
+	choices: Set<CapabilityRef>;
+}
+
+export class CapabilityChoiceField<
+	N extends string = string,
+	R extends boolean = true
+> extends Field<CapabilityRef, N, R> {
+	readonly choices: Set<CapabilityRef>;
+
+	constructor({ choices, ...baseProps }: CapabilityChoiceFieldProps<N, R>) {
+		super(baseProps);
+		this.choices = choices;
+	}
+}

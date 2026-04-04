@@ -4,6 +4,7 @@ import { type Focus } from '../focus';
 import {
 	CardState,
 	type CardLocation,
+	type CardOptions,
 	type MutableCardState,
 	type ReadonlyCardState
 } from './cardstate';
@@ -59,8 +60,11 @@ export class PlayerState {
 		this.mentalTrauma = mentalTrauma;
 	}
 
-	cards(): Array<CardState> {
-		return [...this.hand, ...this.attachments];
+	cards(options?: CardOptions): Array<CardState> {
+		if (options?.ready) {
+			return [...this.hand, ...this.attachments].filter((card) => !card.exhausted);
+		}
+		return [...this.deck, ...this.hand, ...this.discardPile, ...this.attachments];
 	}
 
 	getCard(id: CardId): CardState | undefined {
@@ -93,8 +97,8 @@ export class ReadonlyPlayerState extends PlayerState {
 	declare readonly discardPile: ReadonlyArray<ReadonlyCardState>;
 	declare readonly attachments: ReadonlyArray<ReadonlyCardState>;
 
-	cards(): Array<ReadonlyCardState> {
-		return [...this.hand, ...this.attachments];
+	cards(options?: CardOptions): Array<ReadonlyCardState> {
+		return super.cards(options) as Array<ReadonlyCardState>;
 	}
 
 	getCard(id: CardId): ReadonlyCardState | undefined {
@@ -142,8 +146,8 @@ export class MutablePlayerState extends PlayerState {
 		});
 	}
 
-	cards(): Array<MutableCardState> {
-		return [...this.hand, ...this.attachments];
+	cards(options?: CardOptions): Array<MutableCardState> {
+		return super.cards(options) as Array<MutableCardState>;
 	}
 
 	getCard(id: CardId): MutableCardState | undefined {
