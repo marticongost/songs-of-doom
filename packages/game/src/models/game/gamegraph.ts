@@ -68,8 +68,8 @@ export class GameGraph {
 			id: this._current.id + 1,
 			parent: this._currentParent,
 			previous: this._current,
-			state,
-			...props
+			...props,
+			state
 		} as P);
 
 		this._current[NEXT] = node;
