@@ -7,8 +7,12 @@ import type { CardId, TargetId } from './identifiers';
 import type { Field } from './playerinput';
 import { TargetField } from './playerinput';
 
-type FieldsResult<Fields extends ReadonlyArray<Field<unknown, string>>> = {
-	[F in Fields[number] as F['name']]: F extends Field<infer T, string> ? T : never;
+type FieldsResult<Fields extends ReadonlyArray<Field<unknown, string, boolean>>> = {
+	[F in Fields[number] as F['name']]: F extends Field<infer T, string, infer R>
+		? R extends true
+			? T
+			: T | undefined
+		: never;
 };
 
 export interface GameGraphProps {
@@ -97,10 +101,10 @@ export class GameGraph {
 	}
 
 	async requestInput(target: Target): Promise<{ target: TargetId[] }>;
-	async requestInput<const Fields extends ReadonlyArray<Field<unknown, string>>>(
+	async requestInput<const Fields extends ReadonlyArray<Field<unknown, string, boolean>>>(
 		...fields: Fields
 	): Promise<FieldsResult<Fields>>;
-	async requestInput<const Fields extends ReadonlyArray<Field<unknown, string>>>(
+	async requestInput<const Fields extends ReadonlyArray<Field<unknown, string, boolean>>>(
 		...fields: Fields | [Target]
 	): Promise<FieldsResult<Fields> | { target: number[] }> {
 		if (fields[0] instanceof Target) {
