@@ -1,6 +1,17 @@
 import { mock as vitestMock, type MockProxy } from 'vitest-mock-extended';
 
 /**
+ * Advances the microtask queue by the given number of ticks.
+ * Useful in async tests where code under test uses multiple layers of Promise
+ * chaining and you need to wait for them to settle before asserting.
+ */
+export async function advanceTicks(n: number): Promise<void> {
+	for (let i = 0; i < n; i++) {
+		await Promise.resolve();
+	}
+}
+
+/**
  * Mocks an object, allowing both direct property assignment and mock function
  * implementation.
  *
