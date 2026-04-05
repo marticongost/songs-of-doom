@@ -100,6 +100,54 @@ it('returns ready cards', () => {
 This applies to method stubs too — do not stub methods that the code under
 test does not call for this particular case.
 
+## Test what the method promises, not how it works internally
+
+Tests should describe what happens end-to-end under a given condition, not
+assert each intermediate method call in isolation. A test like "calls
+`requestSingleTargetOrActiveCard` with `this.target`" followed by a separate
+test "calls `effectTriggered` with itself" fragments a single flow into
+implementation details.
+
+Instead, write one test per meaningful condition. Use `.calledWith()` on stubs
+to chain them together — if any step in the chain receives the wrong argument,
+the stub returns `undefined`, the chain breaks, and the final assertion fails.
+This makes intermediate `expect(...).toHaveBeenCalledWith(...)` calls
+unnecessary:
+
+```typescript
+// Wrong — fragments the flow and asserts intermediate steps explicitly
+it('calls requestSingleTargetOrActiveCard with this.target', async () => { ... });
+it('calls effectTriggered with itself', async () => { ... });
+it('state callback calls requireTarget with the resolved targetId', async () => { ... });
+
+// Right — stubs are chained with calledWith; one final assertion proves the whole flow
+it('attaches the active card to the given target', async () => {
+    const target = new Target({});
+    const mutableState = mock<MutableGameState>();
+    const targetCard = mock<MutableCardState>();
+    const attachmentCard = mock<MutableCardState>();
+    mutableState.requireTarget.calledWith('c2').mockReturnValue(targetCard);
+    mutableState.requireActiveCard.mockReturnValue(attachmentCard);
+    const graph = mock<GameGraph>();
+    graph.requestSingleTargetOrActiveCard.calledWith(target).mockResolvedValue('c2');
+    graph.effectTriggered.mockImplementation((_effect, callback) => {
+        callback(mutableState);
+    });
+
+    await attach({ target }).trigger(graph);
+
+    expect(targetCard.addAttachment).toHaveBeenCalledWith(mutableState, attachmentCard);
+});
+```
+
+If `requestSingleTargetOrActiveCard` is called with the wrong argument, it
+returns `undefined`; `requireTarget` never matches `'c2'`; `targetCard` is
+never returned; `addAttachment` is never called — the final assertion fails.
+The chain is self-verifying without any intermediate assertions.
+
+The conditions to cover are the different inputs or states the method can
+receive (e.g. `target` defined vs undefined). Each condition gets one test.
+
 ## When to use real instances instead of mocks
 
 Use a **real instance only for the class under test itself**. Every dependency
