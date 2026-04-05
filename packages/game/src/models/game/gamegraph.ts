@@ -182,7 +182,7 @@ export class GameGraph {
 					if (selection === undefined) {
 						break;
 					}
-					selection.capability.trigger({
+					await selection.capability.trigger({
 						gameGraph: this,
 						cardId: selection.cardId
 					});
