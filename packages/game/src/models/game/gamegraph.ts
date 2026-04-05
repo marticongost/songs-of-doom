@@ -84,6 +84,22 @@ export class GameGraph {
 		}
 	}
 
+	capabilityTriggered(
+		capability: Capability,
+		cardId: CardId,
+		state?: ReadonlyGameState | ((stateAlteration: MutableGameState) => void)
+	) {
+		this.add(CapabilityTriggered, { capability, cardId, state });
+	}
+
+	capabilityFinished(
+		capability: Capability,
+		cardId: CardId,
+		state?: ReadonlyGameState | ((stateAlteration: MutableGameState) => void)
+	) {
+		this.add(CapabilityFinished, { capability, cardId, state });
+	}
+
 	effectTriggered<E extends Effect>(effect: E, state: (s: MutableGameState) => EffectOutcome<E>) {
 		const mutableState = this._current.state.mutable();
 		let outcome: EffectOutcome<E>;
