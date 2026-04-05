@@ -138,9 +138,9 @@ export class GameGraph {
 		return targetIds[0];
 	}
 
-	group(callback: () => void) {
+	async group(callback: () => Promise<void>) {
 		this.beginGroup();
-		callback();
+		await callback();
 		this.endGroup();
 	}
 
@@ -168,7 +168,7 @@ export class GameGraph {
 
 		if (reactiveCapabilities.size > 0) {
 			this.add(EventTriggered, { event: events[eventType] });
-			this.group(async () => {
+			await this.group(async () => {
 				while (reactiveCapabilities.size > 0) {
 					const { selection } = await this.requestInput(
 						new CapabilityChoiceField({

@@ -33,7 +33,7 @@ export abstract class Capability {
 			capability: this,
 			cardId
 		});
-		gameGraph.group(async () => {
+		await gameGraph.group(async () => {
 			for (const effect of this.effects) {
 				await effect.trigger(gameGraph);
 			}
