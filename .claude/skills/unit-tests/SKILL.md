@@ -102,28 +102,39 @@ test does not call for this particular case.
 
 ## When to use real instances instead of mocks
 
-Use a real instance when:
+Use a **real instance only for the class under test itself**. Every dependency
+the class under test interacts with must be mocked — regardless of how simple
+or convenient the real implementation might seem.
 
-- The class has a simple constructor and the test is actually about the class
-  being constructed (e.g. `ReadonlyCardState`, `ReadonlyPlayerState`).
-- The real implementation's methods are needed (e.g. `mutable()`, `getCard()`)
-  and mocking them would be more complex than just constructing the real object.
+```typescript
+// Testing AttachEffect — mock GameGraph and all state objects
+const graph = mock<GameGraph>();
+const mutableState = mock<MutableGameState>();
+const targetCard = mock<MutableCardState>();
+graph.requestSingleTargetOrActiveCard.mockResolvedValue('c2');
+graph.effectTriggered.mockImplementation((_effect, callback) => {
+	callback(mutableState);
+});
+mutableState.requireTarget.mockReturnValue(targetCard);
+mutableState.requireActiveCard.mockReturnValue(mock<MutableCardState>());
+```
 
-Use `mock<Entity>()` for complex dependencies that the constructor requires but
-the test does not exercise:
+When the class under test has a constructor that takes dependencies (like
+`Entity` inside a `ReadonlyCardState`), those dependencies are mocked:
 
 ```typescript
 const c1 = new ReadonlyCardState({
 	id: 'c1',
-	card: mock<Entity>(), // not exercised — mock is fine
+	card: mock<Entity>(), // dependency — mock it
 	ownerId: 'p1',
 	location: { container: 'hand', playerId: 'p1' }
 });
 ```
 
 The pattern in the `drawFromDeck` and `addAttachment` tests is a good example:
-the player state needs real `ReadonlyCardState` instances (so that `mutable()`
-works correctly), but their internal `Entity` can be a mock.
+the player state (the class under test) uses real `ReadonlyCardState` instances
+because those are inputs, not dependencies called by the player state itself.
+Their internal `Entity` is still a mock.
 
 ## Test structure
 
