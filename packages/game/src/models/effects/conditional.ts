@@ -42,6 +42,10 @@ export class ConditionalEffect extends Effect {
 				for (const effect of effects) {
 					await effect.trigger(gameGraph);
 				}
+			} else if (this.default) {
+				for (const effect of this.default) {
+					await effect.trigger(gameGraph);
+				}
 			}
 		}
 	}
