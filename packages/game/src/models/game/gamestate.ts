@@ -1,6 +1,5 @@
 import type { BooleanExpressionType } from '../expressions/boolean/boolean-expression';
 import type { ScalarExpressionType } from '../expressions/scalar/scalar-expression';
-import { Stat } from '../stats';
 import {
 	CardState,
 	type CardOptions,
@@ -98,7 +97,6 @@ export class GameState {
 	evaluate(expr: BooleanExpressionType | ScalarExpressionType): boolean | number {
 		if (typeof expr === 'boolean') return expr;
 		if (typeof expr === 'number') return expr;
-		if (expr instanceof Stat) return this.requireActivePlayer().getStat(expr);
 		return (expr as { evaluate(state: GameState): boolean | number }).evaluate(this);
 	}
 }

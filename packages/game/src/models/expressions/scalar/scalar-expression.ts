@@ -1,7 +1,6 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
 import type { ComparisonOperator } from '../../expressions/boolean/comparison';
 import type { GameState } from '../../game/gamestate';
-import type { Stat } from '../../stats';
 import { Expression } from '../expression';
 
 /**
@@ -35,4 +34,4 @@ export abstract class ScalarExpression extends Expression {
  * A type union representing all possible scalar expressions.
  * Includes primitives (number, Stat) and complex expressions (ScalarExpression).
  */
-export type ScalarExpressionType = Stat | number | ScalarExpression;
+export type ScalarExpressionType = number | ScalarExpression;
