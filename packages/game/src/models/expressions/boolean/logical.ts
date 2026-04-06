@@ -2,7 +2,6 @@ import type { LocalisedText } from '@songsofdoom/common/localisation';
 import type { GameState } from '../../game/gamestate';
 import { Expression } from '../expression';
 import { BooleanExpression, type BooleanExpressionType } from './boolean-expression';
-import { evaluateBoolean } from './functions';
 
 /**
  * Logical AND operation between two or more boolean expressions.
@@ -20,7 +19,7 @@ export class AndExpression extends BooleanExpression {
 	}
 
 	override evaluate(state: GameState): boolean {
-		return this.operands.every((operand) => evaluateBoolean(operand, state));
+		return this.operands.every((operand) => state.evaluate(operand));
 	}
 }
 
@@ -40,7 +39,7 @@ export class OrExpression extends BooleanExpression {
 	}
 
 	override evaluate(state: GameState): boolean {
-		return this.operands.some((operand) => evaluateBoolean(operand, state));
+		return this.operands.some((operand) => state.evaluate(operand));
 	}
 }
 
@@ -76,7 +75,7 @@ export class NotExpression extends BooleanExpression {
 	}
 
 	override evaluate(state: GameState): boolean {
-		return !evaluateBoolean(this.operand, state);
+		return !state.evaluate(this.operand);
 	}
 }
 

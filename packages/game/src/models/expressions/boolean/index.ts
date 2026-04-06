@@ -22,6 +22,3 @@ export { engaged, EngagedExpression } from './engaged';
 export { is, IsExpression, type IsExpressionProps } from './is';
 export { owned, OwnedExpression } from './owned';
 export { wounded } from './wounded';
-
-// Helper functions
-export { evaluateBoolean } from './functions';

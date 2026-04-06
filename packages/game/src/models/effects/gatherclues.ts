@@ -1,6 +1,6 @@
 import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
-import { evaluateScalar, ScalarExpression } from '../expressions';
+import { ScalarExpression } from '../expressions';
 import type { GameGraph } from '../game/gamegraph';
 import { currentLocation, Target, type LocationTargetType, type TargetSpec } from '../target';
 import { EffectWithOutcome } from './effect';
@@ -46,7 +46,7 @@ export class GatherCluesEffect extends EffectWithOutcome<GatherCluesOutcome> {
 		gameGraph.effectTriggered<GatherCluesEffect>(this, (state) => {
 			// TODO: Subtract clues from the location
 			// TODO: Limit amount to available clues at the location
-			const amount = evaluateScalar(this.amount, state);
+			const amount = state.evaluate(this.amount);
 			return { amount, locationId: 0 };
 		});
 	}

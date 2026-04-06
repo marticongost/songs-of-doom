@@ -5,7 +5,6 @@ import {
 } from '../../expressions/scalar/scalar-expression';
 import { ScalarOperation } from '../../expressions/scalar/scalar-operation';
 import type { GameState } from '../../game/gamestate';
-import { evaluateScalar } from '../scalar';
 import { BooleanExpression } from './boolean-expression';
 
 /**
@@ -57,8 +56,8 @@ export class ComparisonExpression extends BooleanExpression {
 	}
 
 	override evaluate(state: GameState): boolean {
-		const leftValue = evaluateScalar(this.left, state);
-		const rightValue = evaluateScalar(this.right, state);
+		const leftValue = state.evaluate(this.left);
+		const rightValue = state.evaluate(this.right);
 		switch (this.operator) {
 			case '>':
 				return leftValue > rightValue;

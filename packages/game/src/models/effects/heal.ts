@@ -1,6 +1,6 @@
 import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
-import { evaluateScalar, ScalarExpression } from '../expressions';
+import { ScalarExpression } from '../expressions';
 import type { GameGraph } from '../game/gamegraph';
 import { Target, type TargetSpec } from '../target';
 import { EffectWithOutcome } from './effect';
@@ -42,7 +42,7 @@ export class HealEffect extends EffectWithOutcome<HealOutcome> {
 	override async trigger(gameGraph: GameGraph) {
 		gameGraph.effectTriggered<HealEffect>(this, (state) => {
 			// TODO: Add helper to gameState to request a target or default to the current subject
-			const amount = evaluateScalar(this.amount, state);
+			const amount = state.evaluate(this.amount);
 			return { amount, targetId: undefined };
 		});
 	}

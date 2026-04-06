@@ -22,4 +22,4 @@ export {
 export { variable, VariableExpression, X, type VariableExpressionProps } from './variable';
 
 // Helper functions
-export { evaluateScalar, expressionPlurality } from './functions';
+export { expressionPlurality } from './functions';

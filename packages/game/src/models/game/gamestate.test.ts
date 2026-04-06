@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { mock } from '@songsofdoom/common/test-utils';
+import type { BooleanExpression } from '../expressions/boolean';
+import type { ScalarExpression } from '../expressions/scalar';
+import { strength } from '../stats';
 import type { ReadonlyCardState } from './cardstate';
 import { ReadonlyGameState } from './gamestate';
 import type { MutablePlayerState, ReadonlyPlayerState } from './playerstate';
@@ -157,6 +160,46 @@ describe('GameState active player stack', () => {
 		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
 		const state = new ReadonlyGameState({ players: [p1], activePlayerStack: ['p1'] });
 		expect(state.requireActivePlayer()).toBe(p1);
+	});
+});
+
+// ─── GameState.evaluate ───────────────────────────────────────────────────────
+
+describe('GameState.evaluate', () => {
+	it('returns a boolean literal unchanged', () => {
+		const state = new ReadonlyGameState({ players: [] });
+		expect(state.evaluate(true)).toBe(true);
+		expect(state.evaluate(false)).toBe(false);
+	});
+
+	it('returns a number literal unchanged', () => {
+		const state = new ReadonlyGameState({ players: [] });
+		expect(state.evaluate(7)).toBe(7);
+	});
+
+	it('returns the active player stat value for a Stat', () => {
+		const player = mock<ReadonlyPlayerState>({
+			id: 'p1',
+			getStat: (stat) => (stat === strength ? 4 : 0)
+		});
+		const state = new ReadonlyGameState({ players: [player], activePlayerStack: ['p1'] });
+		expect(state.evaluate(strength)).toBe(4);
+	});
+
+	it('delegates to a BooleanExpression', () => {
+		const expr = mock<BooleanExpression>();
+		expr.evaluate.mockReturnValue(true);
+		const state = new ReadonlyGameState({ players: [] });
+		expect(state.evaluate(expr)).toBe(true);
+		expect(expr.evaluate).toHaveBeenCalledWith(state);
+	});
+
+	it('delegates to a ScalarExpression', () => {
+		const expr = mock<ScalarExpression>();
+		expr.evaluate.mockReturnValue(5);
+		const state = new ReadonlyGameState({ players: [] });
+		expect(state.evaluate(expr)).toBe(5);
+		expect(expr.evaluate).toHaveBeenCalledWith(state);
 	});
 });
 
