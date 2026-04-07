@@ -180,7 +180,8 @@ describe('ReadonlyPlayerState', () => {
 				id: 'c1',
 				card: mock<Entity>(),
 				ownerId: 'p1',
-				location: { container: 'hand', playerId: 'p1' }
+				location: { container: 'hand', playerId: 'p1' },
+				properties: []
 			});
 			const player = makePlayer('p1', { hand: [c1] });
 			const mutable = player.mutable();
@@ -234,13 +235,15 @@ describe('MutablePlayerState.drawFromDeck', () => {
 			id: 'c1',
 			card: mock<Entity>(),
 			ownerId: 'p1',
-			location: { container: 'deck', playerId: 'p1' }
+			location: { container: 'deck', playerId: 'p1' },
+			properties: []
 		});
 		const c2 = new ReadonlyCardState({
 			id: 'c2',
 			card: mock<Entity>(),
 			ownerId: 'p1',
-			location: { container: 'deck', playerId: 'p1' }
+			location: { container: 'deck', playerId: 'p1' },
+			properties: []
 		});
 		const mutablePlayer = makePlayer('p1', { deck: [c1, c2] }).mutable();
 		const gameState = mock<MutableGameState>();
@@ -258,13 +261,15 @@ describe('MutablePlayerState.drawFromDeck', () => {
 			id: 'c1',
 			card: mock<Entity>(),
 			ownerId: 'p1',
-			location: { container: 'deck', playerId: 'p1' }
+			location: { container: 'deck', playerId: 'p1' },
+			properties: []
 		});
 		const c2 = new ReadonlyCardState({
 			id: 'c2',
 			card: mock<Entity>(),
 			ownerId: 'p1',
-			location: { container: 'deck', playerId: 'p1' }
+			location: { container: 'deck', playerId: 'p1' },
+			properties: []
 		});
 		const mutablePlayer = makePlayer('p1', { deck: [c1, c2] }).mutable();
 		const gameState = mock<MutableGameState>();
@@ -285,7 +290,8 @@ describe('MutablePlayerState.drawFromDeck', () => {
 			id: 'c1',
 			card: mock<Entity>(),
 			ownerId: 'p1',
-			location: { container: 'discard', playerId: 'p1' }
+			location: { container: 'discard', playerId: 'p1' },
+			properties: []
 		});
 		const mutablePlayer = makePlayer('p1', { discard: [c1] }).mutable();
 		const gameState = mock<MutableGameState>();
@@ -313,7 +319,8 @@ describe('MutablePlayerState.drawFromDeck', () => {
 			id: 'c1',
 			card: mock<Entity>(),
 			ownerId: 'p1',
-			location: { container: 'deck', playerId: 'p1' }
+			location: { container: 'deck', playerId: 'p1' },
+			properties: []
 		});
 		const mutablePlayer = makePlayer('p1', { deck: [c1] }).mutable();
 		const gameState = mock<MutableGameState>();
@@ -333,7 +340,8 @@ describe('MutablePlayerState.addAttachment', () => {
 			id: 'c1',
 			card: mock<Entity>(),
 			ownerId: 'p1',
-			location: { container: 'hand', playerId: 'p1' }
+			location: { container: 'hand', playerId: 'p1' },
+			properties: []
 		});
 		const mutablePlayer = makePlayer('p1', { hand: [c1] }).mutable();
 		const mutableCard = mutablePlayer.requireCard('c1');

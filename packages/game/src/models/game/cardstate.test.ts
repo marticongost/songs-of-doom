@@ -260,6 +260,32 @@ describe('CardState', () => {
 		});
 	});
 
+	describe('getProperty', () => {
+		it('returns the property instance when found', () => {
+			const card = makeReadonlyCard(
+				'c1',
+				'p1',
+				{ container: 'hand', playerId: 'p1' },
+				{
+					entity: makeEntity({ type: trait })
+				}
+			);
+			expect(card.getProperty(trait)).toBe(trait);
+		});
+
+		it('returns undefined when the property is not present', () => {
+			const card = makeReadonlyCard(
+				'c1',
+				'p1',
+				{ container: 'hand', playerId: 'p1' },
+				{
+					entity: makeEntity({ type: trait })
+				}
+			);
+			expect(card.getProperty(skill)).toBeUndefined();
+		});
+	});
+
 	describe('isAttached', () => {
 		it('returns false for cards in deck', () => {
 			const card = makeReadonlyCard('c1', 'p1', { container: 'deck', playerId: 'p1' });

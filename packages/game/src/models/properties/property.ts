@@ -21,4 +21,8 @@ export abstract class Property extends BooleanExpression {
 		// TODO: choose the current target
 		return false;
 	}
+
+	is(property: Property): boolean {
+		return this === property;
+	}
 }

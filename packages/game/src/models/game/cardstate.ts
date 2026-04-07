@@ -3,6 +3,7 @@ import type { Entity } from '../entities';
 import { events, type Event, type EventType } from '../event';
 import type { MutableGameState } from './gamestate';
 import type { CardId, PlayerId } from './identifiers';
+import { TargetState, type MutableTargetState } from './targetstate';
 
 export interface CardOptions {
 	ready?: boolean;
@@ -30,18 +31,15 @@ export interface CardStateProps {
 	attachments?: ReadonlyArray<CardState>;
 	physicalTrauma?: number;
 	mentalTrauma?: number;
+	properties?: Array<Property>;
 }
 
-export class CardState {
-	readonly id: CardId;
+export class CardState extends TargetState<CardId> {
 	readonly card: Entity;
 	readonly ownerId: PlayerId;
 	readonly location: CardLocation;
 	readonly exhausted: boolean;
 	readonly charges: number;
-	readonly attachments: ReadonlyArray<CardState>;
-	readonly physicalTrauma: number;
-	readonly mentalTrauma: number;
 
 	constructor({
 		id,
@@ -52,17 +50,21 @@ export class CardState {
 		charges = 0,
 		attachments = [],
 		physicalTrauma = 0,
-		mentalTrauma = 0
+		mentalTrauma = 0,
+		properties
 	}: CardStateProps) {
-		this.id = id;
+		super({
+			id,
+			attachments,
+			properties: properties ?? card.properties,
+			physicalTrauma,
+			mentalTrauma
+		});
 		this.card = card;
 		this.ownerId = ownerId;
 		this.location = location;
 		this.exhausted = exhausted;
 		this.charges = charges;
-		this.attachments = attachments;
-		this.physicalTrauma = physicalTrauma;
-		this.mentalTrauma = mentalTrauma;
 	}
 
 	getCard(id: CardId): CardState | undefined {
@@ -84,17 +86,6 @@ export class CardState {
 			throw new Error(`Card with id ${id} not found`);
 		}
 		return card;
-	}
-
-	/** Determines whether the card has the given property, taking into account any
-	 * effects that might modify its properties.
-	 * @param property The property to check for.
-	 * @return True if the card has the property, false otherwise.
-	 */
-	hasProperty(property: Property): boolean {
-		// TODO: Apply transient effects that might grant or remove properties beyond the
-		// card's inherent ones
-		return this.card.properties.includes(property);
 	}
 
 	isAttached(): boolean {
@@ -143,7 +134,7 @@ export class ReadonlyCardState extends CardState {
 	}
 }
 
-export class MutableCardState extends CardState {
+export class MutableCardState extends CardState implements MutableTargetState<CardId> {
 	declare exhausted: boolean;
 	declare charges: number;
 	declare attachments: Array<MutableCardState>;
@@ -160,6 +151,7 @@ export class MutableCardState extends CardState {
 			exhausted: cardState.exhausted,
 			charges: cardState.charges,
 			attachments: cardState.attachments.map((attachment) => attachment.mutable()),
+			properties: [...cardState.properties],
 			physicalTrauma: cardState.physicalTrauma,
 			mentalTrauma: cardState.mentalTrauma
 		});
@@ -182,6 +174,7 @@ export class MutableCardState extends CardState {
 			exhausted: this.exhausted,
 			charges: this.charges,
 			attachments: this.attachments.map((attachment) => attachment.readonly()),
+			properties: [...this.properties],
 			physicalTrauma: this.physicalTrauma,
 			mentalTrauma: this.mentalTrauma
 		});

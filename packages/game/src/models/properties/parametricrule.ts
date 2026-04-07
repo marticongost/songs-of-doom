@@ -1,3 +1,4 @@
+import type { Property } from '../..';
 import { type ScalarExpressionType } from '../expressions/scalar/scalar-expression';
 import { Rule } from './rule';
 
@@ -20,6 +21,10 @@ export class ParametricRuleInstance<P> extends Rule {
 		super({ title: rule.title, description: rule.description });
 		this.rule = rule;
 		this.params = params;
+	}
+
+	override is(property: Property): boolean {
+		return this.rule === property;
 	}
 }
 

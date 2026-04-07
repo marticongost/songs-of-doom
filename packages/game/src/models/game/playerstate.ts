@@ -1,4 +1,4 @@
-import type { Stat } from '../..';
+import type { Property, Stat } from '../..';
 import type { CharacterState } from '../characters';
 import { type Focus } from '../focus';
 import {
@@ -10,6 +10,7 @@ import {
 } from './cardstate';
 import type { MutableGameState } from './gamestate';
 import type { CardId, PlayerId } from './identifiers';
+import { TargetState, type MutableTargetState } from './targetstate';
 
 export interface PlayerStateProps {
 	id: PlayerId;
@@ -18,21 +19,18 @@ export interface PlayerStateProps {
 	hand: ReadonlyArray<CardState>;
 	discardPile: ReadonlyArray<CardState>;
 	attachments?: ReadonlyArray<CardState>;
+	properties?: ReadonlyArray<Property>;
 	focusesBag: ReadonlyMap<Focus, Record<number, number>>;
 	focusesHand: ReadonlyMap<Focus, Record<number, number>>;
 	physicalTrauma: number;
 	mentalTrauma: number;
 }
 
-export class PlayerState {
-	readonly id: PlayerId;
+export class PlayerState extends TargetState<PlayerId> {
 	readonly character: CharacterState;
 	readonly deck: ReadonlyArray<CardState>;
 	readonly hand: ReadonlyArray<CardState>;
 	readonly discardPile: ReadonlyArray<CardState>;
-	readonly attachments: ReadonlyArray<CardState>;
-	readonly physicalTrauma: number;
-	readonly mentalTrauma: number;
 	readonly focusesBag: ReadonlyMap<Focus, Record<number, number>>;
 	readonly focusesHand: ReadonlyMap<Focus, Record<number, number>>;
 
@@ -43,21 +41,19 @@ export class PlayerState {
 		hand,
 		discardPile,
 		attachments = [],
+		properties,
 		focusesBag,
 		focusesHand,
 		physicalTrauma,
 		mentalTrauma
 	}: PlayerStateProps) {
-		this.id = id;
+		super({ id, attachments, properties: properties ?? [], physicalTrauma, mentalTrauma });
 		this.character = character;
 		this.deck = deck;
 		this.hand = hand;
 		this.discardPile = discardPile;
-		this.attachments = attachments;
 		this.focusesBag = focusesBag;
 		this.focusesHand = focusesHand;
-		this.physicalTrauma = physicalTrauma;
-		this.mentalTrauma = mentalTrauma;
 	}
 
 	cards(options?: CardOptions): Array<CardState> {
@@ -120,7 +116,7 @@ export class ReadonlyPlayerState extends PlayerState {
 	}
 }
 
-export class MutablePlayerState extends PlayerState {
+export class MutablePlayerState extends PlayerState implements MutableTargetState<PlayerId> {
 	declare character: CharacterState;
 	declare deck: Array<MutableCardState>;
 	declare hand: Array<MutableCardState>;
@@ -139,6 +135,7 @@ export class MutablePlayerState extends PlayerState {
 			hand: playerState.hand.map((card) => card.mutable()),
 			discardPile: playerState.discardPile.map((card) => card.mutable()),
 			attachments: playerState.attachments.map((card) => card.mutable()),
+			properties: [...playerState.properties],
 			physicalTrauma: playerState.physicalTrauma,
 			mentalTrauma: playerState.mentalTrauma,
 			focusesBag: new Map(playerState.focusesBag),
@@ -166,6 +163,7 @@ export class MutablePlayerState extends PlayerState {
 			hand: this.hand.map((card) => card.readonly()),
 			discardPile: this.discardPile.map((card) => card.readonly()),
 			attachments: this.attachments.map((card) => card.readonly()),
+			properties: [...this.properties],
 			physicalTrauma: this.physicalTrauma,
 			mentalTrauma: this.mentalTrauma,
 			focusesBag: new Map(this.focusesBag),
