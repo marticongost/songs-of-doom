@@ -1,5 +1,7 @@
 import type { GameGraph } from '../game/gamegraph';
 import type { MutableGameState } from '../game/gamestate';
+import type { TargetId } from '../game/identifiers';
+import type { MutableTargetState } from '../game/targetstate';
 import type { Property } from '../properties';
 import { Effect } from './effect';
 
@@ -30,9 +32,22 @@ export class ConferPropertiesEffect extends Effect {
 	}
 
 	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<ConferPropertiesEffect>(this, (_state: MutableGameState) => {
-			// TODO
+		gameGraph.effectTriggered<ConferPropertiesEffect>(this, (state: MutableGameState) => {
+			const target = state.requireImplicitTarget();
+			for (const conferedProperty of this.properties) {
+				this.addProperty(conferedProperty, target);
+			}
 		});
+	}
+
+	private addProperty(property: Property, target: MutableTargetState<TargetId>): void {
+		const existingProperty = target.getProperty(property);
+		if (!existingProperty) {
+			target.properties.push(property);
+		} else {
+			const position = target.properties.indexOf(existingProperty);
+			target.properties[position] = existingProperty.merge(property);
+		}
 	}
 }
 
