@@ -60,5 +60,8 @@ export abstract class TargetState<Id extends TargetId> {
 }
 
 export interface MutableTargetState<Id extends TargetId> extends TargetState<Id> {
+	attachments: Array<MutableCardState>;
+	properties: Array<Property>;
+
 	addAttachment(gameState: MutableGameState, attachment: MutableCardState): void;
 }

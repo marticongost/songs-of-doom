@@ -122,6 +122,7 @@ export class MutablePlayerState extends PlayerState implements MutableTargetStat
 	declare hand: Array<MutableCardState>;
 	declare discardPile: Array<MutableCardState>;
 	declare attachments: Array<MutableCardState>;
+	declare properties: Array<Property>;
 	declare physicalTrauma: number;
 	declare mentalTrauma: number;
 	declare focusesBag: Map<Focus, Record<number, number>>;

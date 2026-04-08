@@ -138,6 +138,7 @@ export class MutableCardState extends CardState implements MutableTargetState<Ca
 	declare exhausted: boolean;
 	declare charges: number;
 	declare attachments: Array<MutableCardState>;
+	declare properties: Array<Property>;
 	declare location: CardLocation;
 	declare physicalTrauma: number;
 	declare mentalTrauma: number;
