@@ -15,3 +15,13 @@ describe('Property.is', () => {
 		expect(a.is(b)).toBe(false);
 	});
 });
+
+// ─── Property.merge ───────────────────────────────────────────────────────────
+
+describe('Property.merge', () => {
+	it('returns itself by default', () => {
+		const property = new Rule({ title: { en: 'A' } });
+		const merged = property.merge(property);
+		expect(merged).toBe(property);
+	});
+});

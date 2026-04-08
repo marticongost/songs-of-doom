@@ -25,4 +25,17 @@ export abstract class Property extends BooleanExpression {
 	is(property: Property): boolean {
 		return this === property;
 	}
+
+	/**
+	 * Merges this property with another property of the same concrete type.
+	 *
+	 * The base implementation is a no-op and returns the current instance.
+	 * Subclasses can override to combine property-specific state.
+	 *
+	 * @param _other Another property instance to merge with.
+	 * @returns The merged property instance.
+	 */
+	merge(_other: this): this {
+		return this;
+	}
 }
