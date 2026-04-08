@@ -163,6 +163,47 @@ describe('GameState active player stack', () => {
 	});
 });
 
+// ─── GameState implicit target stack ─────────────────────────────────────────
+
+describe('GameState implicit target stack', () => {
+	it('getImplicitTarget returns undefined when the stack is empty', () => {
+		const state = makeGameState([mock<ReadonlyPlayerState>()]);
+		expect(state.getImplicitTarget()).toBeUndefined();
+	});
+
+	it('requireImplicitTarget throws when the stack is empty', () => {
+		const state = makeGameState([mock<ReadonlyPlayerState>()]);
+		expect(() => state.requireImplicitTarget()).toThrow();
+	});
+
+	it('getImplicitTarget returns the top card when the top id is a CardId', () => {
+		const c1 = mock<ReadonlyCardState>();
+		const c2 = mock<ReadonlyCardState>();
+		const p1 = mock<ReadonlyPlayerState>({
+			getCard: (id) => (id === 'c1' ? c1 : id === 'c2' ? c2 : undefined)
+		});
+		const state = new ReadonlyGameState({ players: [p1], implicitTargetStack: ['c1', 'c2'] });
+		expect(state.getImplicitTarget()).toBe(c2);
+	});
+
+	it('getImplicitTarget returns the top player when the top id is a PlayerId', () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const p2 = mock<ReadonlyPlayerState>({ id: 'p2' });
+		const state = new ReadonlyGameState({
+			players: [p1, p2],
+			implicitTargetStack: ['p1', 'p2']
+		});
+		expect(state.getImplicitTarget()).toBe(p2);
+	});
+
+	it('requireImplicitTarget returns the top target', () => {
+		const c1 = mock<ReadonlyCardState>();
+		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) });
+		const state = new ReadonlyGameState({ players: [p1], implicitTargetStack: ['c1'] });
+		expect(state.requireImplicitTarget()).toBe(c1);
+	});
+});
+
 // ─── GameState.evaluate ───────────────────────────────────────────────────────
 
 describe('GameState.evaluate', () => {
@@ -229,6 +270,14 @@ describe('ReadonlyGameState', () => {
 			const state = new ReadonlyGameState({ players: [p1], activePlayerStack: ['p1'] });
 			const mutable = state.mutable();
 			expect(mutable.activePlayerStack).toEqual(['p1']);
+		});
+
+		it('copies the implicit target stack', () => {
+			const p1 = mock<ReadonlyPlayerState>();
+			p1.mutable.mockReturnValue({ id: 'p1', readonly: () => p1 } as unknown as MutablePlayerState);
+			const state = new ReadonlyGameState({ players: [p1], implicitTargetStack: ['c1'] });
+			const mutable = state.mutable();
+			expect(mutable.implicitTargetStack).toEqual(['c1']);
 		});
 	});
 

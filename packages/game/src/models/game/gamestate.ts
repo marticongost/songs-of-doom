@@ -13,17 +13,25 @@ export interface GameStateProps {
 	players: ReadonlyArray<PlayerState>;
 	activeCardStack?: Array<CardId>;
 	activePlayerStack?: Array<PlayerId>;
+	implicitTargetStack?: Array<TargetId>;
 }
 
 export class GameState {
 	readonly players: ReadonlyArray<PlayerState>;
 	readonly activeCardStack: Array<CardId>;
 	readonly activePlayerStack: Array<PlayerId>;
+	readonly implicitTargetStack: Array<TargetId>;
 
-	constructor({ players, activeCardStack, activePlayerStack }: GameStateProps) {
+	constructor({
+		players,
+		activeCardStack,
+		activePlayerStack,
+		implicitTargetStack
+	}: GameStateProps) {
 		this.players = players;
 		this.activeCardStack = activeCardStack ?? [];
 		this.activePlayerStack = activePlayerStack ?? [];
+		this.implicitTargetStack = implicitTargetStack ?? [];
 	}
 
 	cards(options?: CardOptions): Array<CardState> {
@@ -92,6 +100,23 @@ export class GameState {
 		return activePlayer;
 	}
 
+	getImplicitTarget(): CardState | PlayerState | undefined {
+		if (this.implicitTargetStack.length === 0) {
+			return undefined;
+		}
+		const id = this.implicitTargetStack[this.implicitTargetStack.length - 1];
+		if (isCardId(id)) return this.getCard(id);
+		return this.getPlayer(id);
+	}
+
+	requireImplicitTarget(): CardState | PlayerState {
+		const target = this.getImplicitTarget();
+		if (!target) {
+			throw new Error('No implicit target');
+		}
+		return target;
+	}
+
 	evaluate(expr: BooleanExpressionType): boolean;
 	evaluate(expr: ScalarExpressionType): number;
 	evaluate(expr: BooleanExpressionType | ScalarExpressionType): boolean | number {
@@ -140,6 +165,14 @@ export class ReadonlyGameState extends GameState {
 		return super.requireActivePlayer() as ReadonlyPlayerState;
 	}
 
+	getImplicitTarget(): ReadonlyCardState | ReadonlyPlayerState | undefined {
+		return super.getImplicitTarget() as ReadonlyCardState | ReadonlyPlayerState | undefined;
+	}
+
+	requireImplicitTarget(): ReadonlyCardState | ReadonlyPlayerState {
+		return super.requireImplicitTarget() as ReadonlyCardState | ReadonlyPlayerState;
+	}
+
 	mutable(): MutableGameState {
 		return new MutableGameState(this);
 	}
@@ -155,12 +188,14 @@ export class MutableGameState extends GameState {
 	declare players: Array<MutablePlayerState>;
 	declare activeCardStack: Array<CardId>;
 	declare activePlayerStack: Array<PlayerId>;
+	declare implicitTargetStack: Array<TargetId>;
 
 	constructor(gameState: ReadonlyGameState) {
 		super({
 			players: gameState.players.map((player) => player.mutable()),
 			activeCardStack: [...gameState.activeCardStack],
-			activePlayerStack: [...gameState.activePlayerStack]
+			activePlayerStack: [...gameState.activePlayerStack],
+			implicitTargetStack: [...gameState.implicitTargetStack]
 		});
 	}
 
@@ -209,11 +244,20 @@ export class MutableGameState extends GameState {
 		return super.requireActivePlayer() as MutablePlayerState;
 	}
 
+	getImplicitTarget(): MutableCardState | MutablePlayerState | undefined {
+		return super.getImplicitTarget() as MutableCardState | MutablePlayerState | undefined;
+	}
+
+	requireImplicitTarget(): MutableCardState | MutablePlayerState {
+		return super.requireImplicitTarget() as MutableCardState | MutablePlayerState;
+	}
+
 	readonly(): ReadonlyGameState {
 		return new ReadonlyGameState({
 			players: this.players.map((playerAlteration) => playerAlteration.readonly()),
 			activeCardStack: [...this.activeCardStack],
-			activePlayerStack: [...this.activePlayerStack]
+			activePlayerStack: [...this.activePlayerStack],
+			implicitTargetStack: [...this.implicitTargetStack]
 		});
 	}
 }

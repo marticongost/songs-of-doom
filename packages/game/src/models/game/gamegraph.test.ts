@@ -258,6 +258,37 @@ describe('GameGraph.requestSingleTargetOrActiveCard', () => {
 	});
 });
 
+// ─── GameGraph.requestSingleTargetOrImplicitTarget ───────────────────────────
+
+describe('GameGraph.requestSingleTargetOrImplicitTarget', () => {
+	it('returns the implicit target id when target is undefined', async () => {
+		const c1 = mock<ReadonlyCardState>({ id: 'c1' });
+		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) });
+		const graph = new GameGraph({
+			initialState: { players: [p1], implicitTargetStack: ['c1'] }
+		});
+		const result = await graph.requestSingleTargetOrImplicitTarget(undefined);
+		expect(result).toBe('c1');
+	});
+
+	it('requests input and returns the single selected target id', async () => {
+		const graph = new GameGraph({ initialState: { players: [] } });
+		const target = new Target('player');
+		const promise = graph.requestSingleTargetOrImplicitTarget(target);
+		await graph.supplyInput({ target: ['p1'] });
+		const result = await promise;
+		expect(result).toBe('p1');
+	});
+
+	it('throws when more than one target is selected', async () => {
+		const graph = new GameGraph({ initialState: { players: [] } });
+		const target = new Target('player');
+		const promise = graph.requestSingleTargetOrImplicitTarget(target);
+		await graph.supplyInput({ target: ['p1', 'p2'] });
+		await expect(promise).rejects.toThrow();
+	});
+});
+
 // ─── GameGraph.eventTriggered ─────────────────────────────────────────────────
 
 describe('GameGraph.eventTriggered', () => {

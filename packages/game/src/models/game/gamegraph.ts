@@ -154,6 +154,17 @@ export class GameGraph {
 		return targetIds[0];
 	}
 
+	async requestSingleTargetOrImplicitTarget(target: Target | undefined): Promise<TargetId> {
+		if (target === undefined) {
+			return this._current.state.requireImplicitTarget().id;
+		}
+		const targetIds = (await this.requestInput(target)).target;
+		if (targetIds.length !== 1) {
+			throw new Error('Expected exactly one target to be selected');
+		}
+		return targetIds[0];
+	}
+
 	async group(callback: () => Promise<void>) {
 		this.beginGroup();
 		await callback();
