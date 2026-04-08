@@ -70,6 +70,21 @@ const player = mock<ReadonlyPlayerState>({
 });
 ```
 
+When a stub's argument is another mock object, declare that object first so it
+can be used precisely in `.calledWith()`. Never use `expect.anything()` as a
+placeholder — if you know what value will be passed, use it:
+
+```typescript
+// Wrong — loses the self-verifying property of the chain
+player.drawFromDeck.calledWith(expect.anything(), 2).mockReturnValue([c1, c2]);
+
+// Right — declare mutableState first so it can be referenced here
+const mutableState = mock<MutableGameState>();
+const player = mock<MutablePlayerState>();
+player.drawFromDeck.calledWith(mutableState, 2).mockReturnValue([c1, c2]);
+mutableState.requireActivePlayer.mockReturnValue(player);
+```
+
 When the stub needs to reference the mock object itself (e.g. for
 self-referential return values), use `.mockImplementation()` after creation:
 
@@ -183,6 +198,37 @@ The pattern in the `drawFromDeck` and `addAttachment` tests is a good example:
 the player state (the class under test) uses real `ReadonlyCardState` instances
 because those are inputs, not dependencies called by the player state itself.
 Their internal `Entity` is still a mock.
+
+## Parameterised tests
+
+When multiple tests share the same logic but differ only in their inputs, use
+`it.each` to avoid duplication. Name each case with a descriptive `label`
+property and interpolate it into the test name with `$label`:
+
+```typescript
+it.each([
+	{ label: 'without a target', target: undefined },
+	{ label: 'with a target', target: new Target({}) }
+])('exhausts the card and returns its id $label', async ({ target }) => {
+	const card = mock<MutableCardState>({ exhausted: false });
+	const mutableState = mock<MutableGameState>();
+	mutableState.requireCard.calledWith('c1').mockReturnValue(card);
+	const graph = mock<GameGraph>();
+	graph.requestSingleTargetOrActiveCard.calledWith(target).mockResolvedValue('c1');
+	let callbackReturn: unknown;
+	graph.effectTriggered.mockImplementation((_effect, callback) => {
+		callbackReturn = callback(mutableState);
+	});
+
+	await exhaust({ target }).trigger(graph);
+
+	expect(card.exhausted).toBe(true);
+	expect(callbackReturn).toEqual({ card: 'c1' });
+});
+```
+
+Note that `.calledWith(target)` works correctly for both `undefined` and a real
+`Target` instance — there is no need to branch the mock setup.
 
 ## Test structure
 
