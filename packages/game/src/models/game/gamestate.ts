@@ -100,6 +100,18 @@ export class GameState {
 		return activePlayer;
 	}
 
+	/**
+	 * Returns the implicit target for the current context, if any.
+	 *
+	 * Implicit target resolution:
+	 * - For effects in an attached card, the subject is the attachment owner (example: sanctuary)
+	 * - If the effect is on a 'receivingAttack' reaction, the subject is the attack target (example: shield-against-the-dark)
+	 * - If the effect is on an 'attacking' reaction, the subject is the attacker (example: critical-impact)
+	 * - If the effect is on a triggerAttack({modifiers}) prop, the subject is the attack (example: shield-against-the-dark)
+	 * - If the effect is on an equipped piece of equipment, the subject is the wearer (example: chainmail)
+	 * - Otherwise, default to the active player
+	 */
+
 	getImplicitTarget(): CardState | PlayerState | undefined {
 		if (this.implicitTargetStack.length === 0) {
 			return undefined;
