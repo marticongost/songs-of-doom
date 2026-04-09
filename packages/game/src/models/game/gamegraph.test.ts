@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { Obligation, Opportunity } from '../capabilities/reaction';
 import { Effect } from '../effects/effect';
 import { events } from '../event';
-import { Target } from '../target';
+import { Target, type TargetType } from '../target';
 import type { MutableCardState, ReadonlyCardState } from './cardstate';
 import {
 	CapabilityFinished,
@@ -286,6 +286,47 @@ describe('GameGraph.requestSingleTargetOrImplicitTarget', () => {
 		const promise = graph.requestSingleTargetOrImplicitTarget(target);
 		await graph.supplyInput({ target: ['p1', 'p2'] });
 		await expect(promise).rejects.toThrow();
+	});
+});
+
+// ─── GameGraph.requestPlayersOrActivePlayer ─────────────────────────────────
+
+describe('GameGraph.requestPlayersOrActivePlayer', () => {
+	const nonPlayerTargetTypes: Array<Exclude<TargetType, 'player'>> = [
+		'owner',
+		'active-player',
+		'attacker',
+		'defender',
+		'enemy',
+		'ally',
+		'object',
+		'location',
+		'skill'
+	];
+
+	it('returns the active player id when target is undefined', async () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const graph = new GameGraph({
+			initialState: { players: [p1], activePlayerStack: ['p1'] }
+		});
+		const result = await graph.requestPlayersOrActivePlayer(undefined);
+		expect(result).toEqual(['p1']);
+	});
+
+	it('requests input and returns selected player ids when target is a player target', async () => {
+		const graph = new GameGraph({ initialState: { players: [] } });
+		const target = new Target('player');
+		const promise = graph.requestPlayersOrActivePlayer(target);
+		await graph.supplyInput({ target: ['p1', 'p2'] });
+		const result = await promise;
+		expect(result).toEqual(['p1', 'p2']);
+	});
+
+	it.each(nonPlayerTargetTypes)('throws when target type is %s', async (targetType) => {
+		const graph = new GameGraph({ initialState: { players: [] } });
+		await expect(graph.requestPlayersOrActivePlayer(new Target(targetType))).rejects.toThrow(
+			'Expected target to be of type player'
+		);
 	});
 });
 

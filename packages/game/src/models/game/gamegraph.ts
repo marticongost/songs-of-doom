@@ -6,7 +6,7 @@ import { events, type Event, type EventType } from '../event';
 import { Target } from '../target';
 import type { CapabilityRef } from './cardstate';
 import { ReadonlyGameState, type GameStateProps, type MutableGameState } from './gamestate';
-import type { CardId, TargetId } from './identifiers';
+import { type CardId, type PlayerId, type TargetId } from './identifiers';
 import type { Field } from './playerinput';
 import { CapabilityChoiceField, TargetField } from './playerinput';
 
@@ -163,6 +163,16 @@ export class GameGraph {
 			throw new Error('Expected exactly one target to be selected');
 		}
 		return targetIds[0];
+	}
+
+	async requestPlayersOrActivePlayer(target: Target | undefined): Promise<PlayerId[]> {
+		if (target === undefined) {
+			return [this._current.state.requireActivePlayer().id];
+		}
+		if (!target.matchesType('player')) {
+			throw new Error('Expected target to be of type player');
+		}
+		return (await this.requestInput(target)).target as PlayerId[];
 	}
 
 	async group(callback: () => Promise<void>) {
