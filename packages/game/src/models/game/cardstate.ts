@@ -14,18 +14,19 @@ export interface CapabilityRef {
 	capability: Capability;
 }
 
-export type CardLocation =
-	| { container: 'deck'; playerId: PlayerId }
-	| { container: 'hand'; playerId: PlayerId }
-	| { container: 'discard'; playerId: PlayerId }
-	| { container: 'card'; cardId: CardId }
-	| { container: 'player'; playerId: PlayerId };
+export type CardParent =
+	| { type: 'deck'; playerId: PlayerId }
+	| { type: 'hand'; playerId: PlayerId }
+	| { type: 'discard'; playerId: PlayerId }
+	| { type: 'card'; cardId: CardId }
+	| { type: 'player'; playerId: PlayerId }
+	| { type: 'location'; locationId: CardId };
 
 export interface CardStateProps {
 	id: CardId;
 	card: Entity;
 	ownerId: PlayerId;
-	location: CardLocation;
+	container: CardParent;
 	exhausted?: boolean;
 	charges?: number;
 	attachments?: ReadonlyArray<CardState>;
@@ -37,7 +38,7 @@ export interface CardStateProps {
 export class CardState extends TargetState<CardId> {
 	readonly card: Entity;
 	readonly ownerId: PlayerId;
-	readonly location: CardLocation;
+	readonly container: CardParent;
 	readonly exhausted: boolean;
 	readonly charges: number;
 
@@ -45,7 +46,7 @@ export class CardState extends TargetState<CardId> {
 		id,
 		card,
 		ownerId,
-		location,
+		container,
 		exhausted = false,
 		charges = 0,
 		attachments = [],
@@ -62,7 +63,7 @@ export class CardState extends TargetState<CardId> {
 		});
 		this.card = card;
 		this.ownerId = ownerId;
-		this.location = location;
+		this.container = container;
 		this.exhausted = exhausted;
 		this.charges = charges;
 	}
@@ -89,7 +90,7 @@ export class CardState extends TargetState<CardId> {
 	}
 
 	isAttached(): boolean {
-		return this.location.container === 'card' || this.location.container === 'player';
+		return this.container.type === 'card' || this.container.type === 'player';
 	}
 
 	getReactionsToEvent(event: Event | EventType): Array<Reaction> {
@@ -139,7 +140,7 @@ export class MutableCardState extends CardState implements MutableTargetState<Ca
 	declare charges: number;
 	declare attachments: Array<MutableCardState>;
 	declare properties: Array<Property>;
-	declare location: CardLocation;
+	declare container: CardParent;
 	declare physicalTrauma: number;
 	declare mentalTrauma: number;
 
@@ -148,7 +149,7 @@ export class MutableCardState extends CardState implements MutableTargetState<Ca
 			id: cardState.id,
 			card: cardState.card,
 			ownerId: cardState.ownerId,
-			location: cardState.location,
+			container: cardState.container,
 			exhausted: cardState.exhausted,
 			charges: cardState.charges,
 			attachments: cardState.attachments.map((attachment) => attachment.mutable()),
@@ -171,7 +172,7 @@ export class MutableCardState extends CardState implements MutableTargetState<Ca
 			id: this.id,
 			card: this.card,
 			ownerId: this.ownerId,
-			location: this.location,
+			container: this.container,
 			exhausted: this.exhausted,
 			charges: this.charges,
 			attachments: this.attachments.map((attachment) => attachment.readonly()),
@@ -183,13 +184,13 @@ export class MutableCardState extends CardState implements MutableTargetState<Ca
 
 	addAttachment(gameState: MutableGameState, attachment: MutableCardState) {
 		attachment.removeFromCurrentLocation(gameState);
-		attachment.location = { container: 'card', cardId: this.id };
+		attachment.container = { type: 'card', cardId: this.id };
 		this.attachments.push(attachment);
 	}
 
 	moveToPlayer(gameState: MutableGameState, playerId: PlayerId) {
 		this.removeFromCurrentLocation(gameState);
-		this.location = { container: 'player', playerId };
+		this.container = { type: 'player', playerId };
 		const playerState = gameState.requirePlayer(playerId);
 		playerState.attachments.push(this);
 	}
@@ -197,7 +198,7 @@ export class MutableCardState extends CardState implements MutableTargetState<Ca
 	moveToTopOfDiscardPile(gameState: MutableGameState, playerId: PlayerId | undefined = undefined) {
 		playerId = playerId ?? this.ownerId;
 		this.removeFromCurrentLocation(gameState);
-		this.location = { container: 'discard', playerId };
+		this.container = { type: 'discard', playerId };
 		const playerState = gameState.requirePlayer(playerId);
 		playerState.discardPile.unshift(this);
 	}
@@ -208,14 +209,14 @@ export class MutableCardState extends CardState implements MutableTargetState<Ca
 	) {
 		playerId = playerId ?? this.ownerId;
 		this.removeFromCurrentLocation(gameState);
-		this.location = { container: 'discard', playerId };
+		this.container = { type: 'discard', playerId };
 		const playerState = gameState.requirePlayer(playerId);
 		playerState.discardPile.push(this);
 	}
 
 	moveToHand(gameState: MutableGameState, playerId: PlayerId) {
 		this.removeFromCurrentLocation(gameState);
-		this.location = { container: 'hand', playerId };
+		this.container = { type: 'hand', playerId };
 		const playerState = gameState.requirePlayer(playerId);
 		playerState.hand.push(this);
 	}
@@ -223,7 +224,7 @@ export class MutableCardState extends CardState implements MutableTargetState<Ca
 	moveToTopOfDeck(gameState: MutableGameState, playerId: PlayerId | undefined = undefined) {
 		playerId = playerId ?? this.ownerId;
 		this.removeFromCurrentLocation(gameState);
-		this.location = { container: 'deck', playerId };
+		this.container = { type: 'deck', playerId };
 		const playerState = gameState.requirePlayer(playerId);
 		playerState.deck.unshift(this);
 	}
@@ -231,27 +232,37 @@ export class MutableCardState extends CardState implements MutableTargetState<Ca
 	moveToBottomOfDeck(gameState: MutableGameState, playerId: PlayerId | undefined = undefined) {
 		playerId = playerId ?? this.ownerId;
 		this.removeFromCurrentLocation(gameState);
-		this.location = { container: 'deck', playerId };
+		this.container = { type: 'deck', playerId };
 		const playerState = gameState.requirePlayer(playerId);
 		playerState.deck.push(this);
 	}
 
+	moveToLocation(gameState: MutableGameState, locationId: CardId) {
+		this.removeFromCurrentLocation(gameState);
+		this.container = { type: 'location', locationId };
+		const locationState = gameState.requireCard(locationId);
+		locationState.attachments.push(this);
+	}
+
 	private removeFromCurrentLocation(gameState: MutableGameState) {
-		if (this.location.container === 'card') {
-			const previousContainer = gameState.requireCard(this.location.cardId);
+		if (this.container.type === 'card') {
+			const previousContainer = gameState.requireCard(this.container.cardId);
 			previousContainer.attachments = previousContainer.attachments.filter((a) => a.id !== this.id);
-		} else if (this.location.container === 'player') {
-			const playerState = gameState.requirePlayer(this.location.playerId);
+		} else if (this.container.type === 'player') {
+			const playerState = gameState.requirePlayer(this.container.playerId);
 			playerState.attachments = playerState.attachments.filter((a) => a.id !== this.id);
-		} else if (this.location.container === 'discard') {
-			const playerState = gameState.requirePlayer(this.location.playerId);
+		} else if (this.container.type === 'discard') {
+			const playerState = gameState.requirePlayer(this.container.playerId);
 			playerState.discardPile = playerState.discardPile.filter((c) => c.id !== this.id);
-		} else if (this.location.container === 'hand') {
-			const playerState = gameState.requirePlayer(this.location.playerId);
+		} else if (this.container.type === 'hand') {
+			const playerState = gameState.requirePlayer(this.container.playerId);
 			playerState.hand = playerState.hand.filter((c) => c.id !== this.id);
-		} else if (this.location.container === 'deck') {
-			const playerState = gameState.requirePlayer(this.location.playerId);
+		} else if (this.container.type === 'deck') {
+			const playerState = gameState.requirePlayer(this.container.playerId);
 			playerState.deck = playerState.deck.filter((c) => c.id !== this.id);
+		} else if (this.container.type === 'location') {
+			const locationState = gameState.requireCard(this.container.locationId);
+			locationState.attachments = locationState.attachments.filter((a) => a.id !== this.id);
 		}
 	}
 }

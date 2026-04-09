@@ -38,7 +38,7 @@ export abstract class Capability {
 			}
 			gameGraph.capabilityFinished(this, cardId, (state) => {
 				const card = state.requireActiveCard();
-				if (card.location.container === 'hand') {
+				if (card.container.type === 'hand') {
 					card.moveToTopOfDiscardPile(state);
 				}
 				state.activeCardStack.pop();

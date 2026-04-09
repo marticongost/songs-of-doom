@@ -180,7 +180,7 @@ describe('ReadonlyPlayerState', () => {
 				id: 'c1',
 				card: mock<Entity>(),
 				ownerId: 'p1',
-				location: { container: 'hand', playerId: 'p1' },
+				container: { type: 'hand', playerId: 'p1' },
 				properties: []
 			});
 			const player = makePlayer('p1', { hand: [c1] });
@@ -235,14 +235,14 @@ describe('MutablePlayerState.drawFromDeck', () => {
 			id: 'c1',
 			card: mock<Entity>(),
 			ownerId: 'p1',
-			location: { container: 'deck', playerId: 'p1' },
+			container: { type: 'deck', playerId: 'p1' },
 			properties: []
 		});
 		const c2 = new ReadonlyCardState({
 			id: 'c2',
 			card: mock<Entity>(),
 			ownerId: 'p1',
-			location: { container: 'deck', playerId: 'p1' },
+			container: { type: 'deck', playerId: 'p1' },
 			properties: []
 		});
 		const mutablePlayer = makePlayer('p1', { deck: [c1, c2] }).mutable();
@@ -251,7 +251,7 @@ describe('MutablePlayerState.drawFromDeck', () => {
 
 		const drawn = mutablePlayer.drawFromDeck(gameState, 1);
 
-		expect(drawn).toMatchObject([{ id: 'c1', location: { container: 'hand', playerId: 'p1' } }]);
+		expect(drawn).toMatchObject([{ id: 'c1', container: { type: 'hand', playerId: 'p1' } }]);
 		expect(mutablePlayer.hand).toContain(drawn[0]);
 		expect(mutablePlayer.deck).not.toContain(drawn[0]);
 	});
@@ -261,14 +261,14 @@ describe('MutablePlayerState.drawFromDeck', () => {
 			id: 'c1',
 			card: mock<Entity>(),
 			ownerId: 'p1',
-			location: { container: 'deck', playerId: 'p1' },
+			container: { type: 'deck', playerId: 'p1' },
 			properties: []
 		});
 		const c2 = new ReadonlyCardState({
 			id: 'c2',
 			card: mock<Entity>(),
 			ownerId: 'p1',
-			location: { container: 'deck', playerId: 'p1' },
+			container: { type: 'deck', playerId: 'p1' },
 			properties: []
 		});
 		const mutablePlayer = makePlayer('p1', { deck: [c1, c2] }).mutable();
@@ -278,8 +278,8 @@ describe('MutablePlayerState.drawFromDeck', () => {
 		const drawn = mutablePlayer.drawFromDeck(gameState, 2);
 
 		expect(drawn).toMatchObject([
-			{ id: 'c1', location: { container: 'hand', playerId: 'p1' } },
-			{ id: 'c2', location: { container: 'hand', playerId: 'p1' } }
+			{ id: 'c1', container: { type: 'hand', playerId: 'p1' } },
+			{ id: 'c2', container: { type: 'hand', playerId: 'p1' } }
 		]);
 		expect(mutablePlayer.hand).toEqual(drawn);
 		expect(mutablePlayer.deck).toEqual([]);
@@ -290,7 +290,7 @@ describe('MutablePlayerState.drawFromDeck', () => {
 			id: 'c1',
 			card: mock<Entity>(),
 			ownerId: 'p1',
-			location: { container: 'discard', playerId: 'p1' },
+			container: { type: 'discard', playerId: 'p1' },
 			properties: []
 		});
 		const mutablePlayer = makePlayer('p1', { discard: [c1] }).mutable();
@@ -299,8 +299,10 @@ describe('MutablePlayerState.drawFromDeck', () => {
 
 		const drawn = mutablePlayer.drawFromDeck(gameState, 1);
 
-		expect(drawn).toMatchObject([{ id: 'c1', location: { container: 'hand', playerId: 'p1' } }]);
+		expect(drawn).toMatchObject([{ id: 'c1', container: { type: 'hand', playerId: 'p1' } }]);
 		expect(mutablePlayer.hand).toEqual(drawn);
+		expect(mutablePlayer.discardPile).toEqual([]);
+		expect(mutablePlayer.deck).toEqual([]);
 	});
 
 	it('draws nothing when both deck and discard are empty', () => {
@@ -319,7 +321,7 @@ describe('MutablePlayerState.drawFromDeck', () => {
 			id: 'c1',
 			card: mock<Entity>(),
 			ownerId: 'p1',
-			location: { container: 'deck', playerId: 'p1' },
+			container: { type: 'deck', playerId: 'p1' },
 			properties: []
 		});
 		const mutablePlayer = makePlayer('p1', { deck: [c1] }).mutable();
@@ -328,7 +330,28 @@ describe('MutablePlayerState.drawFromDeck', () => {
 
 		const drawn = mutablePlayer.drawFromDeck(gameState);
 
-		expect(drawn).toMatchObject([{ id: 'c1', location: { container: 'hand', playerId: 'p1' } }]);
+		expect(drawn).toMatchObject([{ id: 'c1', container: { type: 'hand', playerId: 'p1' } }]);
+	});
+});
+
+// ─── MutablePlayerState.shuffleDiscardIntoDeck ──────────────────────────────
+
+describe('MutablePlayerState.shuffleDiscardIntoDeck', () => {
+	it('moves discard cards into the deck and updates their container', () => {
+		const c1 = new ReadonlyCardState({
+			id: 'c1',
+			card: mock<Entity>(),
+			ownerId: 'p1',
+			container: { type: 'discard', playerId: 'p1' },
+			properties: []
+		});
+		const mutablePlayer = makePlayer('p1', { discard: [c1] }).mutable();
+
+		mutablePlayer.shuffleDiscardIntoDeck(mock<MutableGameState>());
+
+		expect(mutablePlayer.discardPile).toEqual([]);
+		expect(mutablePlayer.deck).toHaveLength(1);
+		expect(mutablePlayer.deck[0].container).toEqual({ type: 'deck', playerId: 'p1' });
 	});
 });
 
@@ -340,7 +363,7 @@ describe('MutablePlayerState.addAttachment', () => {
 			id: 'c1',
 			card: mock<Entity>(),
 			ownerId: 'p1',
-			location: { container: 'hand', playerId: 'p1' },
+			container: { type: 'hand', playerId: 'p1' },
 			properties: []
 		});
 		const mutablePlayer = makePlayer('p1', { hand: [c1] }).mutable();
@@ -350,7 +373,7 @@ describe('MutablePlayerState.addAttachment', () => {
 
 		mutablePlayer.addAttachment(gameState, mutableCard);
 
-		expect(mutableCard.location).toEqual({ container: 'player', playerId: 'p1' });
+		expect(mutableCard.container).toEqual({ type: 'player', playerId: 'p1' });
 		expect(mutablePlayer.attachments).toContain(mutableCard);
 		expect(mutablePlayer.hand).not.toContain(mutableCard);
 	});

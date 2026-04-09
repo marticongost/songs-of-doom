@@ -1,14 +1,23 @@
-import { describe, expect, it } from 'vitest';
 import { mock } from '@songsofdoom/common/test-utils';
+import { describe, expect, it } from 'vitest';
+import type { Entity } from '../entities';
 import type { BooleanExpression } from '../expressions/boolean';
 import type { ScalarExpression } from '../expressions/scalar';
 import { strength } from '../stats';
 import type { ReadonlyCardState } from './cardstate';
 import { ReadonlyGameState } from './gamestate';
+import {
+	ReadonlyLocationState,
+	type MutableLocationState,
+	type ReadonlyLocationState as ReadonlyLocationStateType
+} from './locationstate';
 import type { MutablePlayerState, ReadonlyPlayerState } from './playerstate';
 
-function makeGameState(players: ReadonlyPlayerState[]): ReadonlyGameState {
-	return new ReadonlyGameState({ players });
+function makeGameState(
+	players: ReadonlyPlayerState[],
+	locations: ReadonlyLocationStateType[] = []
+): ReadonlyGameState {
+	return new ReadonlyGameState({ players, locations });
 }
 
 // ─── GameState.cards ──────────────────────────────────────────────────────────
@@ -33,6 +42,12 @@ describe('GameState.cards', () => {
 		]);
 		expect(state.cards()).toEqual([]);
 	});
+
+	it('includes top-level locations', () => {
+		const location = mock<ReadonlyLocationStateType>();
+		const state = makeGameState([mock<ReadonlyPlayerState>({ cards: () => [] })], [location]);
+		expect(state.cards()).toContain(location);
+	});
 });
 
 // ─── GameState.getCard ────────────────────────────────────────────────────────
@@ -52,6 +67,18 @@ describe('GameState.getCard', () => {
 	it('returns undefined for an unknown card id', () => {
 		const state = makeGameState([mock<ReadonlyPlayerState>()]);
 		expect(state.getCard('c99')).toBeUndefined();
+	});
+
+	it('finds a location card by id', () => {
+		const location = new ReadonlyLocationState({
+			id: 'c9',
+			card: mock<Entity>(),
+			ownerId: 'p1',
+			container: { type: 'location', locationId: 'c9' },
+			properties: []
+		});
+		const state = makeGameState([mock<ReadonlyPlayerState>()], [location]);
+		expect(state.getCard('c9')).toBe(location);
 	});
 });
 
@@ -278,6 +305,20 @@ describe('ReadonlyGameState', () => {
 			const state = new ReadonlyGameState({ players: [p1], implicitTargetStack: ['c1'] });
 			const mutable = state.mutable();
 			expect(mutable.implicitTargetStack).toEqual(['c1']);
+		});
+
+		it('copies locations', () => {
+			const p1 = mock<ReadonlyPlayerState>();
+			const location = mock<ReadonlyLocationState>({ id: 'c9' });
+			p1.mutable.mockReturnValue({ id: 'p1', readonly: () => p1 } as unknown as MutablePlayerState);
+			location.mutable.mockReturnValue({
+				id: 'c9',
+				readonly: () => location
+			} as unknown as MutableLocationState);
+			const state = makeGameState([p1], [location]);
+			const mutable = state.mutable();
+
+			expect(mutable.locations).toMatchObject([{ id: 'c9' }]);
 		});
 	});
 

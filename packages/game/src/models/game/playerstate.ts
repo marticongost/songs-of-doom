@@ -3,8 +3,8 @@ import type { CharacterState } from '../characters';
 import { type Focus } from '../focus';
 import {
 	CardState,
-	type CardLocation,
 	type CardOptions,
+	type CardParent,
 	type MutableCardState,
 	type ReadonlyCardState
 } from './cardstate';
@@ -192,10 +192,12 @@ export class MutablePlayerState extends PlayerState implements MutableTargetStat
 	}
 
 	shuffleDiscardIntoDeck(_state: MutableGameState) {
-		const location: CardLocation = { container: 'deck', playerId: this.id };
-		for (const card of this.discardPile) {
+		const location: CardParent = { type: 'deck', playerId: this.id };
+		const discardPile = this.discardPile;
+		this.discardPile = [];
+		for (const card of discardPile) {
 			this.deck.push(card);
-			card.location = location;
+			card.container = location;
 		}
 		shuffle(this.deck);
 	}

@@ -1,10 +1,10 @@
 import { mock } from '@songsofdoom/common/test-utils';
 import { describe, expect, it } from 'vitest';
 import { Action } from './capabilities/action';
+import type { Effect } from './effects/effect';
 import type { MutableCardState } from './game/cardstate';
 import type { GameGraph } from './game/gamegraph';
 import type { MutableGameState } from './game/gamestate';
-import type { Effect } from './effects/effect';
 
 // ─── Capability.trigger ───────────────────────────────────────────────────────
 
@@ -46,7 +46,7 @@ describe('Capability.trigger', () => {
 			activeCardStack: ['c1'],
 			implicitTargetStack: ['c1']
 		});
-		const card = mock<MutableCardState>({ location: { container: 'hand', playerId: 'p1' } });
+		const card = mock<MutableCardState>({ container: { type: 'hand', playerId: 'p1' } });
 		mutableState.requireActiveCard.mockReturnValue(card);
 		const graph = mock<GameGraph>();
 		graph.group.mockImplementation(async (callback) => {
@@ -70,7 +70,7 @@ describe('Capability.trigger', () => {
 			activeCardStack: ['c1'],
 			implicitTargetStack: ['c1']
 		});
-		const card = mock<MutableCardState>({ location: { container: 'deck', playerId: 'p1' } });
+		const card = mock<MutableCardState>({ container: { type: 'deck', playerId: 'p1' } });
 		mutableState.requireActiveCard.mockReturnValue(card);
 		const graph = mock<GameGraph>();
 		graph.group.mockImplementation(async (callback) => {

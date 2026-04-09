@@ -7,10 +7,16 @@ import {
 	type ReadonlyCardState
 } from './cardstate';
 import { isCardId, isPlayerId, type CardId, type PlayerId, type TargetId } from './identifiers';
+import {
+	LocationState,
+	type MutableLocationState,
+	type ReadonlyLocationState
+} from './locationstate';
 import { PlayerState, type MutablePlayerState, type ReadonlyPlayerState } from './playerstate';
 
 export interface GameStateProps {
 	players: ReadonlyArray<PlayerState>;
+	locations?: ReadonlyArray<LocationState>;
 	activeCardStack?: Array<CardId>;
 	activePlayerStack?: Array<PlayerId>;
 	implicitTargetStack?: Array<TargetId>;
@@ -18,27 +24,37 @@ export interface GameStateProps {
 
 export class GameState {
 	readonly players: ReadonlyArray<PlayerState>;
+	readonly locations: ReadonlyArray<LocationState>;
 	readonly activeCardStack: Array<CardId>;
 	readonly activePlayerStack: Array<PlayerId>;
 	readonly implicitTargetStack: Array<TargetId>;
 
 	constructor({
 		players,
+		locations,
 		activeCardStack,
 		activePlayerStack,
 		implicitTargetStack
 	}: GameStateProps) {
 		this.players = players;
+		this.locations = locations ?? [];
 		this.activeCardStack = activeCardStack ?? [];
 		this.activePlayerStack = activePlayerStack ?? [];
 		this.implicitTargetStack = implicitTargetStack ?? [];
 	}
 
 	cards(options?: CardOptions): Array<CardState> {
-		return this.players.flatMap((player) => player.cards(options));
+		const playerCards = this.players.flatMap((player) => player.cards(options));
+		return options?.ready ? playerCards : [...this.locations, ...playerCards];
 	}
 
 	getCard(cardId: CardId): CardState | undefined {
+		for (const location of this.locations) {
+			const found = location.getCard(cardId);
+			if (found) {
+				return found;
+			}
+		}
 		for (const player of this.players) {
 			const found = player.getCard(cardId);
 			if (found) {
@@ -140,6 +156,7 @@ export class GameState {
 
 export class ReadonlyGameState extends GameState {
 	declare readonly players: ReadonlyArray<ReadonlyPlayerState>;
+	declare readonly locations: ReadonlyArray<ReadonlyLocationState>;
 
 	cards(options?: CardOptions): Array<ReadonlyCardState> {
 		return super.cards(options) as Array<ReadonlyCardState>;
@@ -198,6 +215,7 @@ export class ReadonlyGameState extends GameState {
 
 export class MutableGameState extends GameState {
 	declare players: Array<MutablePlayerState>;
+	declare locations: Array<MutableLocationState>;
 	declare activeCardStack: Array<CardId>;
 	declare activePlayerStack: Array<PlayerId>;
 	declare implicitTargetStack: Array<TargetId>;
@@ -205,6 +223,7 @@ export class MutableGameState extends GameState {
 	constructor(gameState: ReadonlyGameState) {
 		super({
 			players: gameState.players.map((player) => player.mutable()),
+			locations: gameState.locations.map((location) => location.mutable()),
 			activeCardStack: [...gameState.activeCardStack],
 			activePlayerStack: [...gameState.activePlayerStack],
 			implicitTargetStack: [...gameState.implicitTargetStack]
@@ -267,6 +286,7 @@ export class MutableGameState extends GameState {
 	readonly(): ReadonlyGameState {
 		return new ReadonlyGameState({
 			players: this.players.map((playerAlteration) => playerAlteration.readonly()),
+			locations: this.locations.map((location) => location.readonly()),
 			activeCardStack: [...this.activeCardStack],
 			activePlayerStack: [...this.activePlayerStack],
 			implicitTargetStack: [...this.implicitTargetStack]
