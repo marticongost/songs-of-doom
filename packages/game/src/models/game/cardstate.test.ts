@@ -1,3 +1,4 @@
+import { Counter } from '@songsofdoom/common';
 import { describe, expect, it } from 'vitest';
 import type { Capability, Entity, Property } from '../..';
 import { Obligation } from '../capabilities/reaction';
@@ -91,8 +92,9 @@ function makeReadonlyPlayer(
 		hand: cards.hand ?? [],
 		discardPile: cards.discard ?? [],
 		attachments: cards.attachments ?? [],
-		focusesBag: new Map(),
-		focusesHand: new Map(),
+		focusesBag: new Counter(),
+		focusesDiscardPile: new Counter(),
+		focusesHand: new Counter(),
 		physicalTrauma: 0,
 		mentalTrauma: 0
 	});

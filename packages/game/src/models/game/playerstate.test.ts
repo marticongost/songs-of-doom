@@ -1,3 +1,4 @@
+import { Counter } from '@songsofdoom/common';
 import { mock } from '@songsofdoom/common/test-utils';
 import { describe, expect, it } from 'vitest';
 import type { CharacterState } from '../characters';
@@ -23,8 +24,9 @@ function makePlayer(
 		hand: cards.hand ?? [],
 		discardPile: cards.discard ?? [],
 		attachments: cards.attachments ?? [],
-		focusesBag: new Map(),
-		focusesHand: new Map(),
+		focusesBag: new Counter(),
+		focusesDiscardPile: new Counter(),
+		focusesHand: new Counter(),
 		physicalTrauma: 0,
 		mentalTrauma: 0
 	});
@@ -196,8 +198,9 @@ describe('ReadonlyPlayerState', () => {
 				hand: [],
 				discardPile: [],
 				attachments: [],
-				focusesBag: new Map(),
-				focusesHand: new Map(),
+				focusesBag: new Counter(),
+				focusesDiscardPile: new Counter(),
+				focusesHand: new Counter(),
 				physicalTrauma: 3,
 				mentalTrauma: 2
 			});
@@ -334,6 +337,43 @@ describe('MutablePlayerState.drawFromDeck', () => {
 	});
 });
 
+// ─── MutablePlayerState.drawFocusToken ───────────────────────────────────────
+
+describe('MutablePlayerState.drawFocusToken', () => {
+	it('draws a token from the bag and moves it to focus hand', () => {
+		const mutablePlayer = makePlayer('p1').mutable();
+		const gameState = mock<MutableGameState>();
+		mutablePlayer.focusesBag.add('strength-1', 1);
+
+		const token = mutablePlayer.drawFocusToken(gameState);
+
+		expect(token).toBe('strength-1');
+		expect(mutablePlayer.focusesBag.get('strength-1')).toBe(0);
+		expect(mutablePlayer.focusesHand.get('strength-1')).toBe(1);
+	});
+
+	it('refills the bag from discard when bag is empty before drawing', () => {
+		const mutablePlayer = makePlayer('p1').mutable();
+		const gameState = mock<MutableGameState>();
+		mutablePlayer.focusesDiscardPile.add('agility-2', 2);
+
+		const token = mutablePlayer.drawFocusToken(gameState);
+
+		expect(token).toBe('agility-2');
+		expect(mutablePlayer.focusesBag.get('agility-2')).toBe(1);
+		expect(mutablePlayer.focusesHand.get('agility-2')).toBe(1);
+		expect(mutablePlayer.focusesDiscardPile.isEmpty()).toBe(true);
+	});
+
+	it('throws when both focus bag and discard are empty', () => {
+		const mutablePlayer = makePlayer('p1').mutable();
+
+		expect(() => mutablePlayer.drawFocusToken(mock<MutableGameState>())).toThrow(
+			'Focus bag is empty'
+		);
+	});
+});
+
 // ─── MutablePlayerState.shuffleDiscardIntoDeck ──────────────────────────────
 
 describe('MutablePlayerState.shuffleDiscardIntoDeck', () => {
@@ -352,6 +392,24 @@ describe('MutablePlayerState.shuffleDiscardIntoDeck', () => {
 		expect(mutablePlayer.discardPile).toEqual([]);
 		expect(mutablePlayer.deck).toHaveLength(1);
 		expect(mutablePlayer.deck[0].container).toEqual({ type: 'deck', playerId: 'p1' });
+	});
+});
+
+// ─── MutablePlayerState.refillFocusBag ───────────────────────────────────────
+
+describe('MutablePlayerState.refillFocusBag', () => {
+	it('moves all discard tokens into bag and clears focus discard pile', () => {
+		const mutablePlayer = makePlayer('p1').mutable();
+		mutablePlayer.focusesBag.add('charisma-1', 1);
+		mutablePlayer.focusesDiscardPile.add('strength-1', 2);
+		mutablePlayer.focusesDiscardPile.add('heroism-3', 1);
+
+		mutablePlayer.refillFocusBag(mock<MutableGameState>());
+
+		expect(mutablePlayer.focusesBag.get('charisma-1')).toBe(1);
+		expect(mutablePlayer.focusesBag.get('strength-1')).toBe(2);
+		expect(mutablePlayer.focusesBag.get('heroism-3')).toBe(1);
+		expect(mutablePlayer.focusesDiscardPile.isEmpty()).toBe(true);
 	});
 });
 

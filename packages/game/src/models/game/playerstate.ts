@@ -1,6 +1,6 @@
-import type { Property, Stat } from '../..';
+import { Counter, shuffle, weightedChoice, type ReadonlyCounter } from '@songsofdoom/common';
+import type { FocusToken, Property, Stat } from '../..';
 import type { CharacterState } from '../characters';
-import { type Focus } from '../focus';
 import {
 	CardState,
 	type CardOptions,
@@ -20,8 +20,9 @@ export interface PlayerStateProps {
 	discardPile: ReadonlyArray<CardState>;
 	attachments?: ReadonlyArray<CardState>;
 	properties?: ReadonlyArray<Property>;
-	focusesBag: ReadonlyMap<Focus, Record<number, number>>;
-	focusesHand: ReadonlyMap<Focus, Record<number, number>>;
+	focusesBag: ReadonlyCounter<FocusToken>;
+	focusesDiscardPile: ReadonlyCounter<FocusToken>;
+	focusesHand: ReadonlyCounter<FocusToken>;
 	physicalTrauma: number;
 	mentalTrauma: number;
 }
@@ -31,8 +32,9 @@ export class PlayerState extends TargetState<PlayerId> {
 	readonly deck: ReadonlyArray<CardState>;
 	readonly hand: ReadonlyArray<CardState>;
 	readonly discardPile: ReadonlyArray<CardState>;
-	readonly focusesBag: ReadonlyMap<Focus, Record<number, number>>;
-	readonly focusesHand: ReadonlyMap<Focus, Record<number, number>>;
+	readonly focusesBag: ReadonlyCounter<FocusToken>;
+	readonly focusesDiscardPile: ReadonlyCounter<FocusToken>;
+	readonly focusesHand: ReadonlyCounter<FocusToken>;
 
 	constructor({
 		id,
@@ -43,6 +45,7 @@ export class PlayerState extends TargetState<PlayerId> {
 		attachments = [],
 		properties,
 		focusesBag,
+		focusesDiscardPile,
 		focusesHand,
 		physicalTrauma,
 		mentalTrauma
@@ -53,6 +56,7 @@ export class PlayerState extends TargetState<PlayerId> {
 		this.hand = hand;
 		this.discardPile = discardPile;
 		this.focusesBag = focusesBag;
+		this.focusesDiscardPile = focusesDiscardPile;
 		this.focusesHand = focusesHand;
 	}
 
@@ -125,8 +129,9 @@ export class MutablePlayerState extends PlayerState implements MutableTargetStat
 	declare properties: Array<Property>;
 	declare physicalTrauma: number;
 	declare mentalTrauma: number;
-	declare focusesBag: Map<Focus, Record<number, number>>;
-	declare focusesHand: Map<Focus, Record<number, number>>;
+	declare focusesBag: Counter<FocusToken>;
+	declare focusesHand: Counter<FocusToken>;
+	declare focusesDiscardPile: Counter<FocusToken>;
 
 	constructor(playerState: ReadonlyPlayerState) {
 		super({
@@ -139,8 +144,9 @@ export class MutablePlayerState extends PlayerState implements MutableTargetStat
 			properties: [...playerState.properties],
 			physicalTrauma: playerState.physicalTrauma,
 			mentalTrauma: playerState.mentalTrauma,
-			focusesBag: new Map(playerState.focusesBag),
-			focusesHand: new Map(playerState.focusesHand)
+			focusesBag: new Counter(playerState.focusesBag),
+			focusesHand: new Counter(playerState.focusesHand),
+			focusesDiscardPile: new Counter(playerState.focusesDiscardPile)
 		});
 	}
 
@@ -167,8 +173,9 @@ export class MutablePlayerState extends PlayerState implements MutableTargetStat
 			properties: [...this.properties],
 			physicalTrauma: this.physicalTrauma,
 			mentalTrauma: this.mentalTrauma,
-			focusesBag: new Map(this.focusesBag),
-			focusesHand: new Map(this.focusesHand)
+			focusesBag: new Counter(this.focusesBag),
+			focusesHand: new Counter(this.focusesHand),
+			focusesDiscardPile: new Counter(this.focusesDiscardPile)
 		});
 	}
 
@@ -201,11 +208,25 @@ export class MutablePlayerState extends PlayerState implements MutableTargetStat
 		}
 		shuffle(this.deck);
 	}
-}
 
-const shuffle = <T>(array: Array<T>) => {
-	for (let i = array.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[array[i], array[j]] = [array[j], array[i]];
+	drawFocusToken(gameState: MutableGameState): FocusToken {
+		if (this.focusesBag.isEmpty()) {
+			this.refillFocusBag(gameState);
+		}
+		const token = weightedChoice(this.focusesBag);
+		if (!token) {
+			// This should never happen
+			throw new Error('Focus bag is empty');
+		}
+		this.focusesBag.add(token, -1);
+		this.focusesHand.add(token);
+		return token;
 	}
-};
+
+	refillFocusBag(_gameState: MutableGameState) {
+		for (const [token, count] of this.focusesDiscardPile.entries()) {
+			this.focusesBag.add(token, count);
+		}
+		this.focusesDiscardPile = new Counter();
+	}
+}
