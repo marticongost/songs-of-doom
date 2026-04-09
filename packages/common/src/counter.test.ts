@@ -78,6 +78,31 @@ describe('Counter', () => {
 		});
 	});
 
+	describe('remove', () => {
+		it.each([
+			{ label: 'by 1 by default', count: undefined, expected: 4 },
+			{ label: 'by the specified amount', count: 3, expected: 2 }
+		])('decrements $label', ({ count, expected }) => {
+			const c = new Counter<string>();
+			c.add('a', 5);
+
+			if (count === undefined) {
+				c.remove('a');
+			} else {
+				c.remove('a', count);
+			}
+
+			expect(c.get('a')).toBe(expected);
+		});
+
+		it('creates a negative entry when removing an unknown item', () => {
+			const c = new Counter<string>();
+			c.remove('missing', 2);
+			expect(c.has('missing')).toBe(true);
+			expect(c.get('missing')).toBe(-2);
+		});
+	});
+
 	describe('get', () => {
 		it('returns 0 for unknown items', () => {
 			const c = new Counter<string>();
@@ -95,6 +120,66 @@ describe('Counter', () => {
 			const c = new Counter<string>();
 			c.add('present');
 			expect(c.has('present')).toBe(true);
+		});
+	});
+
+	describe('isEmpty', () => {
+		it('returns true for a new counter', () => {
+			const c = new Counter<string>();
+			expect(c.isEmpty()).toBe(true);
+		});
+
+		it('returns true when all explicit entries are zero', () => {
+			const c = new Counter(
+				new Map([
+					['a', 0],
+					['b', 0]
+				])
+			);
+			expect(c.isEmpty()).toBe(true);
+		});
+
+		it('returns false when any entry is > 0', () => {
+			const c = new Counter(
+				new Map([
+					['a', 0],
+					['b', 2]
+				])
+			);
+			expect(c.isEmpty()).toBe(false);
+		});
+
+		it('returns false when any entry is < 0', () => {
+			const c = new Counter(
+				new Map([
+					['a', 0],
+					['b', -2]
+				])
+			);
+			expect(c.isEmpty()).toBe(false);
+		});
+
+		it('returns true again when a count is brought back to zero', () => {
+			const c = new Counter<string>();
+			c.add('a', 3);
+			c.add('a', -3);
+			expect(c.isEmpty()).toBe(true);
+		});
+	});
+
+	describe('totalCount', () => {
+		it('returns 0 for an empty counter', () => {
+			const c = new Counter<string>();
+			expect(c.totalCount()).toBe(0);
+		});
+
+		it('returns the sum of all counts including negatives', () => {
+			const c = new Counter<string>();
+			c.add('a', 5);
+			c.add('b', 2);
+			c.remove('a', 1);
+			c.remove('c', 3);
+			expect(c.totalCount()).toBe(3);
 		});
 	});
 

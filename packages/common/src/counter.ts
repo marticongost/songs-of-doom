@@ -55,6 +55,25 @@ export abstract class BaseCounter<T> {
 		return this.itemCounts.keys();
 	}
 
+	/** Determines whether the counter is empty (no counts different than 0). */
+	isEmpty(): boolean {
+		for (const count of this.itemCounts.values()) {
+			if (count !== 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** Returns the total count of all items in the counter. */
+	totalCount(): number {
+		let total = 0;
+		for (const count of this.itemCounts.values()) {
+			total += count;
+		}
+		return total;
+	}
+
 	/**
 	 * Returns items sorted from most to least frequent.
 	 *
@@ -84,6 +103,13 @@ export class Counter<T> extends BaseCounter<T> {
 	add(item: T, count: number = 1): void {
 		const currentCount = this.itemCounts.get(item) ?? 0;
 		this.itemCounts.set(item, currentCount + count);
+	}
+
+	/** Decrements the count for `item` by `count` (default `1`). Creates an entry
+	 * if one does not yet exist, resulting in a negative count.
+	 */
+	remove(item: T, count: number = 1): void {
+		this.add(item, -count);
 	}
 
 	/** Removes `item` from the counter entirely. */
