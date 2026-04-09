@@ -5,6 +5,7 @@ import type {
 	Encounter,
 	Entity,
 	Item,
+	Location,
 	Module,
 	Scenario,
 	Skill,
@@ -152,9 +153,12 @@ export const entities = new EntityCatalog(
 		import: 'default'
 	}),
 	new QualifiedEntries(
-		import.meta.glob<Campaign | Scenario | Story | Encounter>(`./data/campaigns/**/*.ts`, {
-			eager: true,
-			import: 'default'
-		})
+		import.meta.glob<Campaign | Scenario | Story | Encounter | Location>(
+			`./data/campaigns/**/*.ts`,
+			{
+				eager: true,
+				import: 'default'
+			}
+		)
 	)
 );

@@ -9,6 +9,7 @@
 		allowedTypes: [
 			'scenario',
 			'story',
+			'location',
 			'archetype',
 			'trait',
 			'skill',

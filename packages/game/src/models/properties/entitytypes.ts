@@ -13,7 +13,8 @@ export type EntityTypeId =
 	| 'item'
 	| 'creature'
 	| 'ally'
-	| 'encounter';
+	| 'encounter'
+	| 'location';
 
 export class EntityType extends Property {
 	readonly id: EntityTypeId;
@@ -86,6 +87,11 @@ export const encounter = new EntityType(
 	{ ca: 'Encontre', es: 'Encuentro', en: 'Encounter' },
 	{ ca: 'Encontres', es: 'Encuentros', en: 'Encounters' }
 );
+export const location = new EntityType(
+	'location',
+	{ ca: 'Lloc', es: 'Localización', en: 'Location' },
+	{ ca: 'Llocs', es: 'Localizaciones', en: 'Locations' }
+);
 
 export const entityTypes: Record<EntityTypeId, EntityType> = {
 	campaign,
@@ -99,5 +105,6 @@ export const entityTypes: Record<EntityTypeId, EntityType> = {
 	item,
 	creature,
 	ally,
-	encounter
+	encounter,
+	location
 };

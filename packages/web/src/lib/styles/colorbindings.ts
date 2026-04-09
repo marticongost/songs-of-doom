@@ -110,5 +110,9 @@ export const cardBackgrounds = new ColorCoding<
 	story: {
 		main: new CardBackground('#4C4A42', '#0d0a02'),
 		secondary: new CardBackground('#2a2210', '#090909')
+	},
+	location: {
+		main: new CardBackground('#3d5243', '#080d08'),
+		secondary: new CardBackground('#1a261c', '#090909')
 	}
 });

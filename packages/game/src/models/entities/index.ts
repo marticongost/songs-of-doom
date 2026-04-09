@@ -6,6 +6,7 @@ export * from './discipline';
 export * from './encounter';
 export * from './entity';
 export * from './item';
+export * from './location';
 export * from './module';
 export * from './scenario';
 export * from './skill';

@@ -12,6 +12,7 @@ import type { Creature } from './creature';
 import { type Discipline } from './discipline';
 import type { Encounter } from './encounter';
 import type { Item } from './item';
+import type { Location } from './location';
 import type { Module } from './module';
 import type { Scenario } from './scenario';
 import type { Skill } from './skill';
@@ -274,4 +275,8 @@ export const isScenario = (entity: Entity): entity is Scenario => {
 
 export const isStory = (entity: Entity): entity is Story => {
 	return entity.type.id === 'story';
+};
+
+export const isLocation = (entity: Entity): entity is Location => {
+	return entity.type.id === 'location';
 };
