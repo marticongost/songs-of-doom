@@ -30,3 +30,6 @@ vite.config.ts.timestamp-*
 # VS Code
 *.code-workspace
 .vscode/settings.json
+
+# Image generation script state
+packages/web/scripts/.image-gen-state.json
