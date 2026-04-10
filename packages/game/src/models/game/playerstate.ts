@@ -20,6 +20,7 @@ export interface PlayerStateProps {
 	discardPile: ReadonlyArray<CardState>;
 	attachments?: ReadonlyArray<CardState>;
 	properties?: ReadonlyArray<Property>;
+	clues?: number;
 	focusesBag: ReadonlyCounter<FocusToken>;
 	focusesDiscardPile: ReadonlyCounter<FocusToken>;
 	focusesHand: ReadonlyCounter<FocusToken>;
@@ -32,6 +33,7 @@ export class PlayerState extends TargetState<PlayerId> {
 	readonly deck: ReadonlyArray<CardState>;
 	readonly hand: ReadonlyArray<CardState>;
 	readonly discardPile: ReadonlyArray<CardState>;
+	readonly clues: number;
 	readonly focusesBag: ReadonlyCounter<FocusToken>;
 	readonly focusesDiscardPile: ReadonlyCounter<FocusToken>;
 	readonly focusesHand: ReadonlyCounter<FocusToken>;
@@ -44,6 +46,7 @@ export class PlayerState extends TargetState<PlayerId> {
 		discardPile,
 		attachments = [],
 		properties,
+		clues = 0,
 		focusesBag,
 		focusesDiscardPile,
 		focusesHand,
@@ -55,6 +58,7 @@ export class PlayerState extends TargetState<PlayerId> {
 		this.deck = deck;
 		this.hand = hand;
 		this.discardPile = discardPile;
+		this.clues = clues;
 		this.focusesBag = focusesBag;
 		this.focusesDiscardPile = focusesDiscardPile;
 		this.focusesHand = focusesHand;
@@ -127,6 +131,7 @@ export class MutablePlayerState extends PlayerState implements MutableTargetStat
 	declare discardPile: Array<MutableCardState>;
 	declare attachments: Array<MutableCardState>;
 	declare properties: Array<Property>;
+	declare clues: number;
 	declare physicalTrauma: number;
 	declare mentalTrauma: number;
 	declare focusesBag: Counter<FocusToken>;
@@ -142,6 +147,7 @@ export class MutablePlayerState extends PlayerState implements MutableTargetStat
 			discardPile: playerState.discardPile.map((card) => card.mutable()),
 			attachments: playerState.attachments.map((card) => card.mutable()),
 			properties: [...playerState.properties],
+			clues: playerState.clues,
 			physicalTrauma: playerState.physicalTrauma,
 			mentalTrauma: playerState.mentalTrauma,
 			focusesBag: new Counter(playerState.focusesBag),
@@ -171,6 +177,7 @@ export class MutablePlayerState extends PlayerState implements MutableTargetStat
 			discardPile: this.discardPile.map((card) => card.readonly()),
 			attachments: this.attachments.map((card) => card.readonly()),
 			properties: [...this.properties],
+			clues: this.clues,
 			physicalTrauma: this.physicalTrauma,
 			mentalTrauma: this.mentalTrauma,
 			focusesBag: new Counter(this.focusesBag),

@@ -29,6 +29,7 @@ export interface CardStateProps {
 	container: CardParent;
 	exhausted?: boolean;
 	charges?: number;
+	clues?: number;
 	attachments?: ReadonlyArray<CardState>;
 	physicalTrauma?: number;
 	mentalTrauma?: number;
@@ -41,6 +42,7 @@ export class CardState extends TargetState<CardId> {
 	readonly container: CardParent;
 	readonly exhausted: boolean;
 	readonly charges: number;
+	readonly clues: number;
 
 	constructor({
 		id,
@@ -49,6 +51,7 @@ export class CardState extends TargetState<CardId> {
 		container,
 		exhausted = false,
 		charges = 0,
+		clues = 0,
 		attachments = [],
 		physicalTrauma = 0,
 		mentalTrauma = 0,
@@ -66,6 +69,7 @@ export class CardState extends TargetState<CardId> {
 		this.container = container;
 		this.exhausted = exhausted;
 		this.charges = charges;
+		this.clues = clues;
 	}
 
 	getCard(id: CardId): CardState | undefined {
@@ -138,6 +142,7 @@ export class ReadonlyCardState extends CardState {
 export class MutableCardState extends CardState implements MutableTargetState<CardId> {
 	declare exhausted: boolean;
 	declare charges: number;
+	declare clues: number;
 	declare attachments: Array<MutableCardState>;
 	declare properties: Array<Property>;
 	declare container: CardParent;
@@ -152,6 +157,7 @@ export class MutableCardState extends CardState implements MutableTargetState<Ca
 			container: cardState.container,
 			exhausted: cardState.exhausted,
 			charges: cardState.charges,
+			clues: cardState.clues,
 			attachments: cardState.attachments.map((attachment) => attachment.mutable()),
 			properties: [...cardState.properties],
 			physicalTrauma: cardState.physicalTrauma,
@@ -175,6 +181,7 @@ export class MutableCardState extends CardState implements MutableTargetState<Ca
 			container: this.container,
 			exhausted: this.exhausted,
 			charges: this.charges,
+			clues: this.clues,
 			attachments: this.attachments.map((attachment) => attachment.readonly()),
 			properties: [...this.properties],
 			physicalTrauma: this.physicalTrauma,

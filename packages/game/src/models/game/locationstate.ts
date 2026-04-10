@@ -7,17 +7,14 @@ import {
 import type { CardId, PlayerId } from './identifiers';
 
 export interface LocationStateProps extends CardStateProps {
-	clues?: number;
 	players?: ReadonlyArray<PlayerId>;
 }
 
 export class LocationState extends CardState {
-	readonly clues: number;
 	readonly players: ReadonlyArray<PlayerId>;
 
-	constructor({ clues = 0, players = [], ...rest }: LocationStateProps) {
+	constructor({ players = [], ...rest }: LocationStateProps) {
 		super(rest);
-		this.clues = clues;
 		this.players = players;
 	}
 }
@@ -54,11 +51,11 @@ export class MutableLocationState extends LocationState {
 			container: locationState.container,
 			exhausted: locationState.exhausted,
 			charges: locationState.charges,
+			clues: locationState.clues,
 			attachments: locationState.attachments.map((a) => (a as ReadonlyCardState).mutable()),
 			properties: [...locationState.properties],
 			physicalTrauma: locationState.physicalTrauma,
 			mentalTrauma: locationState.mentalTrauma,
-			clues: locationState.clues,
 			players: [...locationState.players]
 		});
 	}
@@ -79,11 +76,11 @@ export class MutableLocationState extends LocationState {
 			container: this.container,
 			exhausted: this.exhausted,
 			charges: this.charges,
+			clues: this.clues,
 			attachments: this.attachments.map((a) => (a as MutableCardState).readonly()),
 			properties: [...this.properties],
 			physicalTrauma: this.physicalTrauma,
 			mentalTrauma: this.mentalTrauma,
-			clues: this.clues,
 			players: [...this.players]
 		});
 	}
