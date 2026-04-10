@@ -9,10 +9,11 @@ import type { MutableGameState } from './game/gamestate';
 // ─── Capability.trigger ───────────────────────────────────────────────────────
 
 describe('Capability.trigger', () => {
-	it('pushes cardId onto activeCardStack and implicitTargetStack', async () => {
+	it('pushes cardId onto activeCardStack, implicitTargetStack, and implicitSubjectStack', async () => {
 		const mutableState = mock<MutableGameState>({
 			activeCardStack: [],
-			implicitTargetStack: []
+			implicitTargetStack: [],
+			implicitSubjectStack: []
 		});
 		const graph = mock<GameGraph>();
 		let triggeredCallback!: (state: MutableGameState) => void;
@@ -26,6 +27,7 @@ describe('Capability.trigger', () => {
 
 		expect(mutableState.activeCardStack).toContain('c1');
 		expect(mutableState.implicitTargetStack).toContain('c1');
+		expect(mutableState.implicitSubjectStack).toContain('c1');
 	});
 
 	it('triggers all effects', async () => {
@@ -41,10 +43,11 @@ describe('Capability.trigger', () => {
 		expect(effect.trigger).toHaveBeenCalledWith(graph);
 	});
 
-	it('pops both stacks and discards the active card on finish if it was in hand', async () => {
+	it('pops all stacks and discards the active card on finish if it was in hand', async () => {
 		const mutableState = mock<MutableGameState>({
 			activeCardStack: ['c1'],
-			implicitTargetStack: ['c1']
+			implicitTargetStack: ['c1'],
+			implicitSubjectStack: ['c1']
 		});
 		const card = mock<MutableCardState>({ container: { type: 'hand', playerId: 'p1' } });
 		mutableState.requireActiveCard.mockReturnValue(card);
@@ -63,12 +66,14 @@ describe('Capability.trigger', () => {
 		expect(card.moveToTopOfDiscardPile).toHaveBeenCalledWith(mutableState);
 		expect(mutableState.activeCardStack).toEqual([]);
 		expect(mutableState.implicitTargetStack).toEqual([]);
+		expect(mutableState.implicitSubjectStack).toEqual([]);
 	});
 
-	it('pops both stacks without discarding on finish if the card is not in hand', async () => {
+	it('pops all stacks without discarding on finish if the card is not in hand', async () => {
 		const mutableState = mock<MutableGameState>({
 			activeCardStack: ['c1'],
-			implicitTargetStack: ['c1']
+			implicitTargetStack: ['c1'],
+			implicitSubjectStack: ['c1']
 		});
 		const card = mock<MutableCardState>({ container: { type: 'deck', playerId: 'p1' } });
 		mutableState.requireActiveCard.mockReturnValue(card);
@@ -87,5 +92,6 @@ describe('Capability.trigger', () => {
 		expect(card.moveToTopOfDiscardPile).not.toHaveBeenCalled();
 		expect(mutableState.activeCardStack).toEqual([]);
 		expect(mutableState.implicitTargetStack).toEqual([]);
+		expect(mutableState.implicitSubjectStack).toEqual([]);
 	});
 });

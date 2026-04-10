@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { Obligation, Opportunity } from '../capabilities/reaction';
 import { Effect } from '../effects/effect';
 import { events } from '../event';
-import { Target, type TargetType } from '../target';
+import { Target, type ActorTargetType, type TargetType } from '../target';
 import type { MutableCardState, ReadonlyCardState } from './cardstate';
 import {
 	CapabilityFinished,
@@ -327,6 +327,29 @@ describe('GameGraph.requestPlayersOrActivePlayer', () => {
 		await expect(graph.requestPlayersOrActivePlayer(new Target(targetType))).rejects.toThrow(
 			'Expected target to be of type player'
 		);
+	});
+});
+
+// ─── GameGraph.requestSubjects ───────────────────────────────────────────────
+
+describe('GameGraph.requestSubjects', () => {
+	it('returns the implicit subject id when target is undefined', async () => {
+		const c1 = mock<ReadonlyCardState>({ id: 'c1' });
+		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) });
+		const graph = new GameGraph({
+			initialState: { players: [p1], implicitSubjectStack: ['c1'] }
+		});
+		const result = await graph.requestSubjects(undefined);
+		expect(result).toEqual(['c1']);
+	});
+
+	it('requests input and returns all selected target ids when target is provided', async () => {
+		const graph = new GameGraph({ initialState: { players: [] } });
+		const target = new Target<ActorTargetType>('player');
+		const promise = graph.requestSubjects(target);
+		await graph.supplyInput({ target: ['p1', 'p2'] });
+		const result = await promise;
+		expect(result).toEqual(['p1', 'p2']);
 	});
 });
 

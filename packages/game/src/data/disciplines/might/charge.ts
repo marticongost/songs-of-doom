@@ -1,4 +1,5 @@
 import { Action } from '../../../models/capabilities';
+import { sameLocation } from '../../../models/common';
 import {
 	engage,
 	modifyCapabilityCost,
@@ -6,8 +7,8 @@ import {
 	modifyRoll,
 	triggerAttack
 } from '../../../models/effects';
-import { engaged, not } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
+import { engaged, not } from '../../../models/expressions';
 import { upgradable } from '../../../models/upgrades';
 
 export default upgradable(Skill, 2, (variants) => ({
@@ -19,7 +20,7 @@ export default upgradable(Skill, 2, (variants) => ({
 			cost: { strength: 2 },
 			effects: [
 				not(engaged).then(
-					engage(),
+					engage({ target: { type: 'enemy', condition: sameLocation } }),
 					triggerAttack({
 						modifiers: [
 							modifyRoll(2),

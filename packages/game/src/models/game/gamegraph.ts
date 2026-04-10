@@ -3,7 +3,7 @@ import type { Capability } from '../capability';
 import type { Effect } from '../effects';
 import type { EffectOutcome } from '../effects/effect';
 import { events, type Event, type EventType } from '../event';
-import { Target } from '../target';
+import { Target, type ActorTargetType } from '../target';
 import type { CapabilityRef } from './cardstate';
 import { ReadonlyGameState, type GameStateProps, type MutableGameState } from './gamestate';
 import { type CardId, type PlayerId, type TargetId } from './identifiers';
@@ -173,6 +173,13 @@ export class GameGraph {
 			throw new Error('Expected target to be of type player');
 		}
 		return (await this.requestInput(target)).target as PlayerId[];
+	}
+
+	async requestSubjects(target: Target<ActorTargetType> | undefined): Promise<TargetId[]> {
+		if (target === undefined) {
+			return [this._current.state.requireImplicitSubject().id];
+		}
+		return (await this.requestInput(target)).target;
 	}
 
 	async group(callback: () => Promise<void>) {

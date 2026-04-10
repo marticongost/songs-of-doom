@@ -31,6 +31,7 @@ export abstract class Capability {
 		gameGraph.capabilityTriggered(this, cardId, (state) => {
 			state.activeCardStack.push(cardId);
 			state.implicitTargetStack.push(cardId);
+			state.implicitSubjectStack.push(cardId);
 		});
 		await gameGraph.group(async () => {
 			for (const effect of this.effects) {
@@ -43,6 +44,7 @@ export abstract class Capability {
 				}
 				state.activeCardStack.pop();
 				state.implicitTargetStack.pop();
+				state.implicitSubjectStack.pop();
 			});
 		});
 	}
