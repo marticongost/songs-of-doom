@@ -165,6 +165,13 @@ export class GameGraph {
 		return targetIds[0];
 	}
 
+	async requestMultipleTargetsOrImplicitTarget(target: Target | undefined): Promise<TargetId[]> {
+		if (target === undefined) {
+			return [this._current.state.requireImplicitTarget().id];
+		}
+		return (await this.requestInput(target)).target;
+	}
+
 	async requestPlayersOrActivePlayer(target: Target | undefined): Promise<PlayerId[]> {
 		if (target === undefined) {
 			return [this._current.state.requireActivePlayer().id];

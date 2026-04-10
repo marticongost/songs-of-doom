@@ -289,6 +289,38 @@ describe('GameGraph.requestSingleTargetOrImplicitTarget', () => {
 	});
 });
 
+// ─── GameGraph.requestMultipleTargetsOrImplicitTarget ────────────────────────
+
+describe('GameGraph.requestMultipleTargetsOrImplicitTarget', () => {
+	it('returns an array with the implicit target id when target is undefined', async () => {
+		const c1 = mock<ReadonlyCardState>({ id: 'c1' });
+		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) });
+		const graph = new GameGraph({
+			initialState: { players: [p1], implicitTargetStack: ['c1'] }
+		});
+		const result = await graph.requestMultipleTargetsOrImplicitTarget(undefined);
+		expect(result).toEqual(['c1']);
+	});
+
+	it('requests input and returns a single selected target id', async () => {
+		const graph = new GameGraph({ initialState: { players: [] } });
+		const target = new Target('player');
+		const promise = graph.requestMultipleTargetsOrImplicitTarget(target);
+		await graph.supplyInput({ target: ['p1'] });
+		const result = await promise;
+		expect(result).toEqual(['p1']);
+	});
+
+	it('requests input and returns multiple selected target ids', async () => {
+		const graph = new GameGraph({ initialState: { players: [] } });
+		const target = new Target('player');
+		const promise = graph.requestMultipleTargetsOrImplicitTarget(target);
+		await graph.supplyInput({ target: ['p1', 'p2'] });
+		const result = await promise;
+		expect(result).toEqual(['p1', 'p2']);
+	});
+});
+
 // ─── GameGraph.requestPlayersOrActivePlayer ─────────────────────────────────
 
 describe('GameGraph.requestPlayersOrActivePlayer', () => {
