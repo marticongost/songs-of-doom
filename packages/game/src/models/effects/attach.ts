@@ -1,6 +1,6 @@
 import { finalise } from '@songsofdoom/common';
 import type { GameGraph } from '../game/gamegraph';
-import type { TargetId } from '../game/identifiers';
+import type { EntityId } from '../game/identifiers';
 import { Target, type TargetSpec } from '../target';
 import { EffectWithOutcome } from './effect';
 
@@ -17,7 +17,7 @@ export interface AttachEffectProps {
 
 export interface AttachOutcome {
 	/** The card that received the attachment. */
-	readonly targetId: TargetId;
+	readonly targetId: EntityId;
 }
 
 /**

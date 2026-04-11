@@ -8,9 +8,9 @@ import {
 	type MutableCardState,
 	type ReadonlyCardState
 } from './cardstate';
+import { EntityState, type MutableEntityState } from './entitystate';
 import type { MutableGameState } from './gamestate';
 import type { CardId, PlayerId } from './identifiers';
-import { TargetState, type MutableTargetState } from './targetstate';
 
 export interface PlayerStateProps {
 	id: PlayerId;
@@ -28,7 +28,7 @@ export interface PlayerStateProps {
 	mentalTrauma: number;
 }
 
-export class PlayerState extends TargetState<PlayerId> {
+export class PlayerState extends EntityState<PlayerId> {
 	readonly character: CharacterState;
 	readonly deck: ReadonlyArray<CardState>;
 	readonly hand: ReadonlyArray<CardState>;
@@ -124,7 +124,7 @@ export class ReadonlyPlayerState extends PlayerState {
 	}
 }
 
-export class MutablePlayerState extends PlayerState implements MutableTargetState<PlayerId> {
+export class MutablePlayerState extends PlayerState implements MutableEntityState<PlayerId> {
 	declare character: CharacterState;
 	declare deck: Array<MutableCardState>;
 	declare hand: Array<MutableCardState>;

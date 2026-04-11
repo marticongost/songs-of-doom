@@ -1,9 +1,9 @@
 import { finalise } from '@songsofdoom/common';
 import type { MutableCardState } from '../game/cardstate';
+import type { EntityState, MutableEntityState } from '../game/entitystate';
 import type { GameGraph } from '../game/gamegraph';
 import type { MutableGameState } from '../game/gamestate';
 import type { CardId, PlayerId } from '../game/identifiers';
-import type { MutableTargetState, TargetState } from '../game/targetstate';
 import { type ActorTargetType, Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -48,18 +48,18 @@ export class EngageEffect extends Effect {
 			const subjects = subjectIds.map((id) => state.requireEntityState(id));
 			const targets = targetIds.map((id) => state.requireEntityState(id));
 
-			type CardLike = TargetState<CardId | PlayerId> & {
+			type CardLike = EntityState<CardId | PlayerId> & {
 				card: { type: { id: string } };
 			};
-			const isCardLike = (s: TargetState<CardId | PlayerId>): s is CardLike => 'card' in s;
+			const isCardLike = (s: EntityState<CardId | PlayerId>): s is CardLike => 'card' in s;
 
-			const isPlayerOrAlly = (entityState: TargetState<CardId | PlayerId>): boolean =>
+			const isPlayerOrAlly = (entityState: EntityState<CardId | PlayerId>): boolean =>
 				!isCardLike(entityState) || entityState.card.type.id === 'ally';
 
-			const isCreature = (entityState: TargetState<CardId | PlayerId>): boolean =>
+			const isCreature = (entityState: EntityState<CardId | PlayerId>): boolean =>
 				isCardLike(entityState) && entityState.card.type.id === 'creature';
 
-			let friendly: MutableTargetState<CardId | PlayerId>;
+			let friendly: MutableEntityState<CardId | PlayerId>;
 			let enemiesList: Array<MutableCardState>;
 
 			if (isPlayerOrAlly(subjects[0])) {

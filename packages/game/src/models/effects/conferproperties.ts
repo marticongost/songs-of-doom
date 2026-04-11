@@ -1,7 +1,7 @@
+import type { MutableEntityState } from '../game/entitystate';
 import type { GameGraph } from '../game/gamegraph';
 import type { MutableGameState } from '../game/gamestate';
-import type { TargetId } from '../game/identifiers';
-import type { MutableTargetState } from '../game/targetstate';
+import type { EntityId } from '../game/identifiers';
 import type { Property } from '../properties';
 import { Effect } from './effect';
 
@@ -40,7 +40,7 @@ export class ConferPropertiesEffect extends Effect {
 		});
 	}
 
-	private addProperty(property: Property, target: MutableTargetState<TargetId>): void {
+	private addProperty(property: Property, target: MutableEntityState<EntityId>): void {
 		const existingProperty = target.getProperty(property);
 		if (!existingProperty) {
 			target.properties.push(property);

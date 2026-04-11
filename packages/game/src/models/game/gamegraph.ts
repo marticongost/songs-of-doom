@@ -6,7 +6,7 @@ import { events, type Event, type EventType } from '../event';
 import { Target, type ActorTargetType } from '../target';
 import type { CapabilityRef } from './cardstate';
 import { ReadonlyGameState, type GameStateProps, type MutableGameState } from './gamestate';
-import { type CardId, type PlayerId, type TargetId } from './identifiers';
+import { type CardId, type EntityId, type PlayerId } from './identifiers';
 import type { Field } from './playerinput';
 import { CapabilityChoiceField, TargetField } from './playerinput';
 
@@ -119,7 +119,7 @@ export class GameGraph {
 		});
 	}
 
-	async requestInput(target: Target): Promise<{ target: TargetId[] }>;
+	async requestInput(target: Target): Promise<{ target: EntityId[] }>;
 	async requestInput<const Fields extends ReadonlyArray<Field<unknown, string, boolean>>>(
 		...fields: Fields
 	): Promise<FieldsResult<Fields>>;
@@ -143,7 +143,7 @@ export class GameGraph {
 		}
 	}
 
-	async requestSingleTargetOrActiveCard(target: Target | undefined): Promise<TargetId> {
+	async requestSingleTargetOrActiveCard(target: Target | undefined): Promise<EntityId> {
 		if (target === undefined) {
 			return this._current.state.requireActiveCard().id;
 		}
@@ -154,7 +154,7 @@ export class GameGraph {
 		return targetIds[0];
 	}
 
-	async requestSingleTargetOrImplicitTarget(target: Target | undefined): Promise<TargetId> {
+	async requestSingleTargetOrImplicitTarget(target: Target | undefined): Promise<EntityId> {
 		if (target === undefined) {
 			return this._current.state.requireImplicitTarget().id;
 		}
@@ -165,7 +165,7 @@ export class GameGraph {
 		return targetIds[0];
 	}
 
-	async requestMultipleTargetsOrImplicitTarget(target: Target | undefined): Promise<TargetId[]> {
+	async requestMultipleTargetsOrImplicitTarget(target: Target | undefined): Promise<EntityId[]> {
 		if (target === undefined) {
 			return [this._current.state.requireImplicitTarget().id];
 		}
@@ -182,7 +182,7 @@ export class GameGraph {
 		return (await this.requestInput(target)).target as PlayerId[];
 	}
 
-	async requestSubjects(target: Target<ActorTargetType> | undefined): Promise<TargetId[]> {
+	async requestSubjects(target: Target<ActorTargetType> | undefined): Promise<EntityId[]> {
 		if (target === undefined) {
 			return [this._current.state.requireImplicitSubject().id];
 		}

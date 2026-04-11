@@ -2,7 +2,7 @@ import { Counter, finalise, type ReadonlyCounter } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
 import { ScalarExpression } from '../expressions';
 import type { GameGraph } from '../game/gamegraph';
-import type { CardId, TargetId } from '../game/identifiers';
+import type { CardId, EntityId } from '../game/identifiers';
 import type { MutableLocationState } from '../game/locationstate';
 import {
 	currentLocation,
@@ -29,7 +29,7 @@ export interface GatherCluesEffectProps {
 
 export interface GatherCluesOutcome {
 	/** The clues that were gathered at each location, grouped by subject. */
-	readonly gatheredClues: Map<TargetId, ReadonlyCounter<CardId>>;
+	readonly gatheredClues: Map<EntityId, ReadonlyCounter<CardId>>;
 }
 
 /**
@@ -54,7 +54,7 @@ export class GatherCluesEffect extends EffectWithOutcome<GatherCluesOutcome> {
 
 	override async trigger(gameGraph: GameGraph) {
 		const subjectIds = await gameGraph.requestSubjects(this.subject);
-		const subjectTargetIds = new Map<TargetId, Array<CardId>>();
+		const subjectTargetIds = new Map<EntityId, Array<CardId>>();
 
 		// Find the locations to investigate in for each subject (it could be different for
 		// each subject)

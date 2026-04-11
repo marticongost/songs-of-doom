@@ -1,9 +1,9 @@
 import { isSkill, Reaction, type Capability, type Property } from '../..';
 import type { Entity } from '../entities';
 import { events, type Event, type EventType } from '../event';
+import { EntityState, type MutableEntityState } from './entitystate';
 import type { MutableGameState } from './gamestate';
 import type { CardId, PlayerId } from './identifiers';
-import { TargetState, type MutableTargetState } from './targetstate';
 
 export interface CardOptions {
 	ready?: boolean;
@@ -36,7 +36,7 @@ export interface CardStateProps {
 	properties?: Array<Property>;
 }
 
-export class CardState extends TargetState<CardId> {
+export class CardState extends EntityState<CardId> {
 	readonly card: Entity;
 	readonly ownerId: PlayerId;
 	readonly container: CardParent;
@@ -139,7 +139,7 @@ export class ReadonlyCardState extends CardState {
 	}
 }
 
-export class MutableCardState extends CardState implements MutableTargetState<CardId> {
+export class MutableCardState extends CardState implements MutableEntityState<CardId> {
 	declare exhausted: boolean;
 	declare charges: number;
 	declare clues: number;

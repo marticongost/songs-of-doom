@@ -1,9 +1,9 @@
 import type { Property } from '../..';
 import type { CardState, MutableCardState } from './cardstate';
 import type { MutableGameState } from './gamestate';
-import type { CardId, TargetId } from './identifiers';
+import type { CardId, EntityId } from './identifiers';
 
-export interface TargetStateProps<Id extends TargetId> {
+export interface EntityStateProps<Id extends EntityId> {
 	id: Id;
 	attachments?: ReadonlyArray<CardState>;
 	properties: ReadonlyArray<Property>;
@@ -11,7 +11,7 @@ export interface TargetStateProps<Id extends TargetId> {
 	mentalTrauma?: number;
 }
 
-export abstract class TargetState<Id extends TargetId> {
+export abstract class EntityState<Id extends EntityId> {
 	readonly id: Id;
 	readonly attachments: ReadonlyArray<CardState>;
 	readonly properties: ReadonlyArray<Property>;
@@ -24,7 +24,7 @@ export abstract class TargetState<Id extends TargetId> {
 		properties,
 		physicalTrauma = 0,
 		mentalTrauma = 0
-	}: TargetStateProps<Id>) {
+	}: EntityStateProps<Id>) {
 		this.id = id;
 		this.attachments = attachments;
 		this.properties = properties;
@@ -59,7 +59,7 @@ export abstract class TargetState<Id extends TargetId> {
 	}
 }
 
-export interface MutableTargetState<Id extends TargetId> extends TargetState<Id> {
+export interface MutableEntityState<Id extends EntityId> extends EntityState<Id> {
 	attachments: Array<MutableCardState>;
 	properties: Array<Property>;
 
