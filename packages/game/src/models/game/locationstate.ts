@@ -7,10 +7,12 @@ import {
 import type { CardId, PlayerId } from './identifiers';
 
 export interface LocationStateProps extends CardStateProps {
+	/** The ids of the players currently at this location. */
 	players?: ReadonlyArray<PlayerId>;
 }
 
 export class LocationState extends CardState {
+	/** The ids of the players currently at this location. */
 	readonly players: ReadonlyArray<PlayerId>;
 
 	constructor({ players = [], ...rest }: LocationStateProps) {
