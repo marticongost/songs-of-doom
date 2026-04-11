@@ -5,6 +5,7 @@ import {
 	type ReadonlyCardState
 } from './cardstate';
 import type { CardId, PlayerId } from './identifiers';
+import { mutate } from './mutate';
 
 export interface LocationStateProps extends CardStateProps {
 	/** The ids of the players currently at this location. */
@@ -35,9 +36,7 @@ export class ReadonlyLocationState extends LocationState {
 	}
 
 	mutate(change: (state: MutableLocationState) => void): ReadonlyLocationState {
-		const mutableState = this.mutable();
-		change(mutableState);
-		return mutableState.readonly();
+		return mutate(this as ReadonlyLocationState, change);
 	}
 }
 

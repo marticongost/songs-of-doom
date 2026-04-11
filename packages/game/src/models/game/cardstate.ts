@@ -4,6 +4,7 @@ import { events, type Event, type EventType } from '../event';
 import { EntityState, type MutableEntityState } from './entitystate';
 import type { MutableGameState } from './gamestate';
 import type { CardId, PlayerId } from './identifiers';
+import { mutate } from './mutate';
 
 export interface CardOptions {
 	ready?: boolean;
@@ -36,7 +37,11 @@ export interface CardStateProps {
 	properties?: Array<Property>;
 }
 
-export class CardState extends EntityState<CardId> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class CardState<Self extends CardState<Self> = CardState<any>> extends EntityState<
+	CardId,
+	Self
+> {
 	readonly card: Entity;
 	readonly ownerId: PlayerId;
 	readonly container: CardParent;
@@ -72,9 +77,10 @@ export class CardState extends EntityState<CardId> {
 		this.clues = clues;
 	}
 
-	getCard(id: CardId): CardState | undefined {
+	getCard(id: CardId): Self | undefined {
 		if (this.id === id) {
-			return this;
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			return this as any as Self;
 		}
 		for (const attachment of this.attachments) {
 			const found = attachment.getCard(id);
@@ -85,7 +91,7 @@ export class CardState extends EntityState<CardId> {
 		return undefined;
 	}
 
-	requireCard(id: CardId): CardState {
+	requireCard(id: CardId): Self {
 		const card = this.getCard(id);
 		if (!card) {
 			throw new Error(`Card with id ${id} not found`);
@@ -117,29 +123,20 @@ export class CardState extends EntityState<CardId> {
 	}
 }
 
-export class ReadonlyCardState extends CardState {
-	declare readonly attachments: ReadonlyArray<ReadonlyCardState>;
-
-	getCard(id: CardId): ReadonlyCardState | undefined {
-		return super.getCard(id) as ReadonlyCardState | undefined;
-	}
-
-	requireCard(id: CardId): ReadonlyCardState {
-		return super.requireCard(id) as ReadonlyCardState;
-	}
-
+export class ReadonlyCardState extends CardState<ReadonlyCardState> {
 	mutable(): MutableCardState {
 		return new MutableCardState(this);
 	}
 
 	mutate(change: (state: MutableCardState) => void): ReadonlyCardState {
-		const mutableState = this.mutable();
-		change(mutableState);
-		return mutableState.readonly();
+		return mutate(this as ReadonlyCardState, change);
 	}
 }
 
-export class MutableCardState extends CardState implements MutableEntityState<CardId> {
+export class MutableCardState
+	extends CardState<MutableCardState>
+	implements MutableEntityState<CardId>
+{
 	declare exhausted: boolean;
 	declare charges: number;
 	declare clues: number;
@@ -163,14 +160,6 @@ export class MutableCardState extends CardState implements MutableEntityState<Ca
 			physicalTrauma: cardState.physicalTrauma,
 			mentalTrauma: cardState.mentalTrauma
 		});
-	}
-
-	getCard(id: CardId): MutableCardState | undefined {
-		return super.getCard(id) as MutableCardState | undefined;
-	}
-
-	requireCard(id: CardId): MutableCardState {
-		return super.requireCard(id) as MutableCardState;
 	}
 
 	readonly(): ReadonlyCardState {

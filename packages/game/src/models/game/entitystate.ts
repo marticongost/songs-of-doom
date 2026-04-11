@@ -11,9 +11,13 @@ export interface EntityStateProps<Id extends EntityId> {
 	mentalTrauma?: number;
 }
 
-export abstract class EntityState<Id extends EntityId> {
+export abstract class EntityState<
+	Id extends EntityId,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	TCard extends CardState<any> = CardState<any>
+> {
 	readonly id: Id;
-	readonly attachments: ReadonlyArray<CardState>;
+	readonly attachments: ReadonlyArray<TCard>;
 	readonly properties: ReadonlyArray<Property>;
 	readonly physicalTrauma: number;
 	readonly mentalTrauma: number;
@@ -26,14 +30,14 @@ export abstract class EntityState<Id extends EntityId> {
 		mentalTrauma = 0
 	}: EntityStateProps<Id>) {
 		this.id = id;
-		this.attachments = attachments;
+		this.attachments = attachments as ReadonlyArray<TCard>;
 		this.properties = properties;
 		this.physicalTrauma = physicalTrauma;
 		this.mentalTrauma = mentalTrauma;
 	}
 
-	abstract getCard(id: CardId): CardState | undefined;
-	abstract requireCard(id: CardId): CardState;
+	abstract getCard(id: CardId): TCard | undefined;
+	abstract requireCard(id: CardId): TCard;
 
 	/** Obtains the given property if the card has it, taking into account any
 	 * effects that might modify its properties.
@@ -59,7 +63,7 @@ export abstract class EntityState<Id extends EntityId> {
 	}
 }
 
-export interface MutableEntityState<Id extends EntityId> extends EntityState<Id> {
+export interface MutableEntityState<Id extends EntityId> extends EntityState<Id, MutableCardState> {
 	attachments: Array<MutableCardState>;
 	properties: Array<Property>;
 

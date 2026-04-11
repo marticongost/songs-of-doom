@@ -11,6 +11,7 @@ import {
 import { EntityState, type MutableEntityState } from './entitystate';
 import type { MutableGameState } from './gamestate';
 import type { CardId, PlayerId } from './identifiers';
+import { mutate } from './mutate';
 
 export interface PlayerStateProps {
 	id: PlayerId;
@@ -28,11 +29,15 @@ export interface PlayerStateProps {
 	mentalTrauma: number;
 }
 
-export class PlayerState extends EntityState<PlayerId> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extends EntityState<
+	PlayerId,
+	TCard
+> {
 	readonly character: CharacterState;
-	readonly deck: ReadonlyArray<CardState>;
-	readonly hand: ReadonlyArray<CardState>;
-	readonly discardPile: ReadonlyArray<CardState>;
+	readonly deck: ReadonlyArray<TCard>;
+	readonly hand: ReadonlyArray<TCard>;
+	readonly discardPile: ReadonlyArray<TCard>;
 	readonly clues: number;
 	readonly focusesBag: ReadonlyCounter<FocusToken>;
 	readonly focusesDiscardPile: ReadonlyCounter<FocusToken>;
@@ -55,23 +60,23 @@ export class PlayerState extends EntityState<PlayerId> {
 	}: PlayerStateProps) {
 		super({ id, attachments, properties: properties ?? [], physicalTrauma, mentalTrauma });
 		this.character = character;
-		this.deck = deck;
-		this.hand = hand;
-		this.discardPile = discardPile;
+		this.deck = deck as ReadonlyArray<TCard>;
+		this.hand = hand as ReadonlyArray<TCard>;
+		this.discardPile = discardPile as ReadonlyArray<TCard>;
 		this.clues = clues;
 		this.focusesBag = focusesBag;
 		this.focusesDiscardPile = focusesDiscardPile;
 		this.focusesHand = focusesHand;
 	}
 
-	cards(options?: CardOptions): Array<CardState> {
+	cards(options?: CardOptions): Array<TCard> {
 		if (options?.ready) {
 			return [...this.hand, ...this.attachments].filter((card) => !card.exhausted);
 		}
 		return [...this.deck, ...this.hand, ...this.discardPile, ...this.attachments];
 	}
 
-	getCard(id: CardId): CardState | undefined {
+	getCard(id: CardId): TCard | undefined {
 		for (const card of this.cards()) {
 			const found = card.getCard(id);
 			if (found) {
@@ -81,7 +86,7 @@ export class PlayerState extends EntityState<PlayerId> {
 		return undefined;
 	}
 
-	requireCard(id: CardId): CardState {
+	requireCard(id: CardId): TCard {
 		const card = this.getCard(id);
 		if (!card) {
 			throw new Error(`Card with id ${id} not found in player's hand or attachments`);
@@ -95,36 +100,20 @@ export class PlayerState extends EntityState<PlayerId> {
 	}
 }
 
-export class ReadonlyPlayerState extends PlayerState {
-	declare readonly deck: ReadonlyArray<ReadonlyCardState>;
-	declare readonly hand: ReadonlyArray<ReadonlyCardState>;
-	declare readonly discardPile: ReadonlyArray<ReadonlyCardState>;
-	declare readonly attachments: ReadonlyArray<ReadonlyCardState>;
-
-	cards(options?: CardOptions): Array<ReadonlyCardState> {
-		return super.cards(options) as Array<ReadonlyCardState>;
-	}
-
-	getCard(id: CardId): ReadonlyCardState | undefined {
-		return super.getCard(id) as ReadonlyCardState | undefined;
-	}
-
-	requireCard(id: CardId): ReadonlyCardState {
-		return super.requireCard(id) as ReadonlyCardState;
-	}
-
+export class ReadonlyPlayerState extends PlayerState<ReadonlyCardState> {
 	mutable(): MutablePlayerState {
 		return new MutablePlayerState(this);
 	}
 
 	mutate(change: (state: MutablePlayerState) => void): ReadonlyPlayerState {
-		const mutableState = this.mutable();
-		change(mutableState);
-		return mutableState.readonly();
+		return mutate(this as ReadonlyPlayerState, change);
 	}
 }
 
-export class MutablePlayerState extends PlayerState implements MutableEntityState<PlayerId> {
+export class MutablePlayerState
+	extends PlayerState<MutableCardState>
+	implements MutableEntityState<PlayerId>
+{
 	declare character: CharacterState;
 	declare deck: Array<MutableCardState>;
 	declare hand: Array<MutableCardState>;
@@ -154,18 +143,6 @@ export class MutablePlayerState extends PlayerState implements MutableEntityStat
 			focusesHand: new Counter(playerState.focusesHand),
 			focusesDiscardPile: new Counter(playerState.focusesDiscardPile)
 		});
-	}
-
-	cards(options?: CardOptions): Array<MutableCardState> {
-		return super.cards(options) as Array<MutableCardState>;
-	}
-
-	getCard(id: CardId): MutableCardState | undefined {
-		return super.getCard(id) as MutableCardState | undefined;
-	}
-
-	requireCard(id: CardId): MutableCardState {
-		return super.requireCard(id) as MutableCardState;
 	}
 
 	readonly(): ReadonlyPlayerState {

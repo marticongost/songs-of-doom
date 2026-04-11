@@ -1,5 +1,6 @@
 import type { BooleanExpressionType } from '../expressions/boolean/boolean-expression';
 import type { ScalarExpressionType } from '../expressions/scalar/scalar-expression';
+import { mutate } from './mutate';
 import {
 	CardState,
 	type CardOptions,
@@ -23,9 +24,13 @@ export interface GameStateProps {
 	implicitSubjectStack?: Array<EntityId>;
 }
 
-export class GameState {
-	readonly players: ReadonlyArray<PlayerState>;
-	readonly locations: ReadonlyArray<LocationState>;
+export class GameState<
+	TCard extends CardState = CardState,
+	TPlayer extends PlayerState = PlayerState,
+	TLocation extends LocationState = LocationState
+> {
+	readonly players: ReadonlyArray<TPlayer>;
+	readonly locations: ReadonlyArray<TLocation>;
 	readonly activeCardStack: Array<CardId>;
 	readonly activePlayerStack: Array<PlayerId>;
 	readonly implicitTargetStack: Array<EntityId>;
@@ -39,18 +44,18 @@ export class GameState {
 		implicitTargetStack,
 		implicitSubjectStack
 	}: GameStateProps) {
-		this.players = players;
-		this.locations = locations ?? [];
+		this.players = players as ReadonlyArray<TPlayer>;
+		this.locations = (locations ?? []) as ReadonlyArray<TLocation>;
 		this.activeCardStack = activeCardStack ?? [];
 		this.activePlayerStack = activePlayerStack ?? [];
 		this.implicitTargetStack = implicitTargetStack ?? [];
 		this.implicitSubjectStack = implicitSubjectStack ?? [];
 	}
 
-	getEntityState(entityId: CardId): CardState | undefined;
-	getEntityState(entityId: PlayerId): PlayerState | undefined;
-	getEntityState(entityId: EntityId): CardState | PlayerState | undefined;
-	getEntityState(entityId: EntityId): CardState | PlayerState | undefined {
+	getEntityState(entityId: CardId): TCard | undefined;
+	getEntityState(entityId: PlayerId): TPlayer | undefined;
+	getEntityState(entityId: EntityId): TCard | TPlayer | undefined;
+	getEntityState(entityId: EntityId): TCard | TPlayer | undefined {
 		if (isCardId(entityId)) {
 			return this.getCard(entityId);
 		} else if (isPlayerId(entityId)) {
@@ -59,10 +64,10 @@ export class GameState {
 		return undefined;
 	}
 
-	requireEntityState(entityId: CardId): CardState;
-	requireEntityState(entityId: PlayerId): PlayerState;
-	requireEntityState(entityId: EntityId): CardState | PlayerState;
-	requireEntityState(entityId: EntityId): CardState | PlayerState {
+	requireEntityState(entityId: CardId): TCard;
+	requireEntityState(entityId: PlayerId): TPlayer;
+	requireEntityState(entityId: EntityId): TCard | TPlayer;
+	requireEntityState(entityId: EntityId): TCard | TPlayer {
 		const entity = this.getEntityState(entityId);
 		if (!entity) {
 			throw new Error(`Entity with id ${entityId} not found`);
@@ -70,28 +75,28 @@ export class GameState {
 		return entity;
 	}
 
-	cards(options?: CardOptions): Array<CardState> {
-		const playerCards = this.players.flatMap((player) => player.cards(options));
-		return options?.ready ? playerCards : [...this.locations, ...playerCards];
+	cards(options?: CardOptions): Array<TCard> {
+		const playerCards = this.players.flatMap((player) => player.cards(options)) as Array<TCard>;
+		return options?.ready ? playerCards : ([...this.locations, ...playerCards] as Array<TCard>);
 	}
 
-	getCard(cardId: CardId): CardState | undefined {
+	getCard(cardId: CardId): TCard | undefined {
 		for (const location of this.locations) {
 			const found = location.getCard(cardId);
 			if (found) {
-				return found;
+				return found as TCard;
 			}
 		}
 		for (const player of this.players) {
 			const found = player.getCard(cardId);
 			if (found) {
-				return found;
+				return found as TCard;
 			}
 		}
 		return undefined;
 	}
 
-	requireCard(cardId: CardId): CardState {
+	requireCard(cardId: CardId): TCard {
 		const card = this.getCard(cardId);
 		if (!card) {
 			throw new Error(`Card with id ${cardId} not found`);
@@ -99,11 +104,11 @@ export class GameState {
 		return card;
 	}
 
-	getPlayer(playerId: PlayerId): PlayerState | undefined {
+	getPlayer(playerId: PlayerId): TPlayer | undefined {
 		return this.players.find((player) => player.id === playerId);
 	}
 
-	requirePlayer(playerId: PlayerId): PlayerState {
+	requirePlayer(playerId: PlayerId): TPlayer {
 		const player = this.getPlayer(playerId);
 		if (!player) {
 			throw new Error(`Player with id ${playerId} not found`);
@@ -111,7 +116,7 @@ export class GameState {
 		return player;
 	}
 
-	getActiveCard(): CardState | undefined {
+	getActiveCard(): TCard | undefined {
 		if (this.activeCardStack.length === 0) {
 			return undefined;
 		}
@@ -119,7 +124,7 @@ export class GameState {
 		return this.requireCard(activeCardId);
 	}
 
-	requireActiveCard(): CardState {
+	requireActiveCard(): TCard {
 		const activeCard = this.getActiveCard();
 		if (!activeCard) {
 			throw new Error('No active card');
@@ -127,7 +132,7 @@ export class GameState {
 		return activeCard;
 	}
 
-	getActivePlayer(): PlayerState | undefined {
+	getActivePlayer(): TPlayer | undefined {
 		if (this.activePlayerStack.length === 0) {
 			return undefined;
 		}
@@ -135,7 +140,7 @@ export class GameState {
 		return this.requirePlayer(activePlayerId);
 	}
 
-	requireActivePlayer(): PlayerState {
+	requireActivePlayer(): TPlayer {
 		const activePlayer = this.getActivePlayer();
 		if (!activePlayer) {
 			throw new Error('No active player');
@@ -154,8 +159,7 @@ export class GameState {
 	 * - If the effect is on an equipped piece of equipment, the subject is the wearer (example: chainmail)
 	 * - Otherwise, default to the active player
 	 */
-
-	getImplicitTarget(): CardState | PlayerState | undefined {
+	getImplicitTarget(): TCard | TPlayer | undefined {
 		if (this.implicitTargetStack.length === 0) {
 			return undefined;
 		}
@@ -164,7 +168,7 @@ export class GameState {
 		return this.getPlayer(id);
 	}
 
-	requireImplicitTarget(): CardState | PlayerState {
+	requireImplicitTarget(): TCard | TPlayer {
 		const target = this.getImplicitTarget();
 		if (!target) {
 			throw new Error('No implicit target');
@@ -172,7 +176,7 @@ export class GameState {
 		return target;
 	}
 
-	getImplicitSubject(): CardState | PlayerState | undefined {
+	getImplicitSubject(): TCard | TPlayer | undefined {
 		if (this.implicitSubjectStack.length === 0) {
 			return undefined;
 		}
@@ -181,7 +185,7 @@ export class GameState {
 		return this.getPlayer(id);
 	}
 
-	requireImplicitSubject(): CardState | PlayerState {
+	requireImplicitSubject(): TCard | TPlayer {
 		const subject = this.getImplicitSubject();
 		if (!subject) {
 			throw new Error('No implicit subject');
@@ -198,97 +202,25 @@ export class GameState {
 	}
 }
 
-export class ReadonlyGameState extends GameState {
-	declare readonly players: ReadonlyArray<ReadonlyPlayerState>;
-	declare readonly locations: ReadonlyArray<ReadonlyLocationState>;
-
-	getEntityState(entityId: CardId): ReadonlyCardState | undefined;
-	getEntityState(entityId: PlayerId): ReadonlyPlayerState | undefined;
-	getEntityState(entityId: EntityId): ReadonlyCardState | ReadonlyPlayerState | undefined;
-	getEntityState(entityId: EntityId): ReadonlyCardState | ReadonlyPlayerState | undefined {
-		if (isCardId(entityId)) {
-			return this.getCard(entityId);
-		} else if (isPlayerId(entityId)) {
-			return this.getPlayer(entityId);
-		}
-		return undefined;
-	}
-
-	requireEntityState(entityId: CardId): ReadonlyCardState;
-	requireEntityState(entityId: PlayerId): ReadonlyPlayerState;
-	requireEntityState(entityId: EntityId): ReadonlyCardState | ReadonlyPlayerState;
-	requireEntityState(entityId: EntityId): ReadonlyCardState | ReadonlyPlayerState {
-		const entity = this.getEntityState(entityId);
-		if (!entity) {
-			throw new Error(`Entity with id ${entityId} not found`);
-		}
-		return entity;
-	}
-
-	cards(options?: CardOptions): Array<ReadonlyCardState> {
-		return super.cards(options) as Array<ReadonlyCardState>;
-	}
-
-	getCard(cardId: CardId): ReadonlyCardState | undefined {
-		return super.getCard(cardId) as ReadonlyCardState | undefined;
-	}
-
-	requireCard(cardId: CardId): ReadonlyCardState {
-		return super.requireCard(cardId) as ReadonlyCardState;
-	}
-
-	getPlayer(playerId: PlayerId): ReadonlyPlayerState | undefined {
-		return super.getPlayer(playerId) as ReadonlyPlayerState | undefined;
-	}
-
-	requirePlayer(playerId: PlayerId): ReadonlyPlayerState {
-		return super.requirePlayer(playerId) as ReadonlyPlayerState;
-	}
-
-	getActiveCard(): ReadonlyCardState | undefined {
-		return super.getActiveCard() as ReadonlyCardState | undefined;
-	}
-
-	requireActiveCard(): ReadonlyCardState {
-		return super.requireActiveCard() as ReadonlyCardState;
-	}
-
-	getActivePlayer(): ReadonlyPlayerState | undefined {
-		return super.getActivePlayer() as ReadonlyPlayerState | undefined;
-	}
-
-	requireActivePlayer(): ReadonlyPlayerState {
-		return super.requireActivePlayer() as ReadonlyPlayerState;
-	}
-
-	getImplicitTarget(): ReadonlyCardState | ReadonlyPlayerState | undefined {
-		return super.getImplicitTarget() as ReadonlyCardState | ReadonlyPlayerState | undefined;
-	}
-
-	requireImplicitTarget(): ReadonlyCardState | ReadonlyPlayerState {
-		return super.requireImplicitTarget() as ReadonlyCardState | ReadonlyPlayerState;
-	}
-
-	getImplicitSubject(): ReadonlyCardState | ReadonlyPlayerState | undefined {
-		return super.getImplicitSubject() as ReadonlyCardState | ReadonlyPlayerState | undefined;
-	}
-
-	requireImplicitSubject(): ReadonlyCardState | ReadonlyPlayerState {
-		return super.requireImplicitSubject() as ReadonlyCardState | ReadonlyPlayerState;
-	}
-
+export class ReadonlyGameState extends GameState<
+	ReadonlyCardState,
+	ReadonlyPlayerState,
+	ReadonlyLocationState
+> {
 	mutable(): MutableGameState {
 		return new MutableGameState(this);
 	}
 
 	mutate(callback: (mutableState: MutableGameState) => void): ReadonlyGameState {
-		const mutableState = this.mutable();
-		callback(mutableState);
-		return mutableState.readonly();
+		return mutate(this as ReadonlyGameState, callback);
 	}
 }
 
-export class MutableGameState extends GameState {
+export class MutableGameState extends GameState<
+	MutableCardState,
+	MutablePlayerState,
+	MutableLocationState
+> {
 	declare players: Array<MutablePlayerState>;
 	declare locations: Array<MutableLocationState>;
 	declare activeCardStack: Array<CardId>;
@@ -307,37 +239,6 @@ export class MutableGameState extends GameState {
 		});
 	}
 
-	getEntityState(entityId: CardId): MutableCardState | undefined;
-	getEntityState(entityId: PlayerId): MutablePlayerState | undefined;
-	getEntityState(entityId: EntityId): MutableCardState | MutablePlayerState | undefined;
-	getEntityState(entityId: EntityId): MutableCardState | MutablePlayerState | undefined {
-		if (isCardId(entityId)) {
-			return this.getCard(entityId);
-		} else if (isPlayerId(entityId)) {
-			return this.getPlayer(entityId);
-		}
-		return undefined;
-	}
-
-	requireEntityState(entityId: CardId): MutableCardState;
-	requireEntityState(entityId: PlayerId): MutablePlayerState;
-	requireEntityState(entityId: EntityId): MutableCardState | MutablePlayerState;
-	requireEntityState(entityId: EntityId): MutableCardState | MutablePlayerState {
-		const entity = this.getEntityState(entityId);
-		if (!entity) {
-			throw new Error(`Entity with id ${entityId} not found`);
-		}
-		return entity;
-	}
-
-	cards(options?: CardOptions): Array<MutableCardState> {
-		return super.cards(options) as Array<MutableCardState>;
-	}
-
-	getCard(cardId: CardId): MutableCardState | undefined {
-		return super.getCard(cardId) as MutableCardState | undefined;
-	}
-
 	requireTarget(id: EntityId): MutableCardState | MutablePlayerState {
 		if (isCardId(id)) {
 			return this.requireCard(id);
@@ -345,50 +246,6 @@ export class MutableGameState extends GameState {
 			return this.requirePlayer(id);
 		}
 		throw new Error(`Invalid EntityId: ${id}`);
-	}
-
-	requireCard(cardId: CardId): MutableCardState {
-		return super.requireCard(cardId) as MutableCardState;
-	}
-
-	getPlayer(playerId: PlayerId): MutablePlayerState | undefined {
-		return super.getPlayer(playerId) as MutablePlayerState | undefined;
-	}
-
-	requirePlayer(playerId: PlayerId): MutablePlayerState {
-		return super.requirePlayer(playerId) as MutablePlayerState;
-	}
-
-	getActiveCard(): MutableCardState | undefined {
-		return super.getActiveCard() as MutableCardState | undefined;
-	}
-
-	requireActiveCard(): MutableCardState {
-		return super.requireActiveCard() as MutableCardState;
-	}
-
-	getActivePlayer(): MutablePlayerState | undefined {
-		return super.getActivePlayer() as MutablePlayerState | undefined;
-	}
-
-	requireActivePlayer(): MutablePlayerState {
-		return super.requireActivePlayer() as MutablePlayerState;
-	}
-
-	getImplicitTarget(): MutableCardState | MutablePlayerState | undefined {
-		return super.getImplicitTarget() as MutableCardState | MutablePlayerState | undefined;
-	}
-
-	requireImplicitTarget(): MutableCardState | MutablePlayerState {
-		return super.requireImplicitTarget() as MutableCardState | MutablePlayerState;
-	}
-
-	getImplicitSubject(): MutableCardState | MutablePlayerState | undefined {
-		return super.getImplicitSubject() as MutableCardState | MutablePlayerState | undefined;
-	}
-
-	requireImplicitSubject(): MutableCardState | MutablePlayerState {
-		return super.requireImplicitSubject() as MutableCardState | MutablePlayerState;
 	}
 
 	readonly(): ReadonlyGameState {
