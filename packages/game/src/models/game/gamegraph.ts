@@ -218,30 +218,18 @@ export class GameGraph {
 		resolutionFactory,
 		effects = []
 	}: TestProps): Promise<Result> {
+		const factory =
+			resolutionFactory ?? ((props: TestResolutionProps) => new MutableTestResolution(props));
+		const resolution = factory({
+			subjectId,
+			proficiency,
+			properties: properties ? [...properties] : []
+		});
+
 		return await this.group(
 			DrawingFate,
-			{
-				state: (state) => {
-					if (!resolutionFactory) {
-						resolutionFactory = (props: TestResolutionProps) => new MutableTestResolution(props);
-					}
-					state.testResolutionStack.push(
-						resolutionFactory({
-							subjectId,
-							proficiency,
-							properties: properties ? [...properties] : []
-						})
-					);
-				}
-			},
-			{
-				closingNodeType: FateDrawn,
-				closeWith: (state) => {
-					const resolution = state.requireActiveTestResolution().readonly();
-					state.testResolutionStack.pop();
-					return { resolution };
-				}
-			},
+			{},
+			{ closingNodeType: FateDrawn, resolution },
 			async () => {
 				const effectsByTiming = groupBy(effects, (effect) => effect.testTiming);
 
@@ -281,6 +269,9 @@ export class GameGraph {
 	 * @param context.targetId - Pushed onto `targetStack` for the duration of the group.
 	 * @param context.activeCardId - Pushed onto `activeCardStack` for the duration of the group.
 	 * @param context.activePlayerId - Pushed onto `activePlayerStack` for the duration of the group.
+	 * @param context.resolution - Optional test resolution to push onto `testResolutionStack`
+	 *   for the duration of the group. The resolution is automatically popped and included in
+	 *   the closing node props.
 	 * @param context.openWith - Optional extra state mutation applied inside the initial node,
 	 *   *after* any contextual stack entries are pushed. Use this for setup that depends on the
 	 *   group's context being already established.
@@ -303,6 +294,7 @@ export class GameGraph {
 			targetId?: EntityId;
 			activeCardId?: CardId;
 			activePlayerId?: PlayerId;
+			resolution?: MutableTestResolution;
 			openWith?: (state: MutableGameState) => void;
 			closeWith?: (state: MutableGameState) => ClosingNodeExtraProps<ClosingNodeProps> | void;
 			closingNodeType?: new (props: ClosingNodeProps) => GameNode;
@@ -314,6 +306,7 @@ export class GameGraph {
 			targetId,
 			activeCardId,
 			activePlayerId,
+			resolution,
 			openWith,
 			closeWith,
 			closingNodeType
@@ -322,7 +315,8 @@ export class GameGraph {
 			subjectId !== undefined ||
 			targetId !== undefined ||
 			activeCardId !== undefined ||
-			activePlayerId !== undefined;
+			activePlayerId !== undefined ||
+			resolution !== undefined;
 
 		// Merge context stack-pushes (and optional openWith) into the initial node's state mutation.
 		const originalState = nodeProps.state;
@@ -335,6 +329,7 @@ export class GameGraph {
 						if (activePlayerId !== undefined) state.activePlayerStack.push(activePlayerId);
 						if (targetId !== undefined) state.targetStack.push(targetId);
 						if (subjectId !== undefined) state.subjectStack.push(subjectId);
+						if (resolution !== undefined) state.testResolutionStack.push(resolution);
 						if (openWith) openWith(state);
 					}
 				: originalState;
@@ -362,6 +357,14 @@ export class GameGraph {
 				closingState = this._current.state.mutate((state) => {
 					if (closeWith) {
 						closingProps = closeWith(state) as ClosingNodeExtraProps<ClosingNodeProps> | undefined;
+					}
+					if (resolution !== undefined) {
+						const resolvedTestResolution = state.requireActiveTestResolution().readonly();
+						state.testResolutionStack.pop();
+						closingProps = {
+							...closingProps,
+							resolution: resolvedTestResolution
+						} as unknown as ClosingNodeExtraProps<ClosingNodeProps>;
 					}
 					if (subjectId !== undefined) state.subjectStack.pop();
 					if (targetId !== undefined) state.targetStack.pop();

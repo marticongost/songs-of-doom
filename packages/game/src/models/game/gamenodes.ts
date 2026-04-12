@@ -1,6 +1,7 @@
 import type { Capability } from '../capability';
 import type { ReadonlyGameState } from './gamestate';
 import type { CardId } from './identifiers';
+import type { ReadonlyTestResolution } from './testresolution';
 
 export interface GameNodeProps {
 	id: number;
@@ -55,6 +56,8 @@ export class CapabilityTriggered extends GameNode {
 export interface EndGroupProps extends GameNodeProps {
 	/** The id of the node that opened this group. */
 	groupNodeId: number;
+	/** Optional test resolution that was active during this group. */
+	resolution?: ReadonlyTestResolution;
 }
 
 /**
@@ -64,9 +67,12 @@ export interface EndGroupProps extends GameNodeProps {
 export class EndGroup extends GameNode {
 	/** The id of the node that opened this group. */
 	readonly groupNodeId: number;
+	/** Optional test resolution that was active during this group. */
+	readonly resolution?: ReadonlyTestResolution;
 
-	constructor({ groupNodeId, ...baseProps }: EndGroupProps) {
+	constructor({ groupNodeId, resolution, ...baseProps }: EndGroupProps) {
 		super(baseProps);
 		this.groupNodeId = groupNodeId;
+		this.resolution = resolution;
 	}
 }
