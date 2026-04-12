@@ -6,15 +6,18 @@ import { events } from '../event';
 import { Target, type TargetType } from '../target';
 import type { MutableCardState, ReadonlyCardState } from './cardstate';
 import {
+	cancelMutation,
 	CapabilityTriggered,
-	EndGroup,
+	DrawingFate,
 	EffectTriggered,
+	EndGroup,
 	EventTriggered,
+	FateDrawn,
 	GameGraph,
 	GameStart,
 	InputReceived,
 	InputRequested,
-	cancelMutation
+	type EndGroupProps
 } from './gamegraph';
 import { ReadonlyGameState } from './gamestate';
 import type { CardId } from './identifiers';
@@ -208,9 +211,58 @@ describe('GameGraph.group', () => {
 		expect(result).toBe(42);
 	});
 
+	it('supports custom closing node props returned by closeWith', async () => {
+		interface TaggedEndGroupProps extends EndGroupProps {
+			tag: string;
+		}
+
+		class TaggedEndGroup extends EndGroup {
+			readonly tag: string;
+
+			constructor({ tag, ...baseProps }: TaggedEndGroupProps) {
+				super(baseProps);
+				this.tag = tag;
+			}
+		}
+
+		const graph = new GameGraph({ initialState: { players: [] } });
+		await graph.group(
+			InputReceived,
+			{ values: {} },
+			{
+				closingNodeType: TaggedEndGroup,
+				closeWith: () => ({ tag: 'custom-close' })
+			},
+			async () => {}
+		);
+
+		const initialNode = graph.start.next!;
+		const closeNode = initialNode.children[0];
+		expect(closeNode).toBeInstanceOf(TaggedEndGroup);
+		expect((closeNode as TaggedEndGroup).tag).toBe('custom-close');
+		expect((closeNode as TaggedEndGroup).groupNodeId).toBe(initialNode.id);
+	});
+
 	it('endGroup without beginGroup throws', () => {
 		const graph = new GameGraph({ initialState: { players: [] } });
 		expect(() => graph.endGroup()).toThrow();
+	});
+});
+
+// ─── GameGraph.test ───────────────────────────────────────────────────────────
+
+describe('GameGraph.test', () => {
+	it('uses FateDrawn as the closing node of DrawingFate groups', async () => {
+		const graph = new GameGraph({ initialState: { players: [] } });
+		const promise = graph.test({ subjectId: 'c1', proficiency: 1 });
+		await advanceTicks(1);
+		await graph.supplyInput({ result: 2 });
+		await promise;
+
+		const drawingFateNode = graph.start.next;
+		expect(drawingFateNode).toBeInstanceOf(DrawingFate);
+		expect(drawingFateNode?.children.at(-1)).toBeInstanceOf(FateDrawn);
+		expect((drawingFateNode?.children.at(-1) as FateDrawn).groupNodeId).toBe(drawingFateNode?.id);
 	});
 });
 

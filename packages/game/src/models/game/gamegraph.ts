@@ -8,7 +8,14 @@ import type { Property } from '../properties';
 import type { Result } from '../results';
 import { Target } from '../target';
 import type { CapabilityRef } from './cardstate';
-import { CHILDREN, EndGroup, GameNode, NEXT, type GameNodeProps } from './gamenodes';
+import {
+	CHILDREN,
+	EndGroup,
+	GameNode,
+	NEXT,
+	type EndGroupProps,
+	type GameNodeProps
+} from './gamenodes';
 import { ReadonlyGameState, type GameStateProps, type MutableGameState } from './gamestate';
 import { type CardId, type EntityId, type PlayerId } from './identifiers';
 import type { Field } from './playerinput';
@@ -26,6 +33,12 @@ type FieldsResult<Fields extends ReadonlyArray<Field<unknown, string, boolean>>>
 			: T | undefined
 		: never;
 };
+
+type BaseNodeProps = 'id' | 'parent' | 'previous' | 'state';
+type ClosingNodeExtraProps<ClosingNodeProps extends EndGroupProps> = Omit<
+	ClosingNodeProps,
+	BaseNodeProps | 'groupNodeId'
+>;
 
 export interface GameGraphProps {
 	initialState: GameStateProps;
@@ -221,7 +234,14 @@ export class GameGraph {
 					);
 				}
 			},
-			{},
+			{
+				closingNodeType: FateDrawn,
+				closeWith: (state) => {
+					const resolution = state.requireActiveTestResolution().readonly();
+					state.testResolutionStack.pop();
+					return { resolution };
+				}
+			},
 			async () => {
 				const effectsByTiming = groupBy(effects, (effect) => effect.testTiming);
 
@@ -240,13 +260,6 @@ export class GameGraph {
 				for (const effect of effectsByTiming.get(AfterTest) ?? []) {
 					effect.trigger(this);
 				}
-
-				this.add(FateDrawn, {
-					resolution: this._current.state.requireActiveTestResolution() as ReadonlyTestResolution,
-					state: (state) => {
-						state.testResolutionStack.pop();
-					}
-				});
 				return result;
 			}
 		);
@@ -271,15 +284,18 @@ export class GameGraph {
 	 * @param context.openWith - Optional extra state mutation applied inside the initial node,
 	 *   *after* any contextual stack entries are pushed. Use this for setup that depends on the
 	 *   group's context being already established.
-	 * @param context.closeWith - Optional extra state mutation applied inside the {@link EndGroup}
-	 *   node, *before* any contextual stack entries are popped. Use this for cleanup that still
-	 *   needs the group's context to be intact (e.g. discarding the active card).
+	 * @param context.closeWith - Optional extra state mutation applied inside the closing node,
+	 *   *before* any contextual stack entries are popped. Use this for cleanup that still needs
+	 *   the group's context to be intact (e.g. discarding the active card). It may also return
+	 *   extra props for the closing node.
+	 * @param context.closingNodeType - Optional closing node constructor. Defaults to
+	 *   {@link EndGroup}.
 	 * @param callback - Async function containing all mutations that belong to this group.
 	 * @returns The value returned by `callback`.
 	 */
-	async group<P extends GameNodeProps, T>(
+	async group<P extends GameNodeProps, T, ClosingNodeProps extends EndGroupProps = EndGroupProps>(
 		nodeType: new (props: P) => GameNode,
-		nodeProps: Omit<P, 'id' | 'parent' | 'previous' | 'state'> & {
+		nodeProps: Omit<P, BaseNodeProps> & {
 			state?: ReadonlyGameState | ((stateAlteration: MutableGameState) => void);
 		},
 		context: {
@@ -288,11 +304,20 @@ export class GameGraph {
 			activeCardId?: CardId;
 			activePlayerId?: PlayerId;
 			openWith?: (state: MutableGameState) => void;
-			closeWith?: (state: MutableGameState) => void;
+			closeWith?: (state: MutableGameState) => ClosingNodeExtraProps<ClosingNodeProps> | void;
+			closingNodeType?: new (props: ClosingNodeProps) => GameNode;
 		},
 		callback: () => Promise<T>
 	): Promise<T> {
-		const { subjectId, targetId, activeCardId, activePlayerId, openWith, closeWith } = context;
+		const {
+			subjectId,
+			targetId,
+			activeCardId,
+			activePlayerId,
+			openWith,
+			closeWith,
+			closingNodeType
+		} = context;
 		const hasContext =
 			subjectId !== undefined ||
 			targetId !== undefined ||
@@ -315,10 +340,7 @@ export class GameGraph {
 				: originalState;
 
 		const nodeBeforeAdd = this._current;
-		this.add(nodeType, { ...nodeProps, state: mergedState } as Omit<
-			P,
-			'id' | 'parent' | 'previous' | 'state'
-		> & {
+		this.add(nodeType, { ...nodeProps, state: mergedState } as Omit<P, BaseNodeProps> & {
 			state?: ReadonlyGameState | ((s: MutableGameState) => void);
 		});
 		if (this._current === nodeBeforeAdd) {
@@ -330,19 +352,35 @@ export class GameGraph {
 		this.beginGroup();
 		const result = await callback();
 
-		// Add EndGroup: apply closeWith first (context still intact), then pop stacks.
-		const needsEndGroupState = hasContext || closeWith !== undefined;
-		this.add(EndGroup, {
-			groupNodeId,
-			...(needsEndGroupState && {
-				state: (state: MutableGameState) => {
-					if (closeWith) closeWith(state);
+		// Add the closing node: apply closeWith first (context still intact), then pop stacks.
+		const closingType = closingNodeType ?? (EndGroup as new (props: ClosingNodeProps) => GameNode);
+		const needsClosingNodeState = hasContext || closeWith !== undefined;
+		let closingProps: ClosingNodeExtraProps<ClosingNodeProps> | undefined;
+		let closingState: ReadonlyGameState | undefined;
+		if (needsClosingNodeState) {
+			try {
+				closingState = this._current.state.mutate((state) => {
+					if (closeWith) {
+						closingProps = closeWith(state) as ClosingNodeExtraProps<ClosingNodeProps> | undefined;
+					}
 					if (subjectId !== undefined) state.subjectStack.pop();
 					if (targetId !== undefined) state.targetStack.pop();
 					if (activePlayerId !== undefined) state.activePlayerStack.pop();
 					if (activeCardId !== undefined) state.activeCardStack.pop();
+				});
+			} catch (e) {
+				if (!(e instanceof GameStateMutationCancelled)) {
+					throw e;
 				}
-			})
+			}
+		}
+
+		this.add(closingType, {
+			groupNodeId,
+			...(closingState && { state: closingState }),
+			...closingProps
+		} as Omit<ClosingNodeProps, BaseNodeProps> & {
+			state?: ReadonlyGameState | ((s: MutableGameState) => void);
 		});
 
 		this.endGroup();
@@ -401,9 +439,9 @@ export {
 	CapabilityTriggered,
 	EndGroup,
 	GameNode,
-	type GameNodeProps,
 	type CapabilityTriggeredProps,
-	type EndGroupProps
+	type EndGroupProps,
+	type GameNodeProps
 } from './gamenodes';
 
 export class GameStart extends GameNode {}
@@ -465,11 +503,11 @@ export class InputReceived extends GameNode {
 
 export class DrawingFate extends GameNode {}
 
-export interface FateDrawnProps extends GameNodeProps {
+export interface FateDrawnProps extends EndGroupProps {
 	resolution: ReadonlyTestResolution;
 }
 
-export class FateDrawn extends GameNode {
+export class FateDrawn extends EndGroup {
 	readonly resolution: ReadonlyTestResolution;
 
 	constructor({ resolution, ...baseProps }: FateDrawnProps) {
