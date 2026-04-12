@@ -22,8 +22,7 @@ import {
 import { ReadonlyGameState } from './gamestate';
 import type { CardId } from './identifiers';
 import { CapabilityChoiceField } from './playerinput';
-import type { MutablePlayerState } from './playerstate';
-import { ReadonlyPlayerState } from './playerstate';
+import type { MutablePlayerState, ReadonlyPlayerState } from './playerstate';
 
 // A minimal concrete Effect for use in effectTriggered tests
 class NoopEffect extends Effect {
@@ -32,6 +31,14 @@ class NoopEffect extends Effect {
 
 function makeInitialState(players: ReadonlyPlayerState[] = []): ReadonlyGameState {
 	return new ReadonlyGameState({ players });
+}
+
+function makePlayer(id: 'p1' | 'p2'): ReadonlyPlayerState {
+	const player = mock<ReadonlyPlayerState>({ id });
+	const mutablePlayer = mock<MutablePlayerState>({ id });
+	player.mutable.mockReturnValue(mutablePlayer);
+	mutablePlayer.readonly.mockReturnValue(player);
+	return player;
 }
 
 // ─── GameGraph construction ───────────────────────────────────────────────────
@@ -263,6 +270,41 @@ describe('GameGraph.test', () => {
 		expect(drawingFateNode).toBeInstanceOf(DrawingFate);
 		expect(drawingFateNode?.children.at(-1)).toBeInstanceOf(FateDrawn);
 		expect((drawingFateNode?.children.at(-1) as FateDrawn).groupNodeId).toBe(drawingFateNode?.id);
+	});
+
+	it('runs test callbacks around fate events with subject and target context', async () => {
+		const attacker = makePlayer('p1');
+		const defender = makePlayer('p2');
+		const graph = new GameGraph({ initialState: { players: [attacker, defender] } });
+		const eventTriggered = graph.eventTriggered.bind(graph);
+		const order: string[] = [];
+
+		vi.spyOn(graph, 'eventTriggered').mockImplementation(async (eventType) => {
+			order.push(eventType);
+			await eventTriggered(eventType);
+		});
+
+		const promise = graph.test({
+			subjectId: 'p1',
+			targetId: 'p2',
+			proficiency: 1,
+			beforeTest: (innerGraph) => {
+				order.push('beforeTest');
+				expect(innerGraph.current.state.requireSubject().id).toBe('p1');
+				expect(innerGraph.current.state.requireTarget().id).toBe('p2');
+			},
+			afterTest: (innerGraph) => {
+				order.push('afterTest');
+				expect(innerGraph.current.state.requireSubject().id).toBe('p1');
+				expect(innerGraph.current.state.requireTarget().id).toBe('p2');
+			}
+		});
+
+		await advanceTicks(1);
+		await graph.supplyInput({ result: 2 });
+		await promise;
+
+		expect(order).toEqual(['beforeTest', 'beforeDrawingFate', 'afterTest', 'afterDrawingFate']);
 	});
 });
 

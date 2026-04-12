@@ -49,6 +49,9 @@ export interface TestProps {
 	/** Id of the entity performing the test. */
 	subjectId: EntityId;
 
+	/** Optional id of the entity targeted by the test. */
+	targetId?: EntityId;
+
 	/** Expression indicating the proficiency level of the test. */
 	proficiency: ScalarExpressionType;
 
@@ -62,6 +65,12 @@ export interface TestProps {
 
 	/** Effects to trigger before, during and after the test. */
 	effects?: Array<Effect>;
+
+	/** Optional callback run immediately before the `beforeDrawingFate` event. */
+	beforeTest?: (gameGraph: GameGraph) => void | Promise<void>;
+
+	/** Optional callback run immediately before the `afterDrawingFate` event. */
+	afterTest?: (gameGraph: GameGraph) => void | Promise<void>;
 }
 
 export class GameGraph {
@@ -213,10 +222,13 @@ export class GameGraph {
 
 	async test({
 		subjectId,
+		targetId,
 		proficiency,
 		properties,
 		resolutionFactory,
-		effects = []
+		effects = [],
+		beforeTest,
+		afterTest
 	}: TestProps): Promise<Result> {
 		const factory =
 			resolutionFactory ?? ((props: TestResolutionProps) => new MutableTestResolution(props));
@@ -229,10 +241,11 @@ export class GameGraph {
 		return await this.group(
 			DrawingFate,
 			{},
-			{ closingNodeType: FateDrawn, resolution },
+			{ closingNodeType: FateDrawn, resolution, subjectId, targetId },
 			async () => {
 				const effectsByTiming = groupBy(effects, (effect) => effect.testTiming);
 
+				await beforeTest?.(this);
 				this.eventTriggered('beforeDrawingFate');
 				for (const effect of effectsByTiming.get(BeforeTest) ?? []) {
 					effect.trigger(this);
@@ -244,6 +257,7 @@ export class GameGraph {
 					effect.trigger(this);
 				}
 
+				await afterTest?.(this);
 				this.eventTriggered('afterDrawingFate');
 				for (const effect of effectsByTiming.get(AfterTest) ?? []) {
 					effect.trigger(this);
