@@ -8,8 +8,8 @@ import {
 	resultsTable,
 	triggerAttack
 } from '../../../models/effects';
-import { not } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
+import { not, reactivePlayerIsSubject } from '../../../models/expressions';
 import { upgradable } from '../../../models/upgrades';
 import projectile from '../../properties/projectile';
 
@@ -53,7 +53,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	],
 	attachmentCapabilities: [
 		new Obligation({
-			triggers: ['attacking'],
+			triggers: [{ event: 'attack', condition: reactivePlayerIsSubject }],
 			effects: [modifyRoll(-2), modifyDamage(-1)]
 		})
 	]

@@ -1,8 +1,8 @@
 import { Action, Obligation } from '../../../models/capabilities';
 import { fullyRechargeOnChapterStart } from '../../../models/common';
-import { Creature } from '../../../models/entities/creature';
 import { attack, chase, defend, modifyRoll } from '../../../models/effects';
-import { wounded } from '../../../models/expressions';
+import { Creature } from '../../../models/entities/creature';
+import { reactiveCardIsSubject, reactiveCardIsTarget, wounded } from '../../../models/expressions';
 import { strength } from '../../../models/stats';
 
 export default new Creature({
@@ -40,11 +40,11 @@ export default new Creature({
 			]
 		}),
 		new Obligation({
-			triggers: ['attacking'],
+			triggers: [{ event: 'attack', condition: reactiveCardIsSubject }],
 			effects: [wounded.then(modifyRoll(1))]
 		}),
 		new Obligation({
-			triggers: ['receivingAttack'],
+			triggers: [{ event: 'attack', condition: reactiveCardIsTarget }],
 			effects: [
 				defend({
 					expression: 1

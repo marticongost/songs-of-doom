@@ -19,7 +19,13 @@ describe('AttackEffect.trigger', () => {
 		graph.requireSubject.mockReturnValue({ id: 'p1' });
 		graph.requestMultipleTargetsOrImplicitTarget.calledWith(undefined).mockResolvedValue(['p2']);
 		graph.eventTriggered.mockImplementation(async (eventType) => {
-			events.push(eventType);
+			events.push(
+				typeof eventType === 'string'
+					? eventType
+					: typeof eventType.event === 'string'
+						? eventType.event
+						: eventType.event.type
+			);
 		});
 		graph.test.mockImplementation(async (props) => {
 			capturedTestProps = props;
@@ -35,7 +41,7 @@ describe('AttackEffect.trigger', () => {
 			proficiency: 1
 		});
 		expect(capturedTestProps?.beforeTest).toBeTypeOf('function');
-		expect(events).toEqual(['attacking', 'receivingAttack']);
+		expect(events).toEqual(['attack']);
 	});
 
 	it('keeps attack event callbacks ahead of other before-test effects', async () => {
@@ -46,7 +52,13 @@ describe('AttackEffect.trigger', () => {
 		graph.requireSubject.mockReturnValue({ id: 'p1' });
 		graph.requestMultipleTargetsOrImplicitTarget.calledWith(undefined).mockResolvedValue(['p2']);
 		graph.eventTriggered.mockImplementation(async (eventType) => {
-			events.push(eventType);
+			events.push(
+				typeof eventType === 'string'
+					? eventType
+					: typeof eventType.event === 'string'
+						? eventType.event
+						: eventType.event.type
+			);
 		});
 		graph.test.mockImplementation(async (props) => {
 			await props.beforeTest?.(graph);
@@ -60,6 +72,6 @@ describe('AttackEffect.trigger', () => {
 
 		await attack({ expression: 1, results: { '0+': 1 } }).trigger(graph, [beforeTestEffect]);
 
-		expect(events).toEqual(['attacking', 'receivingAttack', 'beforeTestEffect']);
+		expect(events).toEqual(['attack', 'beforeTestEffect']);
 	});
 });

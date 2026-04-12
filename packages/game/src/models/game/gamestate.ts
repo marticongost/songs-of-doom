@@ -21,6 +21,8 @@ export interface GameStateProps {
 	locations?: ReadonlyArray<LocationState>;
 	activeCardStack?: Array<CardId>;
 	activePlayerStack?: Array<PlayerId>;
+	reactiveCardStack?: Array<CardId>;
+	reactivePlayerStack?: Array<PlayerId>;
 	targetStack?: Array<EntityId>;
 	subjectStack?: Array<EntityId>;
 	testResolutionStack?: Array<TestResolution>;
@@ -35,6 +37,8 @@ export class GameState<
 	readonly locations: ReadonlyArray<TLocation>;
 	readonly activeCardStack: Array<CardId>;
 	readonly activePlayerStack: Array<PlayerId>;
+	readonly reactiveCardStack: Array<CardId>;
+	readonly reactivePlayerStack: Array<PlayerId>;
 	readonly targetStack: Array<EntityId>;
 	readonly subjectStack: Array<EntityId>;
 	readonly testResolutionStack: Array<TestResolution>;
@@ -44,6 +48,8 @@ export class GameState<
 		locations,
 		activeCardStack,
 		activePlayerStack,
+		reactiveCardStack,
+		reactivePlayerStack,
 		targetStack,
 		subjectStack,
 		testResolutionStack
@@ -52,6 +58,8 @@ export class GameState<
 		this.locations = (locations ?? []) as ReadonlyArray<TLocation>;
 		this.activeCardStack = activeCardStack ?? [];
 		this.activePlayerStack = activePlayerStack ?? [];
+		this.reactiveCardStack = reactiveCardStack ?? [];
+		this.reactivePlayerStack = reactivePlayerStack ?? [];
 		this.targetStack = targetStack ?? [];
 		this.subjectStack = subjectStack ?? [];
 		this.testResolutionStack = testResolutionStack ?? [];
@@ -153,13 +161,45 @@ export class GameState<
 		return activePlayer;
 	}
 
+	getReactiveCard(): TCard | undefined {
+		if (this.reactiveCardStack.length === 0) {
+			return undefined;
+		}
+		const reactiveCardId = this.reactiveCardStack[this.reactiveCardStack.length - 1];
+		return this.requireCard(reactiveCardId);
+	}
+
+	requireReactiveCard(): TCard {
+		const reactiveCard = this.getReactiveCard();
+		if (!reactiveCard) {
+			throw new Error('No reactive card');
+		}
+		return reactiveCard;
+	}
+
+	getReactivePlayer(): TPlayer | undefined {
+		if (this.reactivePlayerStack.length === 0) {
+			return undefined;
+		}
+		const reactivePlayerId = this.reactivePlayerStack[this.reactivePlayerStack.length - 1];
+		return this.requirePlayer(reactivePlayerId);
+	}
+
+	requireReactivePlayer(): TPlayer {
+		const reactivePlayer = this.getReactivePlayer();
+		if (!reactivePlayer) {
+			throw new Error('No reactive player');
+		}
+		return reactivePlayer;
+	}
+
 	/**
 	 * Returns the implicit target for the current context, if any.
 	 *
 	 * Implicit target resolution:
 	 * - For effects in an attached card, the subject is the attachment owner (example: sanctuary)
-	 * - If the effect is on a 'receivingAttack' reaction, the subject is the attack target (example: shield-against-the-dark)
-	 * - If the effect is on an 'attacking' reaction, the subject is the attacker (example: critical-impact)
+	 * - If the effect is on an 'attack' reaction that matches the target, the subject is the attack target (example: shield-against-the-dark)
+	 * - If the effect is on an 'attack' reaction that matches the subject, the subject is the attacker (example: critical-impact)
 	 * - If the effect is on a triggerAttack({modifiers}) prop, the subject is the attack (example: shield-against-the-dark)
 	 * - If the effect is on an equipped piece of equipment, the subject is the wearer (example: chainmail)
 	 * - Otherwise, default to the active player
@@ -245,6 +285,8 @@ export class MutableGameState extends GameState<
 	declare locations: Array<MutableLocationState>;
 	declare activeCardStack: Array<CardId>;
 	declare activePlayerStack: Array<PlayerId>;
+	declare reactiveCardStack: Array<CardId>;
+	declare reactivePlayerStack: Array<PlayerId>;
 	declare targetStack: Array<EntityId>;
 	declare subjectStack: Array<EntityId>;
 	declare testResolutionStack: Array<ReadonlyTestResolution | MutableTestResolution>;
@@ -256,6 +298,8 @@ export class MutableGameState extends GameState<
 			locations: gameState.locations.map((location) => location.mutable()),
 			activeCardStack: [...gameState.activeCardStack],
 			activePlayerStack: [...gameState.activePlayerStack],
+			reactiveCardStack: [...gameState.reactiveCardStack],
+			reactivePlayerStack: [...gameState.reactivePlayerStack],
 			targetStack: [...gameState.targetStack],
 			subjectStack: [...gameState.subjectStack],
 			testResolutionStack: [
@@ -286,6 +330,8 @@ export class MutableGameState extends GameState<
 			locations: this.locations.map((location) => location.readonly()),
 			activeCardStack: [...this.activeCardStack],
 			activePlayerStack: [...this.activePlayerStack],
+			reactiveCardStack: [...this.reactiveCardStack],
+			reactivePlayerStack: [...this.reactivePlayerStack],
 			targetStack: [...this.targetStack],
 			subjectStack: [...this.subjectStack],
 			testResolutionStack: this.testResolutionStack.map((r) =>

@@ -1,6 +1,7 @@
 import { Opportunity } from '../../../models/capabilities';
 import { conferProperties, modifyDamage, resultsTable } from '../../../models/effects';
 import { Skill } from '../../../models/entities/skill';
+import { reactivePlayerIsSubject } from '../../../models/expressions';
 import { upgradable } from '../../../models/upgrades';
 import { piercing } from '../../properties';
 
@@ -14,7 +15,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { agility: 2 },
 	capabilities: [
 		new Opportunity({
-			triggers: ['attacking'],
+			triggers: [{ event: 'attack', condition: reactivePlayerIsSubject }],
 			cost: { agility: variants.values(2, 3) },
 			effects: [
 				resultsTable({

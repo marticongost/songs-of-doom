@@ -1,7 +1,7 @@
 import { finalise } from '@songsofdoom/common';
 import { CapabilityCost, type CapabilityCostProps } from './capabilitycost';
 import type { Effect } from './effects/effect';
-import type { GameGraph } from './game/gamegraph';
+import type { GameGraph, GroupContext } from './game/gamegraph';
 import { CapabilityTriggered } from './game/gamenodes';
 import type { CardId } from './game/identifiers';
 
@@ -28,22 +28,26 @@ export abstract class Capability {
 		return [];
 	}
 
+	protected getTriggerContext(_gameGraph: GameGraph, cardId: CardId): Partial<GroupContext> {
+		return { activeCardId: cardId };
+	}
+
 	async trigger({ gameGraph, cardId }: TriggerCapabilityProps) {
 		await gameGraph.group(
 			CapabilityTriggered,
 			{ capability: this, cardId },
 			{
-				activeCardId: cardId,
+				...this.getTriggerContext(gameGraph, cardId),
 				targetId: cardId,
 				subjectId: cardId,
 				openWith: (state) => {
-					const card = state.requireActiveCard();
+					const card = state.requireCard(cardId);
 					if (card.container.type === 'hand') {
 						card.moveToStage(state, card.container.playerId);
 					}
 				},
 				closeWith: (state) => {
-					const card = state.requireActiveCard();
+					const card = state.requireCard(cardId);
 					if (card.container.type === 'stage') {
 						card.moveToTopOfDiscardPile(state, card.container.playerId);
 					}

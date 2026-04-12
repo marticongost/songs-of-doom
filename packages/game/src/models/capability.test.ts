@@ -44,7 +44,7 @@ describe('Capability.trigger', () => {
 	it('passes an openWith that moves the active card from hand to stage', async () => {
 		const mutableState = mock<MutableGameState>();
 		const card = mock<MutableCardState>({ container: { type: 'hand', playerId: 'p1' } });
-		mutableState.requireActiveCard.mockReturnValue(card);
+		mutableState.requireCard.mockReturnValue(card);
 
 		const graph = mock<GameGraph>();
 		let capturedOpenWith: ((s: MutableGameState) => void) | undefined;
@@ -61,7 +61,7 @@ describe('Capability.trigger', () => {
 	it('passes a closeWith that discards the active card when it is in stage', async () => {
 		const mutableState = mock<MutableGameState>();
 		const card = mock<MutableCardState>({ container: { type: 'stage', playerId: 'p1' } });
-		mutableState.requireActiveCard.mockReturnValue(card);
+		mutableState.requireCard.mockReturnValue(card);
 
 		const graph = mock<GameGraph>();
 		let capturedCloseWith: ((s: MutableGameState) => void) | undefined;
@@ -78,7 +78,7 @@ describe('Capability.trigger', () => {
 	it('closeWith does not discard the active card when it is not in hand', async () => {
 		const mutableState = mock<MutableGameState>();
 		const card = mock<MutableCardState>({ container: { type: 'deck', playerId: 'p1' } });
-		mutableState.requireActiveCard.mockReturnValue(card);
+		mutableState.requireCard.mockReturnValue(card);
 
 		const graph = mock<GameGraph>();
 		let capturedCloseWith: ((s: MutableGameState) => void) | undefined;

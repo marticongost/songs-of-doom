@@ -1,7 +1,8 @@
-import { Ally } from '../../models/entities/ally';
 import { Action, Constant, Opportunity } from '../../models/capabilities';
 import { fullyRechargeOnChapterStart } from '../../models/common';
 import { attack, defend, equip, modifyCarryingCapacity } from '../../models/effects';
+import { Ally } from '../../models/entities/ally';
+import { reactiveCardIsTarget } from '../../models/expressions';
 import { strength } from '../../models/stats';
 import follower from '../properties/follower';
 import toughness from '../properties/toughness';
@@ -42,7 +43,7 @@ export default new Ally({
 			]
 		}),
 		new Opportunity({
-			triggers: ['receivingAttack'],
+			triggers: [{ event: 'attack', condition: reactiveCardIsTarget }],
 			cost: {
 				charges: 1
 			},

@@ -2,7 +2,13 @@ import { groupBy } from '@songsofdoom/common';
 import { Obligation } from '../capabilities';
 import type { Effect } from '../effects';
 import { AfterTest, BeforeTest, DuringTest, type EffectOutcome } from '../effects/effect';
-import { events, type Event, type EventType } from '../event';
+import {
+	normaliseEventEnvelope,
+	type Event,
+	type EventContext,
+	type EventEnvelope,
+	type EventType
+} from '../event';
 import type { ScalarExpressionType } from '../expressions';
 import type { Property } from '../properties';
 import type { Result } from '../results';
@@ -25,6 +31,19 @@ import {
 	type ReadonlyTestResolution,
 	type TestResolutionProps
 } from './testresolution';
+
+export type GroupContext<ClosingNodeProps extends EndGroupProps = EndGroupProps> = {
+	subjectId?: EntityId;
+	targetId?: EntityId;
+	activeCardId?: CardId;
+	activePlayerId?: PlayerId;
+	reactiveCardId?: CardId;
+	reactivePlayerId?: PlayerId;
+	resolution?: MutableTestResolution;
+	openWith?: (state: MutableGameState) => void;
+	closeWith?: (state: MutableGameState) => ClosingNodeExtraProps<ClosingNodeProps> | void;
+	closingNodeType?: new (props: ClosingNodeProps) => GameNode;
+};
 
 type FieldsResult<Fields extends ReadonlyArray<Field<unknown, string, boolean>>> = {
 	[F in Fields[number] as F['name']]: F extends Field<infer T, string, infer R>
@@ -303,16 +322,7 @@ export class GameGraph {
 		nodeProps: Omit<P, BaseNodeProps> & {
 			state?: ReadonlyGameState | ((stateAlteration: MutableGameState) => void);
 		},
-		context: {
-			subjectId?: EntityId;
-			targetId?: EntityId;
-			activeCardId?: CardId;
-			activePlayerId?: PlayerId;
-			resolution?: MutableTestResolution;
-			openWith?: (state: MutableGameState) => void;
-			closeWith?: (state: MutableGameState) => ClosingNodeExtraProps<ClosingNodeProps> | void;
-			closingNodeType?: new (props: ClosingNodeProps) => GameNode;
-		},
+		context: GroupContext<ClosingNodeProps>,
 		callback: () => Promise<T>
 	): Promise<T> {
 		const {
@@ -320,6 +330,8 @@ export class GameGraph {
 			targetId,
 			activeCardId,
 			activePlayerId,
+			reactiveCardId,
+			reactivePlayerId,
 			resolution,
 			openWith,
 			closeWith,
@@ -330,6 +342,8 @@ export class GameGraph {
 			targetId !== undefined ||
 			activeCardId !== undefined ||
 			activePlayerId !== undefined ||
+			reactiveCardId !== undefined ||
+			reactivePlayerId !== undefined ||
 			resolution !== undefined;
 
 		// Merge context stack-pushes (and optional openWith) into the initial node's state mutation.
@@ -341,6 +355,8 @@ export class GameGraph {
 						if (typeof originalState === 'function') originalState(state);
 						if (activeCardId !== undefined) state.activeCardStack.push(activeCardId);
 						if (activePlayerId !== undefined) state.activePlayerStack.push(activePlayerId);
+						if (reactiveCardId !== undefined) state.reactiveCardStack.push(reactiveCardId);
+						if (reactivePlayerId !== undefined) state.reactivePlayerStack.push(reactivePlayerId);
 						if (targetId !== undefined) state.targetStack.push(targetId);
 						if (subjectId !== undefined) state.subjectStack.push(subjectId);
 						if (resolution !== undefined) state.testResolutionStack.push(resolution);
@@ -382,6 +398,8 @@ export class GameGraph {
 					}
 					if (subjectId !== undefined) state.subjectStack.pop();
 					if (targetId !== undefined) state.targetStack.pop();
+					if (reactivePlayerId !== undefined) state.reactivePlayerStack.pop();
+					if (reactiveCardId !== undefined) state.reactiveCardStack.pop();
 					if (activePlayerId !== undefined) state.activePlayerStack.pop();
 					if (activeCardId !== undefined) state.activeCardStack.pop();
 				});
@@ -415,32 +433,66 @@ export class GameGraph {
 		this._currentParent = this._currentParent.parent;
 	}
 
-	async eventTriggered(eventType: EventType) {
+	async eventTriggered(eventType: EventType | EventEnvelope) {
+		const normalized = normaliseEventEnvelope(eventType);
+		if (!normalized.event) {
+			throw new Error('Unknown event');
+		}
+		const inferredContext: EventContext = {
+			actorId: this._current.state.getSubject()?.id,
+			subjectId: this._current.state.getSubject()?.id,
+			targetId: this._current.state.getTarget()?.id,
+			activePlayerId: this._current.state.getActivePlayer()?.id,
+			reactiveCardId: this._current.state.getReactiveCard()?.id,
+			reactivePlayerId: this._current.state.getReactivePlayer()?.id
+		};
+		const eventContext: EventContext = {
+			...inferredContext,
+			...normalized.context
+		};
+		const eventEnvelope: EventEnvelope = {
+			event: normalized.event,
+			context: eventContext
+		};
+
 		const reactiveCapabilities: Set<CapabilityRef> = new Set(
-			this._current.state
-				.cards({ ready: true })
-				.flatMap((card) =>
-					card
-						.getReactionsToEvent(eventType)
-						.map((reaction) => ({ cardId: card.id, capability: reaction }))
-				)
+			this._current.state.cards({ ready: true }).flatMap((card) =>
+				card.getReactionsToEvent(eventEnvelope, this._current.state).map((reaction) => ({
+					cardId: card.id,
+					capability: reaction
+				}))
+			)
 		);
 
 		if (reactiveCapabilities.size > 0) {
-			await this.group(EventTriggered, { event: events[eventType] }, {}, async () => {
+			await this.group(EventTriggered, { event: normalized.event }, {}, async () => {
 				while (reactiveCapabilities.size > 0) {
+					const obligations = Array.from(reactiveCapabilities).filter(
+						(capabilityRef) => capabilityRef.capability instanceof Obligation
+					);
+
+					if (obligations.length > 0) {
+						for (const obligation of obligations) {
+							await obligation.capability.trigger({
+								gameGraph: this,
+								cardId: obligation.cardId
+							});
+							reactiveCapabilities.delete(obligation);
+						}
+						continue;
+					}
+
 					const { selection } = await this.requestInput(
 						new CapabilityChoiceField({
 							name: 'selection',
 							choices: reactiveCapabilities,
-							required: Array.from(reactiveCapabilities).some(
-								(capabilityRef) => capabilityRef.capability instanceof Obligation
-							)
+							required: false
 						})
 					);
 					if (selection === undefined) {
 						break;
 					}
+
 					await selection.capability.trigger({
 						gameGraph: this,
 						cardId: selection.cardId

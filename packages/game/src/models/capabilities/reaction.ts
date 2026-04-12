@@ -1,15 +1,52 @@
+import { finalise } from '@songsofdoom/common';
 import { Capability, type CapabilityProps } from '../capability';
-import { Event, type EventType, events } from '../event';
+import { Event, events, type EventType } from '../event';
+import { type BooleanExpressionType } from '../expressions';
+import type { GameGraph, GroupContext } from '../game/gamegraph';
+import type { CardId } from '../game/identifiers';
+
+export type EventMatcherSpec = Event | EventType | EventMatcherProps;
+
+export interface EventMatcherProps {
+	/** Event that can activate the reaction. */
+	event: Event | EventType;
+
+	/** Optional expression that must evaluate to true for the trigger to apply. */
+	condition?: BooleanExpressionType;
+}
+
+export class EventMatcher {
+	/** Event that can activate the reaction. */
+	readonly event: Event;
+
+	/** Optional expression that must evaluate to true for the trigger to apply. */
+	readonly condition?: BooleanExpressionType;
+
+	constructor(spec: EventMatcherSpec) {
+		if (spec instanceof Event) {
+			this.event = spec;
+		} else if (typeof spec === 'string') {
+			this.event = events[spec];
+		} else {
+			this.event = typeof spec.event === 'string' ? events[spec.event] : spec.event;
+			this.condition = spec.condition;
+		}
+	}
+}
 
 export interface ReactionProps extends CapabilityProps {
-	/** The events that can trigger this reaction. */
-	triggers: Array<Event | EventType>;
+	triggers: Array<EventMatcherSpec>;
 }
 
 /** A reaction that can be triggered by certain events. */
 export abstract class Reaction extends Capability {
-	/** The events that can trigger this reaction. */
-	readonly triggers: Event[];
+	/** Normalized trigger specifications used by the runtime matcher. */
+	readonly triggerSpecs: Array<EventMatcher>;
+
+	/** Backward-compatible view over trigger events. */
+	get triggers(): Event[] {
+		return Array.from(new Set(this.triggerSpecs.map((spec) => spec.event)));
+	}
 
 	/** Indicates if the reaction is mandatory or optional.
 	 *
@@ -21,10 +58,20 @@ export abstract class Reaction extends Capability {
 
 	constructor({ cost, effects, triggers }: ReactionProps) {
 		super({ cost, effects });
-		this.triggers = triggers.map((event) => (typeof event === 'string' ? events[event] : event));
+		if (!triggers.length) {
+			throw new Error('Reaction requires at least one trigger');
+		}
+		this.triggerSpecs = triggers.map((spec) => finalise(EventMatcher, spec));
+	}
+
+	protected override getTriggerContext(
+		gameGraph: GameGraph,
+		cardId: CardId
+	): Partial<GroupContext> {
+		const ownerId = gameGraph.current.state.requireCard(cardId).ownerId;
+		return { reactiveCardId: cardId, reactivePlayerId: ownerId };
 	}
 }
-
 /** A reaction that must be performed when triggered. */
 export class Obligation extends Reaction {
 	override readonly mandatory = true;

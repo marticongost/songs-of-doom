@@ -1,8 +1,8 @@
 import { Opportunity } from '../../../models/capabilities';
 import { negateDamage, removeCharges } from '../../../models/effects';
-import type { ScalarExpressionType } from '../../../models/expressions';
-import { result } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
+import type { ScalarExpressionType } from '../../../models/expressions';
+import { reactivePlayerIsSubject, result } from '../../../models/expressions';
 import { upgradable } from '../../../models/upgrades';
 
 export default upgradable(Skill, 2, (variants) => ({
@@ -15,7 +15,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { strength: variants.level },
 	capabilities: [
 		new Opportunity({
-			triggers: ['attacking'],
+			triggers: [{ event: 'attack', condition: reactivePlayerIsSubject }],
 			cost: {
 				strength: 2
 			},

@@ -56,8 +56,7 @@ export class AttackEffect extends Effect {
 				resolutionFactory: (props) => new MutableAttackResolution({ ...props, defenderId }),
 				effects: [this.results, ...additionalEffects],
 				beforeTest: async (graph) => {
-					await graph.eventTriggered('attacking');
-					await graph.eventTriggered('receivingAttack');
+					await graph.eventTriggered('attack');
 				}
 			});
 		}

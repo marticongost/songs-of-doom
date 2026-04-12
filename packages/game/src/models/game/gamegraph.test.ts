@@ -188,11 +188,19 @@ describe('GameGraph.group', () => {
 		await graph.group(
 			InputReceived,
 			{ values: {} },
-			{ activeCardId: 'c1', targetId: 'c1', subjectId: 'c1' },
+			{
+				activeCardId: 'c1',
+				reactiveCardId: 'c1',
+				reactivePlayerId: 'p1',
+				targetId: 'c1',
+				subjectId: 'c1'
+			},
 			async () => {}
 		);
 		const initialNode = graph.start.next!;
 		expect(initialNode.state.activeCardStack).toContain('c1');
+		expect(initialNode.state.reactiveCardStack).toContain('c1');
+		expect(initialNode.state.reactivePlayerStack).toContain('p1');
 		expect(initialNode.state.targetStack).toContain('c1');
 		expect(initialNode.state.subjectStack).toContain('c1');
 	});
@@ -202,12 +210,20 @@ describe('GameGraph.group', () => {
 		await graph.group(
 			InputReceived,
 			{ values: {} },
-			{ activeCardId: 'c1', targetId: 'c1', subjectId: 'c1' },
+			{
+				activeCardId: 'c1',
+				reactiveCardId: 'c1',
+				reactivePlayerId: 'p1',
+				targetId: 'c1',
+				subjectId: 'c1'
+			},
 			async () => {}
 		);
 		const initialNode = graph.start.next!;
 		const endGroup = initialNode.children[0];
 		expect(endGroup.state.activeCardStack).not.toContain('c1');
+		expect(endGroup.state.reactiveCardStack).not.toContain('c1');
+		expect(endGroup.state.reactivePlayerStack).not.toContain('p1');
 		expect(endGroup.state.targetStack).not.toContain('c1');
 		expect(endGroup.state.subjectStack).not.toContain('c1');
 	});
@@ -280,7 +296,13 @@ describe('GameGraph.test', () => {
 		const order: string[] = [];
 
 		vi.spyOn(graph, 'eventTriggered').mockImplementation(async (eventType) => {
-			order.push(eventType);
+			order.push(
+				typeof eventType === 'string'
+					? eventType
+					: typeof eventType.event === 'string'
+						? eventType.event
+						: eventType.event.type
+			);
 			await eventTriggered(eventType);
 		});
 
@@ -510,7 +532,7 @@ describe('GameGraph.eventTriggered', () => {
 		const p1 = mock<ReadonlyPlayerState>({ cards: () => [card] });
 		const graph = new GameGraph({ initialState: { players: [p1] } });
 		const before = graph.current;
-		await graph.eventTriggered('attacking');
+		await graph.eventTriggered('attack');
 		expect(graph.current).toBe(before);
 	});
 
@@ -518,26 +540,25 @@ describe('GameGraph.eventTriggered', () => {
 		const p1 = mock<ReadonlyPlayerState>({ cards: () => [] });
 		const graph = new GameGraph({ initialState: { players: [p1] } });
 		const before = graph.current;
-		await graph.eventTriggered('attacking');
+		await graph.eventTriggered('attack');
 		expect(graph.current).toBe(before);
 	});
 
 	it('adds an EventTriggered node when a ready card has matching reactions', async () => {
 		const card = mock<ReadonlyCardState>({
 			id: 'c1',
-			getReactionsToEvent: () => [mock<Obligation>()]
+			getReactionsToEvent: () => [mock<Opportunity>()]
 		});
 		const p1 = mock<ReadonlyPlayerState>({ cards: () => [card] });
 		const graph = new GameGraph({ initialState: { players: [p1] } });
 
-		const eventPromise = graph.eventTriggered('attacking');
+		const eventPromise = graph.eventTriggered('attack');
 
 		// Expect EventTriggered node has been added synchronously
 		const eventNode = graph.start.next!;
 		expect(eventNode).toBeInstanceOf(EventTriggered);
-		expect((eventNode as EventTriggered).event).toBe(events['attacking']);
+		expect((eventNode as EventTriggered).event).toBe(events['attack']);
 
-		// Decline the optional reaction (selection = undefined)
 		await graph.supplyInput({ selection: undefined });
 		await eventPromise;
 	});
@@ -545,7 +566,7 @@ describe('GameGraph.eventTriggered', () => {
 	it('stores the correct event on the EventTriggered node', async () => {
 		const card = mock<ReadonlyCardState>({
 			id: 'c1',
-			getReactionsToEvent: () => [mock<Obligation>()]
+			getReactionsToEvent: () => [mock<Opportunity>()]
 		});
 		const p1 = mock<ReadonlyPlayerState>({ cards: () => [card] });
 		const graph = new GameGraph({ initialState: { players: [p1] } });
@@ -562,8 +583,12 @@ describe('GameGraph.eventTriggered', () => {
 // ─── GameGraph.eventTriggered – iterative input ───────────────────────────────
 
 describe('GameGraph.eventTriggered - iterative input', () => {
-	function mockCardWithReaction(id: CardId, reaction: Obligation | Opportunity): ReadonlyCardState {
-		return mock<ReadonlyCardState>({ id, getReactionsToEvent: () => [reaction] });
+	function mockCardWithReaction(
+		id: CardId,
+		reaction: Obligation | Opportunity,
+		ownerId: 'p1' | 'p2' = 'p1'
+	): ReadonlyCardState {
+		return mock<ReadonlyCardState>({ id, ownerId, getReactionsToEvent: () => [reaction] });
 	}
 
 	function graphWithReactions(cards: ReadonlyCardState[]) {
@@ -578,24 +603,23 @@ describe('GameGraph.eventTriggered - iterative input', () => {
 		return (graph.current as InputRequested).fields[0] as CapabilityChoiceField;
 	}
 
-	it('required is true when the choice set contains an Obligation', async () => {
-		const reaction = new Obligation({ effects: [], triggers: ['attacking'] });
+	it('auto-triggers obligations without requesting input', async () => {
+		const reaction = new Obligation({ effects: [], triggers: ['attack'] });
+		const triggerSpy = vi.spyOn(reaction, 'trigger').mockResolvedValue();
 		const card = mockCardWithReaction('c1', reaction);
 		const graph = graphWithReactions([card]);
 
-		const eventPromise = graph.eventTriggered('attacking');
-		expect(currentChoiceField(graph).required).toBe(true);
-
-		await graph.supplyInput({ selection: undefined });
-		await eventPromise;
+		await graph.eventTriggered('attack');
+		expect(triggerSpy).toHaveBeenCalledWith(expect.objectContaining({ cardId: 'c1' }));
+		expect(graph.current).not.toBeInstanceOf(InputRequested);
 	});
 
 	it('required is false when the choice set contains only Opportunities', async () => {
-		const reaction = new Opportunity({ effects: [], triggers: ['attacking'] });
+		const reaction = new Opportunity({ effects: [], triggers: ['attack'] });
 		const card = mockCardWithReaction('c1', reaction);
 		const graph = graphWithReactions([card]);
 
-		const eventPromise = graph.eventTriggered('attacking');
+		const eventPromise = graph.eventTriggered('attack');
 		expect(currentChoiceField(graph).required).toBe(false);
 
 		await graph.supplyInput({ selection: undefined });
@@ -603,11 +627,11 @@ describe('GameGraph.eventTriggered - iterative input', () => {
 	});
 
 	it('selecting a reaction calls trigger on the capability', async () => {
-		const reaction = mock<Obligation>();
+		const reaction = mock<Opportunity>();
 		const card = mockCardWithReaction('c1', reaction);
 		const graph = graphWithReactions([card]);
 
-		const eventPromise = graph.eventTriggered('attacking');
+		const eventPromise = graph.eventTriggered('attack');
 		const [choice] = currentChoiceField(graph).choices;
 		await graph.supplyInput({ selection: choice });
 		await eventPromise;
@@ -616,13 +640,13 @@ describe('GameGraph.eventTriggered - iterative input', () => {
 	});
 
 	it('selecting a reaction removes it from the choices and loops for the next', async () => {
-		const reaction1 = mock<Obligation>();
-		const reaction2 = mock<Obligation>();
+		const reaction1 = mock<Opportunity>();
+		const reaction2 = mock<Opportunity>();
 		const card1 = mockCardWithReaction('c1', reaction1);
 		const card2 = mockCardWithReaction('c2', reaction2);
 		const graph = graphWithReactions([card1, card2]);
 
-		const eventPromise = graph.eventTriggered('attacking');
+		const eventPromise = graph.eventTriggered('attack');
 
 		// First request: both reactions available
 		const allChoices = [...currentChoiceField(graph).choices];
@@ -644,6 +668,26 @@ describe('GameGraph.eventTriggered - iterative input', () => {
 		expect(reaction2.trigger).toHaveBeenCalledWith(expect.objectContaining({ cardId: 'c2' }));
 	});
 
+	it('triggers obligations first, then asks for optional reactions', async () => {
+		const obligation = new Obligation({ effects: [], triggers: ['attack'] });
+		const obligationTriggerSpy = vi.spyOn(obligation, 'trigger').mockResolvedValue();
+		const opportunity = mock<Opportunity>();
+		const card1 = mockCardWithReaction('c1', obligation);
+		const card2 = mockCardWithReaction('c2', opportunity);
+		const graph = graphWithReactions([card1, card2]);
+
+		const eventPromise = graph.eventTriggered('attack');
+		await advanceTicks(2);
+
+		expect(obligationTriggerSpy).toHaveBeenCalledWith(expect.objectContaining({ cardId: 'c1' }));
+		expect([...currentChoiceField(graph).choices]).toMatchObject([
+			{ cardId: 'c2', capability: opportunity }
+		]);
+
+		await graph.supplyInput({ selection: undefined });
+		await eventPromise;
+	});
+
 	it('supplying undefined breaks the loop without triggering remaining reactions', async () => {
 		const reaction1 = mock<Opportunity>();
 		const reaction2 = mock<Opportunity>();
@@ -651,7 +695,7 @@ describe('GameGraph.eventTriggered - iterative input', () => {
 		const card2 = mockCardWithReaction('c2', reaction2);
 		const graph = graphWithReactions([card1, card2]);
 
-		const eventPromise = graph.eventTriggered('attacking');
+		const eventPromise = graph.eventTriggered('attack');
 		await graph.supplyInput({ selection: undefined });
 
 		await eventPromise;
@@ -674,7 +718,7 @@ describe('GameNode types', () => {
 	const state = makeInitialState();
 
 	it('CapabilityTriggered stores capability and cardId', () => {
-		const capability = new Obligation({ effects: [], triggers: ['attacking'] });
+		const capability = new Obligation({ effects: [], triggers: ['attack'] });
 		const node = new CapabilityTriggered({ id: 1, state, capability, cardId: 'c1' });
 		expect(node.capability).toBe(capability);
 		expect(node.cardId).toBe('c1');
@@ -693,8 +737,8 @@ describe('GameNode types', () => {
 	});
 
 	it('EventTriggered stores the event', () => {
-		const node = new EventTriggered({ id: 1, state, event: events['attacking'] });
-		expect(node.event).toBe(events['attacking']);
+		const node = new EventTriggered({ id: 1, state, event: events['attack'] });
+		expect(node.event).toBe(events['attack']);
 	});
 
 	it('InputRequested stores fields', () => {

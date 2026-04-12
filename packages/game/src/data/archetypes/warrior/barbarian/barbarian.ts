@@ -1,6 +1,7 @@
-import { Archetype } from '../../../../models/entities/archetype';
 import { Obligation } from '../../../../models/capabilities';
 import { modifyRoll } from '../../../../models/effects';
+import { Archetype } from '../../../../models/entities/archetype';
+import { reactivePlayerIsSubject, reactivePlayerIsTarget } from '../../../../models/expressions';
 
 export default new Archetype({
 	title: {
@@ -11,7 +12,7 @@ export default new Archetype({
 	xpCost: 5,
 	capabilities: [
 		new Obligation({
-			triggers: ['attacking'],
+			triggers: [{ event: 'attack', condition: reactivePlayerIsSubject }],
 			effects: [
 				modifyRoll({
 					modifier: 1
@@ -19,7 +20,7 @@ export default new Archetype({
 			]
 		}),
 		new Obligation({
-			triggers: ['receivingAttack'],
+			triggers: [{ event: 'attack', condition: reactivePlayerIsTarget }],
 			effects: [
 				modifyRoll({
 					modifier: 1

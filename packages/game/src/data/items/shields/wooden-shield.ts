@@ -2,6 +2,7 @@ import { Opportunity } from '../../../models/capabilities';
 import { fullyRechargeOnChapterStart } from '../../../models/common';
 import { defend } from '../../../models/effects';
 import { Item } from '../../../models/entities/item';
+import { reactivePlayerIsTarget } from '../../../models/expressions';
 import shield from '../../properties/shield';
 
 export default new Item({
@@ -13,7 +14,7 @@ export default new Item({
 	capabilities: [
 		fullyRechargeOnChapterStart,
 		new Opportunity({
-			triggers: ['receivingAttack'],
+			triggers: [{ event: 'attack', condition: reactivePlayerIsTarget }],
 			cost: { charges: 1, agility: 1 },
 			effects: [
 				defend({

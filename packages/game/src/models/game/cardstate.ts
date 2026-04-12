@@ -1,8 +1,9 @@
-import { isSkill, Reaction, type Capability, type Property } from '../..';
+import { isSkill, type Capability, type Property } from '../..';
+import { Reaction } from '../capabilities/reaction';
 import type { Entity } from '../entities';
-import { events, type Event, type EventType } from '../event';
+import { normaliseEventEnvelope, type Event, type EventEnvelope, type EventType } from '../event';
 import { EntityState, type MutableEntityState } from './entitystate';
-import type { MutableGameState } from './gamestate';
+import type { MutableGameState, ReadonlyGameState } from './gamestate';
 import type { CardId, PlayerId } from './identifiers';
 import { mutate } from './mutate';
 
@@ -104,10 +105,15 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 		return this.container.type === 'card' || this.container.type === 'player';
 	}
 
-	getReactionsToEvent(event: Event | EventType): Array<Reaction> {
-		if (typeof event === 'string') {
-			event = events[event];
+	getReactionsToEvent(
+		event: Event | EventType | EventEnvelope,
+		gameState?: ReadonlyGameState
+	): Array<Reaction> {
+		const { event: normalizedEvent, context } = normaliseEventEnvelope(event);
+		if (!normalizedEvent) {
+			return [];
 		}
+
 		let capabilities: Array<Capability>;
 		if (isSkill(this.card)) {
 			capabilities = this.isAttached() ? this.card.attachmentCapabilities : this.card.capabilities;
@@ -117,9 +123,44 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 				...(this.isAttached() ? this.card.attachmentCapabilities : [])
 			];
 		}
-		const reactions: Reaction[] = capabilities.filter(
-			(capability) => capability instanceof Reaction && capability.triggers.includes(event)
-		) as Reaction[];
+
+		const scopedGameState =
+			gameState === undefined
+				? undefined
+				: gameState.mutate((state) => {
+						state.activeCardStack.push(this.id);
+						state.reactiveCardStack.push(context.reactiveCardId ?? this.id);
+						state.reactivePlayerStack.push(context.reactivePlayerId ?? this.ownerId);
+						if (context.subjectId !== undefined) {
+							state.subjectStack.push(context.subjectId);
+						}
+						if (context.targetId !== undefined) {
+							state.targetStack.push(context.targetId);
+						}
+						if (context.activePlayerId !== undefined) {
+							state.activePlayerStack.push(context.activePlayerId);
+						}
+					});
+
+		const reactions: Reaction[] = capabilities.filter((capability) => {
+			if (!(capability instanceof Reaction)) {
+				return false;
+			}
+			return capability.triggerSpecs.some((spec) => {
+				if (spec.event !== normalizedEvent) {
+					return false;
+				}
+				if (
+					spec.condition !== undefined &&
+					scopedGameState !== undefined &&
+					!scopedGameState.evaluate(spec.condition)
+				) {
+					return false;
+				}
+				return true;
+			});
+		}) as Reaction[];
+
 		return reactions;
 	}
 }

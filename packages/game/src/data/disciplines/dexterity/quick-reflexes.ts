@@ -1,6 +1,7 @@
 import { Constant, Opportunity } from '../../../models/capabilities';
 import { changeStats, defend } from '../../../models/effects';
 import { Trait } from '../../../models/entities/trait';
+import { reactivePlayerIsTarget } from '../../../models/expressions';
 
 export default new Trait({
 	title: {
@@ -18,7 +19,7 @@ export default new Trait({
 			]
 		}),
 		new Opportunity({
-			triggers: ['receivingAttack'],
+			triggers: [{ event: 'attack', condition: reactivePlayerIsTarget }],
 			cost: { agility: 1 },
 			effects: [
 				defend({

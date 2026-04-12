@@ -1,7 +1,7 @@
 import { Opportunity } from '../../../models/capabilities';
 import { conferProperties, triggerAttack } from '../../../models/effects';
 import { Skill } from '../../../models/entities';
-import { ScalarExpressionType, X } from '../../../models/expressions';
+import { reactivePlayerIsTarget, ScalarExpressionType, X } from '../../../models/expressions';
 import { upgradable } from '../../../models/upgrades';
 import { disruption, holy, invulnerable } from '../../properties';
 
@@ -17,7 +17,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	},
 	capabilities: [
 		new Opportunity({
-			triggers: ['receivingAttack'],
+			triggers: [{ event: 'attack', condition: reactivePlayerIsTarget }],
 			cost: { will: variants.values<ScalarExpressionType>(2, X) },
 			effects: [
 				conferProperties([

@@ -1,7 +1,8 @@
 import { Action, Obligation } from '../../../models/capabilities';
 import { fullyRechargeOnChapterStart } from '../../../models/common';
-import { Creature } from '../../../models/entities/creature';
 import { attack, chase, defend } from '../../../models/effects';
+import { Creature } from '../../../models/entities/creature';
+import { reactiveCardIsTarget } from '../../../models/expressions';
 import { strength } from '../../../models/stats';
 import disruption from '../../properties/disruption';
 import piercing from '../../properties/piercing';
@@ -44,7 +45,7 @@ export default new Creature({
 			]
 		}),
 		new Obligation({
-			triggers: ['receivingAttack'],
+			triggers: [{ event: 'attack', condition: reactiveCardIsTarget }],
 			effects: [
 				defend({
 					expression: 1

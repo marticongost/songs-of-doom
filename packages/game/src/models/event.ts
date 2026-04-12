@@ -1,5 +1,6 @@
-import type { LocalisedText } from '@songsofdoom/common/localisation';
 import { mapToRecord } from '@songsofdoom/common';
+import type { LocalisedText } from '@songsofdoom/common/localisation';
+import type { CardId, EntityId, PlayerId } from './game/identifiers';
 
 export type EventProps = { type: EventType; name: LocalisedText };
 
@@ -27,11 +28,8 @@ const eventData: Record<string, Omit<EventProps, 'type'>> = {
 	investigating: {
 		name: { ca: 'En investigar', es: 'Al investigar', en: 'When investigating' }
 	},
-	attacking: {
-		name: { ca: 'En atacar', es: 'Al atacar', en: 'When attacking' }
-	},
-	receivingAttack: {
-		name: { ca: 'En rebre un atac', es: 'Al recibir un ataque', en: 'When attacked' }
+	attack: {
+		name: { ca: 'En un atac', es: 'En un ataque', en: 'During an attack' }
 	},
 	afterReceivedAttackResolved: {
 		name: {
@@ -132,6 +130,46 @@ const eventData: Record<string, Omit<EventProps, 'type'>> = {
 };
 
 export type EventType = keyof typeof eventData;
+
+export interface EventContext {
+	/** Entity performing the triggering action. */
+	actorId?: EntityId;
+
+	/** Implicit subject for the current operation (for tests, usually attacker). */
+	subjectId?: EntityId;
+
+	/** Implicit target for the current operation (for tests, usually defender). */
+	targetId?: EntityId;
+
+	/** Currently active player, if any. */
+	activePlayerId?: PlayerId;
+
+	/** Card currently being evaluated or triggered as a reactor. */
+	reactiveCardId?: CardId;
+
+	/** Player owning the currently evaluated or triggered reactor. */
+	reactivePlayerId?: PlayerId;
+}
+
+export interface EventEnvelope {
+	event: Event | EventType;
+	context?: EventContext;
+}
+
+export const normaliseEvent = (event: Event | EventType): Event | undefined =>
+	typeof event === 'string' ? events[event as EventType] : event;
+
+export const normaliseEventEnvelope = (
+	eventOrEnvelope: Event | EventType | EventEnvelope
+): { event: Event | undefined; context: EventContext } => {
+	if (typeof eventOrEnvelope === 'string' || eventOrEnvelope instanceof Event) {
+		return { event: normaliseEvent(eventOrEnvelope), context: {} };
+	}
+	return {
+		event: normaliseEvent(eventOrEnvelope.event),
+		context: eventOrEnvelope.context ?? {}
+	};
+};
 
 export const events: Record<EventType, Event> = mapToRecord(eventData, {
 	mapEntries: ([type, data]: [string, Omit<EventProps, 'type'>]) => [

@@ -1,8 +1,8 @@
 import { Opportunity } from '../../../models/capabilities';
 import { drawCards, drawFocus, resultsTable } from '../../../models/effects';
 import { addCharges } from '../../../models/effects/recharge';
-import { and, owned } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
+import { and, owned, reactivePlayerIsSubject } from '../../../models/expressions';
 import { upgradable } from '../../../models/upgrades';
 import weapon from '../../properties/weapon';
 
@@ -16,7 +16,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { agility: variants.level },
 	capabilities: [
 		new Opportunity({
-			triggers: ['attacking'],
+			triggers: [{ event: 'attack', condition: reactivePlayerIsSubject }],
 			cost: { agility: 2 },
 			effects: [
 				resultsTable({
