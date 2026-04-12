@@ -18,6 +18,7 @@ export interface CapabilityRef {
 export type CardParent =
 	| { type: 'deck'; playerId: PlayerId }
 	| { type: 'hand'; playerId: PlayerId }
+	| { type: 'stage'; playerId: PlayerId }
 	| { type: 'discard'; playerId: PlayerId }
 	| { type: 'card'; cardId: CardId }
 	| { type: 'player'; playerId: PlayerId }
@@ -217,6 +218,13 @@ export class MutableCardState
 		playerState.hand.push(this);
 	}
 
+	moveToStage(gameState: MutableGameState, playerId: PlayerId) {
+		this.removeFromCurrentLocation(gameState);
+		this.container = { type: 'stage', playerId };
+		const playerState = gameState.requirePlayer(playerId);
+		playerState.stage.push(this);
+	}
+
 	moveToTopOfDeck(gameState: MutableGameState, playerId: PlayerId | undefined = undefined) {
 		playerId = playerId ?? this.ownerId;
 		this.removeFromCurrentLocation(gameState);
@@ -253,6 +261,9 @@ export class MutableCardState
 		} else if (this.container.type === 'hand') {
 			const playerState = gameState.requirePlayer(this.container.playerId);
 			playerState.hand = playerState.hand.filter((c) => c.id !== this.id);
+		} else if (this.container.type === 'stage') {
+			const playerState = gameState.requirePlayer(this.container.playerId);
+			playerState.stage = playerState.stage.filter((c) => c.id !== this.id);
 		} else if (this.container.type === 'deck') {
 			const playerState = gameState.requirePlayer(this.container.playerId);
 			playerState.deck = playerState.deck.filter((c) => c.id !== this.id);

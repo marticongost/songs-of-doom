@@ -18,7 +18,13 @@ describe('Capability.trigger', () => {
 		expect(graph.group).toHaveBeenCalledWith(
 			expect.any(Function), // CapabilityTriggered constructor
 			expect.objectContaining({ cardId: 'c1' }),
-			expect.objectContaining({ activeCardId: 'c1', targetId: 'c1', subjectId: 'c1' }),
+			expect.objectContaining({
+				activeCardId: 'c1',
+				targetId: 'c1',
+				subjectId: 'c1',
+				openWith: expect.any(Function),
+				closeWith: expect.any(Function)
+			}),
 			expect.any(Function)
 		);
 	});
@@ -35,9 +41,26 @@ describe('Capability.trigger', () => {
 		expect(effect.trigger).toHaveBeenCalledWith(graph);
 	});
 
-	it('passes a closeWith that discards the active card when it is in hand', async () => {
+	it('passes an openWith that moves the active card from hand to stage', async () => {
 		const mutableState = mock<MutableGameState>();
 		const card = mock<MutableCardState>({ container: { type: 'hand', playerId: 'p1' } });
+		mutableState.requireActiveCard.mockReturnValue(card);
+
+		const graph = mock<GameGraph>();
+		let capturedOpenWith: ((s: MutableGameState) => void) | undefined;
+		graph.group.mockImplementation(async (_nodeType, _nodeProps, context) => {
+			capturedOpenWith = context.openWith;
+		});
+
+		await new Action({ effects: [] }).trigger({ gameGraph: graph, cardId: 'c1' });
+		capturedOpenWith!(mutableState);
+
+		expect(card.moveToStage).toHaveBeenCalledWith(mutableState, 'p1');
+	});
+
+	it('passes a closeWith that discards the active card when it is in stage', async () => {
+		const mutableState = mock<MutableGameState>();
+		const card = mock<MutableCardState>({ container: { type: 'stage', playerId: 'p1' } });
 		mutableState.requireActiveCard.mockReturnValue(card);
 
 		const graph = mock<GameGraph>();
@@ -49,7 +72,7 @@ describe('Capability.trigger', () => {
 		await new Action({ effects: [] }).trigger({ gameGraph: graph, cardId: 'c1' });
 		capturedCloseWith!(mutableState);
 
-		expect(card.moveToTopOfDiscardPile).toHaveBeenCalledWith(mutableState);
+		expect(card.moveToTopOfDiscardPile).toHaveBeenCalledWith(mutableState, 'p1');
 	});
 
 	it('closeWith does not discard the active card when it is not in hand', async () => {

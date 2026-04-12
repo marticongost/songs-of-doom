@@ -1,8 +1,8 @@
 import { finalise } from '@songsofdoom/common';
 import { CapabilityCost, type CapabilityCostProps } from './capabilitycost';
 import type { Effect } from './effects/effect';
-import { CapabilityTriggered } from './game/gamenodes';
 import type { GameGraph } from './game/gamegraph';
+import { CapabilityTriggered } from './game/gamenodes';
 import type { CardId } from './game/identifiers';
 
 export interface CapabilityProps {
@@ -36,10 +36,16 @@ export abstract class Capability {
 				activeCardId: cardId,
 				targetId: cardId,
 				subjectId: cardId,
-				closeWith: (state) => {
+				openWith: (state) => {
 					const card = state.requireActiveCard();
 					if (card.container.type === 'hand') {
-						card.moveToTopOfDiscardPile(state);
+						card.moveToStage(state, card.container.playerId);
+					}
+				},
+				closeWith: (state) => {
+					const card = state.requireActiveCard();
+					if (card.container.type === 'stage') {
+						card.moveToTopOfDiscardPile(state, card.container.playerId);
 					}
 				}
 			},

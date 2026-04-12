@@ -518,6 +518,21 @@ describe('MutableCardState', () => {
 		});
 	});
 
+	describe('moveToStage', () => {
+		it('moves a card from hand to stage', () => {
+			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
+			const player = makeReadonlyPlayer('p1', { hand: [card] });
+			const gameState = makeReadonlyGameState([player]).mutable();
+
+			const mutableCard = gameState.requireCard('c1');
+			mutableCard.moveToStage(gameState, 'p1');
+
+			expect(mutableCard.container).toEqual({ type: 'stage', playerId: 'p1' });
+			expect(gameState.requirePlayer('p1').stage).toContain(mutableCard);
+			expect(gameState.requirePlayer('p1').hand).not.toContain(mutableCard);
+		});
+	});
+
 	describe('moveToTopOfDiscardPile', () => {
 		it('places the card at the front of the discard pile', () => {
 			const existing = makeReadonlyCard('c2', 'p1', { type: 'discard', playerId: 'p1' });

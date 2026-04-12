@@ -13,6 +13,7 @@ function makePlayer(
 	cards: {
 		deck?: ReadonlyCardState[];
 		hand?: ReadonlyCardState[];
+		stage?: ReadonlyCardState[];
 		discard?: ReadonlyCardState[];
 		attachments?: ReadonlyCardState[];
 	} = {}
@@ -22,6 +23,7 @@ function makePlayer(
 		character: mock<CharacterState>(),
 		deck: cards.deck ?? [],
 		hand: cards.hand ?? [],
+		stage: cards.stage ?? [],
 		discardPile: cards.discard ?? [],
 		attachments: cards.attachments ?? [],
 		focusesBag: new Counter(),
@@ -35,39 +37,47 @@ function makePlayer(
 // ─── PlayerState.cards ────────────────────────────────────────────────────────
 
 describe('PlayerState.cards', () => {
-	it('returns all cards from deck, hand, discard and attachments', () => {
+	it('returns all cards from deck, hand, stage, discard and attachments', () => {
 		const inDeck = mock<ReadonlyCardState>();
 		const inHand = mock<ReadonlyCardState>();
+		const inStage = mock<ReadonlyCardState>();
 		const inDiscard = mock<ReadonlyCardState>();
 		const attached = mock<ReadonlyCardState>();
 		const player = makePlayer('p1', {
 			deck: [inDeck],
 			hand: [inHand],
+			stage: [inStage],
 			discard: [inDiscard],
 			attachments: [attached]
 		});
 		const all = player.cards();
 		expect(all).toContain(inDeck);
 		expect(all).toContain(inHand);
+		expect(all).toContain(inStage);
 		expect(all).toContain(inDiscard);
 		expect(all).toContain(attached);
 	});
 
-	it('with ready:true returns only non-exhausted hand and attachment cards', () => {
+	it('with ready:true returns only non-exhausted hand, stage and attachment cards', () => {
 		const readyHand = mock<ReadonlyCardState>({ exhausted: false });
 		const exhaustedHand = mock<ReadonlyCardState>({ exhausted: true });
+		const readyStage = mock<ReadonlyCardState>({ exhausted: false });
+		const exhaustedStage = mock<ReadonlyCardState>({ exhausted: true });
 		const readyAttachment = mock<ReadonlyCardState>({ exhausted: false });
 		const exhaustedAttachment = mock<ReadonlyCardState>({ exhausted: true });
 		const deckCard = mock<ReadonlyCardState>();
 		const player = makePlayer('p1', {
 			deck: [deckCard],
 			hand: [readyHand, exhaustedHand],
+			stage: [readyStage, exhaustedStage],
 			attachments: [readyAttachment, exhaustedAttachment]
 		});
 		const ready = player.cards({ ready: true });
 		expect(ready).toContain(readyHand);
+		expect(ready).toContain(readyStage);
 		expect(ready).toContain(readyAttachment);
 		expect(ready).not.toContain(exhaustedHand);
+		expect(ready).not.toContain(exhaustedStage);
 		expect(ready).not.toContain(exhaustedAttachment);
 		expect(ready).not.toContain(deckCard);
 	});

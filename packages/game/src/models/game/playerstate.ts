@@ -18,6 +18,7 @@ export interface PlayerStateProps {
 	character: CharacterState;
 	deck: ReadonlyArray<CardState>;
 	hand: ReadonlyArray<CardState>;
+	stage?: ReadonlyArray<CardState>;
 	discardPile: ReadonlyArray<CardState>;
 	attachments?: ReadonlyArray<CardState>;
 	properties?: ReadonlyArray<Property>;
@@ -37,6 +38,7 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 	readonly character: CharacterState;
 	readonly deck: ReadonlyArray<TCard>;
 	readonly hand: ReadonlyArray<TCard>;
+	readonly stage: ReadonlyArray<TCard>;
 	readonly discardPile: ReadonlyArray<TCard>;
 	readonly clues: number;
 	readonly focusesBag: ReadonlyCounter<FocusToken>;
@@ -48,6 +50,7 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 		character,
 		deck,
 		hand,
+		stage = [],
 		discardPile,
 		attachments = [],
 		properties,
@@ -62,6 +65,7 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 		this.character = character;
 		this.deck = deck as ReadonlyArray<TCard>;
 		this.hand = hand as ReadonlyArray<TCard>;
+		this.stage = stage as ReadonlyArray<TCard>;
 		this.discardPile = discardPile as ReadonlyArray<TCard>;
 		this.clues = clues;
 		this.focusesBag = focusesBag;
@@ -71,9 +75,9 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 
 	cards(options?: CardOptions): Array<TCard> {
 		if (options?.ready) {
-			return [...this.hand, ...this.attachments].filter((card) => !card.exhausted);
+			return [...this.hand, ...this.stage, ...this.attachments].filter((card) => !card.exhausted);
 		}
-		return [...this.deck, ...this.hand, ...this.discardPile, ...this.attachments];
+		return [...this.deck, ...this.hand, ...this.stage, ...this.discardPile, ...this.attachments];
 	}
 
 	getCard(id: CardId): TCard | undefined {
@@ -117,6 +121,7 @@ export class MutablePlayerState
 	declare character: CharacterState;
 	declare deck: Array<MutableCardState>;
 	declare hand: Array<MutableCardState>;
+	declare stage: Array<MutableCardState>;
 	declare discardPile: Array<MutableCardState>;
 	declare attachments: Array<MutableCardState>;
 	declare properties: Array<Property>;
@@ -133,6 +138,7 @@ export class MutablePlayerState
 			character: playerState.character,
 			deck: playerState.deck.map((card) => card.mutable()),
 			hand: playerState.hand.map((card) => card.mutable()),
+			stage: playerState.stage.map((card) => card.mutable()),
 			discardPile: playerState.discardPile.map((card) => card.mutable()),
 			attachments: playerState.attachments.map((card) => card.mutable()),
 			properties: [...playerState.properties],
@@ -151,6 +157,7 @@ export class MutablePlayerState
 			character: this.character,
 			deck: this.deck.map((card) => card.readonly()),
 			hand: this.hand.map((card) => card.readonly()),
+			stage: this.stage.map((card) => card.readonly()),
 			discardPile: this.discardPile.map((card) => card.readonly()),
 			attachments: this.attachments.map((card) => card.readonly()),
 			properties: [...this.properties],
