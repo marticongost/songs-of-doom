@@ -9,89 +9,63 @@ import type { MutableGameState } from './game/gamestate';
 // ─── Capability.trigger ───────────────────────────────────────────────────────
 
 describe('Capability.trigger', () => {
-	it('pushes cardId onto activeCardStack, implicitTargetStack, and implicitSubjectStack', async () => {
-		const mutableState = mock<MutableGameState>({
-			activeCardStack: [],
-			implicitTargetStack: [],
-			implicitSubjectStack: []
-		});
+	it('passes activeCardId, targetId, and subjectId context to group()', async () => {
 		const graph = mock<GameGraph>();
-		let triggeredCallback!: (state: MutableGameState) => void;
-		graph.capabilityTriggered.mockImplementation((_cap, _id, callback) => {
-			if (typeof callback === 'function') triggeredCallback = callback;
-		});
 		graph.group.mockResolvedValue(undefined);
 
 		await new Action({ effects: [] }).trigger({ gameGraph: graph, cardId: 'c1' });
-		triggeredCallback(mutableState);
 
-		expect(mutableState.activeCardStack).toContain('c1');
-		expect(mutableState.implicitTargetStack).toContain('c1');
-		expect(mutableState.implicitSubjectStack).toContain('c1');
+		expect(graph.group).toHaveBeenCalledWith(
+			expect.any(Function), // CapabilityTriggered constructor
+			expect.objectContaining({ cardId: 'c1' }),
+			expect.objectContaining({ activeCardId: 'c1', targetId: 'c1', subjectId: 'c1' }),
+			expect.any(Function)
+		);
 	});
 
-	it('triggers all effects', async () => {
+	it('triggers all effects inside the callback', async () => {
 		const effect = mock<Effect>();
 		const graph = mock<GameGraph>();
-		graph.group.mockImplementation(async (callback) => {
+		graph.group.mockImplementation(async (_nodeType, _nodeProps, _context, callback) => {
 			await callback();
 		});
-		graph.capabilityFinished.mockImplementation(() => {});
 
 		await new Action({ effects: [effect] }).trigger({ gameGraph: graph, cardId: 'c1' });
 
 		expect(effect.trigger).toHaveBeenCalledWith(graph);
 	});
 
-	it('pops all stacks and discards the active card on finish if it was in hand', async () => {
-		const mutableState = mock<MutableGameState>({
-			activeCardStack: ['c1'],
-			implicitTargetStack: ['c1'],
-			implicitSubjectStack: ['c1']
-		});
+	it('passes a closeWith that discards the active card when it is in hand', async () => {
+		const mutableState = mock<MutableGameState>();
 		const card = mock<MutableCardState>({ container: { type: 'hand', playerId: 'p1' } });
 		mutableState.requireActiveCard.mockReturnValue(card);
+
 		const graph = mock<GameGraph>();
-		graph.group.mockImplementation(async (callback) => {
-			await callback();
-		});
-		let finishedCallback!: (state: MutableGameState) => void;
-		graph.capabilityFinished.mockImplementation((_cap, _id, callback) => {
-			if (typeof callback === 'function') finishedCallback = callback;
+		let capturedCloseWith: ((s: MutableGameState) => void) | undefined;
+		graph.group.mockImplementation(async (_nodeType, _nodeProps, context) => {
+			capturedCloseWith = context.closeWith;
 		});
 
 		await new Action({ effects: [] }).trigger({ gameGraph: graph, cardId: 'c1' });
-		finishedCallback(mutableState);
+		capturedCloseWith!(mutableState);
 
 		expect(card.moveToTopOfDiscardPile).toHaveBeenCalledWith(mutableState);
-		expect(mutableState.activeCardStack).toEqual([]);
-		expect(mutableState.implicitTargetStack).toEqual([]);
-		expect(mutableState.implicitSubjectStack).toEqual([]);
 	});
 
-	it('pops all stacks without discarding on finish if the card is not in hand', async () => {
-		const mutableState = mock<MutableGameState>({
-			activeCardStack: ['c1'],
-			implicitTargetStack: ['c1'],
-			implicitSubjectStack: ['c1']
-		});
+	it('closeWith does not discard the active card when it is not in hand', async () => {
+		const mutableState = mock<MutableGameState>();
 		const card = mock<MutableCardState>({ container: { type: 'deck', playerId: 'p1' } });
 		mutableState.requireActiveCard.mockReturnValue(card);
+
 		const graph = mock<GameGraph>();
-		graph.group.mockImplementation(async (callback) => {
-			await callback();
-		});
-		let finishedCallback!: (state: MutableGameState) => void;
-		graph.capabilityFinished.mockImplementation((_cap, _id, callback) => {
-			if (typeof callback === 'function') finishedCallback = callback;
+		let capturedCloseWith: ((s: MutableGameState) => void) | undefined;
+		graph.group.mockImplementation(async (_nodeType, _nodeProps, context) => {
+			capturedCloseWith = context.closeWith;
 		});
 
 		await new Action({ effects: [] }).trigger({ gameGraph: graph, cardId: 'c1' });
-		finishedCallback(mutableState);
+		capturedCloseWith!(mutableState);
 
 		expect(card.moveToTopOfDiscardPile).not.toHaveBeenCalled();
-		expect(mutableState.activeCardStack).toEqual([]);
-		expect(mutableState.implicitTargetStack).toEqual([]);
-		expect(mutableState.implicitSubjectStack).toEqual([]);
 	});
 });

@@ -9,8 +9,11 @@ import { Stat } from './stats';
 /** A subset of {@link TargetType} that can be used to designate players. */
 export type PlayerTargetType = 'player' | 'owner' | 'active-player';
 
+/** A subset of {@link TargetType} that can be used to designate combatants. */
+export type CombatantTargetType = PlayerTargetType | 'enemy' | 'ally';
+
 /** A subset of {@link TargetType} that can be used to designate both characters or creatures. */
-export type ActorTargetType = PlayerTargetType | 'attacker' | 'defender' | 'enemy' | 'ally';
+export type ActorTargetType = CombatantTargetType | 'attacker' | 'defender';
 
 /** A subset of {@link TargetType} that can be used to designate enemy creatures. */
 export type EnemyTargetType = 'enemy';

@@ -1,6 +1,6 @@
 import { finalise } from '@songsofdoom/common';
 import type { GameGraph } from '../game/gamegraph';
-import type { EntityId } from '../game/identifiers';
+import type { CardId, EntityId } from '../game/identifiers';
 import { Target, type TargetSpec } from '../target';
 import { EffectWithOutcome } from './effect';
 
@@ -40,7 +40,7 @@ export class AttachEffect extends EffectWithOutcome<AttachOutcome> {
 	override async trigger(gameGraph: GameGraph) {
 		const targetId = await gameGraph.requestSingleTargetOrActiveCard(this.target);
 		gameGraph.effectTriggered<AttachEffect>(this, (state) => {
-			const target = state.requireTarget(targetId);
+			const target = state.requireCard(targetId as CardId);
 			const attachment = state.requireActiveCard();
 			target.addAttachment(state, attachment);
 			return { targetId };

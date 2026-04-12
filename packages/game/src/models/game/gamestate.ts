@@ -1,6 +1,5 @@
 import type { BooleanExpressionType } from '../expressions/boolean/boolean-expression';
 import type { ScalarExpressionType } from '../expressions/scalar/scalar-expression';
-import { mutate } from './mutate';
 import {
 	CardState,
 	type CardOptions,
@@ -13,15 +12,18 @@ import {
 	type MutableLocationState,
 	type ReadonlyLocationState
 } from './locationstate';
+import { mutate } from './mutate';
 import { PlayerState, type MutablePlayerState, type ReadonlyPlayerState } from './playerstate';
+import { MutableTestResolution, ReadonlyTestResolution, TestResolution } from './testresolution';
 
 export interface GameStateProps {
 	players: ReadonlyArray<PlayerState>;
 	locations?: ReadonlyArray<LocationState>;
 	activeCardStack?: Array<CardId>;
 	activePlayerStack?: Array<PlayerId>;
-	implicitTargetStack?: Array<EntityId>;
-	implicitSubjectStack?: Array<EntityId>;
+	targetStack?: Array<EntityId>;
+	subjectStack?: Array<EntityId>;
+	testResolutionStack?: Array<TestResolution>;
 }
 
 export class GameState<
@@ -33,23 +35,26 @@ export class GameState<
 	readonly locations: ReadonlyArray<TLocation>;
 	readonly activeCardStack: Array<CardId>;
 	readonly activePlayerStack: Array<PlayerId>;
-	readonly implicitTargetStack: Array<EntityId>;
-	readonly implicitSubjectStack: Array<EntityId>;
+	readonly targetStack: Array<EntityId>;
+	readonly subjectStack: Array<EntityId>;
+	readonly testResolutionStack: Array<TestResolution>;
 
 	constructor({
 		players,
 		locations,
 		activeCardStack,
 		activePlayerStack,
-		implicitTargetStack,
-		implicitSubjectStack
+		targetStack,
+		subjectStack,
+		testResolutionStack
 	}: GameStateProps) {
 		this.players = players as ReadonlyArray<TPlayer>;
 		this.locations = (locations ?? []) as ReadonlyArray<TLocation>;
 		this.activeCardStack = activeCardStack ?? [];
 		this.activePlayerStack = activePlayerStack ?? [];
-		this.implicitTargetStack = implicitTargetStack ?? [];
-		this.implicitSubjectStack = implicitSubjectStack ?? [];
+		this.targetStack = targetStack ?? [];
+		this.subjectStack = subjectStack ?? [];
+		this.testResolutionStack = testResolutionStack ?? [];
 	}
 
 	getEntityState(entityId: CardId): TCard | undefined;
@@ -159,38 +164,53 @@ export class GameState<
 	 * - If the effect is on an equipped piece of equipment, the subject is the wearer (example: chainmail)
 	 * - Otherwise, default to the active player
 	 */
-	getImplicitTarget(): TCard | TPlayer | undefined {
-		if (this.implicitTargetStack.length === 0) {
+	getTarget(): TCard | TPlayer | undefined {
+		if (this.targetStack.length === 0) {
 			return undefined;
 		}
-		const id = this.implicitTargetStack[this.implicitTargetStack.length - 1];
+		const id = this.targetStack[this.targetStack.length - 1];
 		if (isCardId(id)) return this.getCard(id);
 		return this.getPlayer(id);
 	}
 
-	requireImplicitTarget(): TCard | TPlayer {
-		const target = this.getImplicitTarget();
+	requireTarget(): TCard | TPlayer {
+		const target = this.getTarget();
 		if (!target) {
 			throw new Error('No implicit target');
 		}
 		return target;
 	}
 
-	getImplicitSubject(): TCard | TPlayer | undefined {
-		if (this.implicitSubjectStack.length === 0) {
+	getSubject(): TCard | TPlayer | undefined {
+		if (this.subjectStack.length === 0) {
 			return undefined;
 		}
-		const id = this.implicitSubjectStack[this.implicitSubjectStack.length - 1];
+		const id = this.subjectStack[this.subjectStack.length - 1];
 		if (isCardId(id)) return this.getCard(id);
 		return this.getPlayer(id);
 	}
 
-	requireImplicitSubject(): TCard | TPlayer {
-		const subject = this.getImplicitSubject();
+	requireSubject(): TCard | TPlayer {
+		const subject = this.getSubject();
 		if (!subject) {
 			throw new Error('No implicit subject');
 		}
 		return subject;
+	}
+
+	getActiveTestResolution(): TestResolution | undefined {
+		if (this.testResolutionStack.length === 0) {
+			return undefined;
+		}
+		return this.testResolutionStack[this.testResolutionStack.length - 1];
+	}
+
+	requireActiveTestResolution(): TestResolution {
+		const resolution = this.getActiveTestResolution();
+		if (!resolution) {
+			throw new Error('No active attack resolution');
+		}
+		return resolution;
 	}
 
 	evaluate(expr: BooleanExpressionType): boolean;
@@ -225,27 +245,39 @@ export class MutableGameState extends GameState<
 	declare locations: Array<MutableLocationState>;
 	declare activeCardStack: Array<CardId>;
 	declare activePlayerStack: Array<PlayerId>;
-	declare implicitTargetStack: Array<EntityId>;
-	declare implicitSubjectStack: Array<EntityId>;
+	declare targetStack: Array<EntityId>;
+	declare subjectStack: Array<EntityId>;
+	declare testResolutionStack: Array<ReadonlyTestResolution | MutableTestResolution>;
 
 	constructor(gameState: ReadonlyGameState) {
+		const stack = gameState.testResolutionStack as Array<ReadonlyTestResolution>;
 		super({
 			players: gameState.players.map((player) => player.mutable()),
 			locations: gameState.locations.map((location) => location.mutable()),
 			activeCardStack: [...gameState.activeCardStack],
 			activePlayerStack: [...gameState.activePlayerStack],
-			implicitTargetStack: [...gameState.implicitTargetStack],
-			implicitSubjectStack: [...gameState.implicitSubjectStack]
+			targetStack: [...gameState.targetStack],
+			subjectStack: [...gameState.subjectStack],
+			testResolutionStack: [
+				...stack.slice(0, -1),
+				...(stack.length > 0 ? [stack[stack.length - 1].mutable()] : [])
+			]
 		});
 	}
 
-	requireTarget(id: EntityId): MutableCardState | MutablePlayerState {
-		if (isCardId(id)) {
-			return this.requireCard(id);
-		} else if (isPlayerId(id)) {
-			return this.requirePlayer(id);
+	getActiveTestResolution(): MutableTestResolution | undefined {
+		if (this.testResolutionStack.length === 0) {
+			return undefined;
 		}
-		throw new Error(`Invalid EntityId: ${id}`);
+		return this.testResolutionStack[this.testResolutionStack.length - 1] as MutableTestResolution;
+	}
+
+	requireActiveTestResolution(): MutableTestResolution {
+		const resolution = this.getActiveTestResolution();
+		if (!resolution) {
+			throw new Error('No active attack resolution');
+		}
+		return resolution;
 	}
 
 	readonly(): ReadonlyGameState {
@@ -254,8 +286,11 @@ export class MutableGameState extends GameState<
 			locations: this.locations.map((location) => location.readonly()),
 			activeCardStack: [...this.activeCardStack],
 			activePlayerStack: [...this.activePlayerStack],
-			implicitTargetStack: [...this.implicitTargetStack],
-			implicitSubjectStack: [...this.implicitSubjectStack]
+			targetStack: [...this.targetStack],
+			subjectStack: [...this.subjectStack],
+			testResolutionStack: this.testResolutionStack.map((r) =>
+				r instanceof MutableTestResolution ? r.readonly() : r
+			)
 		});
 	}
 }

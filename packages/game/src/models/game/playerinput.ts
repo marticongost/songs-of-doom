@@ -1,5 +1,6 @@
 import type { ReadonlyCounter } from '@songsofdoom/common';
 import type { FocusToken, FocusType } from '../focus';
+import type { Result } from '../results';
 import type { Target } from '../target';
 import type { CapabilityRef } from './cardstate';
 
@@ -83,3 +84,9 @@ export class CapabilityChoiceField<
 		this.choices = choices;
 	}
 }
+
+export class ResultField<N extends string = string, R extends boolean = true> extends Field<
+	Result,
+	N,
+	R
+> {}

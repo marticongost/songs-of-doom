@@ -33,7 +33,7 @@ export class ConferPropertiesEffect extends Effect {
 
 	override async trigger(gameGraph: GameGraph) {
 		gameGraph.effectTriggered<ConferPropertiesEffect>(this, (state: MutableGameState) => {
-			const target = state.requireImplicitTarget();
+			const target = state.requireTarget();
 			for (const conferedProperty of this.properties) {
 				this.addProperty(conferedProperty, target);
 			}

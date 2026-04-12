@@ -8,9 +8,6 @@ import { type ActorTargetType, Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
 export interface EngageEffectProps {
-	/** The subject(s) performing the engage action. */
-	subject?: TargetSpec<ActorTargetType>;
-
 	/** The target(s) to engage. */
 	target: TargetSpec<ActorTargetType>;
 }
@@ -20,32 +17,24 @@ export interface EngageEffectProps {
  * into melee range within the player's threat zone.
  */
 export class EngageEffect extends Effect {
-	/** The subject(s) performing the engage action. */
-	readonly subject?: Target<ActorTargetType>;
-
 	/** The target(s) to engage. */
 	readonly target: Target<ActorTargetType>;
 
-	constructor({ subject, target }: EngageEffectProps) {
+	constructor({ target }: EngageEffectProps) {
 		super();
-		this.subject = finalise(Target, subject);
 		this.target = finalise(Target, target);
 	}
 
 	override async trigger(gameGraph: GameGraph) {
-		const subjectIds = await gameGraph.requestSubjects(this.subject);
+		const subjectId = gameGraph.requireSubject().id;
 		const targetIds = (await gameGraph.requestInput(this.target)).target;
 
-		if (subjectIds.length > 1 && targetIds.length > 1) {
-			throw new Error('Enemies can only be engaged to a single opponent');
-		} else if (subjectIds.length === 0) {
-			throw new Error('At least one subject must be chosen to engage');
-		} else if (targetIds.length === 0) {
+		if (targetIds.length === 0) {
 			throw new Error('At least one target must be chosen to engage');
 		}
 
 		gameGraph.effectTriggered<EngageEffect>(this, (state: MutableGameState) => {
-			const subjects = subjectIds.map((id) => state.requireEntityState(id));
+			const subject = state.requireEntityState(subjectId);
 			const targets = targetIds.map((id) => state.requireEntityState(id));
 
 			type CardLike = EntityState<CardId | PlayerId> & {
@@ -62,24 +51,21 @@ export class EngageEffect extends Effect {
 			let friendly: MutableEntityState<CardId | PlayerId>;
 			let enemiesList: Array<MutableCardState>;
 
-			if (isPlayerOrAlly(subjects[0])) {
-				if (subjects.length > 1) {
-					throw new Error('Only one friendly target can be chosen to engage');
-				}
+			if (isPlayerOrAlly(subject)) {
 				if (targets.some((t) => !isCreature(t))) {
 					throw new Error('Invalid subject/target combination');
 				}
-				friendly = subjects[0];
+				friendly = subject;
 				enemiesList = targets as Array<MutableCardState>;
-			} else if (isPlayerOrAlly(targets[0])) {
+			} else if (isCreature(subject)) {
 				if (targets.length > 1) {
-					throw new Error('Only one friendly target can be chosen to engage');
+					throw new Error('Enemies can only be engaged to a single opponent');
 				}
-				if (subjects.some((s) => !isCreature(s))) {
+				if (!isPlayerOrAlly(targets[0])) {
 					throw new Error('Invalid subject/target combination');
 				}
 				friendly = targets[0];
-				enemiesList = subjects as Array<MutableCardState>;
+				enemiesList = [subject as MutableCardState];
 			} else {
 				throw new Error('Invalid subject/target combination');
 			}

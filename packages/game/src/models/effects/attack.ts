@@ -1,31 +1,31 @@
+import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
+import { MutableAttackResolution } from '../game/attackresolution';
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import type { Property } from '../properties';
-import { parseResultString, type Result, type ResultRange, type ResultString } from '../results';
+import { parseResultString, type ResultString } from '../results';
+import { Target, type CombatantTargetType, type TargetSpec } from '../target';
 import { Effect } from './effect';
 import { ResultsTableEffect, resultsTable } from './resultstable';
 import { wound } from './wound';
 
-export interface FightEffectProps {
+export interface AttackEffectProps {
 	expression: ScalarExpressionType;
 	results: ResultsTableEffect | Partial<Record<ResultString, number | Array<Effect>>>;
 	properties?: Array<Property>;
-}
-
-export interface AttackResult {
-	result: Result | ResultRange;
-	effects: Array<Effect>;
+	target?: TargetSpec<CombatantTargetType>;
 }
 
 export class AttackEffect extends Effect {
 	readonly expression: ScalarExpressionType;
 	readonly results: ResultsTableEffect;
 	readonly properties: Array<Property>;
+	readonly target?: Target<CombatantTargetType>;
 
-	constructor({ expression, results, properties }: FightEffectProps) {
+	constructor({ expression, results, properties, target }: AttackEffectProps) {
 		super();
 		this.expression = expression;
+		this.target = finalise(Target, target);
 		this.results =
 			results instanceof ResultsTableEffect
 				? results
@@ -38,12 +38,26 @@ export class AttackEffect extends Effect {
 		this.properties = properties ?? [];
 	}
 
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<AttackEffect>(this, (_state: MutableGameState) => {
-			// TODO
-		});
+	override async trigger(
+		gameGraph: GameGraph,
+		additionalEffects: Array<Effect> = []
+	): Promise<void> {
+		const attackerId = gameGraph.requireSubject().id;
+		const defenderIds = await gameGraph.requestMultipleTargetsOrImplicitTarget(this.target);
+
+		gameGraph.effectTriggered<AttackEffect>(this, (_state) => {});
+
+		for (const defenderId of defenderIds) {
+			await gameGraph.test({
+				subjectId: attackerId,
+				proficiency: this.expression,
+				properties: this.properties,
+				resolutionFactory: (props) => new MutableAttackResolution({ ...props, defenderId }),
+				effects: [this.results, ...additionalEffects]
+			});
+		}
 	}
 }
 
 /** Creates an attack effect. */
-export const attack = (props: FightEffectProps): AttackEffect => new AttackEffect(props);
+export const attack = (props: AttackEffectProps): AttackEffect => new AttackEffect(props);

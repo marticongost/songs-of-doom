@@ -12,12 +12,23 @@ import {
 	type ReadonlyLocationState as ReadonlyLocationStateType
 } from './locationstate';
 import type { MutablePlayerState, ReadonlyPlayerState } from './playerstate';
+import { MutableTestResolution, ReadonlyTestResolution } from './testresolution';
 
 function makeGameState(
 	players: ReadonlyPlayerState[],
 	locations: ReadonlyLocationStateType[] = []
 ): ReadonlyGameState {
 	return new ReadonlyGameState({ players, locations });
+}
+
+function makeTestResolution(proficiency = 0): ReadonlyTestResolution {
+	return new ReadonlyTestResolution({ subjectId: 'c1', proficiency, properties: [] });
+}
+
+function makeMutablePlayer(id = 'p1'): ReadonlyPlayerState {
+	const p = mock<ReadonlyPlayerState>();
+	p.mutable.mockReturnValue({ id, readonly: () => p } as unknown as MutablePlayerState);
+	return p;
 }
 
 // ─── GameState.cards ──────────────────────────────────────────────────────────
@@ -249,82 +260,201 @@ describe('GameState active player stack', () => {
 // ─── GameState implicit target stack ─────────────────────────────────────────
 
 describe('GameState implicit target stack', () => {
-	it('getImplicitTarget returns undefined when the stack is empty', () => {
+	it('getTarget returns undefined when the stack is empty', () => {
 		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(state.getImplicitTarget()).toBeUndefined();
+		expect(state.getTarget()).toBeUndefined();
 	});
 
-	it('requireImplicitTarget throws when the stack is empty', () => {
+	it('requireTarget throws when the stack is empty', () => {
 		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(() => state.requireImplicitTarget()).toThrow();
+		expect(() => state.requireTarget()).toThrow();
 	});
 
-	it('getImplicitTarget returns the top card when the top id is a CardId', () => {
+	it('getTarget returns the top card when the top id is a CardId', () => {
 		const c1 = mock<ReadonlyCardState>();
 		const c2 = mock<ReadonlyCardState>();
 		const p1 = mock<ReadonlyPlayerState>({
 			getCard: (id) => (id === 'c1' ? c1 : id === 'c2' ? c2 : undefined)
 		});
-		const state = new ReadonlyGameState({ players: [p1], implicitTargetStack: ['c1', 'c2'] });
-		expect(state.getImplicitTarget()).toBe(c2);
+		const state = new ReadonlyGameState({ players: [p1], targetStack: ['c1', 'c2'] });
+		expect(state.getTarget()).toBe(c2);
 	});
 
-	it('getImplicitTarget returns the top player when the top id is a PlayerId', () => {
+	it('getTarget returns the top player when the top id is a PlayerId', () => {
 		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
 		const p2 = mock<ReadonlyPlayerState>({ id: 'p2' });
 		const state = new ReadonlyGameState({
 			players: [p1, p2],
-			implicitTargetStack: ['p1', 'p2']
+			targetStack: ['p1', 'p2']
 		});
-		expect(state.getImplicitTarget()).toBe(p2);
+		expect(state.getTarget()).toBe(p2);
 	});
 
-	it('requireImplicitTarget returns the top target', () => {
+	it('requireTarget returns the top target', () => {
 		const c1 = mock<ReadonlyCardState>();
 		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) });
-		const state = new ReadonlyGameState({ players: [p1], implicitTargetStack: ['c1'] });
-		expect(state.requireImplicitTarget()).toBe(c1);
+		const state = new ReadonlyGameState({ players: [p1], targetStack: ['c1'] });
+		expect(state.requireTarget()).toBe(c1);
 	});
 });
 
 // ─── GameState implicit subject stack ────────────────────────────────────────
 
 describe('GameState implicit subject stack', () => {
-	it('getImplicitSubject returns undefined when the stack is empty', () => {
+	it('getSubject returns undefined when the stack is empty', () => {
 		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(state.getImplicitSubject()).toBeUndefined();
+		expect(state.getSubject()).toBeUndefined();
 	});
 
-	it('requireImplicitSubject throws when the stack is empty', () => {
+	it('requireSubject throws when the stack is empty', () => {
 		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(() => state.requireImplicitSubject()).toThrow();
+		expect(() => state.requireSubject()).toThrow();
 	});
 
-	it('getImplicitSubject returns the top card when the top id is a CardId', () => {
+	it('getSubject returns the top card when the top id is a CardId', () => {
 		const c1 = mock<ReadonlyCardState>();
 		const c2 = mock<ReadonlyCardState>();
 		const p1 = mock<ReadonlyPlayerState>({
 			getCard: (id) => (id === 'c1' ? c1 : id === 'c2' ? c2 : undefined)
 		});
-		const state = new ReadonlyGameState({ players: [p1], implicitSubjectStack: ['c1', 'c2'] });
-		expect(state.getImplicitSubject()).toBe(c2);
+		const state = new ReadonlyGameState({ players: [p1], subjectStack: ['c1', 'c2'] });
+		expect(state.getSubject()).toBe(c2);
 	});
 
-	it('getImplicitSubject returns the top player when the top id is a PlayerId', () => {
+	it('getSubject returns the top player when the top id is a PlayerId', () => {
 		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
 		const p2 = mock<ReadonlyPlayerState>({ id: 'p2' });
 		const state = new ReadonlyGameState({
 			players: [p1, p2],
-			implicitSubjectStack: ['p1', 'p2']
+			subjectStack: ['p1', 'p2']
 		});
-		expect(state.getImplicitSubject()).toBe(p2);
+		expect(state.getSubject()).toBe(p2);
 	});
 
-	it('requireImplicitSubject returns the top subject', () => {
+	it('requireSubject returns the top subject', () => {
 		const c1 = mock<ReadonlyCardState>();
 		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) });
-		const state = new ReadonlyGameState({ players: [p1], implicitSubjectStack: ['c1'] });
-		expect(state.requireImplicitSubject()).toBe(c1);
+		const state = new ReadonlyGameState({ players: [p1], subjectStack: ['c1'] });
+		expect(state.requireSubject()).toBe(c1);
+	});
+});
+
+// ─── GameState test resolution stack ───────────────────────────────────────
+
+describe('GameState test resolution stack', () => {
+	it('getActiveTestResolution returns undefined when the stack is empty', () => {
+		const state = makeGameState([mock<ReadonlyPlayerState>()]);
+		expect(state.getActiveTestResolution()).toBeUndefined();
+	});
+
+	it('requireActiveTestResolution throws when the stack is empty', () => {
+		const state = makeGameState([mock<ReadonlyPlayerState>()]);
+		expect(() => state.requireActiveTestResolution()).toThrow();
+	});
+
+	it('getActiveTestResolution returns the last element of the stack', () => {
+		const r1 = makeTestResolution(1);
+		const r2 = makeTestResolution(2);
+		const state = new ReadonlyGameState({
+			players: [],
+			testResolutionStack: [r1, r2]
+		});
+		expect(state.getActiveTestResolution()).toBe(r2);
+	});
+
+	it('requireActiveTestResolution returns the last element of the stack', () => {
+		const r1 = makeTestResolution(3);
+		const state = new ReadonlyGameState({ players: [], testResolutionStack: [r1] });
+		expect(state.requireActiveTestResolution()).toBe(r1);
+	});
+});
+
+// ─── MutableGameState test resolution stack ─────────────────────────────────
+
+describe('MutableGameState test resolution stack', () => {
+	it('is empty when the source stack is empty', () => {
+		const state = new ReadonlyGameState({ players: [makeMutablePlayer()] });
+		expect(state.mutable().testResolutionStack).toEqual([]);
+	});
+
+	it('converts the last element to MutableTestResolution', () => {
+		const r1 = makeTestResolution(5);
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			testResolutionStack: [r1]
+		});
+		const mutable = state.mutable();
+		expect(mutable.testResolutionStack[0]).toBeInstanceOf(MutableTestResolution);
+	});
+
+	it('leaves preceding elements as ReadonlyTestResolution', () => {
+		const r1 = makeTestResolution(1);
+		const r2 = makeTestResolution(2);
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			testResolutionStack: [r1, r2]
+		});
+		const mutable = state.mutable();
+		expect(mutable.testResolutionStack[0]).toBeInstanceOf(ReadonlyTestResolution);
+		expect(mutable.testResolutionStack[1]).toBeInstanceOf(MutableTestResolution);
+	});
+
+	it('getActiveTestResolution returns the last element as MutableTestResolution', () => {
+		const r1 = makeTestResolution(5);
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			testResolutionStack: [r1]
+		});
+		expect(state.mutable().getActiveTestResolution()).toBeInstanceOf(MutableTestResolution);
+	});
+
+	it('requireActiveTestResolution returns the last element as MutableTestResolution', () => {
+		const r1 = makeTestResolution(5);
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			testResolutionStack: [r1]
+		});
+		expect(state.mutable().requireActiveTestResolution()).toBeInstanceOf(MutableTestResolution);
+	});
+
+	it('preserves proficiency values through the mutable conversion', () => {
+		const r1 = makeTestResolution(3);
+		const r2 = makeTestResolution(7);
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			testResolutionStack: [r1, r2]
+		});
+		const mutable = state.mutable();
+		expect(mutable.testResolutionStack[0].proficiency).toBe(3);
+		expect(mutable.testResolutionStack[1].proficiency).toBe(7);
+	});
+
+	it('readonly() converts the last element back to ReadonlyTestResolution', () => {
+		const r1 = makeTestResolution(5);
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			testResolutionStack: [r1]
+		});
+		const roundTripped = state.mutable().readonly();
+		expect(roundTripped.testResolutionStack[0]).toBeInstanceOf(ReadonlyTestResolution);
+	});
+
+	it('readonly() preserves preceding ReadonlyTestResolution elements', () => {
+		const r1 = makeTestResolution(1);
+		const r2 = makeTestResolution(2);
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			testResolutionStack: [r1, r2]
+		});
+		const roundTripped = state.mutable().readonly();
+		expect(roundTripped.testResolutionStack).toHaveLength(2);
+		expect(roundTripped.testResolutionStack[0]).toBeInstanceOf(ReadonlyTestResolution);
+		expect(roundTripped.testResolutionStack[1]).toBeInstanceOf(ReadonlyTestResolution);
+	});
+
+	it('requireActiveTestResolution throws when the stack is empty', () => {
+		const state = new ReadonlyGameState({ players: [makeMutablePlayer()] });
+		expect(() => state.mutable().requireActiveTestResolution()).toThrow();
 	});
 });
 
@@ -399,17 +529,29 @@ describe('ReadonlyGameState', () => {
 		it('copies the implicit target stack', () => {
 			const p1 = mock<ReadonlyPlayerState>();
 			p1.mutable.mockReturnValue({ id: 'p1', readonly: () => p1 } as unknown as MutablePlayerState);
-			const state = new ReadonlyGameState({ players: [p1], implicitTargetStack: ['c1'] });
+			const state = new ReadonlyGameState({ players: [p1], targetStack: ['c1'] });
 			const mutable = state.mutable();
-			expect(mutable.implicitTargetStack).toEqual(['c1']);
+			expect(mutable.targetStack).toEqual(['c1']);
 		});
 
 		it('copies the implicit subject stack', () => {
 			const p1 = mock<ReadonlyPlayerState>();
 			p1.mutable.mockReturnValue({ id: 'p1', readonly: () => p1 } as unknown as MutablePlayerState);
-			const state = new ReadonlyGameState({ players: [p1], implicitSubjectStack: ['c1'] });
+			const state = new ReadonlyGameState({ players: [p1], subjectStack: ['c1'] });
 			const mutable = state.mutable();
-			expect(mutable.implicitSubjectStack).toEqual(['c1']);
+			expect(mutable.subjectStack).toEqual(['c1']);
+		});
+
+		it('copies the test resolution stack', () => {
+			const p1 = mock<ReadonlyPlayerState>();
+			p1.mutable.mockReturnValue({ id: 'p1', readonly: () => p1 } as unknown as MutablePlayerState);
+			const r1 = makeTestResolution(2);
+			const state = new ReadonlyGameState({
+				players: [p1],
+				testResolutionStack: [r1]
+			});
+			const mutable = state.mutable();
+			expect(mutable.testResolutionStack).toHaveLength(1);
 		});
 
 		it('copies locations', () => {

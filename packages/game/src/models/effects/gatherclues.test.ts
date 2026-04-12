@@ -6,7 +6,7 @@ import type { GameGraph } from '../game/gamegraph';
 import type { MutableGameState } from '../game/gamestate';
 import { ReadonlyLocationState, type MutableLocationState } from '../game/locationstate';
 import { Target } from '../target';
-import { type GatherCluesOutcome, GatherCluesEffect, gatherClues } from './gatherclues';
+import { GatherCluesEffect, gatherClues, type GatherCluesOutcome } from './gatherclues';
 
 function makeSubject(id: `c${number}`, clues = 0): MutableCardState {
 	return new ReadonlyCardState({
@@ -33,11 +33,10 @@ function makeLocation(id: `c${number}`, clues: number): MutableLocationState {
 // ─── GatherCluesEffect construction ───────────────────────────────────────────
 
 describe('GatherCluesEffect construction', () => {
-	it('gatherClues(amount) creates an effect with that amount and no subject', () => {
+	it('gatherClues(amount) creates an effect with that amount', () => {
 		const effect = gatherClues(3);
 		expect(effect).toBeInstanceOf(GatherCluesEffect);
 		expect(effect.amount).toBe(3);
-		expect(effect.subject).toBeUndefined();
 	});
 
 	it('gatherClues({ amount }) creates an effect whose target defaults to a Target instance', () => {
@@ -46,11 +45,9 @@ describe('GatherCluesEffect construction', () => {
 		expect(effect.target).toBeInstanceOf(Target);
 	});
 
-	it('gatherClues({ amount, subject, target }) stores subject and target as Target instances', () => {
-		const subject = new Target({ type: 'player' });
+	it('gatherClues({ amount, target }) stores target as a Target instance', () => {
 		const target = new Target({ type: 'location' });
-		const effect = gatherClues({ amount: 1, subject, target });
-		expect(effect.subject).toBeInstanceOf(Target);
+		const effect = gatherClues({ amount: 1, target });
 		expect(effect.target).toBeInstanceOf(Target);
 	});
 });
@@ -68,7 +65,7 @@ describe('GatherCluesEffect.trigger', () => {
 			.mockReturnValue(location as unknown as MutableCardState);
 		mutableState.evaluate.calledWith(3).mockReturnValue(3);
 		const graph = mock<GameGraph>();
-		graph.requestSubjects.mockResolvedValue(['c1']);
+		graph.requireSubject.mockReturnValue(subject);
 		graph.requestMultipleTargetsOrImplicitTarget.mockResolvedValue(['c2']);
 		let callbackReturn: unknown;
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
@@ -80,7 +77,7 @@ describe('GatherCluesEffect.trigger', () => {
 		expect(subject.clues).toBe(3);
 		expect(location.clues).toBe(2);
 		const outcome = callbackReturn as GatherCluesOutcome;
-		expect(outcome.gatheredClues.get('c1')?.get('c2')).toBe(3);
+		expect(outcome.gatheredClues.get('c2')).toBe(3);
 	});
 
 	it('gathers at most the available clues on the location', async () => {
@@ -93,7 +90,7 @@ describe('GatherCluesEffect.trigger', () => {
 			.mockReturnValue(location as unknown as MutableCardState);
 		mutableState.evaluate.calledWith(5).mockReturnValue(5);
 		const graph = mock<GameGraph>();
-		graph.requestSubjects.mockResolvedValue(['c1']);
+		graph.requireSubject.mockReturnValue(subject);
 		graph.requestMultipleTargetsOrImplicitTarget.mockResolvedValue(['c2']);
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callback(mutableState);
@@ -115,7 +112,7 @@ describe('GatherCluesEffect.trigger', () => {
 		mutableState.requireCard.calledWith('c3').mockReturnValue(loc2 as unknown as MutableCardState);
 		mutableState.evaluate.calledWith(2).mockReturnValue(2);
 		const graph = mock<GameGraph>();
-		graph.requestSubjects.mockResolvedValue(['c1']);
+		graph.requireSubject.mockReturnValue(subject);
 		graph.requestMultipleTargetsOrImplicitTarget.mockResolvedValue(['c2', 'c3']);
 		let callbackReturn: unknown;
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
@@ -128,36 +125,7 @@ describe('GatherCluesEffect.trigger', () => {
 		expect(loc1.clues).toBe(1);
 		expect(loc2.clues).toBe(2);
 		const outcome = callbackReturn as GatherCluesOutcome;
-		expect(outcome.gatheredClues.get('c1')?.get('c2')).toBe(2);
-		expect(outcome.gatheredClues.get('c1')?.get('c3')).toBe(2);
-	});
-
-	it('tracks gathered clues per subject separately in the outcome', async () => {
-		const s1 = makeSubject('c1', 0);
-		const s2 = makeSubject('c2', 0);
-		const location = makeLocation('c3', 6);
-		const mutableState = mock<MutableGameState>();
-		mutableState.requireEntityState.calledWith('c1').mockReturnValue(s1);
-		mutableState.requireEntityState.calledWith('c2').mockReturnValue(s2);
-		mutableState.requireCard
-			.calledWith('c3')
-			.mockReturnValue(location as unknown as MutableCardState);
-		mutableState.evaluate.calledWith(2).mockReturnValue(2);
-		const graph = mock<GameGraph>();
-		graph.requestSubjects.mockResolvedValue(['c1', 'c2']);
-		graph.requestMultipleTargetsOrImplicitTarget.mockResolvedValue(['c3']);
-		let callbackReturn: unknown;
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callbackReturn = callback(mutableState);
-		});
-
-		await gatherClues(2).trigger(graph);
-
-		expect(s1.clues).toBe(2);
-		expect(s2.clues).toBe(2);
-		expect(location.clues).toBe(2);
-		const outcome = callbackReturn as GatherCluesOutcome;
-		expect(outcome.gatheredClues.get('c1')?.get('c3')).toBe(2);
-		expect(outcome.gatheredClues.get('c2')?.get('c3')).toBe(2);
+		expect(outcome.gatheredClues.get('c2')).toBe(2);
+		expect(outcome.gatheredClues.get('c3')).toBe(2);
 	});
 });

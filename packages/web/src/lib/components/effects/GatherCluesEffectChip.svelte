@@ -23,9 +23,6 @@ Renders a gather clues effect, displaying the amount of clues gathered and the s
 </script>
 
 <span {...standardAttributes(attributes, 'gather-clues-effect-chip')}>
-	{#if effect.subject}
-		<TargetChip target={effect.subject} />
-	{/if}
 	{#if typeof effect.amount === 'number'}
 		<CluesIndicator amount={effect.amount} />
 	{:else}

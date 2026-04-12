@@ -1,4 +1,4 @@
 export { BaseCounter, Counter, ReadonlyCounter } from './counter';
 export * from './localisation';
 export { shuffle, weightedChoice } from './random';
-export { finalise, mapToRecord, type Constructor, type MapToRecordOptions } from './utils';
+export { finalise, groupBy, mapToRecord, type Constructor, type MapToRecordOptions } from './utils';

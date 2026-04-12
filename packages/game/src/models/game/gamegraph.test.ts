@@ -3,11 +3,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { Obligation, Opportunity } from '../capabilities/reaction';
 import { Effect } from '../effects/effect';
 import { events } from '../event';
-import { Target, type ActorTargetType, type TargetType } from '../target';
+import { Target, type TargetType } from '../target';
 import type { MutableCardState, ReadonlyCardState } from './cardstate';
 import {
-	CapabilityFinished,
 	CapabilityTriggered,
+	EndGroup,
 	EffectTriggered,
 	EventTriggered,
 	GameGraph,
@@ -131,35 +131,81 @@ describe('GameGraph.add', () => {
 // ─── GameGraph.group / beginGroup / endGroup ──────────────────────────────────
 
 describe('GameGraph.group', () => {
-	it('nodes inside the group have the pre-group current as parent', async () => {
+	it('adds the initial node before beginning the group', async () => {
 		const graph = new GameGraph({ initialState: { players: [] } });
-		const groupParent = graph.current;
-		await graph.group(async () => {
-			graph.add(InputReceived, { values: {} });
-		});
-		const child = groupParent.next!;
-		expect(child.parent).toBe(groupParent);
+		await graph.group(InputReceived, { values: {} }, {}, async () => {});
+		expect(graph.start.next).toBeInstanceOf(InputReceived);
 	});
 
-	it('the parent node accumulates child nodes', async () => {
+	it('nodes inside the callback have the initial node as parent', async () => {
 		const graph = new GameGraph({ initialState: { players: [] } });
-		const groupParent = graph.current;
-		await graph.group(async () => {
+		await graph.group(InputReceived, { values: {} }, {}, async () => {
+			graph.add(InputReceived, { values: {} });
+		});
+		const initialNode = graph.start.next!;
+		const child = initialNode.next!;
+		expect(child.parent).toBe(initialNode);
+	});
+
+	it('the initial node accumulates all children including EndGroup', async () => {
+		const graph = new GameGraph({ initialState: { players: [] } });
+		await graph.group(InputReceived, { values: {} }, {}, async () => {
 			graph.add(InputReceived, { values: { a: 1 } });
 			graph.add(InputReceived, { values: { b: 2 } });
 		});
-		const firstChild = groupParent.next!;
-		const secondChild = firstChild.next!;
-		expect(groupParent.children).toEqual([firstChild, secondChild]);
+		const initialNode = graph.start.next!;
+		expect(initialNode.children).toHaveLength(3); // two explicit + EndGroup
+		expect(initialNode.children[2]).toBeInstanceOf(EndGroup);
+	});
+
+	it('EndGroup carries the id of the initial node', async () => {
+		const graph = new GameGraph({ initialState: { players: [] } });
+		await graph.group(InputReceived, { values: {} }, {}, async () => {});
+		const initialNode = graph.start.next!;
+		const endGroup = initialNode.children[0] as EndGroup;
+		expect(endGroup.groupNodeId).toBe(initialNode.id);
 	});
 
 	it('nodes added after the group have no parent at root level', async () => {
 		const graph = new GameGraph({ initialState: { players: [] } });
-		await graph.group(async () => {
-			graph.add(InputReceived, { values: {} });
-		});
+		await graph.group(InputReceived, { values: {} }, {}, async () => {});
 		graph.add(InputReceived, { values: {} });
 		expect(graph.current.parent).toBeUndefined();
+	});
+
+	it('context ids are pushed onto their stacks in the initial node state', async () => {
+		const graph = new GameGraph({ initialState: { players: [] } });
+		await graph.group(
+			InputReceived,
+			{ values: {} },
+			{ activeCardId: 'c1', targetId: 'c1', subjectId: 'c1' },
+			async () => {}
+		);
+		const initialNode = graph.start.next!;
+		expect(initialNode.state.activeCardStack).toContain('c1');
+		expect(initialNode.state.targetStack).toContain('c1');
+		expect(initialNode.state.subjectStack).toContain('c1');
+	});
+
+	it('EndGroup pops context ids from their stacks', async () => {
+		const graph = new GameGraph({ initialState: { players: [] } });
+		await graph.group(
+			InputReceived,
+			{ values: {} },
+			{ activeCardId: 'c1', targetId: 'c1', subjectId: 'c1' },
+			async () => {}
+		);
+		const initialNode = graph.start.next!;
+		const endGroup = initialNode.children[0];
+		expect(endGroup.state.activeCardStack).not.toContain('c1');
+		expect(endGroup.state.targetStack).not.toContain('c1');
+		expect(endGroup.state.subjectStack).not.toContain('c1');
+	});
+
+	it('returns the value from the callback', async () => {
+		const graph = new GameGraph({ initialState: { players: [] } });
+		const result = await graph.group(InputReceived, { values: {} }, {}, async () => 42);
+		expect(result).toBe(42);
 	});
 
 	it('endGroup without beginGroup throws', () => {
@@ -265,7 +311,7 @@ describe('GameGraph.requestSingleTargetOrImplicitTarget', () => {
 		const c1 = mock<ReadonlyCardState>({ id: 'c1' });
 		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) });
 		const graph = new GameGraph({
-			initialState: { players: [p1], implicitTargetStack: ['c1'] }
+			initialState: { players: [p1], targetStack: ['c1'] }
 		});
 		const result = await graph.requestSingleTargetOrImplicitTarget(undefined);
 		expect(result).toBe('c1');
@@ -296,7 +342,7 @@ describe('GameGraph.requestMultipleTargetsOrImplicitTarget', () => {
 		const c1 = mock<ReadonlyCardState>({ id: 'c1' });
 		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) });
 		const graph = new GameGraph({
-			initialState: { players: [p1], implicitTargetStack: ['c1'] }
+			initialState: { players: [p1], targetStack: ['c1'] }
 		});
 		const result = await graph.requestMultipleTargetsOrImplicitTarget(undefined);
 		expect(result).toEqual(['c1']);
@@ -359,29 +405,6 @@ describe('GameGraph.requestPlayersOrActivePlayer', () => {
 		await expect(graph.requestPlayersOrActivePlayer(new Target(targetType))).rejects.toThrow(
 			'Expected target to be of type player'
 		);
-	});
-});
-
-// ─── GameGraph.requestSubjects ───────────────────────────────────────────────
-
-describe('GameGraph.requestSubjects', () => {
-	it('returns the implicit subject id when target is undefined', async () => {
-		const c1 = mock<ReadonlyCardState>({ id: 'c1' });
-		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) });
-		const graph = new GameGraph({
-			initialState: { players: [p1], implicitSubjectStack: ['c1'] }
-		});
-		const result = await graph.requestSubjects(undefined);
-		expect(result).toEqual(['c1']);
-	});
-
-	it('requests input and returns all selected target ids when target is provided', async () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
-		const target = new Target<ActorTargetType>('player');
-		const promise = graph.requestSubjects(target);
-		await graph.supplyInput({ target: ['p1', 'p2'] });
-		const result = await promise;
-		expect(result).toEqual(['p1', 'p2']);
 	});
 });
 
@@ -563,11 +586,9 @@ describe('GameNode types', () => {
 		expect(node.cardId).toBe('c1');
 	});
 
-	it('CapabilityFinished stores capability and cardId', () => {
-		const capability = new Obligation({ effects: [], triggers: ['attacking'] });
-		const node = new CapabilityFinished({ id: 1, state, capability, cardId: 'c1' });
-		expect(node.capability).toBe(capability);
-		expect(node.cardId).toBe('c1');
+	it('EndGroup stores the groupNodeId', () => {
+		const node = new EndGroup({ id: 2, state, groupNodeId: 1 });
+		expect(node.groupNodeId).toBe(1);
 	});
 
 	it('EffectTriggered stores effect and outcome', () => {

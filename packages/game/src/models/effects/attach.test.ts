@@ -35,7 +35,7 @@ describe('AttachEffect.trigger', () => {
 		const mutableState = mock<MutableGameState>();
 		const targetCard = mock<MutableCardState>();
 		const attachmentCard = mock<MutableCardState>();
-		mutableState.requireTarget.calledWith('c2').mockReturnValue(targetCard);
+		mutableState.requireCard.calledWith('c2').mockReturnValue(targetCard);
 		mutableState.requireActiveCard.mockReturnValue(attachmentCard);
 		const graph = mock<GameGraph>();
 		graph.requestSingleTargetOrActiveCard.calledWith(target).mockResolvedValue('c2');

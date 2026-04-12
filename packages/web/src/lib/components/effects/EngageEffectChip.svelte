@@ -10,12 +10,5 @@
 	const { effect }: Props = $props();
 </script>
 
-<TargetChip target={effect.subject} />
-{#if !effect.subject}
-	<Text ca="Enfrontar-se a" es="Enfrentarse a" en="Engage" />
-{:else if effect.subject?.cardinality.isSingleTarget()}
-	<Text ca="s'enfronta a" es="se enfrenta a" en="engages" />
-{:else}
-	<Text ca="s'enfronten" es="se enfrentan" en="engage" />
-{/if}
+<Text ca="Enfrontar-se a" es="Enfrentarse a" en="Engage" />
 <TargetChip target={effect.target} />

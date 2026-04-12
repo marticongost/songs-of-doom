@@ -1,14 +1,23 @@
+import { groupBy } from '@songsofdoom/common';
 import { Obligation } from '../capabilities';
-import type { Capability } from '../capability';
 import type { Effect } from '../effects';
-import type { EffectOutcome } from '../effects/effect';
+import { AfterTest, BeforeTest, DuringTest, type EffectOutcome } from '../effects/effect';
 import { events, type Event, type EventType } from '../event';
-import { Target, type ActorTargetType } from '../target';
+import type { ScalarExpressionType } from '../expressions';
+import type { Property } from '../properties';
+import type { Result } from '../results';
+import { Target } from '../target';
 import type { CapabilityRef } from './cardstate';
+import { CHILDREN, EndGroup, GameNode, NEXT, type GameNodeProps } from './gamenodes';
 import { ReadonlyGameState, type GameStateProps, type MutableGameState } from './gamestate';
 import { type CardId, type EntityId, type PlayerId } from './identifiers';
 import type { Field } from './playerinput';
-import { CapabilityChoiceField, TargetField } from './playerinput';
+import { CapabilityChoiceField, ResultField, TargetField } from './playerinput';
+import {
+	MutableTestResolution,
+	type ReadonlyTestResolution,
+	type TestResolutionProps
+} from './testresolution';
 
 type FieldsResult<Fields extends ReadonlyArray<Field<unknown, string, boolean>>> = {
 	[F in Fields[number] as F['name']]: F extends Field<infer T, string, infer R>
@@ -21,6 +30,25 @@ type FieldsResult<Fields extends ReadonlyArray<Field<unknown, string, boolean>>>
 export interface GameGraphProps {
 	initialState: GameStateProps;
 	onChange?: () => void;
+}
+
+export interface TestProps {
+	/** Id of the entity performing the test. */
+	subjectId: EntityId;
+
+	/** Expression indicating the proficiency level of the test. */
+	proficiency: ScalarExpressionType;
+
+	/** Properties associated with the test. */
+	properties?: Array<Property>;
+
+	/** Optional factory function to create a the resolution object that will be used
+	 * to keep track of the test's modifiers and outcome. Leave empty to use the default;
+	 * override if a test requires additional book-keeping (e.g. attacks). */
+	resolutionFactory?: (props: TestResolutionProps) => MutableTestResolution;
+
+	/** Effects to trigger before, during and after the test. */
+	effects?: Array<Effect>;
 }
 
 export class GameGraph {
@@ -84,22 +112,6 @@ export class GameGraph {
 		}
 	}
 
-	capabilityTriggered(
-		capability: Capability,
-		cardId: CardId,
-		state?: ReadonlyGameState | ((stateAlteration: MutableGameState) => void)
-	) {
-		this.add(CapabilityTriggered, { capability, cardId, state });
-	}
-
-	capabilityFinished(
-		capability: Capability,
-		cardId: CardId,
-		state?: ReadonlyGameState | ((stateAlteration: MutableGameState) => void)
-	) {
-		this.add(CapabilityFinished, { capability, cardId, state });
-	}
-
 	effectTriggered<E extends Effect>(effect: E, state: (s: MutableGameState) => EffectOutcome<E>) {
 		const mutableState = this._current.state.mutable();
 		let outcome: EffectOutcome<E>;
@@ -156,7 +168,7 @@ export class GameGraph {
 
 	async requestSingleTargetOrImplicitTarget(target: Target | undefined): Promise<EntityId> {
 		if (target === undefined) {
-			return this._current.state.requireImplicitTarget().id;
+			return this._current.state.requireTarget().id;
 		}
 		const targetIds = (await this.requestInput(target)).target;
 		if (targetIds.length !== 1) {
@@ -167,9 +179,13 @@ export class GameGraph {
 
 	async requestMultipleTargetsOrImplicitTarget(target: Target | undefined): Promise<EntityId[]> {
 		if (target === undefined) {
-			return [this._current.state.requireImplicitTarget().id];
+			return [this._current.state.requireTarget().id];
 		}
 		return (await this.requestInput(target)).target;
+	}
+
+	requireSubject(): { id: EntityId } {
+		return this._current.state.requireSubject();
 	}
 
 	async requestPlayersOrActivePlayer(target: Target | undefined): Promise<PlayerId[]> {
@@ -182,17 +198,155 @@ export class GameGraph {
 		return (await this.requestInput(target)).target as PlayerId[];
 	}
 
-	async requestSubjects(target: Target<ActorTargetType> | undefined): Promise<EntityId[]> {
-		if (target === undefined) {
-			return [this._current.state.requireImplicitSubject().id];
-		}
-		return (await this.requestInput(target)).target;
+	async test({
+		subjectId,
+		proficiency,
+		properties,
+		resolutionFactory,
+		effects = []
+	}: TestProps): Promise<Result> {
+		return await this.group(
+			DrawingFate,
+			{
+				state: (state) => {
+					if (!resolutionFactory) {
+						resolutionFactory = (props: TestResolutionProps) => new MutableTestResolution(props);
+					}
+					state.testResolutionStack.push(
+						resolutionFactory({
+							subjectId,
+							proficiency,
+							properties: properties ? [...properties] : []
+						})
+					);
+				}
+			},
+			{},
+			async () => {
+				const effectsByTiming = groupBy(effects, (effect) => effect.testTiming);
+
+				this.eventTriggered('beforeDrawingFate');
+				for (const effect of effectsByTiming.get(BeforeTest) ?? []) {
+					effect.trigger(this);
+				}
+
+				const { result } = await this.requestInput(new ResultField({ name: 'result' }));
+
+				for (const effect of effectsByTiming.get(DuringTest) ?? []) {
+					effect.trigger(this);
+				}
+
+				this.eventTriggered('afterDrawingFate');
+				for (const effect of effectsByTiming.get(AfterTest) ?? []) {
+					effect.trigger(this);
+				}
+
+				this.add(FateDrawn, {
+					resolution: this._current.state.requireActiveTestResolution() as ReadonlyTestResolution,
+					state: (state) => {
+						state.testResolutionStack.pop();
+					}
+				});
+				return result;
+			}
+		);
 	}
 
-	async group(callback: () => Promise<void>) {
+	/**
+	 * Opens a group, adds the initial node (just like {@link add}), runs the callback
+	 * with all mutations as children of that node, appends an {@link EndGroup} node that
+	 * cleans up any contextual state pushed by the initial node, then closes the group.
+	 *
+	 * @param nodeType - Constructor of the initial group node.
+	 * @param nodeProps - Props for the initial node (same shape as {@link add}).
+	 *   When `context` contains ids, their stack pushes are merged into this state mutation
+	 *   automatically.
+	 * @param context - Contextual identifiers to push onto the corresponding game-state
+	 *   stacks before the callback runs. Each entry is popped by the automatically added
+	 *   {@link EndGroup} node when the group closes.
+	 * @param context.subjectId - Pushed onto `subjectStack` for the duration of the group.
+	 * @param context.targetId - Pushed onto `targetStack` for the duration of the group.
+	 * @param context.activeCardId - Pushed onto `activeCardStack` for the duration of the group.
+	 * @param context.activePlayerId - Pushed onto `activePlayerStack` for the duration of the group.
+	 * @param context.openWith - Optional extra state mutation applied inside the initial node,
+	 *   *after* any contextual stack entries are pushed. Use this for setup that depends on the
+	 *   group's context being already established.
+	 * @param context.closeWith - Optional extra state mutation applied inside the {@link EndGroup}
+	 *   node, *before* any contextual stack entries are popped. Use this for cleanup that still
+	 *   needs the group's context to be intact (e.g. discarding the active card).
+	 * @param callback - Async function containing all mutations that belong to this group.
+	 * @returns The value returned by `callback`.
+	 */
+	async group<P extends GameNodeProps, T>(
+		nodeType: new (props: P) => GameNode,
+		nodeProps: Omit<P, 'id' | 'parent' | 'previous' | 'state'> & {
+			state?: ReadonlyGameState | ((stateAlteration: MutableGameState) => void);
+		},
+		context: {
+			subjectId?: EntityId;
+			targetId?: EntityId;
+			activeCardId?: CardId;
+			activePlayerId?: PlayerId;
+			openWith?: (state: MutableGameState) => void;
+			closeWith?: (state: MutableGameState) => void;
+		},
+		callback: () => Promise<T>
+	): Promise<T> {
+		const { subjectId, targetId, activeCardId, activePlayerId, openWith, closeWith } = context;
+		const hasContext =
+			subjectId !== undefined ||
+			targetId !== undefined ||
+			activeCardId !== undefined ||
+			activePlayerId !== undefined;
+
+		// Merge context stack-pushes (and optional openWith) into the initial node's state mutation.
+		const originalState = nodeProps.state;
+		const needsOpenState = hasContext || openWith !== undefined;
+		const mergedState: ReadonlyGameState | ((s: MutableGameState) => void) | undefined =
+			needsOpenState
+				? (state: MutableGameState) => {
+						if (typeof originalState === 'function') originalState(state);
+						if (activeCardId !== undefined) state.activeCardStack.push(activeCardId);
+						if (activePlayerId !== undefined) state.activePlayerStack.push(activePlayerId);
+						if (targetId !== undefined) state.targetStack.push(targetId);
+						if (subjectId !== undefined) state.subjectStack.push(subjectId);
+						if (openWith) openWith(state);
+					}
+				: originalState;
+
+		const nodeBeforeAdd = this._current;
+		this.add(nodeType, { ...nodeProps, state: mergedState } as Omit<
+			P,
+			'id' | 'parent' | 'previous' | 'state'
+		> & {
+			state?: ReadonlyGameState | ((s: MutableGameState) => void);
+		});
+		if (this._current === nodeBeforeAdd) {
+			// The initial add was cancelled; skip the group.
+			return undefined as T;
+		}
+		const groupNodeId = this._current.id;
+
 		this.beginGroup();
-		await callback();
+		const result = await callback();
+
+		// Add EndGroup: apply closeWith first (context still intact), then pop stacks.
+		const needsEndGroupState = hasContext || closeWith !== undefined;
+		this.add(EndGroup, {
+			groupNodeId,
+			...(needsEndGroupState && {
+				state: (state: MutableGameState) => {
+					if (closeWith) closeWith(state);
+					if (subjectId !== undefined) state.subjectStack.pop();
+					if (targetId !== undefined) state.targetStack.pop();
+					if (activePlayerId !== undefined) state.activePlayerStack.pop();
+					if (activeCardId !== undefined) state.activeCardStack.pop();
+				}
+			})
+		});
+
 		this.endGroup();
+		return result;
 	}
 
 	beginGroup() {
@@ -218,8 +372,7 @@ export class GameGraph {
 		);
 
 		if (reactiveCapabilities.size > 0) {
-			this.add(EventTriggered, { event: events[eventType] });
-			await this.group(async () => {
+			await this.group(EventTriggered, { event: events[eventType] }, {}, async () => {
 				while (reactiveCapabilities.size > 0) {
 					const { selection } = await this.requestInput(
 						new CapabilityChoiceField({
@@ -244,68 +397,16 @@ export class GameGraph {
 	}
 }
 
-export interface GameNodeProps {
-	id: number;
-	parent?: GameNode;
-	previous?: GameNode;
-	state: ReadonlyGameState;
-}
-
-const CHILDREN = Symbol('children');
-const NEXT = Symbol('next');
-
-export abstract class GameNode {
-	readonly id: number;
-	readonly parent?: GameNode;
-	readonly previous?: GameNode;
-	readonly [CHILDREN]: Array<GameNode> = [];
-	[NEXT]?: GameNode;
-	readonly state: ReadonlyGameState;
-
-	constructor({ id, parent, previous, state }: GameNodeProps) {
-		this.id = id;
-		this.parent = parent;
-		this.state = state;
-		this.previous = previous;
-	}
-
-	get children(): ReadonlyArray<GameNode> {
-		return this[CHILDREN];
-	}
-
-	get next(): GameNode | undefined {
-		return this[NEXT];
-	}
-}
+export {
+	CapabilityTriggered,
+	EndGroup,
+	GameNode,
+	type GameNodeProps,
+	type CapabilityTriggeredProps,
+	type EndGroupProps
+} from './gamenodes';
 
 export class GameStart extends GameNode {}
-
-export interface CapabilityTriggeredProps extends GameNodeProps {
-	capability: Capability;
-	cardId: CardId;
-}
-
-export class CapabilityTriggered extends GameNode {
-	readonly capability: Capability;
-	readonly cardId: CardId;
-
-	constructor({ capability, cardId, ...baseProps }: CapabilityTriggeredProps) {
-		super(baseProps);
-		this.capability = capability;
-		this.cardId = cardId;
-	}
-}
-
-export class CapabilityFinished extends GameNode {
-	readonly capability: Capability;
-	readonly cardId: CardId;
-
-	constructor({ capability, cardId, ...baseProps }: CapabilityTriggeredProps) {
-		super(baseProps);
-		this.capability = capability;
-		this.cardId = cardId;
-	}
-}
 
 export interface EffectTriggeredProps<EffectType extends Effect> extends GameNodeProps {
 	effect: EffectType;
@@ -359,6 +460,21 @@ export class InputReceived extends GameNode {
 	constructor({ values, ...baseProps }: InputReceivedProps) {
 		super(baseProps);
 		this.values = values;
+	}
+}
+
+export class DrawingFate extends GameNode {}
+
+export interface FateDrawnProps extends GameNodeProps {
+	resolution: ReadonlyTestResolution;
+}
+
+export class FateDrawn extends GameNode {
+	readonly resolution: ReadonlyTestResolution;
+
+	constructor({ resolution, ...baseProps }: FateDrawnProps) {
+		super(baseProps);
+		this.resolution = resolution;
 	}
 }
 

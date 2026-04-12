@@ -62,3 +62,18 @@ export const mapToRecord = <
 	}
 	return record;
 };
+
+/** Group a collection of values by the given key. */
+export const groupBy = <K, V>(values: Array<V>, getKey: (value: V) => K): Map<K, Array<V>> => {
+	const map = new Map<K, Array<V>>();
+	for (const value of values) {
+		const key = getKey(value);
+		const group = map.get(key);
+		if (group) {
+			group.push(value);
+		} else {
+			map.set(key, [value]);
+		}
+	}
+	return map;
+};

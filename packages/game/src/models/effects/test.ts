@@ -2,7 +2,7 @@ import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
 import type { GameGraph } from '../game/gamegraph';
 import type { MutableGameState } from '../game/gamestate';
-import { Target, type TargetSpec } from '../target';
+import { Target, type ActorTargetType, type TargetSpec } from '../target';
 import { Effect } from './effect';
 import { ResultsTableEffect, type ResultsTableEffectProps } from './resultstable';
 
@@ -19,9 +19,11 @@ export interface TestEffectProps {
 	 * The target(s) that must perform the test.
 	 * Defaults to "active-player" if not specified.
 	 */
-	target?: TargetSpec;
+	target?: TargetSpec<ActorTargetType>;
+
 	/** The expression that sets the proficiency level for the test. */
 	expression: ScalarExpressionType;
+
 	/** The effects to apply based on the test result. */
 	results: ResultsSpec;
 }
@@ -32,9 +34,11 @@ export interface TestEffectProps {
  */
 export class TestEffect extends Effect {
 	/** The target(s) that must perform the test. */
-	readonly target: Target;
+	readonly target: Target<ActorTargetType>;
+
 	/** The expression that sets the proficiency level for the test. */
 	readonly expression: ScalarExpressionType;
+
 	/** The effects to apply based on the test result. */
 	readonly results: ResultsTableEffect;
 

@@ -36,7 +36,7 @@ describe('ConferPropertiesEffect.trigger', () => {
 		const target = mock<MutableCardState>({ properties: [] });
 		target.getProperty.calledWith(grantedProperty).mockReturnValue(undefined);
 		const mutableState = mock<MutableGameState>();
-		mutableState.requireImplicitTarget.mockReturnValue(target);
+		mutableState.requireTarget.mockReturnValue(target);
 		const graph = mock<GameGraph>();
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callback(mutableState);
@@ -55,7 +55,7 @@ describe('ConferPropertiesEffect.trigger', () => {
 		const target = mock<MutableCardState>({ properties: [existingProperty] });
 		target.getProperty.calledWith(grantedProperty).mockReturnValue(existingProperty);
 		const mutableState = mock<MutableGameState>();
-		mutableState.requireImplicitTarget.mockReturnValue(target);
+		mutableState.requireTarget.mockReturnValue(target);
 		const graph = mock<GameGraph>();
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callback(mutableState);
