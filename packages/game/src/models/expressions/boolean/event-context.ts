@@ -1,4 +1,5 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
+import type { EntityTypeId } from '../../..';
 import type { GameState } from '../../game/gamestate';
 import { BooleanExpression } from './boolean-expression';
 
@@ -120,6 +121,20 @@ class ReactiveCardIsTargetExpression extends BooleanExpression {
 	}
 }
 
+class ActiveCardHasTypeExpression extends BooleanExpression {
+	readonly type: EntityTypeId;
+
+	constructor(type: EntityTypeId) {
+		super();
+		this.type = type;
+	}
+
+	override evaluate(state: GameState): boolean {
+		const activeCard = state.getActiveCard();
+		return activeCard !== undefined && activeCard.card.type.id === this.type;
+	}
+}
+
 export const activeCardIsTarget = new ActiveCardIsTargetExpression();
 export const activeCardIsActor = new ActiveCardIsActorExpression();
 export const reactivePlayerIsNotActivePlayer = new ActiveCardOwnerIsNotActivePlayerExpression();
@@ -127,3 +142,4 @@ export const reactiveCardIsSubject = new ReactiveCardIsSubjectExpression();
 export const reactiveCardIsTarget = new ReactiveCardIsTargetExpression();
 export const reactivePlayerIsSubject = new ReactivePlayerIsSubjectExpression();
 export const reactivePlayerIsTarget = new ReactivePlayerIsTargetExpression();
+export const activeCardHasType = (type: EntityTypeId) => new ActiveCardHasTypeExpression(type);

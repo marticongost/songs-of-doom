@@ -152,10 +152,10 @@ export interface TestProps {
 	/** Effects to trigger before, during and after the test. */
 	effects?: Array<Effect>;
 
-	/** Optional callback run immediately before the `beforeDrawingFate` event. */
+	/** Optional callback run before the token is drawn. */
 	beforeTest?: (gameGraph: GameGraph) => void | Promise<void>;
 
-	/** Optional callback run immediately before the `afterDrawingFate` event. */
+	/** Optional callback run after the token is drawn. */
 	afterTest?: (gameGraph: GameGraph) => void | Promise<void>;
 }
 
@@ -396,7 +396,7 @@ export class GameGraph {
 				}
 
 				const { result } = await this.requestInput([new ResultField({ name: 'result' })]);
-
+				this.eventTriggered('fateTokenRevealed');
 				for (const effect of effectsByTiming.get(DuringTest) ?? []) {
 					effect.trigger(this);
 				}

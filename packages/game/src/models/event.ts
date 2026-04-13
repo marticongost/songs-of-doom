@@ -2,7 +2,10 @@ import { mapToRecord } from '@songsofdoom/common';
 import type { LocalisedText } from '@songsofdoom/common/localisation';
 import type { CardId, EntityId, PlayerId } from './game/identifiers';
 
-export type EventProps = { type: EventType; name: LocalisedText };
+export type EventProps = {
+	type: EventType;
+	name: LocalisedText;
+};
 
 export class Event {
 	readonly type: EventType;
@@ -15,52 +18,43 @@ export class Event {
 }
 
 const eventData: Record<string, Omit<EventProps, 'type'>> = {
-	beforeEnemyEngagesWithSelf: {
+	engage: {
 		name: {
-			ca: 'Abans de ser enfrontat per un enemic',
-			es: 'Antes de ser enfrentado por un enemigo',
-			en: 'Before being engaged by an enemy'
+			ca: "Abans d'un enfrontament",
+			es: 'Antes de un enfrentamiento',
+			en: 'Before an engagement'
 		}
 	},
 	played: {
 		name: { ca: 'En entrar en joc', es: 'Al entrar en juego', en: 'When played' }
 	},
-	investigating: {
-		name: { ca: 'En investigar', es: 'Al investigar', en: 'When investigating' }
-	},
-	attack: {
-		name: { ca: 'En un atac', es: 'En un ataque', en: 'During an attack' }
-	},
-	afterReceivedAttackResolved: {
+	investigation: {
 		name: {
-			ca: 'Després de resoldre un atac rebut',
-			es: 'Tras resolver un ataque recibido',
-			en: 'After resolving a received attack'
+			ca: 'Durant una investigació',
+			es: 'Durante una investigación',
+			en: 'When investigating'
 		}
 	},
-	afterDefending: {
+	attack: {
 		name: {
-			ca: "Després de defensar-se d'un atac",
-			es: 'Tras defenderse de un ataque',
-			en: 'After defending against an attack'
+			ca: 'Quan es resolgui un atac',
+			es: 'Cuando se resuelva un ataque',
+			en: 'When resolving an attack'
 		}
 	},
 	enemyDefeated: {
 		name: {
-			ca: 'En derrotar un enemic',
-			es: 'Al derrotar a un enemigo',
-			en: 'When defeating an enemy'
+			ca: 'Quan un enemic sigui derrotat',
+			es: 'Cuando un enemigo sea derrotado',
+			en: 'When an enemy is defeated'
 		}
 	},
 	payingCapability: {
 		name: {
-			ca: 'En pagar una capacitat',
-			es: 'Al pagar una capacidad',
+			ca: 'Quan es pagui una capacitat',
+			es: 'Cuando se pague una capacidad',
 			en: 'When paying for a capability'
 		}
-	},
-	acquired: {
-		name: { ca: 'En adquirir', es: 'Al adquirir', en: 'When acquired' }
 	},
 	scenarioStart: {
 		name: { ca: "En començar l'escenari", es: 'Al empezar el escenario', en: 'Start of scenario' }
@@ -83,41 +77,42 @@ const eventData: Record<string, Omit<EventProps, 'type'>> = {
 	provoked: {
 		name: { ca: 'En ser provocat', es: 'Al ser provocado', en: 'When provoked' }
 	},
-	takingDamage: {
-		name: { ca: 'En rebre dany', es: 'Al recibir daño', en: 'When taking damage' }
+	damageDealt: {
+		name: { ca: "Quan s'apliqui dany", es: 'Cuando se inflinja daño', en: 'When damage is dealt' }
 	},
 	beforeDrawingFate: {
 		name: {
-			ca: 'Abans de robar una fitxa de destí',
-			es: 'Antes de robar una ficha de destino',
-			en: 'Before drawing a fate token'
+			ca: 'Abans que es robi una fitxa de destí',
+			es: 'Antes que se robe una ficha de destino',
+			en: 'Before a fate token is drawn'
+		}
+	},
+	fateTokenRevealed: {
+		name: {
+			ca: 'Quan es reveli una fitxa de destí',
+			es: 'Cuando se revele una ficha de destino',
+			en: 'When a fate token is revealed'
 		}
 	},
 	afterDrawingFate: {
 		name: {
-			ca: 'Després de robar una fitxa de destí',
-			es: 'Después de robar una ficha de destino',
-			en: 'After drawing a fate token'
+			ca: 'Després que es robi una fitxa de destí',
+			es: 'Después de que se robe una ficha de destino',
+			en: 'After a fate token is drawn'
 		}
 	},
-	beforeOtherPlayerDrawsFate: {
+	encounterRevealed: {
 		name: {
-			ca: 'Abans que un altre jugador robi una fitxa de destí',
-			es: 'Antes de que otro jugador robe una ficha de destino',
-			en: 'Before another player draws a fate token'
+			ca: 'Quan es reveli un encontre',
+			es: 'Cuando se revele un encuentro',
+			en: 'When an encounter is revealed'
 		}
-	},
-	revealed: {
-		name: { ca: 'Revelació', es: 'Revelación', en: 'When revealed' }
 	},
 	moving: {
-		name: { ca: "En moure's", es: 'Al moverse', en: 'When moving' }
-	},
-	resolvingEncounter: {
 		name: {
-			ca: 'En resoldre un encontre',
-			es: 'Al resolver un encuentro',
-			en: 'When resolving an encounter'
+			ca: 'En resoldre un moviment',
+			es: 'Al resolver un movimiento',
+			en: 'When a movement is resolved'
 		}
 	},
 	fullyDischarged: {

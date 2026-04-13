@@ -23,7 +23,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	},
 	capabilities: [
 		new Opportunity({
-			triggers: ['takingDamage'],
+			triggers: ['damageDealt'],
 			cost: { strength: 2 },
 			effects: [
 				saveTargetToVariable({ name: 'X', value: { type: 'attacker' } }),

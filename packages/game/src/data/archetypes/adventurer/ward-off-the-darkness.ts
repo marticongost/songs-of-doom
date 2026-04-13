@@ -1,6 +1,12 @@
 import { Opportunity } from '../../../models/capabilities';
-import { drawCards, modifyRoll, resultsTable } from '../../../models/effects';
+import { modifyRoll } from '../../../models/effects';
 import { Skill } from '../../../models/entities/skill';
+import {
+	activeCardHasType,
+	reactivePlayerIsSubject
+} from '../../../models/expressions/boolean/event-context';
+import { and } from '../../../models/expressions/boolean/logical';
+import type { BooleanExpression } from '../../../models/expressions/boolean/boolean-expression';
 import { upgradable } from '../../../models/upgrades';
 
 export default upgradable(Skill, 2, (variants) => ({
@@ -13,8 +19,16 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { will: variants.values(1, 2) },
 	capabilities: [
 		new Opportunity({
-			triggers: ['resolvingEncounter'],
-			effects: [modifyRoll(1), ...variants.ifMatches(2, resultsTable({ '2+': [drawCards(1)] }))]
+			triggers: [
+				{
+					event: 'beforeDrawingFate',
+					condition: variants.values<BooleanExpression>(
+						and(activeCardHasType('encounter'), reactivePlayerIsSubject),
+						activeCardHasType('encounter')
+					)
+				}
+			],
+			effects: [modifyRoll(2)]
 		})
 	]
 }));

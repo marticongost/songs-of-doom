@@ -1,3 +1,4 @@
+import { reactivePlayerIsSubject } from '../../..';
 import { Opportunity } from '../../../models/capabilities';
 import { modifyGatheredClues, resultsTable } from '../../../models/effects';
 import { Skill } from '../../../models/entities/skill';
@@ -13,7 +14,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { intelligence: variants.values(1, 2) },
 	capabilities: [
 		new Opportunity({
-			triggers: ['investigating'],
+			triggers: [{ event: 'investigation', condition: reactivePlayerIsSubject }],
 			cost: { intelligence: 1 },
 			effects: [
 				resultsTable({

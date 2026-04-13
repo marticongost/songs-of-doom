@@ -9,7 +9,13 @@ import {
 } from '../../../models/effects';
 import { addCharges } from '../../../models/effects/recharge';
 import { Encounter } from '../../../models/entities/encounter';
-import { charges, copyAlreadyAttached, minus, plus } from '../../../models/expressions';
+import {
+	charges,
+	copyAlreadyAttached,
+	minus,
+	plus,
+	reactiveCardIsSubject
+} from '../../../models/expressions';
 import { agility, strength } from '../../../models/stats';
 
 export default new Encounter({
@@ -20,7 +26,7 @@ export default new Encounter({
 	},
 	capabilities: [
 		new Obligation({
-			triggers: ['revealed'],
+			triggers: [{ event: 'encounterRevealed', condition: reactiveCardIsSubject }],
 			effects: [
 				copyAlreadyAttached.then(replaceEncounter()).orElse(
 					test({

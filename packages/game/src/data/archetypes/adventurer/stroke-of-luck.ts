@@ -1,3 +1,4 @@
+import { reactivePlayerIsSubject } from '../../..';
 import { Opportunity } from '../../../models/capabilities';
 import { redrawFate, resultsTable } from '../../../models/effects';
 import { Skill } from '../../../models/entities/skill';
@@ -15,7 +16,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	xpCost: variants.values(0, 1),
 	capabilities: [
 		new Opportunity({
-			triggers: ['afterDrawingFate'],
+			triggers: [{ event: 'fateTokenRevealed', condition: reactivePlayerIsSubject }],
 			cost: { any: 1 },
 			effects: variants.values(
 				[resultsTable({ entries: [{ result: ['CF', 0], effects: [redrawFate()] }] })],

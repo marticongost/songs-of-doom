@@ -1,6 +1,12 @@
 import { Obligation, Opportunity } from './capabilities';
-import { attach, addCharges, replaceEncounter, triggerAttack } from './effects';
-import { copyAlreadyAttached, distance, eq } from './expressions';
+import { addCharges, attach, replaceEncounter, triggerAttack } from './effects';
+import {
+	copyAlreadyAttached,
+	distance,
+	eq,
+	reactiveCardIsSubject,
+	reactivePlayerIsTarget
+} from './expressions';
 
 export const fullyRechargeOnChapterStart = new Obligation({
 	triggers: ['chapterStart'],
@@ -8,12 +14,12 @@ export const fullyRechargeOnChapterStart = new Obligation({
 });
 
 export const shootBeforeEngaged = new Opportunity({
-	triggers: ['beforeEnemyEngagesWithSelf'],
+	triggers: [{ event: 'engage', condition: reactivePlayerIsTarget }],
 	effects: [triggerAttack({ card: { selection: 'this' } })]
 });
 
 export const attachOrReplaceWithNewEncounterWhenRevealed = new Obligation({
-	triggers: ['revealed'],
+	triggers: [{ event: 'encounterRevealed', condition: reactiveCardIsSubject }],
 	effects: [copyAlreadyAttached.then(replaceEncounter()).orElse(attach())]
 });
 

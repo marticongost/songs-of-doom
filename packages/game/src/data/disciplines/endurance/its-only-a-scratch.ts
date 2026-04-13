@@ -13,7 +13,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { will: 1 },
 	capabilities: [
 		new Opportunity({
-			triggers: ['takingDamage'],
+			triggers: ['damageDealt'],
 			cost: {
 				will: 2
 			},

@@ -329,7 +329,13 @@ describe('GameGraph.test', () => {
 		await graph.supplyInput({ result: 2 });
 		await promise;
 
-		expect(order).toEqual(['beforeTest', 'beforeDrawingFate', 'afterTest', 'afterDrawingFate']);
+		expect(order).toEqual([
+			'beforeTest',
+			'beforeDrawingFate',
+			'fateTokenRevealed',
+			'afterTest',
+			'afterDrawingFate'
+		]);
 	});
 });
 
@@ -624,9 +630,9 @@ describe('GameGraph.eventTriggered', () => {
 		const p1 = mock<ReadonlyPlayerState>({ id: 'p1', cards: () => [card] });
 		const graph = new GameGraph({ initialState: { players: [p1] } });
 
-		const eventPromise = graph.eventTriggered('investigating');
+		const eventPromise = graph.eventTriggered('investigation');
 		const eventNode = graph.start.next as EventTriggered;
-		expect(eventNode.event).toBe(events['investigating']);
+		expect(eventNode.event).toBe(events['investigation']);
 
 		await advanceTicks(3);
 		await graph.supplyInput({ selection: { cardId: 'c1', capability: reaction } });

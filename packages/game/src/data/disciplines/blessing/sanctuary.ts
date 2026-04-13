@@ -1,3 +1,4 @@
+import { reactivePlayerIsTarget } from '../../..';
 import { Action, Constant, Obligation, Opportunity } from '../../../models/capabilities';
 import {
 	addCharges,
@@ -35,7 +36,7 @@ export default upgradable(Skill, 2, (variants) => ({
 			effects: [conferProperties([immobilized])]
 		}),
 		new Obligation({
-			triggers: ['takingDamage'],
+			triggers: [{ event: 'damageDealt', condition: reactivePlayerIsTarget }],
 			cost: { charges: 1 },
 			effects: [negateDamage()]
 		}),

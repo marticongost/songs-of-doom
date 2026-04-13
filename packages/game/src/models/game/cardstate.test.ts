@@ -380,7 +380,7 @@ describe('CardState', () => {
 				capabilities: [reaction]
 			});
 			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' }, { entity });
-			expect(card.getReactionsToEvent('investigating')).toEqual([]);
+			expect(card.getReactionsToEvent('investigation')).toEqual([]);
 		});
 
 		it('includes attachment capabilities for non-skill entities when attached', () => {
@@ -453,45 +453,6 @@ describe('CardState', () => {
 
 			expect(defender.getReactionsToEvent(event, state)).toContain(receivingAttackReaction);
 			expect(observer.getReactionsToEvent(event, state)).toEqual([]);
-		});
-
-		it('filters beforeOtherPlayerDrawsFate reactions by active player', () => {
-			const otherPlayerReaction = new Obligation({
-				effects: [],
-				triggers: [
-					{ event: 'beforeOtherPlayerDrawsFate', condition: reactivePlayerIsNotActivePlayer }
-				]
-			});
-			const entity = makeEntity({
-				type: trait,
-				capabilities: [otherPlayerReaction]
-			});
-			const activePlayerCard = makeReadonlyCard(
-				'c1',
-				'p1',
-				{ type: 'hand', playerId: 'p1' },
-				{ entity }
-			);
-			const otherPlayerCard = makeReadonlyCard(
-				'c2',
-				'p2',
-				{ type: 'hand', playerId: 'p2' },
-				{ entity }
-			);
-			const state = makeReadonlyGameState([
-				makeReadonlyPlayer('p1', { hand: [activePlayerCard] }),
-				makeReadonlyPlayer('p2', { hand: [otherPlayerCard] })
-			]).mutate((mutableState) => {
-				mutableState.activePlayerStack.push('p1');
-			});
-
-			const event: EventEnvelope = {
-				event: 'beforeOtherPlayerDrawsFate',
-				context: { activePlayerId: 'p1' }
-			};
-
-			expect(activePlayerCard.getReactionsToEvent(event, state)).toEqual([]);
-			expect(otherPlayerCard.getReactionsToEvent(event, state)).toContain(otherPlayerReaction);
 		});
 
 		it('supports explicit trigger.when expressions without participation', () => {

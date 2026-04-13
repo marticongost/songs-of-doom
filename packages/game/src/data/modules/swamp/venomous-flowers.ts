@@ -1,7 +1,7 @@
 import { Obligation } from '../../../models/capabilities';
 import { discardFromHand, test } from '../../../models/effects';
 import { Encounter } from '../../../models/entities/encounter';
-import { handSize, minus } from '../../../models/expressions';
+import { handSize, minus, reactiveCardIsSubject } from '../../../models/expressions';
 import { intelligence } from '../../../models/stats';
 
 export default new Encounter({
@@ -12,7 +12,7 @@ export default new Encounter({
 	},
 	capabilities: [
 		new Obligation({
-			triggers: ['revealed'],
+			triggers: [{ event: 'encounterRevealed', condition: reactiveCardIsSubject }],
 			effects: [
 				test({
 					expression: minus(intelligence, handSize),

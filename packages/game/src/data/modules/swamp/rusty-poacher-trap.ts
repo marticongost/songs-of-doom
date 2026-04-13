@@ -8,7 +8,11 @@ import {
 	wound
 } from '../../../models/effects';
 import { Encounter } from '../../../models/entities/encounter';
-import { copyAlreadyAttached, talentProficiency } from '../../../models/expressions';
+import {
+	copyAlreadyAttached,
+	reactiveCardIsSubject,
+	talentProficiency
+} from '../../../models/expressions';
 import { immobilized, piercing } from '../../properties';
 import { disarmTrap } from '../../talents';
 
@@ -16,7 +20,7 @@ export default new Encounter({
 	title: { ca: 'Trampa rovellada', es: 'Trampa oxidada', en: 'Rusty poacher trap' },
 	capabilities: [
 		new Obligation({
-			triggers: ['revealed'],
+			triggers: [{ event: 'encounterRevealed', condition: reactiveCardIsSubject }],
 			effects: [
 				copyAlreadyAttached.then(replaceEncounter()).orElse(
 					test({

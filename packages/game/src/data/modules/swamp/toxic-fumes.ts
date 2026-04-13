@@ -1,3 +1,4 @@
+import { reactiveCardIsSubject } from '../../..';
 import { Obligation } from '../../../models/capabilities';
 import { goTowards, test } from '../../../models/effects';
 import { Encounter } from '../../../models/entities/encounter';
@@ -11,7 +12,7 @@ export default new Encounter({
 	},
 	capabilities: [
 		new Obligation({
-			triggers: ['revealed'],
+			triggers: [{ event: 'encounterRevealed', condition: reactiveCardIsSubject }],
 			effects: [
 				test({
 					expression: strength,

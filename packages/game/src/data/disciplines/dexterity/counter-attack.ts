@@ -6,8 +6,8 @@ import {
 	resultsTable,
 	triggerAttack
 } from '../../../models/effects';
-import { effectiveDefense, gte } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
+import { effectiveDefense, gte, reactivePlayerIsSubject } from '../../../models/expressions';
 import { upgradable } from '../../../models/upgrades';
 
 export default upgradable(Skill, 2, (variants) => ({
@@ -20,7 +20,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { agility: 1, strength: variants.values(0, 1) },
 	capabilities: [
 		new Opportunity({
-			triggers: ['afterReceivedAttackResolved'],
+			triggers: [{ event: 'attack', condition: reactivePlayerIsSubject }],
 			cost: { agility: 1 },
 			effects: [
 				resultsTable({
