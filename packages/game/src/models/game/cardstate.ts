@@ -146,7 +146,7 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 			if (!(capability instanceof Reaction)) {
 				return false;
 			}
-			return capability.triggerSpecs.some((spec) => {
+			return capability.triggers.some((spec) => {
 				if (spec.event !== normalizedEvent) {
 					return false;
 				}

@@ -41,12 +41,7 @@ export interface ReactionProps extends CapabilityProps {
 /** A reaction that can be triggered by certain events. */
 export abstract class Reaction extends Capability {
 	/** Normalized trigger specifications used by the runtime matcher. */
-	readonly triggerSpecs: Array<EventMatcher>;
-
-	/** Backward-compatible view over trigger events. */
-	get triggers(): Event[] {
-		return Array.from(new Set(this.triggerSpecs.map((spec) => spec.event)));
-	}
+	readonly triggers: Array<EventMatcher>;
 
 	/** Indicates if the reaction is mandatory or optional.
 	 *
@@ -61,7 +56,7 @@ export abstract class Reaction extends Capability {
 		if (!triggers.length) {
 			throw new Error('Reaction requires at least one trigger');
 		}
-		this.triggerSpecs = triggers.map((spec) => finalise(EventMatcher, spec));
+		this.triggers = triggers.map((spec) => finalise(EventMatcher, spec));
 	}
 
 	protected override getTriggerContext(

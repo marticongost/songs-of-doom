@@ -89,7 +89,7 @@
 					{@const reaction = capability as Reaction}
 					<TextList type="commas" items={reaction.triggers}>
 						{#snippet entry(trigger)}
-							<Text {...trigger.name} />
+							<Text {...trigger.event.name} />
 						{/snippet}
 					</TextList>
 				{/if}
