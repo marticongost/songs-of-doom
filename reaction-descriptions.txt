@@ -1,0 +1,55 @@
+{event: "attack", condition: reactivePlayerIsSubject}
+Quan es resolgui un atac El jugador reactiu és el subjecte de l'esdeveniment
+>> Quan ataquis
+
+{event: "attack", condition: reactivePlayerIsTarget}
+Quan es resolgui un atac El jugador reactiu és el destinatari de l'esdeveniment
+>> Quan rebis un atac
+
+{event: "attack", condition: reactiveCardIsSubject}
+Quan es resolgui un atac La carta reactiva és el subjecte de l'esdeveniment
+>> Quan ataqui
+
+{event: "attack", condition: reactiveCardIsTarget}
+Quan es resolgui un atac La carta reactiva és el destinatari de l'esdeveniment
+>> Quan rebi un atac
+
+{event: "beforeFateDrawn", condition: activeCardOwnerIsNotActivePlayerExpression}
+Abans que es robi una fitxa de destí El propietari de la carta activa no es el jugador actiu
+>> Abans que un altre jugador robi una fitxa de destí
+
+{event: "engage", condition: reactivePlayerIsTarget}
+Abans d'un enfrontament El jugador reactiu és el destinatari de l'esdeveniment:
+>> Abans que un enemic s'enfronti amb tu
+
+{event: "beforeFateDrawn", condition: and(activeCardType("encounter"), reactivePlayerIsTarget)}
+Abans que es robi una fitxa de destí La carta activa és de tipus Encontre i El jugador reactiu és el subjecte de l'esdeveniment:
+>> Abans que robis una fitxa de destí durant un encontre
+
+{event: "fateTokenRevealed", condition: reactivePlayerIsTarget}
+Quan es reveli una fitxa de destí El jugador reactiu és el subjecte de l'esdeveniment
+>> Quan revelis una fitxa de destí
+
+{event: "damageDealt", condition: reactivePlayerIsTarget}
+Quan s'apliqui dany El jugador reactiu és el destinatari de l'esdeveniment
+>> Quan rebis dany
+
+{event: "damageDealt", condition: reactivePlayerIsSubject}
+Quan s'apliqui dany El jugador reactiu és el subjecte de l'esdeveniment
+>> Quan inflingeixis dany
+
+{event: "fullyDischarged", condition: reactiveCardIsSubject}
+Quan una carta perdi totes les càrregues La carta reactiva és el subjecte de l'esdeveniment:
+>> Quan perdi totes les càrregues
+
+{event: "movement", condition: reactivePlayerIsSubject}
+En resoldre un moviment El jugador reactiu és el subjecte de l'esdeveniment:
+>> Quan et moguis
+
+{event: "movement", condition: reactiveCardIsSubject}
+En resoldre un moviment La carta reactiva és el subjecte de l'esdeveniment:
+>> Quan es mogui
+
+{event: "enemyDefeated", condition: reactivePlayerIsSubject}
+Quan un enemic sigui derrotat El jugador reactiu és el subjecte de l'esdeveniment(
+>> Quan derrotis un enemic

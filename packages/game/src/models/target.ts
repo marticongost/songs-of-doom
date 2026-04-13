@@ -1,9 +1,9 @@
 import { finalise } from '@songsofdoom/common';
+import { type BooleanExpressionType } from './expressions/boolean/boolean-expression';
 import {
 	ScalarExpression,
-	type BooleanExpressionType,
 	type ScalarExpressionType
-} from './expressions';
+} from './expressions/scalar/scalar-expression';
 import { Stat } from './stats';
 
 /** A subset of {@link TargetType} that can be used to designate players. */

@@ -6,9 +6,9 @@ import { BooleanExpression } from './boolean-expression';
 class ActiveCardIsTargetExpression extends BooleanExpression {
 	translate(): LocalisedText {
 		return {
-			ca: "La carta activa es el destinatari de l'esdeveniment",
-			es: 'La carta activa es el objetivo del evento',
-			en: 'Active card is the event target'
+			ca: "la carta activa es el destinatari de l'esdeveniment",
+			es: 'la carta activa es el objetivo del evento',
+			en: 'active card is the event target'
 		};
 	}
 
@@ -22,9 +22,9 @@ class ActiveCardIsTargetExpression extends BooleanExpression {
 class ActiveCardIsActorExpression extends BooleanExpression {
 	translate(): LocalisedText {
 		return {
-			ca: "La carta activa es l'actor de l'esdeveniment",
-			es: 'La carta activa es el actor del evento',
-			en: 'Active card is the event actor'
+			ca: "la carta activa es l'actor de l'esdeveniment",
+			es: 'la carta activa es el actor del evento',
+			en: 'active card is the event actor'
 		};
 	}
 
@@ -38,9 +38,9 @@ class ActiveCardIsActorExpression extends BooleanExpression {
 class ActiveCardOwnerIsNotActivePlayerExpression extends BooleanExpression {
 	translate(): LocalisedText {
 		return {
-			ca: 'El propietari de la carta activa no es el jugador actiu',
-			es: 'El propietario de la carta activa no es el jugador activo',
-			en: 'Active card owner is not the active player'
+			ca: 'el propietari de la carta activa no es el jugador actiu',
+			es: 'el propietario de la carta activa no es el jugador activo',
+			en: 'active card owner is not the active player'
 		};
 	}
 
@@ -58,9 +58,9 @@ class ActiveCardOwnerIsNotActivePlayerExpression extends BooleanExpression {
 class ReactivePlayerIsTargetExpression extends BooleanExpression {
 	translate(): LocalisedText {
 		return {
-			ca: "El jugador reactiu és el destinatari de l'esdeveniment",
-			es: 'El jugador reactivo es el objetivo del evento',
-			en: 'Reactive player is the event target'
+			ca: "el jugador reactiu és el destinatari de l'esdeveniment",
+			es: 'el jugador reactivo es el objetivo del evento',
+			en: 'reactive player is the event target'
 		};
 	}
 
@@ -74,9 +74,9 @@ class ReactivePlayerIsTargetExpression extends BooleanExpression {
 class ReactivePlayerIsSubjectExpression extends BooleanExpression {
 	translate(): LocalisedText {
 		return {
-			ca: "El jugador reactiu és el subjecte de l'esdeveniment",
-			es: 'El jugador reactivo es el sujeto del evento',
-			en: 'Reactive player is the event subject'
+			ca: "el jugador reactiu és el subjecte de l'esdeveniment",
+			es: 'el jugador reactivo es el sujeto del evento',
+			en: 'reactive player is the event subject'
 		};
 	}
 
@@ -92,9 +92,9 @@ class ReactivePlayerIsSubjectExpression extends BooleanExpression {
 class ReactiveCardIsSubjectExpression extends BooleanExpression {
 	translate(): LocalisedText {
 		return {
-			ca: "La carta reactiva és el subjecte de l'esdeveniment",
-			es: 'La carta reactiva es el sujeto del evento',
-			en: 'Reactive card is the event subject'
+			ca: "la carta reactiva és el subjecte de l'esdeveniment",
+			es: 'la carta reactiva es el sujeto del evento',
+			en: 'reactive card is the event subject'
 		};
 	}
 
@@ -108,9 +108,9 @@ class ReactiveCardIsSubjectExpression extends BooleanExpression {
 class ReactiveCardIsTargetExpression extends BooleanExpression {
 	translate(): LocalisedText {
 		return {
-			ca: "La carta reactiva és el destinatari de l'esdeveniment",
-			es: 'La carta reactiva es el objetivo del evento',
-			en: 'Reactive card is the event target'
+			ca: "la carta reactiva és el destinatari de l'esdeveniment",
+			es: 'la carta reactiva es el objetivo del evento',
+			en: 'reactive card is the event target'
 		};
 	}
 
@@ -131,9 +131,9 @@ class ActiveCardHasTypeExpression extends BooleanExpression {
 
 	translate(): LocalisedText {
 		return {
-			ca: `La carta activa és de tipus ${this.type.title.ca}`,
-			es: `La carta activa es de tipo ${this.type.title.es}`,
-			en: `Active card is of type ${this.type.title.en}`
+			ca: `la carta activa és de tipus ${this.type.title.ca}`,
+			es: `la carta activa es de tipo ${this.type.title.es}`,
+			en: `active card is of type ${this.type.title.en}`
 		};
 	}
 

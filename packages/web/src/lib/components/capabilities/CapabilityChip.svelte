@@ -38,6 +38,7 @@
 	import { Action, Constant, Reaction } from '@songsofdoom/game';
 	import InlineSvg from '../InlineSvg.svelte';
 	import EffectList from '../effects/EffectList.svelte';
+	import EventTriggerChip from '../events/EventTriggerChip.svelte';
 	import TextList from '../localisation/TextList.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import CapabilityCostList from './CapabilityCostList.svelte';
@@ -89,7 +90,7 @@
 					{@const reaction = capability as Reaction}
 					<TextList type="commas" items={reaction.triggers}>
 						{#snippet entry(trigger)}
-							<Text {...trigger.event.name} />
+							<EventTriggerChip {trigger} />
 						{/snippet}
 					</TextList>
 				{/if}

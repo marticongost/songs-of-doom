@@ -11,6 +11,7 @@ export * from './models/slots';
 
 // Capabilities
 export * from './models/capabilities';
+export { EventTrigger } from './models/capabilities/reaction';
 export { Capability } from './models/capability';
 export {
 	CapabilityCost,
