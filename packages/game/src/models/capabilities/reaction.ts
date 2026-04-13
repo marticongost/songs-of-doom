@@ -5,9 +5,9 @@ import { type BooleanExpressionType } from '../expressions';
 import type { GameGraph, GroupContext } from '../game/gamegraph';
 import type { CardId } from '../game/identifiers';
 
-export type EventMatcherSpec = Event | EventType | EventMatcherProps;
+export type EventTriggerSpec = Event | EventType | EventTriggerProps;
 
-export interface EventMatcherProps {
+export interface EventTriggerProps {
 	/** Event that can activate the reaction. */
 	event: Event | EventType;
 
@@ -15,14 +15,14 @@ export interface EventMatcherProps {
 	condition?: BooleanExpressionType;
 }
 
-export class EventMatcher {
+export class EventTrigger {
 	/** Event that can activate the reaction. */
 	readonly event: Event;
 
 	/** Optional expression that must evaluate to true for the trigger to apply. */
 	readonly condition?: BooleanExpressionType;
 
-	constructor(spec: EventMatcherSpec) {
+	constructor(spec: EventTriggerSpec) {
 		if (spec instanceof Event) {
 			this.event = spec;
 		} else if (typeof spec === 'string') {
@@ -35,13 +35,13 @@ export class EventMatcher {
 }
 
 export interface ReactionProps extends CapabilityProps {
-	triggers: Array<EventMatcherSpec>;
+	triggers: Array<EventTriggerSpec>;
 }
 
 /** A reaction that can be triggered by certain events. */
 export abstract class Reaction extends Capability {
 	/** Normalized trigger specifications used by the runtime matcher. */
-	readonly triggers: Array<EventMatcher>;
+	readonly triggers: Array<EventTrigger>;
 
 	/** Indicates if the reaction is mandatory or optional.
 	 *
@@ -56,7 +56,7 @@ export abstract class Reaction extends Capability {
 		if (!triggers.length) {
 			throw new Error('Reaction requires at least one trigger');
 		}
-		this.triggers = triggers.map((spec) => finalise(EventMatcher, spec));
+		this.triggers = triggers.map((spec) => finalise(EventTrigger, spec));
 	}
 
 	protected override getTriggerContext(
