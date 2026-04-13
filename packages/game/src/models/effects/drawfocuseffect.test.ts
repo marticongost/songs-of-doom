@@ -41,7 +41,9 @@ describe('DrawFocusEffect.trigger', () => {
 			mutableState.requirePlayer.calledWith('p1').mockReturnValue(player);
 			player.drawFocusToken.calledWith(mutableState).mockReturnValue('strength-1');
 			const graph = mock<GameGraph>();
-			graph.requestPlayersOrActivePlayer.calledWith(effect.players).mockResolvedValue(['p1']);
+			graph.requestPlayers
+				.calledWith(effect.players, expect.objectContaining({ default: expect.any(Function) }))
+				.mockResolvedValue(['p1']);
 			let callbackReturn: unknown;
 			graph.effectTriggered.mockImplementation((_effect, callback) => {
 				callbackReturn = callback(mutableState);
@@ -70,7 +72,7 @@ describe('DrawFocusEffect.trigger', () => {
 			.mockReturnValueOnce('will-2' as FocusToken)
 			.mockReturnValueOnce('will-2' as FocusToken);
 		const graph = mock<GameGraph>();
-		graph.requestPlayersOrActivePlayer.mockResolvedValue(['p1', 'p2']);
+		graph.requestPlayers.mockResolvedValue(['p1', 'p2']);
 		let callbackReturn: unknown;
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callbackReturn = callback(mutableState);

@@ -32,7 +32,9 @@ export class DrawFocusEffect extends EffectWithOutcome<DrawFocusOutcome> {
 	}
 
 	override async trigger(gameGraph: GameGraph) {
-		const playerIds = await gameGraph.requestPlayersOrActivePlayer(this.players);
+		const playerIds = await gameGraph.requestPlayers(this.players, {
+			default: () => [gameGraph.current.state.requireActivePlayer().id]
+		});
 		gameGraph.effectTriggered<DrawFocusEffect>(this, (state) => {
 			const playerDrawnTokens = new Map<PlayerId, Counter<FocusToken>>();
 			for (const playerId of playerIds) {

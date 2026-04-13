@@ -41,9 +41,9 @@ export class GatherCluesEffect extends EffectWithOutcome<GatherCluesOutcome> {
 
 	override async trigger(gameGraph: GameGraph) {
 		const subjectId = gameGraph.requireSubject().id;
-		const targetIds = (await gameGraph.requestMultipleTargetsOrImplicitTarget(
-			this.target
-		)) as Array<CardId>;
+		const targetIds = (await gameGraph.requestTargets(this.target, {
+			default: () => [gameGraph.current.state.requireTarget().id]
+		})) as Array<CardId>;
 
 		gameGraph.effectTriggered<GatherCluesEffect>(this, (state) => {
 			const subject = state.requireEntityState(subjectId);

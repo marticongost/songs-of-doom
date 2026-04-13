@@ -1,7 +1,7 @@
-import { Entity, type EntityProps } from './entity';
 import { item, type EntityType } from '../properties';
-import type { Talent } from '../talent';
 import { slots, type Slot, type SlotType } from '../slots';
+import type { Talent } from '../talent';
+import { Entity, type EntityProps } from './entity';
 
 export interface ItemProps extends EntityProps<Item> {
 	slot: Slot | SlotType;
@@ -11,6 +11,7 @@ export interface ItemProps extends EntityProps<Item> {
 export class Item extends Entity {
 	readonly slot: Slot;
 	readonly requiredTalent?: Talent;
+	override readonly reactionOrder = 4;
 	override readonly set = undefined;
 	override readonly type: EntityType = item;
 

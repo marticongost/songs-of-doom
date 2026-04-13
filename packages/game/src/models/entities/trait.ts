@@ -6,6 +6,7 @@ import { trait } from '../properties';
 
 export class Trait extends ChildEntity<Discipline | Archetype> {
 	override readonly type = trait;
+	override readonly reactionOrder = 4;
 	override readonly maxCopies = 1;
 
 	override permanentEffects(): Array<Effect> {

@@ -38,7 +38,9 @@ export class AttachEffect extends EffectWithOutcome<AttachOutcome> {
 	}
 
 	override async trigger(gameGraph: GameGraph) {
-		const targetId = await gameGraph.requestSingleTargetOrActiveCard(this.target);
+		const targetId = (await gameGraph.requestSingleTarget(this.target, {
+			default: () => gameGraph.current.state.requireActiveCard().id
+		})) as EntityId;
 		gameGraph.effectTriggered<AttachEffect>(this, (state) => {
 			const target = state.requireCard(targetId as CardId);
 			const attachment = state.requireActiveCard();

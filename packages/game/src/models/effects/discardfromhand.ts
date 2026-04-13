@@ -39,7 +39,9 @@ export class DiscardFromHandEffect extends EffectWithOutcome<DiscardFromHandOutc
 	}
 
 	override async trigger(gameGraph: GameGraph) {
-		const playerIds = await gameGraph.requestPlayersOrActivePlayer(this.players);
+		const playerIds = await gameGraph.requestPlayers(this.players, {
+			default: () => [gameGraph.current.state.requireActivePlayer().id]
+		});
 		const playerDiscards = new Map<PlayerId, CardId[]>();
 		for (const playerId of playerIds) {
 			const cardIds = (await gameGraph.requestInput(this.cards)).target as CardId[];

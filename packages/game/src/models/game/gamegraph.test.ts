@@ -17,6 +17,7 @@ import {
 	GameStart,
 	InputReceived,
 	InputRequested,
+	orderReactiveCapabilities,
 	type EndGroupProps
 } from './gamegraph';
 import { ReadonlyGameState } from './gamestate';
@@ -36,6 +37,7 @@ function makeInitialState(players: ReadonlyPlayerState[] = []): ReadonlyGameStat
 function makePlayer(id: 'p1' | 'p2'): ReadonlyPlayerState {
 	const player = mock<ReadonlyPlayerState>({ id });
 	const mutablePlayer = mock<MutablePlayerState>({ id });
+	player.cards.mockReturnValue([]);
 	player.mutable.mockReturnValue(mutablePlayer);
 	mutablePlayer.readonly.mockReturnValue(player);
 	return player;
@@ -276,7 +278,8 @@ describe('GameGraph.group', () => {
 
 describe('GameGraph.test', () => {
 	it('uses FateDrawn as the closing node of DrawingFate groups', async () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
+		const p1 = makePlayer('p1');
+		const graph = new GameGraph({ initialState: { players: [p1] } });
 		const promise = graph.test({ subjectId: 'c1', proficiency: 1 });
 		await advanceTicks(1);
 		await graph.supplyInput({ result: 2 });
@@ -361,17 +364,32 @@ describe('GameGraph.effectTriggered', () => {
 
 describe('GameGraph.requestInput / supplyInput', () => {
 	it('adds an InputRequested node with the provided fields', async () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const graph = new GameGraph({ initialState: { players: [p1] } });
 		const target = new Target('player');
 		const promise = graph.requestInput(target);
 		expect(graph.current).toBeInstanceOf(InputRequested);
+		expect((graph.current as InputRequested).playerId).toBe('p1');
 		// Resolve the promise so the test doesn't hang
 		await graph.supplyInput({ target: [] });
 		await promise;
 	});
 
+	it('addresses input to the active player when available', async () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const graph = new GameGraph({
+			initialState: { players: [p1], activePlayerStack: ['p1'] }
+		});
+		const target = new Target('player');
+		const promise = graph.requestInput(target);
+		expect((graph.current as InputRequested).playerId).toBe('p1');
+		await graph.supplyInput({ target: ['p1'] });
+		await promise;
+	});
+
 	it('supplyInput adds an InputReceived node', async () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const graph = new GameGraph({ initialState: { players: [p1] } });
 		const target = new Target('player');
 		const promise = graph.requestInput(target);
 		await graph.supplyInput({ target: ['p1'] });
@@ -380,7 +398,8 @@ describe('GameGraph.requestInput / supplyInput', () => {
 	});
 
 	it('the resolved value contains the supplied values', async () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const graph = new GameGraph({ initialState: { players: [p1] } });
 		const target = new Target('player');
 		const promise = graph.requestInput(target);
 		await graph.supplyInput({ target: ['p1'] });
@@ -389,103 +408,124 @@ describe('GameGraph.requestInput / supplyInput', () => {
 	});
 });
 
-// ─── GameGraph.requestSingleTargetOrActiveCard ────────────────────────────────
+// ─── GameGraph.requestSingleTarget ───────────────────────────────────────────
 
-describe('GameGraph.requestSingleTargetOrActiveCard', () => {
-	it('returns the active card id when target is undefined', async () => {
+describe('GameGraph.requestSingleTarget', () => {
+	it('returns the provided default when target is undefined', async () => {
 		const c1 = mock<ReadonlyCardState>({ id: 'c1' });
 		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) });
 		const graph = new GameGraph({
 			initialState: { players: [p1], activeCardStack: ['c1'] }
 		});
-		const result = await graph.requestSingleTargetOrActiveCard(undefined);
+		const result = await graph.requestSingleTarget(undefined, {
+			default: () => graph.current.state.requireActiveCard().id
+		});
 		expect(result).toBe('c1');
 	});
 
+	it('returns undefined when target is undefined and no default is provided', async () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const graph = new GameGraph({ initialState: { players: [p1] } });
+		const result = await graph.requestSingleTarget(undefined);
+		expect(result).toBeUndefined();
+	});
+
 	it('requests input and returns the single selected target id', async () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const graph = new GameGraph({ initialState: { players: [p1] } });
 		const target = new Target('player');
-		const promise = graph.requestSingleTargetOrActiveCard(target);
+		const promise = graph.requestSingleTarget(target);
 		await graph.supplyInput({ target: ['p1'] });
 		const result = await promise;
 		expect(result).toBe('p1');
 	});
 
 	it('throws when more than one target is selected', async () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const graph = new GameGraph({ initialState: { players: [p1] } });
 		const target = new Target('player');
-		const promise = graph.requestSingleTargetOrActiveCard(target);
+		const promise = graph.requestSingleTarget(target);
 		await graph.supplyInput({ target: ['p1', 'p2'] });
 		await expect(promise).rejects.toThrow();
 	});
 });
 
-// ─── GameGraph.requestSingleTargetOrImplicitTarget ───────────────────────────
+// ─── GameGraph.requestSinglePlayer ───────────────────────────────────────────
 
-describe('GameGraph.requestSingleTargetOrImplicitTarget', () => {
-	it('returns the implicit target id when target is undefined', async () => {
-		const c1 = mock<ReadonlyCardState>({ id: 'c1' });
-		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) });
+describe('GameGraph.requestSinglePlayer', () => {
+	it('returns the provided default when target is undefined', async () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
 		const graph = new GameGraph({
-			initialState: { players: [p1], targetStack: ['c1'] }
+			initialState: { players: [p1], activePlayerStack: ['p1'] }
 		});
-		const result = await graph.requestSingleTargetOrImplicitTarget(undefined);
-		expect(result).toBe('c1');
+		const result = await graph.requestSinglePlayer(undefined, {
+			default: () => graph.current.state.requireActivePlayer().id
+		});
+		expect(result).toBe('p1');
 	});
 
-	it('requests input and returns the single selected target id', async () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
+	it('returns undefined when target is undefined and no default is provided', async () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const graph = new GameGraph({ initialState: { players: [p1] } });
+		const result = await graph.requestSinglePlayer(undefined);
+		expect(result).toBeUndefined();
+	});
+
+	it('requests input and returns the single selected player id', async () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const graph = new GameGraph({ initialState: { players: [p1] } });
 		const target = new Target('player');
-		const promise = graph.requestSingleTargetOrImplicitTarget(target);
+		const promise = graph.requestSinglePlayer(target);
 		await graph.supplyInput({ target: ['p1'] });
 		const result = await promise;
 		expect(result).toBe('p1');
 	});
 
-	it('throws when more than one target is selected', async () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
-		const target = new Target('player');
-		const promise = graph.requestSingleTargetOrImplicitTarget(target);
-		await graph.supplyInput({ target: ['p1', 'p2'] });
-		await expect(promise).rejects.toThrow();
+	it('throws when target is not a player target', async () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const graph = new GameGraph({ initialState: { players: [p1] } });
+		await expect(graph.requestSinglePlayer(new Target('skill'))).rejects.toThrow(
+			'Expected target to be of type player'
+		);
 	});
 });
 
-// ─── GameGraph.requestMultipleTargetsOrImplicitTarget ────────────────────────
+// ─── GameGraph.requestTargets ────────────────────────────────────────────────
 
-describe('GameGraph.requestMultipleTargetsOrImplicitTarget', () => {
-	it('returns an array with the implicit target id when target is undefined', async () => {
+describe('GameGraph.requestTargets', () => {
+	it('returns the provided default when target is undefined', async () => {
 		const c1 = mock<ReadonlyCardState>({ id: 'c1' });
 		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) });
 		const graph = new GameGraph({
 			initialState: { players: [p1], targetStack: ['c1'] }
 		});
-		const result = await graph.requestMultipleTargetsOrImplicitTarget(undefined);
+		const result = await graph.requestTargets(undefined, {
+			default: () => [graph.current.state.requireTarget().id]
+		});
 		expect(result).toEqual(['c1']);
 	});
 
-	it('requests input and returns a single selected target id', async () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
-		const target = new Target('player');
-		const promise = graph.requestMultipleTargetsOrImplicitTarget(target);
-		await graph.supplyInput({ target: ['p1'] });
-		const result = await promise;
-		expect(result).toEqual(['p1']);
+	it('returns an empty array when target is undefined and no default is provided', async () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const graph = new GameGraph({ initialState: { players: [p1] } });
+		const result = await graph.requestTargets(undefined);
+		expect(result).toEqual([]);
 	});
 
-	it('requests input and returns multiple selected target ids', async () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
+	it('requests input and returns selected target ids', async () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const graph = new GameGraph({ initialState: { players: [p1] } });
 		const target = new Target('player');
-		const promise = graph.requestMultipleTargetsOrImplicitTarget(target);
+		const promise = graph.requestTargets(target);
 		await graph.supplyInput({ target: ['p1', 'p2'] });
 		const result = await promise;
 		expect(result).toEqual(['p1', 'p2']);
 	});
 });
 
-// ─── GameGraph.requestPlayersOrActivePlayer ─────────────────────────────────
+// ─── GameGraph.requestPlayers ────────────────────────────────────────────────
 
-describe('GameGraph.requestPlayersOrActivePlayer', () => {
+describe('GameGraph.requestPlayers', () => {
 	const nonPlayerTargetTypes: Array<Exclude<TargetType, 'player'>> = [
 		'owner',
 		'active-player',
@@ -498,19 +538,29 @@ describe('GameGraph.requestPlayersOrActivePlayer', () => {
 		'skill'
 	];
 
-	it('returns the active player id when target is undefined', async () => {
+	it('returns the provided default when target is undefined', async () => {
 		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
 		const graph = new GameGraph({
 			initialState: { players: [p1], activePlayerStack: ['p1'] }
 		});
-		const result = await graph.requestPlayersOrActivePlayer(undefined);
+		const result = await graph.requestPlayers(undefined, {
+			default: () => [graph.current.state.requireActivePlayer().id]
+		});
 		expect(result).toEqual(['p1']);
 	});
 
+	it('returns an empty array when target is undefined and no default is provided', async () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const graph = new GameGraph({ initialState: { players: [p1] } });
+		const result = await graph.requestPlayers(undefined);
+		expect(result).toEqual([]);
+	});
+
 	it('requests input and returns selected player ids when target is a player target', async () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const graph = new GameGraph({ initialState: { players: [p1] } });
 		const target = new Target('player');
-		const promise = graph.requestPlayersOrActivePlayer(target);
+		const promise = graph.requestPlayers(target);
 		await graph.supplyInput({ target: ['p1', 'p2'] });
 		const result = await promise;
 		expect(result).toEqual(['p1', 'p2']);
@@ -518,7 +568,7 @@ describe('GameGraph.requestPlayersOrActivePlayer', () => {
 
 	it.each(nonPlayerTargetTypes)('throws when target type is %s', async (targetType) => {
 		const graph = new GameGraph({ initialState: { players: [] } });
-		await expect(graph.requestPlayersOrActivePlayer(new Target(targetType))).rejects.toThrow(
+		await expect(graph.requestPlayers(new Target(targetType))).rejects.toThrow(
 			'Expected target to be of type player'
 		);
 	});
@@ -545,11 +595,12 @@ describe('GameGraph.eventTriggered', () => {
 	});
 
 	it('adds an EventTriggered node when a ready card has matching reactions', async () => {
+		const reaction = mock<Opportunity>();
 		const card = mock<ReadonlyCardState>({
 			id: 'c1',
-			getReactionsToEvent: () => [mock<Opportunity>()]
+			getReactionsToEvent: () => [reaction]
 		});
-		const p1 = mock<ReadonlyPlayerState>({ cards: () => [card] });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1', cards: () => [card] });
 		const graph = new GameGraph({ initialState: { players: [p1] } });
 
 		const eventPromise = graph.eventTriggered('attack');
@@ -559,28 +610,92 @@ describe('GameGraph.eventTriggered', () => {
 		expect(eventNode).toBeInstanceOf(EventTriggered);
 		expect((eventNode as EventTriggered).event).toBe(events['attack']);
 
-		await graph.supplyInput({ selection: undefined });
+		await advanceTicks(3);
+		await graph.supplyInput({ selection: { cardId: 'c1', capability: reaction } });
 		await eventPromise;
 	});
 
 	it('stores the correct event on the EventTriggered node', async () => {
+		const reaction = mock<Opportunity>();
 		const card = mock<ReadonlyCardState>({
 			id: 'c1',
-			getReactionsToEvent: () => [mock<Opportunity>()]
+			getReactionsToEvent: () => [reaction]
 		});
-		const p1 = mock<ReadonlyPlayerState>({ cards: () => [card] });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1', cards: () => [card] });
 		const graph = new GameGraph({ initialState: { players: [p1] } });
 
 		const eventPromise = graph.eventTriggered('investigating');
 		const eventNode = graph.start.next as EventTriggered;
 		expect(eventNode.event).toBe(events['investigating']);
 
-		await graph.supplyInput({ selection: undefined });
+		await advanceTicks(3);
+		await graph.supplyInput({ selection: { cardId: 'c1', capability: reaction } });
 		await eventPromise;
 	});
 });
 
 // ─── GameGraph.eventTriggered – iterative input ───────────────────────────────
+
+describe('orderReactiveCapabilities', () => {
+	it('groups by reactionOrder and then by owner in clockwise order', () => {
+		const p1Order1 = {
+			cardId: 'c1',
+			reactionOrder: 1,
+			ownerId: 'p1',
+			capability: mock<Opportunity>()
+		};
+		const p2Order1 = {
+			cardId: 'c2',
+			reactionOrder: 1,
+			ownerId: 'p2',
+			capability: mock<Opportunity>()
+		};
+		const p1Order2 = {
+			cardId: 'c3',
+			reactionOrder: 2,
+			ownerId: 'p1',
+			capability: mock<Opportunity>()
+		};
+
+		const groups = orderReactiveCapabilities([p1Order2, p2Order1, p1Order1] as never, 'p1', [
+			'p1',
+			'p2'
+		]);
+
+		expect(groups.map((group) => group.reactions.map((reaction) => reaction.cardId))).toEqual([
+			['c1'],
+			['c2'],
+			['c3']
+		]);
+		expect(groups.map((group) => group.decidingPlayerId)).toEqual(['p1', 'p2', 'p1']);
+	});
+
+	it('assigns ownerless reactions to current player decisions before owned ties', () => {
+		const ownerlessOrder1 = {
+			cardId: 'c4',
+			reactionOrder: 1,
+			ownerId: undefined,
+			capability: mock<Obligation>()
+		};
+		const p2Order1 = {
+			cardId: 'c5',
+			reactionOrder: 1,
+			ownerId: 'p2',
+			capability: mock<Opportunity>()
+		};
+
+		const groups = orderReactiveCapabilities([ownerlessOrder1, p2Order1] as never, 'p1', [
+			'p1',
+			'p2'
+		]);
+
+		expect(groups.map((group) => group.reactions.map((reaction) => reaction.cardId))).toEqual([
+			['c4'],
+			['c5']
+		]);
+		expect(groups.map((group) => group.decidingPlayerId)).toEqual(['p1', 'p2']);
+	});
+});
 
 describe('GameGraph.eventTriggered - iterative input', () => {
 	function mockCardWithReaction(
@@ -592,8 +707,11 @@ describe('GameGraph.eventTriggered - iterative input', () => {
 	}
 
 	function graphWithReactions(cards: ReadonlyCardState[]) {
-		const p1 = mock<ReadonlyPlayerState>({ cards: () => cards });
-		const mutablePlayer = mock<MutablePlayerState>({ getCard: () => mock<MutableCardState>() });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1', cards: () => cards });
+		const mutablePlayer = mock<MutablePlayerState>({
+			id: 'p1',
+			getCard: () => mock<MutableCardState>()
+		});
 		mutablePlayer.readonly.mockReturnValue(p1);
 		p1.mutable.mockReturnValue(mutablePlayer);
 		return new GameGraph({ initialState: { players: [p1] } });
@@ -614,15 +732,16 @@ describe('GameGraph.eventTriggered - iterative input', () => {
 		expect(graph.current).not.toBeInstanceOf(InputRequested);
 	});
 
-	it('required is false when the choice set contains only Opportunities', async () => {
-		const reaction = new Opportunity({ effects: [], triggers: ['attack'] });
+	it('required is true when user ordering is needed', async () => {
+		const reaction = mock<Opportunity>();
 		const card = mockCardWithReaction('c1', reaction);
 		const graph = graphWithReactions([card]);
 
 		const eventPromise = graph.eventTriggered('attack');
-		expect(currentChoiceField(graph).required).toBe(false);
+		expect(currentChoiceField(graph).required).toBe(true);
 
-		await graph.supplyInput({ selection: undefined });
+		const [choice] = currentChoiceField(graph).choices;
+		await graph.supplyInput({ selection: choice });
 		await eventPromise;
 	});
 
@@ -668,7 +787,7 @@ describe('GameGraph.eventTriggered - iterative input', () => {
 		expect(reaction2.trigger).toHaveBeenCalledWith(expect.objectContaining({ cardId: 'c2' }));
 	});
 
-	it('triggers obligations first, then asks for optional reactions', async () => {
+	it('asks for user order when obligation and opportunity coexist', async () => {
 		const obligation = new Obligation({ effects: [], triggers: ['attack'] });
 		const obligationTriggerSpy = vi.spyOn(obligation, 'trigger').mockResolvedValue();
 		const opportunity = mock<Opportunity>();
@@ -679,16 +798,22 @@ describe('GameGraph.eventTriggered - iterative input', () => {
 		const eventPromise = graph.eventTriggered('attack');
 		await advanceTicks(2);
 
-		expect(obligationTriggerSpy).toHaveBeenCalledWith(expect.objectContaining({ cardId: 'c1' }));
-		expect([...currentChoiceField(graph).choices]).toMatchObject([
+		expect(obligationTriggerSpy).not.toHaveBeenCalled();
+		const choices = [...currentChoiceField(graph).choices];
+		expect(choices).toMatchObject([
+			{ cardId: 'c1', capability: obligation },
 			{ cardId: 'c2', capability: opportunity }
 		]);
 
-		await graph.supplyInput({ selection: undefined });
+		await graph.supplyInput({ selection: choices[1] });
+		await advanceTicks(2);
+
+		expect(opportunity.trigger).toHaveBeenCalledWith(expect.objectContaining({ cardId: 'c2' }));
+		expect(obligationTriggerSpy).toHaveBeenCalledWith(expect.objectContaining({ cardId: 'c1' }));
 		await eventPromise;
 	});
 
-	it('supplying undefined breaks the loop without triggering remaining reactions', async () => {
+	it('throws when no reaction is selected while ordering is required', async () => {
 		const reaction1 = mock<Opportunity>();
 		const reaction2 = mock<Opportunity>();
 		const card1 = mockCardWithReaction('c1', reaction1);
@@ -698,7 +823,9 @@ describe('GameGraph.eventTriggered - iterative input', () => {
 		const eventPromise = graph.eventTriggered('attack');
 		await graph.supplyInput({ selection: undefined });
 
-		await eventPromise;
+		await expect(eventPromise).rejects.toThrow(
+			'Reaction selection is required when multiple reactions are available'
+		);
 		expect(reaction1.trigger).not.toHaveBeenCalled();
 		expect(reaction2.trigger).not.toHaveBeenCalled();
 	});
@@ -748,7 +875,8 @@ describe('GameNode types', () => {
 			required: true,
 			target
 		} as unknown as InputRequested['fields'][number];
-		const node = new InputRequested({ id: 1, state, fields: [field] });
+		const node = new InputRequested({ id: 1, state, playerId: 'p1', fields: [field] });
+		expect(node.playerId).toBe('p1');
 		expect(node.fields).toEqual([field]);
 	});
 

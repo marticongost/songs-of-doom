@@ -43,7 +43,9 @@ export class AttackEffect extends Effect {
 		additionalEffects: Array<Effect> = []
 	): Promise<void> {
 		const attackerId = gameGraph.requireSubject().id;
-		const defenderIds = await gameGraph.requestMultipleTargetsOrImplicitTarget(this.target);
+		const defenderIds = await gameGraph.requestTargets(this.target, {
+			default: () => [gameGraph.current.state.requireTarget().id]
+		});
 
 		gameGraph.effectTriggered<AttackEffect>(this, (_state) => {});
 

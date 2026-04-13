@@ -12,6 +12,7 @@ export interface CreatureProps extends EntityProps<Creature> {
 
 export class Creature extends ChildEntity<Module> {
 	override readonly type: EntityType = creature;
+	override readonly reactionOrder = 3;
 	readonly stats: Record<CreatureStatType, number>;
 
 	constructor({ stats, ...baseProps }: CreatureProps) {

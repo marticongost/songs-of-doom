@@ -33,7 +33,9 @@ describe('ExhaustEffect.trigger', () => {
 		const mutableState = mock<MutableGameState>();
 		mutableState.requireCard.calledWith('c1').mockReturnValue(card);
 		const graph = mock<GameGraph>();
-		graph.requestSingleTargetOrActiveCard.calledWith(target).mockResolvedValue('c1');
+		graph.requestSingleTarget
+			.calledWith(target, expect.objectContaining({ default: expect.any(Function) }))
+			.mockResolvedValue('c1');
 		let callbackReturn: unknown;
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callbackReturn = callback(mutableState);
@@ -50,7 +52,7 @@ describe('ExhaustEffect.trigger', () => {
 		const mutableState = mock<MutableGameState>();
 		mutableState.requireCard.calledWith('c1').mockReturnValue(card);
 		const graph = mock<GameGraph>();
-		graph.requestSingleTargetOrActiveCard.mockResolvedValue('c1');
+		graph.requestSingleTarget.mockResolvedValue('c1');
 		let capturedCallback!: (state: MutableGameState) => unknown;
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			capturedCallback = callback;

@@ -30,7 +30,9 @@ export class ExhaustEffect extends EffectWithOutcome<ExhaustOutcome> {
 	}
 
 	override async trigger(gameGraph: GameGraph) {
-		const cardId = (await gameGraph.requestSingleTargetOrActiveCard(this.target)) as CardId;
+		const cardId = (await gameGraph.requestSingleTarget(this.target, {
+			default: () => gameGraph.current.state.requireActiveCard().id
+		})) as CardId;
 		gameGraph.effectTriggered<ExhaustEffect>(this, (state) => {
 			const card = state.requireCard(cardId);
 			if (card.exhausted) {

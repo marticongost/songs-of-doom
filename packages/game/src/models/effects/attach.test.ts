@@ -38,7 +38,9 @@ describe('AttachEffect.trigger', () => {
 		mutableState.requireCard.calledWith('c2').mockReturnValue(targetCard);
 		mutableState.requireActiveCard.mockReturnValue(attachmentCard);
 		const graph = mock<GameGraph>();
-		graph.requestSingleTargetOrActiveCard.calledWith(target).mockResolvedValue('c2');
+		graph.requestSingleTarget
+			.calledWith(target, expect.objectContaining({ default: expect.any(Function) }))
+			.mockResolvedValue('c2');
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callback(mutableState);
 		});

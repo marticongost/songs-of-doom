@@ -66,7 +66,7 @@ describe('GatherCluesEffect.trigger', () => {
 		mutableState.evaluate.calledWith(3).mockReturnValue(3);
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(subject);
-		graph.requestMultipleTargetsOrImplicitTarget.mockResolvedValue(['c2']);
+		graph.requestTargets.mockResolvedValue(['c2']);
 		let callbackReturn: unknown;
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callbackReturn = callback(mutableState);
@@ -91,7 +91,7 @@ describe('GatherCluesEffect.trigger', () => {
 		mutableState.evaluate.calledWith(5).mockReturnValue(5);
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(subject);
-		graph.requestMultipleTargetsOrImplicitTarget.mockResolvedValue(['c2']);
+		graph.requestTargets.mockResolvedValue(['c2']);
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callback(mutableState);
 		});
@@ -113,7 +113,7 @@ describe('GatherCluesEffect.trigger', () => {
 		mutableState.evaluate.calledWith(2).mockReturnValue(2);
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(subject);
-		graph.requestMultipleTargetsOrImplicitTarget.mockResolvedValue(['c2', 'c3']);
+		graph.requestTargets.mockResolvedValue(['c2', 'c3']);
 		let callbackReturn: unknown;
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callbackReturn = callback(mutableState);

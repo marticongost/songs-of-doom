@@ -45,6 +45,7 @@ export interface EntityProps<T> {
 export abstract class Entity {
 	readonly title: LocalisedText;
 	readonly description?: LocalisedText;
+	readonly reactionOrder: number = 0;
 	protected readonly explicitProperties: Array<Property>;
 	readonly capabilities: Array<Capability>;
 	readonly attachmentCapabilities: Array<Capability>;

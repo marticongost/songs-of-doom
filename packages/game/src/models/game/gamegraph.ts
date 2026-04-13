@@ -59,6 +59,73 @@ type ClosingNodeExtraProps<ClosingNodeProps extends EndGroupProps> = Omit<
 	BaseNodeProps | 'groupNodeId'
 >;
 
+interface OrderedReactionRef extends CapabilityRef {
+	reactionOrder: number;
+	ownerId?: PlayerId;
+}
+
+interface OrderedReactionGroup {
+	decidingPlayerId: PlayerId;
+	reactions: Array<OrderedReactionRef>;
+}
+
+export interface RequestInputOptions {
+	playerId?: PlayerId;
+}
+
+type EventContextWithActivePlayer = EventContext & { activePlayerId: PlayerId };
+
+export interface RequestSingleTargetOptions {
+	playerId?: PlayerId;
+	default?: () => EntityId | undefined;
+}
+
+export interface RequestSinglePlayerOptions {
+	playerId?: PlayerId;
+	default?: () => PlayerId | undefined;
+}
+
+export interface RequestTargetsOptions {
+	playerId?: PlayerId;
+	default?: () => Array<EntityId>;
+}
+
+export interface RequestPlayersOptions {
+	playerId?: PlayerId;
+	default?: () => Array<PlayerId>;
+}
+
+export const orderReactiveCapabilities = (
+	reactions: Array<OrderedReactionRef>,
+	currentPlayerId: PlayerId,
+	clockwisePlayerOrder: Array<PlayerId>
+): Array<OrderedReactionGroup> => {
+	const groups: Array<OrderedReactionGroup> = [];
+	const orderLevels = Array.from(
+		new Set(reactions.map((capabilityRef) => capabilityRef.reactionOrder))
+	).sort((a, b) => a - b);
+
+	for (const orderLevel of orderLevels) {
+		const sameOrder = reactions.filter(
+			(capabilityRef) => capabilityRef.reactionOrder === orderLevel
+		);
+
+		const ownerless = sameOrder.filter((capabilityRef) => capabilityRef.ownerId === undefined);
+		if (ownerless.length > 0) {
+			groups.push({ decidingPlayerId: currentPlayerId, reactions: ownerless });
+		}
+
+		for (const playerId of clockwisePlayerOrder) {
+			const sameOwner = sameOrder.filter((capabilityRef) => capabilityRef.ownerId === playerId);
+			if (sameOwner.length > 0) {
+				groups.push({ decidingPlayerId: playerId, reactions: sameOwner });
+			}
+		}
+	}
+
+	return groups;
+};
+
 export interface GameGraphProps {
 	initialState: GameStateProps;
 	onChange?: () => void;
@@ -172,17 +239,36 @@ export class GameGraph {
 		});
 	}
 
-	async requestInput(target: Target): Promise<{ target: EntityId[] }>;
+	async requestInput(
+		target: Target,
+		options?: RequestInputOptions
+	): Promise<{ target: EntityId[] }>;
 	async requestInput<const Fields extends ReadonlyArray<Field<unknown, string, boolean>>>(
-		...fields: Fields
+		fields: Fields,
+		options?: RequestInputOptions
 	): Promise<FieldsResult<Fields>>;
 	async requestInput<const Fields extends ReadonlyArray<Field<unknown, string, boolean>>>(
-		...fields: Fields | [Target]
-	): Promise<FieldsResult<Fields> | { target: number[] }> {
-		if (fields[0] instanceof Target) {
-			return this.requestInput(new TargetField({ name: 'target', target: fields[0] }));
+		fieldsOrTarget: Fields | Target,
+		options: RequestInputOptions = {}
+	): Promise<FieldsResult<Fields> | { target: EntityId[] }> {
+		if (fieldsOrTarget instanceof Target) {
+			return this.requestInput(
+				[new TargetField({ name: 'target', target: fieldsOrTarget })] as const,
+				options
+			) as unknown as Promise<{ target: EntityId[] }>;
 		}
-		this.add(InputRequested, { fields: fields as unknown as Array<Field<unknown>> });
+
+		const playerId =
+			options.playerId ??
+			this._current.state.getActivePlayer()?.id ??
+			this._current.state.players[0]?.id;
+		if (playerId === undefined) {
+			throw new Error('Cannot request input without a player id');
+		}
+		this.add(InputRequested, {
+			playerId,
+			fields: fieldsOrTarget as unknown as Array<Field<unknown>>
+		});
 		return new Promise((resolve) => {
 			this._inputPromise = resolve as (values: Record<string, unknown>) => void;
 		}) as Promise<FieldsResult<Fields>>;
@@ -196,47 +282,86 @@ export class GameGraph {
 		}
 	}
 
-	async requestSingleTargetOrActiveCard(target: Target | undefined): Promise<EntityId> {
+	async requestSingleTarget(
+		target: Target,
+		options?: RequestSingleTargetOptions
+	): Promise<EntityId>;
+	async requestSingleTarget(
+		target: undefined,
+		options: RequestSingleTargetOptions & { default: () => EntityId }
+	): Promise<EntityId>;
+	async requestSingleTarget(
+		target?: Target,
+		options?: RequestSingleTargetOptions
+	): Promise<EntityId | undefined>;
+	async requestSingleTarget(
+		target?: Target,
+		options: RequestSingleTargetOptions = {}
+	): Promise<EntityId | undefined> {
 		if (target === undefined) {
-			return this._current.state.requireActiveCard().id;
+			return options.default?.();
 		}
-		const targetIds = (await this.requestInput(target)).target;
+		const targetIds = (await this.requestInput(target, { playerId: options.playerId })).target;
 		if (targetIds.length !== 1) {
 			throw new Error('Expected exactly one target to be selected');
 		}
 		return targetIds[0];
 	}
 
-	async requestSingleTargetOrImplicitTarget(target: Target | undefined): Promise<EntityId> {
+	async requestSinglePlayer(
+		target: Target,
+		options?: RequestSinglePlayerOptions
+	): Promise<PlayerId>;
+	async requestSinglePlayer(
+		target: undefined,
+		options: RequestSinglePlayerOptions & { default: () => PlayerId }
+	): Promise<PlayerId>;
+	async requestSinglePlayer(
+		target?: Target,
+		options?: RequestSinglePlayerOptions
+	): Promise<PlayerId | undefined>;
+	async requestSinglePlayer(
+		target?: Target,
+		options: RequestSinglePlayerOptions = {}
+	): Promise<PlayerId | undefined> {
 		if (target === undefined) {
-			return this._current.state.requireTarget().id;
+			return options.default?.();
 		}
-		const targetIds = (await this.requestInput(target)).target;
-		if (targetIds.length !== 1) {
+		if (!target.matchesType('player')) {
+			throw new Error('Expected target to be of type player');
+		}
+		const playerIds = (await this.requestInput(target, { playerId: options.playerId })).target;
+		if (playerIds.length !== 1) {
 			throw new Error('Expected exactly one target to be selected');
 		}
-		return targetIds[0];
+		return playerIds[0] as PlayerId;
 	}
 
-	async requestMultipleTargetsOrImplicitTarget(target: Target | undefined): Promise<EntityId[]> {
+	async requestTargets(
+		target?: Target,
+		options: RequestTargetsOptions = {}
+	): Promise<Array<EntityId>> {
 		if (target === undefined) {
-			return [this._current.state.requireTarget().id];
+			return options.default?.() ?? [];
 		}
-		return (await this.requestInput(target)).target;
+		return (await this.requestInput(target, { playerId: options.playerId })).target;
 	}
 
 	requireSubject(): { id: EntityId } {
 		return this._current.state.requireSubject();
 	}
 
-	async requestPlayersOrActivePlayer(target: Target | undefined): Promise<PlayerId[]> {
+	async requestPlayers(
+		target?: Target,
+		options: RequestPlayersOptions = {}
+	): Promise<Array<PlayerId>> {
 		if (target === undefined) {
-			return [this._current.state.requireActivePlayer().id];
+			return options.default?.() ?? [];
 		}
 		if (!target.matchesType('player')) {
 			throw new Error('Expected target to be of type player');
 		}
-		return (await this.requestInput(target)).target as PlayerId[];
+		return (await this.requestInput(target, { playerId: options.playerId })).target as PlayerId[];
 	}
 
 	async test({
@@ -270,7 +395,7 @@ export class GameGraph {
 					effect.trigger(this);
 				}
 
-				const { result } = await this.requestInput(new ResultField({ name: 'result' }));
+				const { result } = await this.requestInput([new ResultField({ name: 'result' })]);
 
 				for (const effect of effectsByTiming.get(DuringTest) ?? []) {
 					effect.trigger(this);
@@ -438,66 +563,95 @@ export class GameGraph {
 		if (!normalized.event) {
 			throw new Error('Unknown event');
 		}
-		const inferredContext: EventContext = {
+		const inferredActivePlayerId =
+			this._current.state.getActivePlayer()?.id ?? this._current.state.players[0]?.id;
+		if (inferredActivePlayerId === undefined) {
+			throw new Error('Cannot resolve active player when triggering an event');
+		}
+
+		const inferredContext: EventContextWithActivePlayer = {
 			actorId: this._current.state.getSubject()?.id,
 			subjectId: this._current.state.getSubject()?.id,
 			targetId: this._current.state.getTarget()?.id,
-			activePlayerId: this._current.state.getActivePlayer()?.id,
+			activePlayerId: inferredActivePlayerId,
 			reactiveCardId: this._current.state.getReactiveCard()?.id,
 			reactivePlayerId: this._current.state.getReactivePlayer()?.id
 		};
-		const eventContext: EventContext = {
+		const eventContext: EventContextWithActivePlayer = {
 			...inferredContext,
-			...normalized.context
+			...normalized.context,
+			activePlayerId: normalized.context?.activePlayerId ?? inferredActivePlayerId
 		};
 		const eventEnvelope: EventEnvelope = {
 			event: normalized.event,
 			context: eventContext
 		};
 
-		const reactiveCapabilities: Set<CapabilityRef> = new Set(
-			this._current.state.cards({ ready: true }).flatMap((card) =>
-				card.getReactionsToEvent(eventEnvelope, this._current.state).map((reaction) => ({
+		const currentPlayerId = eventContext.activePlayerId;
+
+		const reactiveCapabilities: Array<OrderedReactionRef> = this._current.state
+			.cards({ ready: true })
+			.flatMap((card) => {
+				const reactionOrder = card.card.reactionOrder;
+				return card.getReactionsToEvent(eventEnvelope, this._current.state).map((reaction) => ({
 					cardId: card.id,
+					ownerId: card.ownerId,
+					reactionOrder,
 					capability: reaction
-				}))
-			)
-		);
+				}));
+			});
 
-		if (reactiveCapabilities.size > 0) {
-			await this.group(EventTriggered, { event: normalized.event }, {}, async () => {
-				while (reactiveCapabilities.size > 0) {
-					const obligations = Array.from(reactiveCapabilities).filter(
-						(capabilityRef) => capabilityRef.capability instanceof Obligation
-					);
+		if (reactiveCapabilities.length > 0) {
+			const clockwisePlayerOrder = this._current.state.clockwise(currentPlayerId);
 
-					if (obligations.length > 0) {
-						for (const obligation of obligations) {
-							await obligation.capability.trigger({
-								gameGraph: this,
-								cardId: obligation.cardId
-							});
-							reactiveCapabilities.delete(obligation);
-						}
+			const consumeReactions = async (
+				reactions: Array<OrderedReactionRef>,
+				decidingPlayerId: PlayerId
+			) => {
+				while (reactions.length > 0) {
+					if (reactions.length === 1 && reactions[0].capability instanceof Obligation) {
+						const [onlyReaction] = reactions;
+						await onlyReaction.capability.trigger({
+							gameGraph: this,
+							cardId: onlyReaction.cardId
+						});
+						reactions.splice(0, 1);
 						continue;
 					}
 
 					const { selection } = await this.requestInput(
-						new CapabilityChoiceField({
-							name: 'selection',
-							choices: reactiveCapabilities,
-							required: false
-						})
+						[
+							new CapabilityChoiceField({
+								name: 'selection',
+								choices: new Set(reactions),
+								required: true
+							})
+						],
+						{ playerId: decidingPlayerId }
 					);
 					if (selection === undefined) {
-						break;
+						throw new Error('Reaction selection is required when multiple reactions are available');
 					}
 
 					await selection.capability.trigger({
 						gameGraph: this,
 						cardId: selection.cardId
 					});
-					reactiveCapabilities.delete(selection);
+
+					const selectedIndex = reactions.indexOf(selection as OrderedReactionRef);
+					if (selectedIndex !== -1) {
+						reactions.splice(selectedIndex, 1);
+					}
+				}
+			};
+
+			await this.group(EventTriggered, { event: normalized.event }, {}, async () => {
+				for (const reactionGroup of orderReactiveCapabilities(
+					reactiveCapabilities,
+					currentPlayerId,
+					clockwisePlayerOrder
+				)) {
+					await consumeReactions(reactionGroup.reactions, reactionGroup.decidingPlayerId);
 				}
 			});
 		}
@@ -545,14 +699,17 @@ export class EventTriggered extends GameNode {
 }
 
 export interface InputRequestedProps extends GameNodeProps {
+	playerId: PlayerId;
 	fields: Array<Field<unknown>>;
 }
 
 export class InputRequested extends GameNode {
+	readonly playerId: PlayerId;
 	readonly fields: ReadonlyArray<Field<unknown>>;
 
-	constructor({ fields, ...baseProps }: InputRequestedProps) {
+	constructor({ playerId, fields, ...baseProps }: InputRequestedProps) {
 		super(baseProps);
+		this.playerId = playerId;
 		this.fields = fields;
 	}
 }
