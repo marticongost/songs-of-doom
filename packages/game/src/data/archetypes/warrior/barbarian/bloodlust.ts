@@ -1,3 +1,4 @@
+import { reactivePlayerIsSubject } from '../../../..';
 import { Opportunity } from '../../../../models/capabilities';
 import { drawCards } from '../../../../models/effects';
 import { Trait } from '../../../../models/entities/trait';
@@ -11,7 +12,7 @@ export default new Trait({
 	xpCost: 2,
 	capabilities: [
 		new Opportunity({
-			triggers: ['enemyDefeated'],
+			triggers: [{ event: 'enemyDefeated', condition: reactivePlayerIsSubject }],
 			cost: {
 				cardTransition: 'exhaust'
 			},

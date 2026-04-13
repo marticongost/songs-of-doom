@@ -1,4 +1,5 @@
-import { conditional, ConditionalEffect, type Effect } from '../../effects';
+import { conditional, ConditionalEffect } from '../../effects/conditional';
+import type { Effect } from '../../effects/effect';
 import { Expression } from '../../expressions/expression';
 import type { GameState } from '../../game/gamestate';
 import type { Property } from '../../properties';

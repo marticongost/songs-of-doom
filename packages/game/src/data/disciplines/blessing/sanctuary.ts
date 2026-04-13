@@ -1,4 +1,4 @@
-import { reactivePlayerIsTarget } from '../../..';
+import { reactiveCardIsSubject, reactivePlayerIsTarget } from '../../..';
 import { Action, Constant, Obligation, Opportunity } from '../../../models/capabilities';
 import {
 	addCharges,
@@ -50,7 +50,7 @@ export default upgradable(Skill, 2, (variants) => ({
 			]
 		}),
 		new Obligation({
-			triggers: ['fullyDischarged'],
+			triggers: [{ event: 'fullyDischarged', condition: reactiveCardIsSubject }],
 			effects: [discard()]
 		})
 	]

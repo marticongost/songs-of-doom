@@ -1,3 +1,4 @@
+import { reactiveCardIsSubject } from '../../..';
 import { Action, Obligation } from '../../../models/capabilities';
 import {
 	addCharges,
@@ -43,7 +44,7 @@ export default upgradable(Skill, 2, (variants) => ({
 			]
 		}),
 		new Obligation({
-			triggers: ['fullyDischarged'],
+			triggers: [{ event: 'fullyDischarged', condition: reactiveCardIsSubject }],
 			effects: [discard()]
 		})
 	]

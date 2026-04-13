@@ -1,5 +1,5 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
-import { BooleanExpression } from '../expressions';
+import { BooleanExpression } from '../expressions/boolean/boolean-expression';
 import type { GameState } from '../game/gamestate';
 
 export interface PropertyProps {

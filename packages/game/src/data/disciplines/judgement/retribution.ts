@@ -1,3 +1,4 @@
+import { reactiveCardIsSubject, reactivePlayerIsTarget } from '../../..';
 import { Action, Opportunity } from '../../../models/capabilities';
 import {
 	addCharges,
@@ -23,7 +24,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	},
 	capabilities: [
 		new Opportunity({
-			triggers: ['damageDealt'],
+			triggers: [{ event: 'damageDealt', condition: reactivePlayerIsTarget }],
 			cost: { strength: 2 },
 			effects: [
 				saveTargetToVariable({ name: 'X', value: { type: 'attacker' } }),
@@ -43,7 +44,7 @@ export default upgradable(Skill, 2, (variants) => ({
 			]
 		}),
 		new Opportunity({
-			triggers: ['fullyDischarged'],
+			triggers: [{ event: 'fullyDischarged', condition: reactiveCardIsSubject }],
 			effects: [discard()]
 		})
 	]

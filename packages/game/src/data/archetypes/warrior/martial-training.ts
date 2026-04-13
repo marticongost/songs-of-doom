@@ -1,3 +1,4 @@
+import { reactivePlayerIsSubject } from '../../..';
 import { Opportunity } from '../../../models/capabilities';
 import { modifyCapabilityCost } from '../../../models/effects';
 import { Trait } from '../../../models/entities/trait';
@@ -11,7 +12,7 @@ export default new Trait({
 	xpCost: 3,
 	capabilities: [
 		new Opportunity({
-			triggers: ['payingCapability'],
+			triggers: [{ event: 'payingCapability', condition: reactivePlayerIsSubject }],
 			cost: {
 				cardTransition: 'exhaust'
 			},

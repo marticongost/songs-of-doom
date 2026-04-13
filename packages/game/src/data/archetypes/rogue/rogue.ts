@@ -1,6 +1,7 @@
-import { Archetype } from '../../../models/entities/archetype';
+import { reactivePlayerIsSubject } from '../../..';
 import { Constant, Opportunity } from '../../../models/capabilities';
 import { talent, transformFocus } from '../../../models/effects';
+import { Archetype } from '../../../models/entities/archetype';
 import { lightArmour } from '../../talents';
 
 export default new Archetype({
@@ -16,7 +17,7 @@ export default new Archetype({
 			effects: [talent([lightArmour])]
 		}),
 		new Opportunity({
-			triggers: ['payingCapability'],
+			triggers: [{ event: 'payingCapability', condition: reactivePlayerIsSubject }],
 			cost: { cardTransition: 'exhaust' },
 			effects: [
 				transformFocus({

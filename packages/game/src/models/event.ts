@@ -108,7 +108,7 @@ const eventData: Record<string, Omit<EventProps, 'type'>> = {
 			en: 'When an encounter is revealed'
 		}
 	},
-	moving: {
+	movement: {
 		name: {
 			ca: 'En resoldre un moviment',
 			es: 'Al resolver un movimiento',
@@ -117,9 +117,9 @@ const eventData: Record<string, Omit<EventProps, 'type'>> = {
 	},
 	fullyDischarged: {
 		name: {
-			ca: 'En perdre totes les càrregues',
-			es: 'Al perder todas las cargas',
-			en: 'When fully discharged'
+			ca: 'Quan una carta perdi totes les càrregues',
+			es: 'Cuando una carta pierda todas las cargas',
+			en: 'When a card loses all charges'
 		}
 	}
 };
