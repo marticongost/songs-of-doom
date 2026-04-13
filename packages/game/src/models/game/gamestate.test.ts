@@ -140,6 +140,24 @@ describe('GameState.requirePlayer', () => {
 	});
 });
 
+// ─── GameState.clockwise ─────────────────────────────────────────────────────
+
+describe('GameState.clockwise', () => {
+	it('returns players starting at the requested id and wrapping around', () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const p2 = mock<ReadonlyPlayerState>({ id: 'p2' });
+		const p3 = mock<ReadonlyPlayerState>({ id: 'p3' });
+		const state = makeGameState([p1, p2, p3]);
+		expect(state.clockwise('p2')).toEqual(['p2', 'p3', 'p1']);
+	});
+
+	it('throws when the requested starting player does not exist', () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const state = makeGameState([p1]);
+		expect(() => state.clockwise('p9')).toThrow('p9');
+	});
+});
+
 // ─── GameState.getEntityState ─────────────────────────────────────────────────
 
 describe('GameState.getEntityState', () => {

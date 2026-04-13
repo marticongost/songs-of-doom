@@ -129,6 +129,17 @@ export class GameState<
 		return player;
 	}
 
+	clockwise(startingPlayer: PlayerId): Array<PlayerId> {
+		const startIndex = this.players.findIndex((player) => player.id === startingPlayer);
+		if (startIndex === -1) {
+			throw new Error(`Player with id ${startingPlayer} not found`);
+		}
+		return [
+			...this.players.slice(startIndex).map((player) => player.id),
+			...this.players.slice(0, startIndex).map((player) => player.id)
+		];
+	}
+
 	getActiveCard(): TCard | undefined {
 		if (this.activeCardStack.length === 0) {
 			return undefined;
