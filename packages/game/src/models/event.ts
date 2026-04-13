@@ -147,24 +147,9 @@ export interface EventContext {
 }
 
 export interface EventEnvelope {
-	event: Event | EventType;
+	event: Event;
 	context?: EventContext;
 }
-
-export const normaliseEvent = (event: Event | EventType): Event | undefined =>
-	typeof event === 'string' ? events[event as EventType] : event;
-
-export const normaliseEventEnvelope = (
-	eventOrEnvelope: Event | EventType | EventEnvelope
-): { event: Event | undefined; context: EventContext } => {
-	if (typeof eventOrEnvelope === 'string' || eventOrEnvelope instanceof Event) {
-		return { event: normaliseEvent(eventOrEnvelope), context: {} };
-	}
-	return {
-		event: normaliseEvent(eventOrEnvelope.event),
-		context: eventOrEnvelope.context ?? {}
-	};
-};
 
 export const events: Record<EventType, Event> = mapToRecord(eventData, {
 	mapEntries: ([type, data]: [string, Omit<EventProps, 'type'>]) => [

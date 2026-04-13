@@ -21,13 +21,7 @@ describe('AttackEffect.trigger', () => {
 			.calledWith(undefined, expect.objectContaining({ default: expect.any(Function) }))
 			.mockResolvedValue(['p2']);
 		graph.eventTriggered.mockImplementation(async (eventType) => {
-			events.push(
-				typeof eventType === 'string'
-					? eventType
-					: typeof eventType.event === 'string'
-						? eventType.event
-						: eventType.event.type
-			);
+			events.push(eventType);
 		});
 		graph.test.mockImplementation(async (props) => {
 			capturedTestProps = props;
@@ -56,13 +50,7 @@ describe('AttackEffect.trigger', () => {
 			.calledWith(undefined, expect.objectContaining({ default: expect.any(Function) }))
 			.mockResolvedValue(['p2']);
 		graph.eventTriggered.mockImplementation(async (eventType) => {
-			events.push(
-				typeof eventType === 'string'
-					? eventType
-					: typeof eventType.event === 'string'
-						? eventType.event
-						: eventType.event.type
-			);
+			events.push(eventType);
 		});
 		graph.test.mockImplementation(async (props) => {
 			await props.beforeTest?.(graph);

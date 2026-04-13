@@ -299,13 +299,7 @@ describe('GameGraph.test', () => {
 		const order: string[] = [];
 
 		vi.spyOn(graph, 'eventTriggered').mockImplementation(async (eventType) => {
-			order.push(
-				typeof eventType === 'string'
-					? eventType
-					: typeof eventType.event === 'string'
-						? eventType.event
-						: eventType.event.type
-			);
+			order.push(eventType);
 			await eventTriggered(eventType);
 		});
 

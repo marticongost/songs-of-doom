@@ -1,7 +1,7 @@
 import { isSkill, type Capability, type Property } from '../..';
 import { Reaction } from '../capabilities/reaction';
 import type { Entity } from '../entities';
-import { normaliseEventEnvelope, type Event, type EventEnvelope, type EventType } from '../event';
+import type { EventEnvelope } from '../event';
 import { EntityState, type MutableEntityState } from './entitystate';
 import type { MutableGameState, ReadonlyGameState } from './gamestate';
 import type { CardId, PlayerId } from './identifiers';
@@ -106,13 +106,10 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 	}
 
 	getReactionsToEvent(
-		event: Event | EventType | EventEnvelope,
+		eventEnvelope: EventEnvelope,
 		gameState?: ReadonlyGameState
 	): Array<Reaction> {
-		const { event: normalizedEvent, context } = normaliseEventEnvelope(event);
-		if (!normalizedEvent) {
-			return [];
-		}
+		const context = eventEnvelope.context ?? {};
 
 		let capabilities: Array<Capability>;
 		if (isSkill(this.card)) {
@@ -147,7 +144,7 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 				return false;
 			}
 			return capability.triggers.some((spec) => {
-				if (spec.event !== normalizedEvent) {
+				if (spec.event !== eventEnvelope.event) {
 					return false;
 				}
 				if (

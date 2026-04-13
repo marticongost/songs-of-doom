@@ -362,16 +362,16 @@ describe('CardState', () => {
 				capabilities: [reaction]
 			});
 			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' }, { entity });
-			expect(card.getReactionsToEvent('attack')).toContain(reaction);
+			expect(card.getReactionsToEvent({ event: events['attack'] })).toContain(reaction);
 		});
 
-		it('accepts an Event object instead of an EventType string', () => {
+		it('accepts an Event object through EventEnvelope', () => {
 			const entity = makeEntity({
 				type: trait,
 				capabilities: [reaction]
 			});
 			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' }, { entity });
-			expect(card.getReactionsToEvent(events['attack'])).toContain(reaction);
+			expect(card.getReactionsToEvent({ event: events['attack'] })).toContain(reaction);
 		});
 
 		it('does not return reactions for non-matching events', () => {
@@ -380,7 +380,7 @@ describe('CardState', () => {
 				capabilities: [reaction]
 			});
 			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' }, { entity });
-			expect(card.getReactionsToEvent('investigation')).toEqual([]);
+			expect(card.getReactionsToEvent({ event: events['investigation'] })).toEqual([]);
 		});
 
 		it('includes attachment capabilities for non-skill entities when attached', () => {
@@ -390,7 +390,7 @@ describe('CardState', () => {
 				attachmentCapabilities: [attachmentReaction]
 			});
 			const card = makeReadonlyCard('c2', 'p1', { type: 'card', cardId: 'c1' }, { entity });
-			const results = card.getReactionsToEvent('attack');
+			const results = card.getReactionsToEvent({ event: events['attack'] });
 			expect(results).toContain(attachmentReaction);
 		});
 
@@ -402,7 +402,7 @@ describe('CardState', () => {
 			});
 			const card = makeReadonlyCard('c2', 'p1', { type: 'card', cardId: 'c1' }, { entity });
 			// skill entity when attached: only attachmentCapabilities are used
-			expect(card.getReactionsToEvent('attack')).toEqual([attachmentReaction]);
+			expect(card.getReactionsToEvent({ event: events['attack'] })).toEqual([attachmentReaction]);
 		});
 
 		it('uses only regular capabilities for skill entities when not attached', () => {
@@ -412,7 +412,7 @@ describe('CardState', () => {
 				attachmentCapabilities: [attachmentReaction]
 			});
 			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' }, { entity });
-			expect(card.getReactionsToEvent('attack')).toEqual([reaction]);
+			expect(card.getReactionsToEvent({ event: events['attack'] })).toEqual([reaction]);
 		});
 
 		it('filters attack reactions by subject when context is provided', () => {
@@ -427,7 +427,7 @@ describe('CardState', () => {
 				makeReadonlyPlayer('p2', { hand: [observer] })
 			]);
 
-			const event: EventEnvelope = { event: 'attack', context: { subjectId: 'p1' } };
+			const event: EventEnvelope = { event: events['attack'], context: { subjectId: 'p1' } };
 
 			expect(attacker.getReactionsToEvent(event, state)).toContain(reaction);
 			expect(observer.getReactionsToEvent(event, state)).toEqual([]);
@@ -449,7 +449,7 @@ describe('CardState', () => {
 				makeReadonlyPlayer('p2', { hand: [observer] })
 			]);
 
-			const event: EventEnvelope = { event: 'attack', context: { targetId: 'c1' } };
+			const event: EventEnvelope = { event: events['attack'], context: { targetId: 'c1' } };
 
 			expect(defender.getReactionsToEvent(event, state)).toContain(receivingAttackReaction);
 			expect(observer.getReactionsToEvent(event, state)).toEqual([]);
@@ -487,21 +487,21 @@ describe('CardState', () => {
 			});
 
 			expect(
-				card1.getReactionsToEvent({ event: 'attack', context: { subjectId: 'p1' } }, state)
+				card1.getReactionsToEvent({ event: events['attack'], context: { subjectId: 'p1' } }, state)
 			).toContain(attackingReaction);
 			expect(
-				card2.getReactionsToEvent({ event: 'attack', context: { subjectId: 'p1' } }, state)
+				card2.getReactionsToEvent({ event: events['attack'], context: { subjectId: 'p1' } }, state)
 			).toEqual([]);
 
 			expect(
-				card1.getReactionsToEvent({ event: 'attack', context: { targetId: 'c1' } }, state)
+				card1.getReactionsToEvent({ event: events['attack'], context: { targetId: 'c1' } }, state)
 			).toContain(receivingAttackReaction);
 			expect(
-				card2.getReactionsToEvent({ event: 'attack', context: { targetId: 'c1' } }, state)
+				card2.getReactionsToEvent({ event: events['attack'], context: { targetId: 'c1' } }, state)
 			).toEqual([]);
 
-			expect(card1.getReactionsToEvent({ event: 'beforeDrawingFate' }, state)).toEqual([]);
-			expect(card2.getReactionsToEvent({ event: 'beforeDrawingFate' }, state)).toContain(
+			expect(card1.getReactionsToEvent({ event: events['beforeDrawingFate'] }, state)).toEqual([]);
+			expect(card2.getReactionsToEvent({ event: events['beforeDrawingFate'] }, state)).toContain(
 				otherPlayerReaction
 			);
 		});
@@ -534,12 +534,15 @@ describe('CardState', () => {
 
 			expect(
 				ownerReactiveCard.getReactionsToEvent(
-					{ event: 'attack', context: { targetId: 'p1' } },
+					{ event: events['attack'], context: { targetId: 'p1' } },
 					state
 				)
 			).toContain(ownerTargetReaction);
 			expect(
-				otherPlayerCard.getReactionsToEvent({ event: 'attack', context: { targetId: 'p1' } }, state)
+				otherPlayerCard.getReactionsToEvent(
+					{ event: events['attack'], context: { targetId: 'p1' } },
+					state
+				)
 			).toEqual([]);
 		});
 
@@ -576,17 +579,20 @@ describe('CardState', () => {
 			]);
 
 			expect(
-				targetedCard.getReactionsToEvent({ event: 'attack', context: { targetId: 'c10' } }, state)
+				targetedCard.getReactionsToEvent(
+					{ event: events['attack'], context: { targetId: 'c10' } },
+					state
+				)
 			).toContain(cardTargetReaction);
 			expect(
 				sameOwnerOtherCard.getReactionsToEvent(
-					{ event: 'attack', context: { targetId: 'c10' } },
+					{ event: events['attack'], context: { targetId: 'c10' } },
 					state
 				)
 			).toEqual([]);
 			expect(
 				otherPlayerCard.getReactionsToEvent(
-					{ event: 'attack', context: { targetId: 'c10' } },
+					{ event: events['attack'], context: { targetId: 'c10' } },
 					state
 				)
 			).toEqual([]);

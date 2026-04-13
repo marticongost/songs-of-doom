@@ -3,7 +3,7 @@ import { Obligation } from '../capabilities';
 import type { Effect } from '../effects';
 import { AfterTest, BeforeTest, DuringTest, type EffectOutcome } from '../effects/effect';
 import {
-	normaliseEventEnvelope,
+	events,
 	type Event,
 	type EventContext,
 	type EventEnvelope,
@@ -558,11 +558,7 @@ export class GameGraph {
 		this._currentParent = this._currentParent.parent;
 	}
 
-	async eventTriggered(eventType: EventType | EventEnvelope) {
-		const normalized = normaliseEventEnvelope(eventType);
-		if (!normalized.event) {
-			throw new Error('Unknown event');
-		}
+	async eventTriggered(eventType: EventType) {
 		const inferredActivePlayerId =
 			this._current.state.getActivePlayer()?.id ?? this._current.state.players[0]?.id;
 		if (inferredActivePlayerId === undefined) {
@@ -579,11 +575,10 @@ export class GameGraph {
 		};
 		const eventContext: EventContextWithActivePlayer = {
 			...inferredContext,
-			...normalized.context,
-			activePlayerId: normalized.context?.activePlayerId ?? inferredActivePlayerId
+			activePlayerId: inferredActivePlayerId
 		};
 		const eventEnvelope: EventEnvelope = {
-			event: normalized.event,
+			event: events[eventType],
 			context: eventContext
 		};
 
@@ -645,7 +640,7 @@ export class GameGraph {
 				}
 			};
 
-			await this.group(EventTriggered, { event: normalized.event }, {}, async () => {
+			await this.group(EventTriggered, { event: events[eventType] }, {}, async () => {
 				for (const reactionGroup of orderReactiveCapabilities(
 					reactiveCapabilities,
 					currentPlayerId,
