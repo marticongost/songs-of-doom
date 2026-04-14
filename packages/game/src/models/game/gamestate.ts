@@ -6,7 +6,15 @@ import {
 	type MutableCardState,
 	type ReadonlyCardState
 } from './cardstate';
-import { isCardId, isPlayerId, type CardId, type EntityId, type PlayerId } from './identifiers';
+import {
+	isCardId,
+	isLocationId,
+	isPlayerId,
+	type CardId,
+	type EntityId,
+	type LocationId,
+	type PlayerId
+} from './identifiers';
 import {
 	LocationState,
 	type MutableLocationState,
@@ -65,10 +73,11 @@ export class GameState<
 		this.testResolutionStack = testResolutionStack ?? [];
 	}
 
+	getEntityState(entityId: LocationId): TLocation | undefined;
 	getEntityState(entityId: CardId): TCard | undefined;
 	getEntityState(entityId: PlayerId): TPlayer | undefined;
-	getEntityState(entityId: EntityId): TCard | TPlayer | undefined;
-	getEntityState(entityId: EntityId): TCard | TPlayer | undefined {
+	getEntityState(entityId: EntityId): TCard | TLocation | TPlayer | undefined;
+	getEntityState(entityId: EntityId): TCard | TLocation | TPlayer | undefined {
 		if (isCardId(entityId)) {
 			return this.getCard(entityId);
 		} else if (isPlayerId(entityId)) {
@@ -77,10 +86,11 @@ export class GameState<
 		return undefined;
 	}
 
+	requireEntityState(entityId: LocationId): TLocation;
 	requireEntityState(entityId: CardId): TCard;
 	requireEntityState(entityId: PlayerId): TPlayer;
-	requireEntityState(entityId: EntityId): TCard | TPlayer;
-	requireEntityState(entityId: EntityId): TCard | TPlayer {
+	requireEntityState(entityId: EntityId): TCard | TLocation | TPlayer;
+	requireEntityState(entityId: EntityId): TCard | TLocation | TPlayer {
 		const entity = this.getEntityState(entityId);
 		if (!entity) {
 			throw new Error(`Entity with id ${entityId} not found`);
@@ -93,7 +103,12 @@ export class GameState<
 		return options?.ready ? playerCards : ([...this.locations, ...playerCards] as Array<TCard>);
 	}
 
-	getCard(cardId: CardId): TCard | undefined {
+	getCard(cardId: LocationId): TLocation | undefined;
+	getCard(cardId: CardId): TCard | undefined;
+	getCard(cardId: CardId): TCard | TLocation | undefined {
+		if (isLocationId(cardId)) {
+			return this.locations.find((l) => l.id === cardId);
+		}
 		for (const location of this.locations) {
 			const found = location.getCard(cardId);
 			if (found) {
@@ -109,7 +124,9 @@ export class GameState<
 		return undefined;
 	}
 
-	requireCard(cardId: CardId): TCard {
+	requireCard(cardId: LocationId): TLocation;
+	requireCard(cardId: CardId): TCard;
+	requireCard(cardId: CardId): TCard | TLocation {
 		const card = this.getCard(cardId);
 		if (!card) {
 			throw new Error(`Card with id ${cardId} not found`);

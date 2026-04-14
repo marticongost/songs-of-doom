@@ -4,7 +4,7 @@ import type { Entity } from '../entities';
 import type { EventEnvelope } from '../event';
 import { EntityState, type MutableEntityState } from './entitystate';
 import type { MutableGameState, ReadonlyGameState } from './gamestate';
-import type { CardId, PlayerId } from './identifiers';
+import type { CardId, LocationId, PlayerId } from './identifiers';
 import { mutate } from './mutate';
 
 export interface CardOptions {
@@ -23,7 +23,7 @@ export type CardParent =
 	| { type: 'discard'; playerId: PlayerId }
 	| { type: 'card'; cardId: CardId }
 	| { type: 'player'; playerId: PlayerId }
-	| { type: 'location'; locationId: CardId };
+	| { type: 'location'; locationId: LocationId };
 
 export interface CardStateProps {
 	id: CardId;
@@ -279,7 +279,7 @@ export class MutableCardState
 		playerState.deck.push(this);
 	}
 
-	moveToLocation(gameState: MutableGameState, locationId: CardId) {
+	moveToLocation(gameState: MutableGameState, locationId: LocationId) {
 		this.removeFromCurrentLocation(gameState);
 		this.container = { type: 'location', locationId };
 		const locationState = gameState.requireCard(locationId);

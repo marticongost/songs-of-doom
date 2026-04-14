@@ -3,8 +3,8 @@ import type { MutableCardState } from '../game/cardstate';
 import type { EntityState, MutableEntityState } from '../game/entitystate';
 import type { GameGraph } from '../game/gamegraph';
 import type { MutableGameState } from '../game/gamestate';
-import type { CardId, PlayerId } from '../game/identifiers';
-import { type ActorTargetType, Target, type TargetSpec } from '../target';
+import { isCardId, type EntityId } from '../game/identifiers';
+import { Target, type ActorTargetType, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
 export interface EngageEffectProps {
@@ -37,25 +37,25 @@ export class EngageEffect extends Effect {
 			const subject = state.requireEntityState(subjectId);
 			const targets = targetIds.map((id) => state.requireEntityState(id));
 
-			type CardLike = EntityState<CardId | PlayerId> & {
+			type CardLike = EntityState<EntityId> & {
 				card: { type: { id: string } };
 			};
-			const isCardLike = (s: EntityState<CardId | PlayerId>): s is CardLike => 'card' in s;
+			const isCardLike = (s: EntityState<EntityId>): s is CardLike => isCardId(s.id);
 
-			const isPlayerOrAlly = (entityState: EntityState<CardId | PlayerId>): boolean =>
+			const isPlayerOrAlly = (entityState: EntityState<EntityId>): boolean =>
 				!isCardLike(entityState) || entityState.card.type.id === 'ally';
 
-			const isCreature = (entityState: EntityState<CardId | PlayerId>): boolean =>
+			const isCreature = (entityState: EntityState<EntityId>): boolean =>
 				isCardLike(entityState) && entityState.card.type.id === 'creature';
 
-			let friendly: MutableEntityState<CardId | PlayerId>;
+			let friendly: MutableEntityState<EntityId>;
 			let enemiesList: Array<MutableCardState>;
 
 			if (isPlayerOrAlly(subject)) {
 				if (targets.some((t) => !isCreature(t))) {
 					throw new Error('Invalid subject/target combination');
 				}
-				friendly = subject;
+				friendly = subject as MutableEntityState<EntityId>;
 				enemiesList = targets as Array<MutableCardState>;
 			} else if (isCreature(subject)) {
 				if (targets.length > 1) {
@@ -64,7 +64,7 @@ export class EngageEffect extends Effect {
 				if (!isPlayerOrAlly(targets[0])) {
 					throw new Error('Invalid subject/target combination');
 				}
-				friendly = targets[0];
+				friendly = targets[0] as MutableEntityState<EntityId>;
 				enemiesList = [subject as MutableCardState];
 			} else {
 				throw new Error('Invalid subject/target combination');

@@ -14,7 +14,7 @@ import {
 import { skill, trait } from '../properties';
 import { MutableCardState, ReadonlyCardState, type CardParent } from './cardstate';
 import { ReadonlyGameState } from './gamestate';
-import type { CardId, PlayerId } from './identifiers';
+import type { CardId, LocationId, PlayerId } from './identifiers';
 import { ReadonlyLocationState } from './locationstate';
 import { ReadonlyPlayerState } from './playerstate';
 
@@ -64,7 +64,7 @@ function makeReadonlyCard(
 }
 
 function makeReadonlyLocation(
-	id: CardId,
+	id: LocationId,
 	overrides?: Partial<{
 		ownerId: PlayerId;
 		clues: number;
@@ -75,7 +75,7 @@ function makeReadonlyLocation(
 	return new ReadonlyLocationState({
 		id,
 		card: makeEntity(),
-		ownerId: overrides?.ownerId ?? 'p1',
+		ownerId: overrides?.ownerId ?? 'plr1',
 		container: { type: 'location', locationId: id },
 		attachments: overrides?.attachments,
 		clues: overrides?.clues,
@@ -119,35 +119,35 @@ function makeReadonlyGameState(
 describe('CardState', () => {
 	describe('constructor defaults', () => {
 		it('defaults exhausted to false', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
 			expect(card.exhausted).toBe(false);
 		});
 
 		it('defaults charges to 0', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
 			expect(card.charges).toBe(0);
 		});
 
 		it('defaults attachments to empty array', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
 			expect(card.attachments).toEqual([]);
 		});
 
 		it('defaults physicalTrauma to 0', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
 			expect(card.physicalTrauma).toBe(0);
 		});
 
 		it('defaults mentalTrauma to 0', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
 			expect(card.mentalTrauma).toBe(0);
 		});
 
 		it('stores explicit values when provided', () => {
 			const card = makeReadonlyCard(
-				'c2',
-				'p1',
-				{ type: 'deck', playerId: 'p1' },
+				'trt2',
+				'plr1',
+				{ type: 'deck', playerId: 'plr1' },
 				{
 					exhausted: true,
 					charges: 3,
@@ -164,102 +164,102 @@ describe('CardState', () => {
 
 	describe('getCard', () => {
 		it('returns itself when the id matches', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
-			expect(card.getCard('c1')).toBe(card);
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
+			expect(card.getCard('trt1')).toBe(card);
 		});
 
 		it('returns undefined when id is unknown and there are no attachments', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
-			expect(card.getCard('c99')).toBeUndefined();
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
+			expect(card.getCard('trt99')).toBeUndefined();
 		});
 
 		it('finds a direct attachment by id', () => {
-			const attachment = makeReadonlyCard('c2', 'p1', { type: 'card', cardId: 'c1' });
+			const attachment = makeReadonlyCard('trt2', 'plr1', { type: 'card', cardId: 'trt1' });
 			const card = makeReadonlyCard(
-				'c1',
-				'p1',
-				{ type: 'hand', playerId: 'p1' },
+				'trt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
 				{
 					attachments: [attachment]
 				}
 			);
-			expect(card.getCard('c2')).toBe(attachment);
+			expect(card.getCard('trt2')).toBe(attachment);
 		});
 
 		it('finds a nested attachment recursively', () => {
-			const nested = makeReadonlyCard('c3', 'p1', { type: 'card', cardId: 'c2' });
+			const nested = makeReadonlyCard('trt3', 'plr1', { type: 'card', cardId: 'trt2' });
 			const middle = makeReadonlyCard(
-				'c2',
-				'p1',
-				{ type: 'card', cardId: 'c1' },
+				'trt2',
+				'plr1',
+				{ type: 'card', cardId: 'trt1' },
 				{
 					attachments: [nested]
 				}
 			);
 			const root = makeReadonlyCard(
-				'c1',
-				'p1',
-				{ type: 'hand', playerId: 'p1' },
+				'trt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
 				{
 					attachments: [middle]
 				}
 			);
-			expect(root.getCard('c3')).toBe(nested);
+			expect(root.getCard('trt3')).toBe(nested);
 		});
 	});
 
 	describe('requireCard', () => {
 		it('returns itself when the id matches', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
-			expect(card.requireCard('c1')).toBe(card);
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
+			expect(card.requireCard('trt1')).toBe(card);
 		});
 
 		it('throws when id is unknown and there are no attachments', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
-			expect(() => card.requireCard('c99')).toThrow('c99');
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
+			expect(() => card.requireCard('trt99')).toThrow('trt99');
 		});
 
 		it('finds a direct attachment by id', () => {
-			const attachment = makeReadonlyCard('c2', 'p1', { type: 'card', cardId: 'c1' });
+			const attachment = makeReadonlyCard('trt2', 'plr1', { type: 'card', cardId: 'trt1' });
 			const card = makeReadonlyCard(
-				'c1',
-				'p1',
-				{ type: 'hand', playerId: 'p1' },
+				'trt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
 				{
 					attachments: [attachment]
 				}
 			);
-			expect(card.requireCard('c2')).toBe(attachment);
+			expect(card.requireCard('trt2')).toBe(attachment);
 		});
 
 		it('finds a nested attachment recursively', () => {
-			const nested = makeReadonlyCard('c3', 'p1', { type: 'card', cardId: 'c2' });
+			const nested = makeReadonlyCard('trt3', 'plr1', { type: 'card', cardId: 'trt2' });
 			const middle = makeReadonlyCard(
-				'c2',
-				'p1',
-				{ type: 'card', cardId: 'c1' },
+				'trt2',
+				'plr1',
+				{ type: 'card', cardId: 'trt1' },
 				{
 					attachments: [nested]
 				}
 			);
 			const root = makeReadonlyCard(
-				'c1',
-				'p1',
-				{ type: 'hand', playerId: 'p1' },
+				'trt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
 				{
 					attachments: [middle]
 				}
 			);
-			expect(root.requireCard('c3')).toBe(nested);
+			expect(root.requireCard('trt3')).toBe(nested);
 		});
 	});
 
 	describe('hasProperty', () => {
 		it('returns true for the entity type property', () => {
 			const card = makeReadonlyCard(
-				'c1',
-				'p1',
-				{ type: 'hand', playerId: 'p1' },
+				'trt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
 				{
 					entity: makeEntity({ type: trait })
 				}
@@ -270,9 +270,9 @@ describe('CardState', () => {
 		it('returns true for an explicit property', () => {
 			const prop = skill; // reuse a known Property instance
 			const card = makeReadonlyCard(
-				'c1',
-				'p1',
-				{ type: 'hand', playerId: 'p1' },
+				'trt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
 				{
 					entity: makeEntity({ type: trait, properties: [prop] })
 				}
@@ -282,9 +282,9 @@ describe('CardState', () => {
 
 		it('returns false for a property the card does not have', () => {
 			const card = makeReadonlyCard(
-				'c1',
-				'p1',
-				{ type: 'hand', playerId: 'p1' },
+				'trt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
 				{
 					entity: makeEntity({ type: trait })
 				}
@@ -296,9 +296,9 @@ describe('CardState', () => {
 	describe('getProperty', () => {
 		it('returns the property instance when found', () => {
 			const card = makeReadonlyCard(
-				'c1',
-				'p1',
-				{ type: 'hand', playerId: 'p1' },
+				'trt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
 				{
 					entity: makeEntity({ type: trait })
 				}
@@ -308,9 +308,9 @@ describe('CardState', () => {
 
 		it('returns undefined when the property is not present', () => {
 			const card = makeReadonlyCard(
-				'c1',
-				'p1',
-				{ type: 'hand', playerId: 'p1' },
+				'trt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
 				{
 					entity: makeEntity({ type: trait })
 				}
@@ -321,27 +321,27 @@ describe('CardState', () => {
 
 	describe('isAttached', () => {
 		it('returns false for cards in deck', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'deck', playerId: 'p1' });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'deck', playerId: 'plr1' });
 			expect(card.isAttached()).toBe(false);
 		});
 
 		it('returns false for cards in hand', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
 			expect(card.isAttached()).toBe(false);
 		});
 
 		it('returns false for cards in discard', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'discard', playerId: 'p1' });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'discard', playerId: 'plr1' });
 			expect(card.isAttached()).toBe(false);
 		});
 
 		it('returns true for cards attached to another card', () => {
-			const card = makeReadonlyCard('c2', 'p1', { type: 'card', cardId: 'c1' });
+			const card = makeReadonlyCard('trt2', 'plr1', { type: 'card', cardId: 'trt1' });
 			expect(card.isAttached()).toBe(true);
 		});
 
 		it('returns true for cards attached to a player', () => {
-			const card = makeReadonlyCard('c2', 'p1', { type: 'player', playerId: 'p1' });
+			const card = makeReadonlyCard('trt2', 'plr1', { type: 'player', playerId: 'plr1' });
 			expect(card.isAttached()).toBe(true);
 		});
 	});
@@ -361,7 +361,7 @@ describe('CardState', () => {
 				type: trait,
 				capabilities: [reaction]
 			});
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' }, { entity });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' }, { entity });
 			expect(card.getReactionsToEvent({ event: events['attack'] })).toContain(reaction);
 		});
 
@@ -370,7 +370,7 @@ describe('CardState', () => {
 				type: trait,
 				capabilities: [reaction]
 			});
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' }, { entity });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' }, { entity });
 			expect(card.getReactionsToEvent({ event: events['attack'] })).toContain(reaction);
 		});
 
@@ -379,7 +379,7 @@ describe('CardState', () => {
 				type: trait,
 				capabilities: [reaction]
 			});
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' }, { entity });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' }, { entity });
 			expect(card.getReactionsToEvent({ event: events['investigation'] })).toEqual([]);
 		});
 
@@ -389,7 +389,7 @@ describe('CardState', () => {
 				capabilities: [reaction],
 				attachmentCapabilities: [attachmentReaction]
 			});
-			const card = makeReadonlyCard('c2', 'p1', { type: 'card', cardId: 'c1' }, { entity });
+			const card = makeReadonlyCard('trt2', 'plr1', { type: 'card', cardId: 'trt1' }, { entity });
 			const results = card.getReactionsToEvent({ event: events['attack'] });
 			expect(results).toContain(attachmentReaction);
 		});
@@ -400,7 +400,7 @@ describe('CardState', () => {
 				capabilities: [reaction],
 				attachmentCapabilities: [attachmentReaction]
 			});
-			const card = makeReadonlyCard('c2', 'p1', { type: 'card', cardId: 'c1' }, { entity });
+			const card = makeReadonlyCard('trt2', 'plr1', { type: 'card', cardId: 'trt1' }, { entity });
 			// skill entity when attached: only attachmentCapabilities are used
 			expect(card.getReactionsToEvent({ event: events['attack'] })).toEqual([attachmentReaction]);
 		});
@@ -411,7 +411,7 @@ describe('CardState', () => {
 				capabilities: [reaction],
 				attachmentCapabilities: [attachmentReaction]
 			});
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' }, { entity });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' }, { entity });
 			expect(card.getReactionsToEvent({ event: events['attack'] })).toEqual([reaction]);
 		});
 
@@ -420,14 +420,24 @@ describe('CardState', () => {
 				type: trait,
 				capabilities: [reaction]
 			});
-			const attacker = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' }, { entity });
-			const observer = makeReadonlyCard('c2', 'p2', { type: 'hand', playerId: 'p2' }, { entity });
+			const attacker = makeReadonlyCard(
+				'trt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
+				{ entity }
+			);
+			const observer = makeReadonlyCard(
+				'trt2',
+				'plr2',
+				{ type: 'hand', playerId: 'plr2' },
+				{ entity }
+			);
 			const state = makeReadonlyGameState([
-				makeReadonlyPlayer('p1', { hand: [attacker] }),
-				makeReadonlyPlayer('p2', { hand: [observer] })
+				makeReadonlyPlayer('plr1', { hand: [attacker] }),
+				makeReadonlyPlayer('plr2', { hand: [observer] })
 			]);
 
-			const event: EventEnvelope = { event: events['attack'], context: { subjectId: 'p1' } };
+			const event: EventEnvelope = { event: events['attack'], context: { subjectId: 'plr1' } };
 
 			expect(attacker.getReactionsToEvent(event, state)).toContain(reaction);
 			expect(observer.getReactionsToEvent(event, state)).toEqual([]);
@@ -442,14 +452,24 @@ describe('CardState', () => {
 				type: trait,
 				capabilities: [receivingAttackReaction]
 			});
-			const defender = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' }, { entity });
-			const observer = makeReadonlyCard('c2', 'p2', { type: 'hand', playerId: 'p2' }, { entity });
+			const defender = makeReadonlyCard(
+				'trt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
+				{ entity }
+			);
+			const observer = makeReadonlyCard(
+				'trt2',
+				'plr2',
+				{ type: 'hand', playerId: 'plr2' },
+				{ entity }
+			);
 			const state = makeReadonlyGameState([
-				makeReadonlyPlayer('p1', { hand: [defender] }),
-				makeReadonlyPlayer('p2', { hand: [observer] })
+				makeReadonlyPlayer('plr1', { hand: [defender] }),
+				makeReadonlyPlayer('plr2', { hand: [observer] })
 			]);
 
-			const event: EventEnvelope = { event: events['attack'], context: { targetId: 'c1' } };
+			const event: EventEnvelope = { event: events['attack'], context: { targetId: 'trt1' } };
 
 			expect(defender.getReactionsToEvent(event, state)).toContain(receivingAttackReaction);
 			expect(observer.getReactionsToEvent(event, state)).toEqual([]);
@@ -477,27 +497,43 @@ describe('CardState', () => {
 				type: trait,
 				capabilities: [attackingReaction, receivingAttackReaction, otherPlayerReaction]
 			});
-			const card1 = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' }, { entity });
-			const card2 = makeReadonlyCard('c2', 'p2', { type: 'hand', playerId: 'p2' }, { entity });
+			const card1 = makeReadonlyCard(
+				'trt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
+				{ entity }
+			);
+			const card2 = makeReadonlyCard(
+				'trt2',
+				'plr2',
+				{ type: 'hand', playerId: 'plr2' },
+				{ entity }
+			);
 			const state = makeReadonlyGameState([
-				makeReadonlyPlayer('p1', { hand: [card1] }),
-				makeReadonlyPlayer('p2', { hand: [card2] })
+				makeReadonlyPlayer('plr1', { hand: [card1] }),
+				makeReadonlyPlayer('plr2', { hand: [card2] })
 			]).mutate((mutableState) => {
-				mutableState.activePlayerStack.push('p1');
+				mutableState.activePlayerStack.push('plr1');
 			});
 
 			expect(
-				card1.getReactionsToEvent({ event: events['attack'], context: { subjectId: 'p1' } }, state)
+				card1.getReactionsToEvent(
+					{ event: events['attack'], context: { subjectId: 'plr1' } },
+					state
+				)
 			).toContain(attackingReaction);
 			expect(
-				card2.getReactionsToEvent({ event: events['attack'], context: { subjectId: 'p1' } }, state)
+				card2.getReactionsToEvent(
+					{ event: events['attack'], context: { subjectId: 'plr1' } },
+					state
+				)
 			).toEqual([]);
 
 			expect(
-				card1.getReactionsToEvent({ event: events['attack'], context: { targetId: 'c1' } }, state)
+				card1.getReactionsToEvent({ event: events['attack'], context: { targetId: 'trt1' } }, state)
 			).toContain(receivingAttackReaction);
 			expect(
-				card2.getReactionsToEvent({ event: events['attack'], context: { targetId: 'c1' } }, state)
+				card2.getReactionsToEvent({ event: events['attack'], context: { targetId: 'trt1' } }, state)
 			).toEqual([]);
 
 			expect(card1.getReactionsToEvent({ event: events['beforeDrawingFate'] }, state)).toEqual([]);
@@ -516,31 +552,31 @@ describe('CardState', () => {
 				capabilities: [ownerTargetReaction]
 			});
 			const ownerReactiveCard = makeReadonlyCard(
-				'c10',
-				'p1',
-				{ type: 'hand', playerId: 'p1' },
+				'trt10',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
 				{ entity }
 			);
 			const otherPlayerCard = makeReadonlyCard(
-				'c11',
-				'p2',
-				{ type: 'hand', playerId: 'p2' },
+				'trt11',
+				'plr2',
+				{ type: 'hand', playerId: 'plr2' },
 				{ entity }
 			);
 			const state = makeReadonlyGameState([
-				makeReadonlyPlayer('p1', { hand: [ownerReactiveCard] }),
-				makeReadonlyPlayer('p2', { hand: [otherPlayerCard] })
+				makeReadonlyPlayer('plr1', { hand: [ownerReactiveCard] }),
+				makeReadonlyPlayer('plr2', { hand: [otherPlayerCard] })
 			]);
 
 			expect(
 				ownerReactiveCard.getReactionsToEvent(
-					{ event: events['attack'], context: { targetId: 'p1' } },
+					{ event: events['attack'], context: { targetId: 'plr1' } },
 					state
 				)
 			).toContain(ownerTargetReaction);
 			expect(
 				otherPlayerCard.getReactionsToEvent(
-					{ event: events['attack'], context: { targetId: 'p1' } },
+					{ event: events['attack'], context: { targetId: 'plr1' } },
 					state
 				)
 			).toEqual([]);
@@ -556,43 +592,43 @@ describe('CardState', () => {
 				capabilities: [cardTargetReaction]
 			});
 			const targetedCard = makeReadonlyCard(
-				'c10',
-				'p1',
-				{ type: 'hand', playerId: 'p1' },
+				'trt10',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
 				{ entity }
 			);
 			const sameOwnerOtherCard = makeReadonlyCard(
-				'c11',
-				'p1',
-				{ type: 'hand', playerId: 'p1' },
+				'trt11',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
 				{ entity }
 			);
 			const otherPlayerCard = makeReadonlyCard(
-				'c12',
-				'p2',
-				{ type: 'hand', playerId: 'p2' },
+				'trt12',
+				'plr2',
+				{ type: 'hand', playerId: 'plr2' },
 				{ entity }
 			);
 			const state = makeReadonlyGameState([
-				makeReadonlyPlayer('p1', { hand: [targetedCard, sameOwnerOtherCard] }),
-				makeReadonlyPlayer('p2', { hand: [otherPlayerCard] })
+				makeReadonlyPlayer('plr1', { hand: [targetedCard, sameOwnerOtherCard] }),
+				makeReadonlyPlayer('plr2', { hand: [otherPlayerCard] })
 			]);
 
 			expect(
 				targetedCard.getReactionsToEvent(
-					{ event: events['attack'], context: { targetId: 'c10' } },
+					{ event: events['attack'], context: { targetId: 'trt10' } },
 					state
 				)
 			).toContain(cardTargetReaction);
 			expect(
 				sameOwnerOtherCard.getReactionsToEvent(
-					{ event: events['attack'], context: { targetId: 'c10' } },
+					{ event: events['attack'], context: { targetId: 'trt10' } },
 					state
 				)
 			).toEqual([]);
 			expect(
 				otherPlayerCard.getReactionsToEvent(
-					{ event: events['attack'], context: { targetId: 'c10' } },
+					{ event: events['attack'], context: { targetId: 'trt10' } },
 					state
 				)
 			).toEqual([]);
@@ -606,9 +642,9 @@ describe('ReadonlyCardState', () => {
 	describe('mutable', () => {
 		it('returns a MutableCardState with the same data', () => {
 			const readonly = makeReadonlyCard(
-				'c1',
-				'p1',
-				{ type: 'hand', playerId: 'p1' },
+				'trt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
 				{
 					exhausted: true,
 					charges: 5
@@ -616,17 +652,17 @@ describe('ReadonlyCardState', () => {
 			);
 			const mutable = readonly.mutable();
 			expect(mutable).toBeInstanceOf(MutableCardState);
-			expect(mutable.id).toBe('c1');
+			expect(mutable.id).toBe('trt1');
 			expect(mutable.exhausted).toBe(true);
 			expect(mutable.charges).toBe(5);
 		});
 
 		it('converts attachments to MutableCardState', () => {
-			const attachment = makeReadonlyCard('c2', 'p1', { type: 'card', cardId: 'c1' });
+			const attachment = makeReadonlyCard('trt2', 'plr1', { type: 'card', cardId: 'trt1' });
 			const card = makeReadonlyCard(
-				'c1',
-				'p1',
-				{ type: 'hand', playerId: 'p1' },
+				'trt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
 				{
 					attachments: [attachment]
 				}
@@ -638,7 +674,7 @@ describe('ReadonlyCardState', () => {
 
 	describe('mutate', () => {
 		it('applies the change and returns a new ReadonlyCardState', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
 			const updated = card.mutate((m) => {
 				m.exhausted = true;
 			});
@@ -647,7 +683,7 @@ describe('ReadonlyCardState', () => {
 		});
 
 		it('does not mutate the original', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
 			card.mutate((m) => {
 				m.charges = 99;
 			});
@@ -661,7 +697,7 @@ describe('ReadonlyCardState', () => {
 describe('MutableCardState', () => {
 	describe('readonly', () => {
 		it('returns a ReadonlyCardState with the same data', () => {
-			const readonly = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
+			const readonly = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
 			const mutable = readonly.mutable();
 			mutable.charges = 7;
 			const back = mutable.readonly();
@@ -672,155 +708,155 @@ describe('MutableCardState', () => {
 
 	describe('addAttachment', () => {
 		it('moves the attachment to the card and adds it to its attachments list', () => {
-			const attachmentCard = makeReadonlyCard('c2', 'p1', { type: 'hand', playerId: 'p1' });
-			const baseCard = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
-			const player = makeReadonlyPlayer('p1', {
+			const attachmentCard = makeReadonlyCard('trt2', 'plr1', { type: 'hand', playerId: 'plr1' });
+			const baseCard = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
+			const player = makeReadonlyPlayer('plr1', {
 				hand: [baseCard, attachmentCard]
 			});
 			const gameState = makeReadonlyGameState([player]).mutable();
 
-			const mutableBase = gameState.requireCard('c1');
-			const mutableAttachment = gameState.requireCard('c2');
+			const mutableBase = gameState.requireCard('trt1');
+			const mutableAttachment = gameState.requireCard('trt2');
 
 			mutableBase.addAttachment(gameState, mutableAttachment);
 
-			expect(mutableAttachment.container).toEqual({ type: 'card', cardId: 'c1' });
+			expect(mutableAttachment.container).toEqual({ type: 'card', cardId: 'trt1' });
 			expect(mutableBase.attachments).toContain(mutableAttachment);
 			// removed from hand
-			expect(gameState.requirePlayer('p1').hand).not.toContain(mutableAttachment);
+			expect(gameState.requirePlayer('plr1').hand).not.toContain(mutableAttachment);
 		});
 	});
 
 	describe('moveToHand', () => {
 		it('moves a card from deck to hand', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'deck', playerId: 'p1' });
-			const player = makeReadonlyPlayer('p1', { deck: [card] });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'deck', playerId: 'plr1' });
+			const player = makeReadonlyPlayer('plr1', { deck: [card] });
 			const gameState = makeReadonlyGameState([player]).mutable();
 
-			const mutableCard = gameState.requireCard('c1');
-			mutableCard.moveToHand(gameState, 'p1');
+			const mutableCard = gameState.requireCard('trt1');
+			mutableCard.moveToHand(gameState, 'plr1');
 
-			expect(mutableCard.container).toEqual({ type: 'hand', playerId: 'p1' });
-			expect(gameState.requirePlayer('p1').hand).toContain(mutableCard);
-			expect(gameState.requirePlayer('p1').deck).not.toContain(mutableCard);
+			expect(mutableCard.container).toEqual({ type: 'hand', playerId: 'plr1' });
+			expect(gameState.requirePlayer('plr1').hand).toContain(mutableCard);
+			expect(gameState.requirePlayer('plr1').deck).not.toContain(mutableCard);
 		});
 	});
 
 	describe('moveToStage', () => {
 		it('moves a card from hand to stage', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
-			const player = makeReadonlyPlayer('p1', { hand: [card] });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
+			const player = makeReadonlyPlayer('plr1', { hand: [card] });
 			const gameState = makeReadonlyGameState([player]).mutable();
 
-			const mutableCard = gameState.requireCard('c1');
-			mutableCard.moveToStage(gameState, 'p1');
+			const mutableCard = gameState.requireCard('trt1');
+			mutableCard.moveToStage(gameState, 'plr1');
 
-			expect(mutableCard.container).toEqual({ type: 'stage', playerId: 'p1' });
-			expect(gameState.requirePlayer('p1').stage).toContain(mutableCard);
-			expect(gameState.requirePlayer('p1').hand).not.toContain(mutableCard);
+			expect(mutableCard.container).toEqual({ type: 'stage', playerId: 'plr1' });
+			expect(gameState.requirePlayer('plr1').stage).toContain(mutableCard);
+			expect(gameState.requirePlayer('plr1').hand).not.toContain(mutableCard);
 		});
 	});
 
 	describe('moveToTopOfDiscardPile', () => {
 		it('places the card at the front of the discard pile', () => {
-			const existing = makeReadonlyCard('c2', 'p1', { type: 'discard', playerId: 'p1' });
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
-			const player = makeReadonlyPlayer('p1', { hand: [card], discard: [existing] });
+			const existing = makeReadonlyCard('trt2', 'plr1', { type: 'discard', playerId: 'plr1' });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
+			const player = makeReadonlyPlayer('plr1', { hand: [card], discard: [existing] });
 			const gameState = makeReadonlyGameState([player]).mutable();
 
-			const mutableCard = gameState.requireCard('c1');
+			const mutableCard = gameState.requireCard('trt1');
 			mutableCard.moveToTopOfDiscardPile(gameState);
 
-			const discard = gameState.requirePlayer('p1').discardPile;
+			const discard = gameState.requirePlayer('plr1').discardPile;
 			expect(discard[0]).toBe(mutableCard);
 		});
 
 		it('uses the card owner when no playerId is given', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
-			const player = makeReadonlyPlayer('p1', { hand: [card] });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
+			const player = makeReadonlyPlayer('plr1', { hand: [card] });
 			const gameState = makeReadonlyGameState([player]).mutable();
 
-			const mutableCard = gameState.requireCard('c1');
+			const mutableCard = gameState.requireCard('trt1');
 			mutableCard.moveToTopOfDiscardPile(gameState);
 
-			expect(mutableCard.container).toEqual({ type: 'discard', playerId: 'p1' });
+			expect(mutableCard.container).toEqual({ type: 'discard', playerId: 'plr1' });
 		});
 	});
 
 	describe('moveToBottomOfDiscardPile', () => {
 		it('places the card at the end of the discard pile', () => {
-			const existing = makeReadonlyCard('c2', 'p1', { type: 'discard', playerId: 'p1' });
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
-			const player = makeReadonlyPlayer('p1', { hand: [card], discard: [existing] });
+			const existing = makeReadonlyCard('trt2', 'plr1', { type: 'discard', playerId: 'plr1' });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
+			const player = makeReadonlyPlayer('plr1', { hand: [card], discard: [existing] });
 			const gameState = makeReadonlyGameState([player]).mutable();
 
-			const mutableCard = gameState.requireCard('c1');
+			const mutableCard = gameState.requireCard('trt1');
 			mutableCard.moveToBottomOfDiscardPile(gameState);
 
-			const discard = gameState.requirePlayer('p1').discardPile;
+			const discard = gameState.requirePlayer('plr1').discardPile;
 			expect(discard[discard.length - 1]).toBe(mutableCard);
 		});
 	});
 
 	describe('moveToTopOfDeck', () => {
 		it('places the card at the front of the deck', () => {
-			const existing = makeReadonlyCard('c2', 'p1', { type: 'deck', playerId: 'p1' });
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
-			const player = makeReadonlyPlayer('p1', { hand: [card], deck: [existing] });
+			const existing = makeReadonlyCard('trt2', 'plr1', { type: 'deck', playerId: 'plr1' });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
+			const player = makeReadonlyPlayer('plr1', { hand: [card], deck: [existing] });
 			const gameState = makeReadonlyGameState([player]).mutable();
 
-			const mutableCard = gameState.requireCard('c1');
+			const mutableCard = gameState.requireCard('trt1');
 			mutableCard.moveToTopOfDeck(gameState);
 
-			const deck = gameState.requirePlayer('p1').deck;
+			const deck = gameState.requirePlayer('plr1').deck;
 			expect(deck[0]).toBe(mutableCard);
 		});
 	});
 
 	describe('moveToBottomOfDeck', () => {
 		it('places the card at the end of the deck', () => {
-			const existing = makeReadonlyCard('c2', 'p1', { type: 'deck', playerId: 'p1' });
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
-			const player = makeReadonlyPlayer('p1', { hand: [card], deck: [existing] });
+			const existing = makeReadonlyCard('trt2', 'plr1', { type: 'deck', playerId: 'plr1' });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
+			const player = makeReadonlyPlayer('plr1', { hand: [card], deck: [existing] });
 			const gameState = makeReadonlyGameState([player]).mutable();
 
-			const mutableCard = gameState.requireCard('c1');
+			const mutableCard = gameState.requireCard('trt1');
 			mutableCard.moveToBottomOfDeck(gameState);
 
-			const deck = gameState.requirePlayer('p1').deck;
+			const deck = gameState.requirePlayer('plr1').deck;
 			expect(deck[deck.length - 1]).toBe(mutableCard);
 		});
 	});
 
 	describe('moveToPlayer', () => {
 		it('attaches the card to the player', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
-			const player = makeReadonlyPlayer('p1', { hand: [card] });
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
+			const player = makeReadonlyPlayer('plr1', { hand: [card] });
 			const gameState = makeReadonlyGameState([player]).mutable();
 
-			const mutableCard = gameState.requireCard('c1');
-			mutableCard.moveToPlayer(gameState, 'p1');
+			const mutableCard = gameState.requireCard('trt1');
+			mutableCard.moveToPlayer(gameState, 'plr1');
 
-			expect(mutableCard.container).toEqual({ type: 'player', playerId: 'p1' });
-			expect(gameState.requirePlayer('p1').attachments).toContain(mutableCard);
-			expect(gameState.requirePlayer('p1').hand).not.toContain(mutableCard);
+			expect(mutableCard.container).toEqual({ type: 'player', playerId: 'plr1' });
+			expect(gameState.requirePlayer('plr1').attachments).toContain(mutableCard);
+			expect(gameState.requirePlayer('plr1').hand).not.toContain(mutableCard);
 		});
 	});
 
 	describe('moveToLocation', () => {
 		it('attaches the card to the location', () => {
-			const card = makeReadonlyCard('c1', 'p1', { type: 'hand', playerId: 'p1' });
-			const player = makeReadonlyPlayer('p1', { hand: [card] });
-			const location = makeReadonlyLocation('c9');
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
+			const player = makeReadonlyPlayer('plr1', { hand: [card] });
+			const location = makeReadonlyLocation('loc9');
 			const gameState = makeReadonlyGameState([player], [location]).mutable();
 
-			const mutableCard = gameState.requireCard('c1');
-			const mutableLocation = gameState.requireCard('c9');
-			mutableCard.moveToLocation(gameState, 'c9');
+			const mutableCard = gameState.requireCard('trt1');
+			const mutableLocation = gameState.requireCard('loc9');
+			mutableCard.moveToLocation(gameState, 'loc9');
 
-			expect(mutableCard.container).toEqual({ type: 'location', locationId: 'c9' });
+			expect(mutableCard.container).toEqual({ type: 'location', locationId: 'loc9' });
 			expect(mutableLocation.attachments).toContain(mutableCard);
-			expect(gameState.requirePlayer('p1').hand).not.toContain(mutableCard);
+			expect(gameState.requirePlayer('plr1').hand).not.toContain(mutableCard);
 		});
 	});
 });

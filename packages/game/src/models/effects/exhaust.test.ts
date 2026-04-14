@@ -31,11 +31,11 @@ describe('ExhaustEffect.trigger', () => {
 	])('exhausts the card and returns its id $label', async ({ target }) => {
 		const card = mock<MutableCardState>({ exhausted: false });
 		const mutableState = mock<MutableGameState>();
-		mutableState.requireCard.calledWith('c1').mockReturnValue(card);
+		mutableState.requireCard.calledWith('trt1').mockReturnValue(card);
 		const graph = mock<GameGraph>();
 		graph.requestSingleTarget
 			.calledWith(target, expect.objectContaining({ default: expect.any(Function) }))
-			.mockResolvedValue('c1');
+			.mockResolvedValue('trt1');
 		let callbackReturn: unknown;
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callbackReturn = callback(mutableState);
@@ -44,15 +44,15 @@ describe('ExhaustEffect.trigger', () => {
 		await exhaust({ target }).trigger(graph);
 
 		expect(card.exhausted).toBe(true);
-		expect(callbackReturn).toEqual({ card: 'c1' });
+		expect(callbackReturn).toEqual({ card: 'trt1' });
 	});
 
 	it('cancels the mutation if the card is already exhausted', async () => {
 		const card = mock<MutableCardState>({ exhausted: true });
 		const mutableState = mock<MutableGameState>();
-		mutableState.requireCard.calledWith('c1').mockReturnValue(card);
+		mutableState.requireCard.calledWith('trt1').mockReturnValue(card);
 		const graph = mock<GameGraph>();
-		graph.requestSingleTarget.mockResolvedValue('c1');
+		graph.requestSingleTarget.mockResolvedValue('trt1');
 		let capturedCallback!: (state: MutableGameState) => unknown;
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			capturedCallback = callback;

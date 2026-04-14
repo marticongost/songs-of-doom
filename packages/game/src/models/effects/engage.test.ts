@@ -16,8 +16,8 @@ function makeCreature(id: CardId): MutableCardState {
 	return new ReadonlyCardState({
 		id,
 		card: mock<Entity>({ type: mock<EntityType>({ id: 'creature' }) }),
-		ownerId: 'p1',
-		container: { type: 'hand', playerId: 'p1' },
+		ownerId: 'plr1',
+		container: { type: 'hand', playerId: 'plr1' },
 		properties: []
 	}).mutable();
 }
@@ -26,8 +26,8 @@ function makeAlly(id: CardId): MutableCardState {
 	return new ReadonlyCardState({
 		id,
 		card: mock<Entity>({ type: mock<EntityType>({ id: 'ally' }) }),
-		ownerId: 'p1',
-		container: { type: 'hand', playerId: 'p1' },
+		ownerId: 'plr1',
+		container: { type: 'hand', playerId: 'plr1' },
 		properties: []
 	}).mutable();
 }
@@ -64,7 +64,7 @@ describe('EngageEffect construction', () => {
 describe('EngageEffect.trigger — input validation', () => {
 	it('throws when no targets are chosen', async () => {
 		const graph = mock<GameGraph>();
-		graph.requireSubject.mockReturnValue(makePlayer('p1'));
+		graph.requireSubject.mockReturnValue(makePlayer('plr1'));
 		graph.requestInput.mockResolvedValue({ target: [] });
 
 		await expect(engage({ target: { type: 'enemy' } }).trigger(graph)).rejects.toThrow(
@@ -77,15 +77,15 @@ describe('EngageEffect.trigger — input validation', () => {
 
 describe('EngageEffect.trigger', () => {
 	it('attaches the creature to the player when subject is a player and target is a creature', async () => {
-		const player = makePlayer('p1');
-		const creature = makeCreature('c1');
+		const player = makePlayer('plr1');
+		const creature = makeCreature('crt1');
 		vi.spyOn(player, 'addAttachment').mockImplementation(() => {});
 		const mutableState = mock<MutableGameState>();
-		mutableState.requireEntityState.calledWith('p1').mockReturnValue(player);
-		mutableState.requireEntityState.calledWith('c1').mockReturnValue(creature);
+		mutableState.requireEntityState.calledWith('plr1').mockReturnValue(player);
+		mutableState.requireEntityState.calledWith('crt1').mockReturnValue(creature);
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(player);
-		graph.requestInput.mockResolvedValue({ target: ['c1'] });
+		graph.requestInput.mockResolvedValue({ target: ['crt1'] });
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callback(mutableState);
 		});
@@ -96,17 +96,17 @@ describe('EngageEffect.trigger', () => {
 	});
 
 	it('attaches all creatures to the player when subject is a player and targets are multiple creatures', async () => {
-		const player = makePlayer('p1');
-		const c1 = makeCreature('c1');
-		const c2 = makeCreature('c2');
+		const player = makePlayer('plr1');
+		const c1 = makeCreature('crt1');
+		const c2 = makeCreature('crt2');
 		vi.spyOn(player, 'addAttachment').mockImplementation(() => {});
 		const mutableState = mock<MutableGameState>();
-		mutableState.requireEntityState.calledWith('p1').mockReturnValue(player);
-		mutableState.requireEntityState.calledWith('c1').mockReturnValue(c1);
-		mutableState.requireEntityState.calledWith('c2').mockReturnValue(c2);
+		mutableState.requireEntityState.calledWith('plr1').mockReturnValue(player);
+		mutableState.requireEntityState.calledWith('crt1').mockReturnValue(c1);
+		mutableState.requireEntityState.calledWith('crt2').mockReturnValue(c2);
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(player);
-		graph.requestInput.mockResolvedValue({ target: ['c1', 'c2'] });
+		graph.requestInput.mockResolvedValue({ target: ['crt1', 'crt2'] });
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callback(mutableState);
 		});
@@ -118,15 +118,15 @@ describe('EngageEffect.trigger', () => {
 	});
 
 	it('attaches the creature to the ally when subject is an ally and target is a creature', async () => {
-		const ally = makeAlly('c0');
-		const creature = makeCreature('c1');
+		const ally = makeAlly('crt0');
+		const creature = makeCreature('crt1');
 		vi.spyOn(ally, 'addAttachment').mockImplementation(() => {});
 		const mutableState = mock<MutableGameState>();
-		mutableState.requireEntityState.calledWith('c0').mockReturnValue(ally);
-		mutableState.requireEntityState.calledWith('c1').mockReturnValue(creature);
+		mutableState.requireEntityState.calledWith('crt0').mockReturnValue(ally);
+		mutableState.requireEntityState.calledWith('crt1').mockReturnValue(creature);
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(ally);
-		graph.requestInput.mockResolvedValue({ target: ['c1'] });
+		graph.requestInput.mockResolvedValue({ target: ['crt1'] });
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callback(mutableState);
 		});
@@ -137,15 +137,15 @@ describe('EngageEffect.trigger', () => {
 	});
 
 	it('attaches the creature to the player when subject is a creature and target is a player', async () => {
-		const player = makePlayer('p1');
-		const creature = makeCreature('c1');
+		const player = makePlayer('plr1');
+		const creature = makeCreature('crt1');
 		vi.spyOn(player, 'addAttachment').mockImplementation(() => {});
 		const mutableState = mock<MutableGameState>();
-		mutableState.requireEntityState.calledWith('c1').mockReturnValue(creature);
-		mutableState.requireEntityState.calledWith('p1').mockReturnValue(player);
+		mutableState.requireEntityState.calledWith('crt1').mockReturnValue(creature);
+		mutableState.requireEntityState.calledWith('plr1').mockReturnValue(player);
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(creature);
-		graph.requestInput.mockResolvedValue({ target: ['p1'] });
+		graph.requestInput.mockResolvedValue({ target: ['plr1'] });
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callback(mutableState);
 		});
@@ -156,16 +156,16 @@ describe('EngageEffect.trigger', () => {
 	});
 
 	it('throws when creature subject has multiple targets', async () => {
-		const player = makePlayer('p1');
-		const p2 = makePlayer('p2');
-		const creature = makeCreature('c1');
+		const player = makePlayer('plr1');
+		const p2 = makePlayer('plr2');
+		const creature = makeCreature('crt1');
 		const mutableState = mock<MutableGameState>();
-		mutableState.requireEntityState.calledWith('c1').mockReturnValue(creature);
-		mutableState.requireEntityState.calledWith('p1').mockReturnValue(player);
-		mutableState.requireEntityState.calledWith('p2').mockReturnValue(p2);
+		mutableState.requireEntityState.calledWith('crt1').mockReturnValue(creature);
+		mutableState.requireEntityState.calledWith('plr1').mockReturnValue(player);
+		mutableState.requireEntityState.calledWith('plr2').mockReturnValue(p2);
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(creature);
-		graph.requestInput.mockResolvedValue({ target: ['p1', 'p2'] });
+		graph.requestInput.mockResolvedValue({ target: ['plr1', 'plr2'] });
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callback(mutableState);
 		});
@@ -176,14 +176,14 @@ describe('EngageEffect.trigger', () => {
 	});
 
 	it('throws when subject is a player but a target is not a creature', async () => {
-		const player = makePlayer('p1');
-		const ally = makeAlly('c1');
+		const player = makePlayer('plr1');
+		const ally = makeAlly('crt1');
 		const mutableState = mock<MutableGameState>();
-		mutableState.requireEntityState.calledWith('p1').mockReturnValue(player);
-		mutableState.requireEntityState.calledWith('c1').mockReturnValue(ally);
+		mutableState.requireEntityState.calledWith('plr1').mockReturnValue(player);
+		mutableState.requireEntityState.calledWith('crt1').mockReturnValue(ally);
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(player);
-		graph.requestInput.mockResolvedValue({ target: ['c1'] });
+		graph.requestInput.mockResolvedValue({ target: ['crt1'] });
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callback(mutableState);
 		});
@@ -194,14 +194,14 @@ describe('EngageEffect.trigger', () => {
 	});
 
 	it('throws when subject is a creature but target is not a player or ally', async () => {
-		const creature = makeCreature('c1');
-		const c2 = makeCreature('c2');
+		const creature = makeCreature('crt1');
+		const c2 = makeCreature('crt2');
 		const mutableState = mock<MutableGameState>();
-		mutableState.requireEntityState.calledWith('c1').mockReturnValue(creature);
-		mutableState.requireEntityState.calledWith('c2').mockReturnValue(c2);
+		mutableState.requireEntityState.calledWith('crt1').mockReturnValue(creature);
+		mutableState.requireEntityState.calledWith('crt2').mockReturnValue(c2);
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(creature);
-		graph.requestInput.mockResolvedValue({ target: ['c2'] });
+		graph.requestInput.mockResolvedValue({ target: ['crt2'] });
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callback(mutableState);
 		});
@@ -212,14 +212,14 @@ describe('EngageEffect.trigger', () => {
 	});
 
 	it('throws when neither subject nor target is a player or ally', async () => {
-		const c1 = makeCreature('c1');
-		const c2 = makeCreature('c2');
+		const c1 = makeCreature('crt1');
+		const c2 = makeCreature('crt2');
 		const mutableState = mock<MutableGameState>();
-		mutableState.requireEntityState.calledWith('c1').mockReturnValue(c1);
-		mutableState.requireEntityState.calledWith('c2').mockReturnValue(c2);
+		mutableState.requireEntityState.calledWith('crt1').mockReturnValue(c1);
+		mutableState.requireEntityState.calledWith('crt2').mockReturnValue(c2);
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(c1);
-		graph.requestInput.mockResolvedValue({ target: ['c2'] });
+		graph.requestInput.mockResolvedValue({ target: ['crt2'] });
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callback(mutableState);
 		});

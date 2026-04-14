@@ -4,15 +4,17 @@ import {
 	type MutableCardState,
 	type ReadonlyCardState
 } from './cardstate';
-import type { CardId, PlayerId } from './identifiers';
+import type { CardId, LocationId, PlayerId } from './identifiers';
 import { mutate } from './mutate';
 
-export interface LocationStateProps extends CardStateProps {
+export interface LocationStateProps extends Omit<CardStateProps, 'id'> {
+	id: LocationId;
 	/** The ids of the players currently at this location. */
 	players?: ReadonlyArray<PlayerId>;
 }
 
 export class LocationState extends CardState {
+	declare readonly id: LocationId;
 	/** The ids of the players currently at this location. */
 	readonly players: ReadonlyArray<PlayerId>;
 
@@ -42,6 +44,7 @@ export class ReadonlyLocationState extends LocationState {
 
 export class MutableLocationState extends LocationState {
 	declare clues: number;
+	declare attachments: Array<MutableCardState>;
 	declare players: Array<PlayerId>;
 
 	constructor(locationState: ReadonlyLocationState) {

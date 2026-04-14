@@ -38,12 +38,12 @@ describe('DrawFocusEffect.trigger', () => {
 			const effect = drawFocus({ amount: 2, players });
 			const player = mock<MutablePlayerState>();
 			const mutableState = mock<MutableGameState>();
-			mutableState.requirePlayer.calledWith('p1').mockReturnValue(player);
+			mutableState.requirePlayer.calledWith('plr1').mockReturnValue(player);
 			player.drawFocusToken.calledWith(mutableState).mockReturnValue('strength-1');
 			const graph = mock<GameGraph>();
 			graph.requestPlayers
 				.calledWith(effect.players, expect.objectContaining({ default: expect.any(Function) }))
-				.mockResolvedValue(['p1']);
+				.mockResolvedValue(['plr1']);
 			let callbackReturn: unknown;
 			graph.effectTriggered.mockImplementation((_effect, callback) => {
 				callbackReturn = callback(mutableState);
@@ -52,8 +52,8 @@ describe('DrawFocusEffect.trigger', () => {
 			await effect.trigger(graph);
 
 			const outcome = callbackReturn as DrawFocusOutcome;
-			expect(outcome.playerDrawnTokens.get('p1')?.totalCount()).toBe(2);
-			expect(outcome.playerDrawnTokens.get('p1')?.get('strength-1')).toBe(2);
+			expect(outcome.playerDrawnTokens.get('plr1')?.totalCount()).toBe(2);
+			expect(outcome.playerDrawnTokens.get('plr1')?.get('strength-1')).toBe(2);
 		}
 	);
 
@@ -61,8 +61,8 @@ describe('DrawFocusEffect.trigger', () => {
 		const p1 = mock<MutablePlayerState>();
 		const p2 = mock<MutablePlayerState>();
 		const mutableState = mock<MutableGameState>();
-		mutableState.requirePlayer.calledWith('p1').mockReturnValue(p1);
-		mutableState.requirePlayer.calledWith('p2').mockReturnValue(p2);
+		mutableState.requirePlayer.calledWith('plr1').mockReturnValue(p1);
+		mutableState.requirePlayer.calledWith('plr2').mockReturnValue(p2);
 		p1.drawFocusToken
 			.calledWith(mutableState)
 			.mockReturnValueOnce('strength-1' as FocusToken)
@@ -72,7 +72,7 @@ describe('DrawFocusEffect.trigger', () => {
 			.mockReturnValueOnce('will-2' as FocusToken)
 			.mockReturnValueOnce('will-2' as FocusToken);
 		const graph = mock<GameGraph>();
-		graph.requestPlayers.mockResolvedValue(['p1', 'p2']);
+		graph.requestPlayers.mockResolvedValue(['plr1', 'plr2']);
 		let callbackReturn: unknown;
 		graph.effectTriggered.mockImplementation((_effect, callback) => {
 			callbackReturn = callback(mutableState);
@@ -81,8 +81,8 @@ describe('DrawFocusEffect.trigger', () => {
 		await drawFocus(2).trigger(graph);
 
 		const outcome = callbackReturn as DrawFocusOutcome;
-		expect(outcome.playerDrawnTokens.get('p1')?.get('strength-1')).toBe(1);
-		expect(outcome.playerDrawnTokens.get('p1')?.get('will-2')).toBe(1);
-		expect(outcome.playerDrawnTokens.get('p2')?.get('will-2')).toBe(2);
+		expect(outcome.playerDrawnTokens.get('plr1')?.get('strength-1')).toBe(1);
+		expect(outcome.playerDrawnTokens.get('plr1')?.get('will-2')).toBe(1);
+		expect(outcome.playerDrawnTokens.get('plr2')?.get('will-2')).toBe(2);
 	});
 });

@@ -22,10 +22,10 @@ function makeGameState(
 }
 
 function makeTestResolution(proficiency = 0): ReadonlyTestResolution {
-	return new ReadonlyTestResolution({ subjectId: 'c1', proficiency, properties: [] });
+	return new ReadonlyTestResolution({ subjectId: 'trt1', proficiency, properties: [] });
 }
 
-function makeMutablePlayer(id = 'p1'): ReadonlyPlayerState {
+function makeMutablePlayer(id = 'plr1'): ReadonlyPlayerState {
 	const p = mock<ReadonlyPlayerState>();
 	p.mutable.mockReturnValue({ id, readonly: () => p } as unknown as MutablePlayerState);
 	return p;
@@ -68,28 +68,28 @@ describe('GameState.getCard', () => {
 		const c1 = mock<ReadonlyCardState>();
 		const c2 = mock<ReadonlyCardState>();
 		const state = makeGameState([
-			mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) }),
-			mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c2' ? c2 : undefined) })
+			mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt1' ? c1 : undefined) }),
+			mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt2' ? c2 : undefined) })
 		]);
-		expect(state.getCard('c1')).toBe(c1);
-		expect(state.getCard('c2')).toBe(c2);
+		expect(state.getCard('trt1')).toBe(c1);
+		expect(state.getCard('trt2')).toBe(c2);
 	});
 
 	it('returns undefined for an unknown card id', () => {
 		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(state.getCard('c99')).toBeUndefined();
+		expect(state.getCard('trt99')).toBeUndefined();
 	});
 
 	it('finds a location card by id', () => {
 		const location = new ReadonlyLocationState({
-			id: 'c9',
+			id: 'loc9',
 			card: mock<Entity>(),
-			ownerId: 'p1',
-			container: { type: 'location', locationId: 'c9' },
+			ownerId: 'plr1',
+			container: { type: 'location', locationId: 'loc9' },
 			properties: []
 		});
 		const state = makeGameState([mock<ReadonlyPlayerState>()], [location]);
-		expect(state.getCard('c9')).toBe(location);
+		expect(state.getCard('loc9')).toBe(location);
 	});
 });
 
@@ -99,14 +99,14 @@ describe('GameState.requireCard', () => {
 	it('returns the card when found', () => {
 		const c1 = mock<ReadonlyCardState>();
 		const state = makeGameState([
-			mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) })
+			mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt1' ? c1 : undefined) })
 		]);
-		expect(state.requireCard('c1')).toBe(c1);
+		expect(state.requireCard('trt1')).toBe(c1);
 	});
 
 	it('throws when the card does not exist', () => {
 		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(() => state.requireCard('c99')).toThrow('c99');
+		expect(() => state.requireCard('trt99')).toThrow('trt99');
 	});
 });
 
@@ -114,14 +114,14 @@ describe('GameState.requireCard', () => {
 
 describe('GameState.getPlayer', () => {
 	it('returns the player with the given id', () => {
-		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
 		const state = makeGameState([p1]);
-		expect(state.getPlayer('p1')).toBe(p1);
+		expect(state.getPlayer('plr1')).toBe(p1);
 	});
 
 	it('returns undefined for an unknown player id', () => {
-		const state = makeGameState([mock<ReadonlyPlayerState>({ id: 'p1' })]);
-		expect(state.getPlayer('p99')).toBeUndefined();
+		const state = makeGameState([mock<ReadonlyPlayerState>({ id: 'plr1' })]);
+		expect(state.getPlayer('plr99')).toBeUndefined();
 	});
 });
 
@@ -129,14 +129,14 @@ describe('GameState.getPlayer', () => {
 
 describe('GameState.requirePlayer', () => {
 	it('returns the player when found', () => {
-		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
 		const state = makeGameState([p1]);
-		expect(state.requirePlayer('p1')).toBe(p1);
+		expect(state.requirePlayer('plr1')).toBe(p1);
 	});
 
 	it('throws when the player does not exist', () => {
-		const state = makeGameState([mock<ReadonlyPlayerState>({ id: 'p1' })]);
-		expect(() => state.requirePlayer('p99')).toThrow('p99');
+		const state = makeGameState([mock<ReadonlyPlayerState>({ id: 'plr1' })]);
+		expect(() => state.requirePlayer('plr99')).toThrow('plr99');
 	});
 });
 
@@ -144,17 +144,17 @@ describe('GameState.requirePlayer', () => {
 
 describe('GameState.clockwise', () => {
 	it('returns players starting at the requested id and wrapping around', () => {
-		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
-		const p2 = mock<ReadonlyPlayerState>({ id: 'p2' });
-		const p3 = mock<ReadonlyPlayerState>({ id: 'p3' });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
+		const p2 = mock<ReadonlyPlayerState>({ id: 'plr2' });
+		const p3 = mock<ReadonlyPlayerState>({ id: 'plr3' });
 		const state = makeGameState([p1, p2, p3]);
-		expect(state.clockwise('p2')).toEqual(['p2', 'p3', 'p1']);
+		expect(state.clockwise('plr2')).toEqual(['plr2', 'plr3', 'plr1']);
 	});
 
 	it('throws when the requested starting player does not exist', () => {
-		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
 		const state = makeGameState([p1]);
-		expect(() => state.clockwise('p9')).toThrow('p9');
+		expect(() => state.clockwise('plr9')).toThrow('plr9');
 	});
 });
 
@@ -164,25 +164,25 @@ describe('GameState.getEntityState', () => {
 	it('returns the card state when given a CardId', () => {
 		const c1 = mock<ReadonlyCardState>();
 		const state = makeGameState([
-			mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) })
+			mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt1' ? c1 : undefined) })
 		]);
-		expect(state.getEntityState('c1')).toBe(c1);
+		expect(state.getEntityState('trt1')).toBe(c1);
 	});
 
 	it('returns the player state when given a PlayerId', () => {
-		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
 		const state = makeGameState([p1]);
-		expect(state.getEntityState('p1')).toBe(p1);
+		expect(state.getEntityState('plr1')).toBe(p1);
 	});
 
 	it('returns undefined for an unknown CardId', () => {
 		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(state.getEntityState('c99')).toBeUndefined();
+		expect(state.getEntityState('trt99')).toBeUndefined();
 	});
 
 	it('returns undefined for an unknown PlayerId', () => {
-		const state = makeGameState([mock<ReadonlyPlayerState>({ id: 'p1' })]);
-		expect(state.getEntityState('p99')).toBeUndefined();
+		const state = makeGameState([mock<ReadonlyPlayerState>({ id: 'plr1' })]);
+		expect(state.getEntityState('plr99')).toBeUndefined();
 	});
 });
 
@@ -192,25 +192,25 @@ describe('GameState.requireEntityState', () => {
 	it('returns the card state when given a CardId', () => {
 		const c1 = mock<ReadonlyCardState>();
 		const state = makeGameState([
-			mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) })
+			mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt1' ? c1 : undefined) })
 		]);
-		expect(state.requireEntityState('c1')).toBe(c1);
+		expect(state.requireEntityState('trt1')).toBe(c1);
 	});
 
 	it('returns the player state when given a PlayerId', () => {
-		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
 		const state = makeGameState([p1]);
-		expect(state.requireEntityState('p1')).toBe(p1);
+		expect(state.requireEntityState('plr1')).toBe(p1);
 	});
 
 	it('throws when the CardId is not found', () => {
 		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(() => state.requireEntityState('c99')).toThrow('c99');
+		expect(() => state.requireEntityState('trt99')).toThrow('trt99');
 	});
 
 	it('throws when the PlayerId is not found', () => {
-		const state = makeGameState([mock<ReadonlyPlayerState>({ id: 'p1' })]);
-		expect(() => state.requireEntityState('p99')).toThrow('p99');
+		const state = makeGameState([mock<ReadonlyPlayerState>({ id: 'plr1' })]);
+		expect(() => state.requireEntityState('plr99')).toThrow('plr99');
 	});
 });
 
@@ -231,16 +231,16 @@ describe('GameState active card stack', () => {
 		const c1 = mock<ReadonlyCardState>();
 		const c2 = mock<ReadonlyCardState>();
 		const p1 = mock<ReadonlyPlayerState>({
-			getCard: (id) => (id === 'c1' ? c1 : id === 'c2' ? c2 : undefined)
+			getCard: (id) => (id === 'trt1' ? c1 : id === 'trt2' ? c2 : undefined)
 		});
-		const state = new ReadonlyGameState({ players: [p1], activeCardStack: ['c1', 'c2'] });
+		const state = new ReadonlyGameState({ players: [p1], activeCardStack: ['trt1', 'trt2'] });
 		expect(state.getActiveCard()).toBe(c2);
 	});
 
 	it('requireActiveCard returns the top card of the stack', () => {
 		const c1 = mock<ReadonlyCardState>();
-		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) });
-		const state = new ReadonlyGameState({ players: [p1], activeCardStack: ['c1'] });
+		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt1' ? c1 : undefined) });
+		const state = new ReadonlyGameState({ players: [p1], activeCardStack: ['trt1'] });
 		expect(state.requireActiveCard()).toBe(c1);
 	});
 });
@@ -259,18 +259,18 @@ describe('GameState active player stack', () => {
 	});
 
 	it('getActivePlayer returns the top player of the stack', () => {
-		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
-		const p2 = mock<ReadonlyPlayerState>({ id: 'p2' });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
+		const p2 = mock<ReadonlyPlayerState>({ id: 'plr2' });
 		const state = new ReadonlyGameState({
 			players: [p1, p2],
-			activePlayerStack: ['p1', 'p2']
+			activePlayerStack: ['plr1', 'plr2']
 		});
 		expect(state.getActivePlayer()).toBe(p2);
 	});
 
 	it('requireActivePlayer returns the top player of the stack', () => {
-		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
-		const state = new ReadonlyGameState({ players: [p1], activePlayerStack: ['p1'] });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
+		const state = new ReadonlyGameState({ players: [p1], activePlayerStack: ['plr1'] });
 		expect(state.requireActivePlayer()).toBe(p1);
 	});
 });
@@ -292,16 +292,16 @@ describe('GameState reactive card stack', () => {
 		const c1 = mock<ReadonlyCardState>();
 		const c2 = mock<ReadonlyCardState>();
 		const p1 = mock<ReadonlyPlayerState>({
-			getCard: (id) => (id === 'c1' ? c1 : id === 'c2' ? c2 : undefined)
+			getCard: (id) => (id === 'trt1' ? c1 : id === 'trt2' ? c2 : undefined)
 		});
-		const state = new ReadonlyGameState({ players: [p1], reactiveCardStack: ['c1', 'c2'] });
+		const state = new ReadonlyGameState({ players: [p1], reactiveCardStack: ['trt1', 'trt2'] });
 		expect(state.getReactiveCard()).toBe(c2);
 	});
 
 	it('requireReactiveCard returns the top card of the stack', () => {
 		const c1 = mock<ReadonlyCardState>();
-		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) });
-		const state = new ReadonlyGameState({ players: [p1], reactiveCardStack: ['c1'] });
+		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt1' ? c1 : undefined) });
+		const state = new ReadonlyGameState({ players: [p1], reactiveCardStack: ['trt1'] });
 		expect(state.requireReactiveCard()).toBe(c1);
 	});
 });
@@ -320,18 +320,18 @@ describe('GameState reactive player stack', () => {
 	});
 
 	it('getReactivePlayer returns the top player of the stack', () => {
-		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
-		const p2 = mock<ReadonlyPlayerState>({ id: 'p2' });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
+		const p2 = mock<ReadonlyPlayerState>({ id: 'plr2' });
 		const state = new ReadonlyGameState({
 			players: [p1, p2],
-			reactivePlayerStack: ['p1', 'p2']
+			reactivePlayerStack: ['plr1', 'plr2']
 		});
 		expect(state.getReactivePlayer()).toBe(p2);
 	});
 
 	it('requireReactivePlayer returns the top player of the stack', () => {
-		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
-		const state = new ReadonlyGameState({ players: [p1], reactivePlayerStack: ['p1'] });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
+		const state = new ReadonlyGameState({ players: [p1], reactivePlayerStack: ['plr1'] });
 		expect(state.requireReactivePlayer()).toBe(p1);
 	});
 });
@@ -353,26 +353,26 @@ describe('GameState implicit target stack', () => {
 		const c1 = mock<ReadonlyCardState>();
 		const c2 = mock<ReadonlyCardState>();
 		const p1 = mock<ReadonlyPlayerState>({
-			getCard: (id) => (id === 'c1' ? c1 : id === 'c2' ? c2 : undefined)
+			getCard: (id) => (id === 'trt1' ? c1 : id === 'trt2' ? c2 : undefined)
 		});
-		const state = new ReadonlyGameState({ players: [p1], targetStack: ['c1', 'c2'] });
+		const state = new ReadonlyGameState({ players: [p1], targetStack: ['trt1', 'trt2'] });
 		expect(state.getTarget()).toBe(c2);
 	});
 
 	it('getTarget returns the top player when the top id is a PlayerId', () => {
-		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
-		const p2 = mock<ReadonlyPlayerState>({ id: 'p2' });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
+		const p2 = mock<ReadonlyPlayerState>({ id: 'plr2' });
 		const state = new ReadonlyGameState({
 			players: [p1, p2],
-			targetStack: ['p1', 'p2']
+			targetStack: ['plr1', 'plr2']
 		});
 		expect(state.getTarget()).toBe(p2);
 	});
 
 	it('requireTarget returns the top target', () => {
 		const c1 = mock<ReadonlyCardState>();
-		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) });
-		const state = new ReadonlyGameState({ players: [p1], targetStack: ['c1'] });
+		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt1' ? c1 : undefined) });
+		const state = new ReadonlyGameState({ players: [p1], targetStack: ['trt1'] });
 		expect(state.requireTarget()).toBe(c1);
 	});
 });
@@ -394,26 +394,26 @@ describe('GameState implicit subject stack', () => {
 		const c1 = mock<ReadonlyCardState>();
 		const c2 = mock<ReadonlyCardState>();
 		const p1 = mock<ReadonlyPlayerState>({
-			getCard: (id) => (id === 'c1' ? c1 : id === 'c2' ? c2 : undefined)
+			getCard: (id) => (id === 'trt1' ? c1 : id === 'trt2' ? c2 : undefined)
 		});
-		const state = new ReadonlyGameState({ players: [p1], subjectStack: ['c1', 'c2'] });
+		const state = new ReadonlyGameState({ players: [p1], subjectStack: ['trt1', 'trt2'] });
 		expect(state.getSubject()).toBe(c2);
 	});
 
 	it('getSubject returns the top player when the top id is a PlayerId', () => {
-		const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
-		const p2 = mock<ReadonlyPlayerState>({ id: 'p2' });
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
+		const p2 = mock<ReadonlyPlayerState>({ id: 'plr2' });
 		const state = new ReadonlyGameState({
 			players: [p1, p2],
-			subjectStack: ['p1', 'p2']
+			subjectStack: ['plr1', 'plr2']
 		});
 		expect(state.getSubject()).toBe(p2);
 	});
 
 	it('requireSubject returns the top subject', () => {
 		const c1 = mock<ReadonlyCardState>();
-		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'c1' ? c1 : undefined) });
-		const state = new ReadonlyGameState({ players: [p1], subjectStack: ['c1'] });
+		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt1' ? c1 : undefined) });
+		const state = new ReadonlyGameState({ players: [p1], subjectStack: ['trt1'] });
 		expect(state.requireSubject()).toBe(c1);
 	});
 });
@@ -553,10 +553,10 @@ describe('GameState.evaluate', () => {
 
 	it('returns the active player stat value for a Stat', () => {
 		const player = mock<ReadonlyPlayerState>({
-			id: 'p1',
+			id: 'plr1',
 			getStat: (stat) => (stat === strength ? 4 : 0)
 		});
-		const state = new ReadonlyGameState({ players: [player], activePlayerStack: ['p1'] });
+		const state = new ReadonlyGameState({ players: [player], activePlayerStack: ['plr1'] });
 		expect(state.evaluate(strength)).toBe(4);
 	});
 
@@ -582,64 +582,88 @@ describe('GameState.evaluate', () => {
 describe('ReadonlyGameState', () => {
 	describe('mutable', () => {
 		it('produces a mutable copy with the same players', () => {
-			const p1 = mock<ReadonlyPlayerState>({ id: 'p1' });
-			p1.mutable.mockReturnValue({ id: 'p1', readonly: () => p1 } as unknown as MutablePlayerState);
+			const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
+			p1.mutable.mockReturnValue({
+				id: 'plr1',
+				readonly: () => p1
+			} as unknown as MutablePlayerState);
 			const state = makeGameState([p1]);
 			const mutable = state.mutable();
-			expect(mutable.players).toMatchObject([{ id: 'p1' }]);
+			expect(mutable.players).toMatchObject([{ id: 'plr1' }]);
 		});
 
 		it('copies the active card stack', () => {
 			const p1 = mock<ReadonlyPlayerState>();
-			p1.mutable.mockReturnValue({ id: 'p1', readonly: () => p1 } as unknown as MutablePlayerState);
-			const state = new ReadonlyGameState({ players: [p1], activeCardStack: ['c1'] });
+			p1.mutable.mockReturnValue({
+				id: 'plr1',
+				readonly: () => p1
+			} as unknown as MutablePlayerState);
+			const state = new ReadonlyGameState({ players: [p1], activeCardStack: ['trt1'] });
 			const mutable = state.mutable();
-			expect(mutable.activeCardStack).toEqual(['c1']);
+			expect(mutable.activeCardStack).toEqual(['trt1']);
 		});
 
 		it('copies the active player stack', () => {
 			const p1 = mock<ReadonlyPlayerState>();
-			p1.mutable.mockReturnValue({ id: 'p1', readonly: () => p1 } as unknown as MutablePlayerState);
-			const state = new ReadonlyGameState({ players: [p1], activePlayerStack: ['p1'] });
+			p1.mutable.mockReturnValue({
+				id: 'plr1',
+				readonly: () => p1
+			} as unknown as MutablePlayerState);
+			const state = new ReadonlyGameState({ players: [p1], activePlayerStack: ['plr1'] });
 			const mutable = state.mutable();
-			expect(mutable.activePlayerStack).toEqual(['p1']);
+			expect(mutable.activePlayerStack).toEqual(['plr1']);
 		});
 
 		it('copies the reactive card stack', () => {
 			const p1 = mock<ReadonlyPlayerState>();
-			p1.mutable.mockReturnValue({ id: 'p1', readonly: () => p1 } as unknown as MutablePlayerState);
-			const state = new ReadonlyGameState({ players: [p1], reactiveCardStack: ['c1'] });
+			p1.mutable.mockReturnValue({
+				id: 'plr1',
+				readonly: () => p1
+			} as unknown as MutablePlayerState);
+			const state = new ReadonlyGameState({ players: [p1], reactiveCardStack: ['trt1'] });
 			const mutable = state.mutable();
-			expect(mutable.reactiveCardStack).toEqual(['c1']);
+			expect(mutable.reactiveCardStack).toEqual(['trt1']);
 		});
 
 		it('copies the reactive player stack', () => {
 			const p1 = mock<ReadonlyPlayerState>();
-			p1.mutable.mockReturnValue({ id: 'p1', readonly: () => p1 } as unknown as MutablePlayerState);
-			const state = new ReadonlyGameState({ players: [p1], reactivePlayerStack: ['p1'] });
+			p1.mutable.mockReturnValue({
+				id: 'plr1',
+				readonly: () => p1
+			} as unknown as MutablePlayerState);
+			const state = new ReadonlyGameState({ players: [p1], reactivePlayerStack: ['plr1'] });
 			const mutable = state.mutable();
-			expect(mutable.reactivePlayerStack).toEqual(['p1']);
+			expect(mutable.reactivePlayerStack).toEqual(['plr1']);
 		});
 
 		it('copies the implicit target stack', () => {
 			const p1 = mock<ReadonlyPlayerState>();
-			p1.mutable.mockReturnValue({ id: 'p1', readonly: () => p1 } as unknown as MutablePlayerState);
-			const state = new ReadonlyGameState({ players: [p1], targetStack: ['c1'] });
+			p1.mutable.mockReturnValue({
+				id: 'plr1',
+				readonly: () => p1
+			} as unknown as MutablePlayerState);
+			const state = new ReadonlyGameState({ players: [p1], targetStack: ['trt1'] });
 			const mutable = state.mutable();
-			expect(mutable.targetStack).toEqual(['c1']);
+			expect(mutable.targetStack).toEqual(['trt1']);
 		});
 
 		it('copies the implicit subject stack', () => {
 			const p1 = mock<ReadonlyPlayerState>();
-			p1.mutable.mockReturnValue({ id: 'p1', readonly: () => p1 } as unknown as MutablePlayerState);
-			const state = new ReadonlyGameState({ players: [p1], subjectStack: ['c1'] });
+			p1.mutable.mockReturnValue({
+				id: 'plr1',
+				readonly: () => p1
+			} as unknown as MutablePlayerState);
+			const state = new ReadonlyGameState({ players: [p1], subjectStack: ['trt1'] });
 			const mutable = state.mutable();
-			expect(mutable.subjectStack).toEqual(['c1']);
+			expect(mutable.subjectStack).toEqual(['trt1']);
 		});
 
 		it('copies the test resolution stack', () => {
 			const p1 = mock<ReadonlyPlayerState>();
-			p1.mutable.mockReturnValue({ id: 'p1', readonly: () => p1 } as unknown as MutablePlayerState);
+			p1.mutable.mockReturnValue({
+				id: 'plr1',
+				readonly: () => p1
+			} as unknown as MutablePlayerState);
 			const r1 = makeTestResolution(2);
 			const state = new ReadonlyGameState({
 				players: [p1],
@@ -651,37 +675,46 @@ describe('ReadonlyGameState', () => {
 
 		it('copies locations', () => {
 			const p1 = mock<ReadonlyPlayerState>();
-			const location = mock<ReadonlyLocationState>({ id: 'c9' });
-			p1.mutable.mockReturnValue({ id: 'p1', readonly: () => p1 } as unknown as MutablePlayerState);
+			const location = mock<ReadonlyLocationState>({ id: 'loc9' });
+			p1.mutable.mockReturnValue({
+				id: 'plr1',
+				readonly: () => p1
+			} as unknown as MutablePlayerState);
 			location.mutable.mockReturnValue({
-				id: 'c9',
+				id: 'loc9',
 				readonly: () => location
 			} as unknown as MutableLocationState);
 			const state = makeGameState([p1], [location]);
 			const mutable = state.mutable();
 
-			expect(mutable.locations).toMatchObject([{ id: 'c9' }]);
+			expect(mutable.locations).toMatchObject([{ id: 'loc9' }]);
 		});
 	});
 
 	describe('mutate', () => {
 		it('applies the change and returns a new ReadonlyGameState', () => {
 			const p1 = mock<ReadonlyPlayerState>();
-			p1.mutable.mockReturnValue({ id: 'p1', readonly: () => p1 } as unknown as MutablePlayerState);
+			p1.mutable.mockReturnValue({
+				id: 'plr1',
+				readonly: () => p1
+			} as unknown as MutablePlayerState);
 			const state = makeGameState([p1]);
 			const updated = state.mutate((m) => {
-				m.activePlayerStack.push('p1');
+				m.activePlayerStack.push('plr1');
 			});
 			expect(updated).toBeInstanceOf(ReadonlyGameState);
-			expect(updated.activePlayerStack).toContain('p1');
+			expect(updated.activePlayerStack).toContain('plr1');
 		});
 
 		it('does not mutate the original', () => {
 			const p1 = mock<ReadonlyPlayerState>();
-			p1.mutable.mockReturnValue({ id: 'p1', readonly: () => p1 } as unknown as MutablePlayerState);
+			p1.mutable.mockReturnValue({
+				id: 'plr1',
+				readonly: () => p1
+			} as unknown as MutablePlayerState);
 			const state = makeGameState([p1]);
 			state.mutate((m) => {
-				m.activePlayerStack.push('p1');
+				m.activePlayerStack.push('plr1');
 			});
 			expect(state.activePlayerStack).toEqual([]);
 		});

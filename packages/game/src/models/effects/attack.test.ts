@@ -16,10 +16,10 @@ describe('AttackEffect.trigger', () => {
 		const events: string[] = [];
 		let capturedTestProps: TestProps | undefined;
 
-		graph.requireSubject.mockReturnValue({ id: 'p1' });
+		graph.requireSubject.mockReturnValue({ id: 'plr1' });
 		graph.requestTargets
 			.calledWith(undefined, expect.objectContaining({ default: expect.any(Function) }))
-			.mockResolvedValue(['p2']);
+			.mockResolvedValue(['plr2']);
 		graph.eventTriggered.mockImplementation(async (eventType) => {
 			events.push(eventType);
 		});
@@ -32,8 +32,8 @@ describe('AttackEffect.trigger', () => {
 		await attack({ expression: 1, results: { '0+': 1 } }).trigger(graph);
 
 		expect(capturedTestProps).toMatchObject({
-			subjectId: 'p1',
-			targetId: 'p2',
+			subjectId: 'plr1',
+			targetId: 'plr2',
 			proficiency: 1
 		});
 		expect(capturedTestProps?.beforeTest).toBeTypeOf('function');
@@ -45,10 +45,10 @@ describe('AttackEffect.trigger', () => {
 		const events: string[] = [];
 		const beforeTestEffect = new BeforeTestEffect();
 
-		graph.requireSubject.mockReturnValue({ id: 'p1' });
+		graph.requireSubject.mockReturnValue({ id: 'plr1' });
 		graph.requestTargets
 			.calledWith(undefined, expect.objectContaining({ default: expect.any(Function) }))
-			.mockResolvedValue(['p2']);
+			.mockResolvedValue(['plr2']);
 		graph.eventTriggered.mockImplementation(async (eventType) => {
 			events.push(eventType);
 		});

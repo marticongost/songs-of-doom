@@ -26,8 +26,8 @@ describe('DrawCardsEffect construction', () => {
 
 describe('DrawCardsEffect.trigger', () => {
 	it('draws the given number of cards from the active player and returns their ids', async () => {
-		const c1 = mock<MutableCardState>({ id: 'c1' });
-		const c2 = mock<MutableCardState>({ id: 'c2' });
+		const c1 = mock<MutableCardState>({ id: 'trt1' });
+		const c2 = mock<MutableCardState>({ id: 'trt2' });
 		const mutableState = mock<MutableGameState>();
 		const player = mock<MutablePlayerState>();
 		player.drawFromDeck.calledWith(mutableState, 2).mockReturnValue([c1, c2]);
@@ -40,6 +40,6 @@ describe('DrawCardsEffect.trigger', () => {
 
 		await drawCards(2).trigger(graph);
 
-		expect(callbackReturn).toEqual({ cards: ['c1', 'c2'] });
+		expect(callbackReturn).toEqual({ cards: ['trt1', 'trt2'] });
 	});
 });
