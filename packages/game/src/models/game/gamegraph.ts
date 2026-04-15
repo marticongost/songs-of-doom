@@ -175,7 +175,7 @@ export class GameGraph {
 		return this._current;
 	}
 
-	add<P extends GameNodeProps>(
+	private add<P extends GameNodeProps>(
 		nodeType: new (props: P) => GameNode,
 		props: Omit<P, 'id' | 'parent' | 'previous' | 'state'> & {
 			state?: ReadonlyGameState | ((stateAlteration: MutableGameState) => void);

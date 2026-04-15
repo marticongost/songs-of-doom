@@ -62,82 +62,6 @@ describe('GameGraph construction', () => {
 	});
 });
 
-// ─── GameGraph.add ────────────────────────────────────────────────────────────
-
-describe('GameGraph.add', () => {
-	it('advances current to the new node', () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
-		const before = graph.current;
-		graph.add(InputReceived, { values: {} });
-		expect(graph.current).not.toBe(before);
-		expect(graph.current).toBeInstanceOf(InputReceived);
-	});
-
-	it('increments node id by 1', () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
-		graph.add(InputReceived, { values: {} });
-		expect(graph.current.id).toBe(1);
-		graph.add(InputReceived, { values: {} });
-		expect(graph.current.id).toBe(2);
-	});
-
-	it('links previous.next to the new node', () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
-		const prev = graph.current;
-		graph.add(InputReceived, { values: {} });
-		expect(prev.next).toBe(graph.current);
-	});
-
-	it('sets previous on the new node', () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
-		const prev = graph.current;
-		graph.add(InputReceived, { values: {} });
-		expect(graph.current.previous).toBe(prev);
-	});
-
-	it('calls onChange after adding a node', () => {
-		const onChange = vi.fn();
-		const graph = new GameGraph({ initialState: { players: [] }, onChange });
-		graph.add(InputReceived, { values: {} });
-		expect(onChange).toHaveBeenCalledTimes(1);
-	});
-
-	it('carries forward the current state when no state is provided', () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
-		const initialState = graph.current.state;
-		graph.add(InputReceived, { values: {} });
-		expect(graph.current.state).toBe(initialState);
-	});
-
-	it('uses a ReadonlyGameState directly when provided', () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
-		const newState = new ReadonlyGameState({ players: [] });
-		graph.add(InputReceived, { values: {}, state: newState });
-		expect(graph.current.state).toBe(newState);
-	});
-
-	it('applies a state mutation function', () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
-		graph.add(InputReceived, {
-			values: {},
-			state: (s) => {
-				s.activePlayerStack.push('plr1');
-			}
-		});
-		expect(graph.current.state.activePlayerStack).toContain('plr1');
-	});
-
-	it('does not add a node when the mutation calls cancelMutation', () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
-		const before = graph.current;
-		graph.add(InputReceived, {
-			values: {},
-			state: () => cancelMutation()
-		});
-		expect(graph.current).toBe(before);
-	});
-});
-
 // ─── GameGraph.group / beginGroup / endGroup ──────────────────────────────────
 
 describe('GameGraph.group', () => {
@@ -150,7 +74,7 @@ describe('GameGraph.group', () => {
 	it('nodes inside the callback have the initial node as parent', async () => {
 		const graph = new GameGraph({ initialState: { players: [] } });
 		await graph.group(InputReceived, { values: {} }, {}, async () => {
-			graph.add(InputReceived, { values: {} });
+			graph.effectTriggered(new NoopEffect(), () => undefined);
 		});
 		const initialNode = graph.start.next!;
 		const child = initialNode.next!;
@@ -160,8 +84,8 @@ describe('GameGraph.group', () => {
 	it('the initial node accumulates all children including EndGroup', async () => {
 		const graph = new GameGraph({ initialState: { players: [] } });
 		await graph.group(InputReceived, { values: {} }, {}, async () => {
-			graph.add(InputReceived, { values: { a: 1 } });
-			graph.add(InputReceived, { values: { b: 2 } });
+			graph.effectTriggered(new NoopEffect(), () => undefined);
+			graph.effectTriggered(new NoopEffect(), () => undefined);
 		});
 		const initialNode = graph.start.next!;
 		expect(initialNode.children).toHaveLength(3); // two explicit + EndGroup
@@ -179,7 +103,7 @@ describe('GameGraph.group', () => {
 	it('nodes added after the group have no parent at root level', async () => {
 		const graph = new GameGraph({ initialState: { players: [] } });
 		await graph.group(InputReceived, { values: {} }, {}, async () => {});
-		graph.add(InputReceived, { values: {} });
+		graph.effectTriggered(new NoopEffect(), () => undefined);
 		expect(graph.current.parent).toBeUndefined();
 	});
 
