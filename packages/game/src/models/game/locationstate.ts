@@ -9,18 +9,27 @@ import { mutate } from './mutate';
 
 export interface LocationStateProps extends Omit<CardStateProps, 'id'> {
 	id: LocationId;
+
 	/** The ids of the players currently at this location. */
 	players?: ReadonlyArray<PlayerId>;
+
+	/** The ids of locations connected to this location. */
+	connections?: ReadonlyArray<LocationId>;
 }
 
 export class LocationState extends CardState {
 	declare readonly id: LocationId;
+
 	/** The ids of the players currently at this location. */
 	readonly players: ReadonlyArray<PlayerId>;
 
-	constructor({ players = [], ...rest }: LocationStateProps) {
+	/** The ids of locations connected to this location. */
+	readonly connections: ReadonlyArray<LocationId>;
+
+	constructor({ players = [], connections = [], ...rest }: LocationStateProps) {
 		super(rest);
 		this.players = players;
+		this.connections = connections;
 	}
 }
 
@@ -46,6 +55,7 @@ export class MutableLocationState extends LocationState {
 	declare clues: number;
 	declare attachments: Array<MutableCardState>;
 	declare players: Array<PlayerId>;
+	declare connections: Array<LocationId>;
 
 	constructor(locationState: ReadonlyLocationState) {
 		super({
@@ -60,7 +70,8 @@ export class MutableLocationState extends LocationState {
 			properties: [...locationState.properties],
 			physicalTrauma: locationState.physicalTrauma,
 			mentalTrauma: locationState.mentalTrauma,
-			players: [...locationState.players]
+			players: [...locationState.players],
+			connections: [...locationState.connections]
 		});
 	}
 
@@ -85,7 +96,8 @@ export class MutableLocationState extends LocationState {
 			properties: [...this.properties],
 			physicalTrauma: this.physicalTrauma,
 			mentalTrauma: this.mentalTrauma,
-			players: [...this.players]
+			players: [...this.players],
+			connections: [...this.connections]
 		});
 	}
 }
