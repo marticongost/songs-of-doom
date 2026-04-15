@@ -5,21 +5,19 @@ import { Effect } from '../effects/effect';
 import { events } from '../event';
 import { Target, type TargetType } from '../target';
 import type { MutableCardState, ReadonlyCardState } from './cardstate';
+import { cancelMutation, GameGraph, orderReactiveCapabilities } from './gamegraph';
 import {
-	cancelMutation,
 	CapabilityTriggered,
 	DrawingFate,
 	EffectTriggered,
 	EndGroup,
 	EventTriggered,
 	FateDrawn,
-	GameGraph,
 	GameStart,
 	InputReceived,
 	InputRequested,
-	orderReactiveCapabilities,
 	type EndGroupProps
-} from './gamegraph';
+} from './gamenodes';
 import { ReadonlyGameState } from './gamestate';
 import type { CardId } from './identifiers';
 import { CapabilityChoiceField } from './playerinput';

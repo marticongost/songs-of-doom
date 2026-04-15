@@ -2,13 +2,7 @@ import { groupBy } from '@songsofdoom/common';
 import { Obligation } from '../capabilities';
 import type { Effect } from '../effects';
 import { AfterTest, BeforeTest, DuringTest, type EffectOutcome } from '../effects/effect';
-import {
-	events,
-	type Event,
-	type EventContext,
-	type EventEnvelope,
-	type EventType
-} from '../event';
+import { events, type EventContext, type EventEnvelope, type EventType } from '../event';
 import type { ScalarExpressionType } from '../expressions';
 import type { Property } from '../properties';
 import type { Result } from '../results';
@@ -16,9 +10,17 @@ import { Target } from '../target';
 import type { CapabilityRef } from './cardstate';
 import {
 	CHILDREN,
+	DrawingFate,
+	EffectTriggered,
 	EndGroup,
+	EventTriggered,
+	FateDrawn,
 	GameNode,
+	GameStart,
+	InputReceived,
+	InputRequested,
 	NEXT,
+	type EffectTriggeredProps,
 	type EndGroupProps,
 	type GameNodeProps
 } from './gamenodes';
@@ -26,11 +28,7 @@ import { ReadonlyGameState, type GameStateProps, type MutableGameState } from '.
 import { type CardId, type EntityId, type PlayerId } from './identifiers';
 import type { Field } from './playerinput';
 import { CapabilityChoiceField, ResultField, TargetField } from './playerinput';
-import {
-	MutableTestResolution,
-	type ReadonlyTestResolution,
-	type TestResolutionProps
-} from './testresolution';
+import { MutableTestResolution, type TestResolutionProps } from './testresolution';
 
 export type GroupContext<ClosingNodeProps extends EndGroupProps = EndGroupProps> = {
 	subjectId?: EntityId;
@@ -650,90 +648,6 @@ export class GameGraph {
 				}
 			});
 		}
-	}
-}
-
-export {
-	CapabilityTriggered,
-	EndGroup,
-	GameNode,
-	type CapabilityTriggeredProps,
-	type EndGroupProps,
-	type GameNodeProps
-} from './gamenodes';
-
-export class GameStart extends GameNode {}
-
-export interface EffectTriggeredProps<EffectType extends Effect> extends GameNodeProps {
-	effect: EffectType;
-	outcome: EffectOutcome<EffectType>;
-}
-
-export class EffectTriggered<EffectType extends Effect> extends GameNode {
-	readonly effect: EffectType;
-	readonly outcome: EffectOutcome<EffectType>;
-
-	constructor({ effect, outcome, ...baseProps }: EffectTriggeredProps<EffectType>) {
-		super(baseProps);
-		this.effect = effect;
-		this.outcome = outcome;
-	}
-}
-
-export interface EventTriggeredProps extends GameNodeProps {
-	event: Event;
-}
-
-export class EventTriggered extends GameNode {
-	readonly event: Event;
-
-	constructor({ event, ...baseProps }: EventTriggeredProps) {
-		super(baseProps);
-		this.event = event;
-	}
-}
-
-export interface InputRequestedProps extends GameNodeProps {
-	playerId: PlayerId;
-	fields: Array<Field<unknown>>;
-}
-
-export class InputRequested extends GameNode {
-	readonly playerId: PlayerId;
-	readonly fields: ReadonlyArray<Field<unknown>>;
-
-	constructor({ playerId, fields, ...baseProps }: InputRequestedProps) {
-		super(baseProps);
-		this.playerId = playerId;
-		this.fields = fields;
-	}
-}
-
-export interface InputReceivedProps extends GameNodeProps {
-	values: Record<string, unknown>;
-}
-
-export class InputReceived extends GameNode {
-	readonly values: Readonly<Record<string, unknown>>;
-
-	constructor({ values, ...baseProps }: InputReceivedProps) {
-		super(baseProps);
-		this.values = values;
-	}
-}
-
-export class DrawingFate extends GameNode {}
-
-export interface FateDrawnProps extends EndGroupProps {
-	resolution: ReadonlyTestResolution;
-}
-
-export class FateDrawn extends EndGroup {
-	readonly resolution: ReadonlyTestResolution;
-
-	constructor({ resolution, ...baseProps }: FateDrawnProps) {
-		super(baseProps);
-		this.resolution = resolution;
 	}
 }
 

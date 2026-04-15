@@ -1,10 +1,11 @@
 import { mock } from '@songsofdoom/common/test-utils';
 import { describe, expect, it } from 'vitest';
 import type { BooleanExpression, BooleanExpressionType } from '../expressions';
-import type { GameGraph, GameNode } from '../game/gamegraph';
+import type { GameGraph } from '../game/gamegraph';
+import type { GameNode } from '../game/gamenodes';
 import type { ReadonlyGameState } from '../game/gamestate';
-import type { Effect } from './effect';
 import { ConditionalEffect, conditional } from './conditional';
+import type { Effect } from './effect';
 
 // ─── ConditionalEffect construction ───────────────────────────────────────────
 
