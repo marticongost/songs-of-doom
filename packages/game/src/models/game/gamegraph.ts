@@ -38,8 +38,8 @@ export type GroupContext<ClosingNodeProps extends EndGroupProps = EndGroupProps>
 	reactiveCardId?: CardId;
 	reactivePlayerId?: PlayerId;
 	resolution?: MutableTestResolution;
-	openWith?: (state: MutableGameState) => void;
-	closeWith?: (state: MutableGameState) => ClosingNodeExtraProps<ClosingNodeProps> | void;
+	opening?: (state: MutableGameState) => void;
+	closure?: (state: MutableGameState) => ClosingNodeExtraProps<ClosingNodeProps> | void;
 	closingNodeType?: new (props: ClosingNodeProps) => GameNode;
 };
 
@@ -428,16 +428,17 @@ export class GameGraph {
 	 * @param context.resolution - Optional test resolution to push onto `testResolutionStack`
 	 *   for the duration of the group. The resolution is automatically popped and included in
 	 *   the closing node props.
-	 * @param context.openWith - Optional extra state mutation applied inside the initial node,
+	 * @param context.opening - Optional extra state mutation applied inside the initial node,
 	 *   *after* any contextual stack entries are pushed. Use this for setup that depends on the
 	 *   group's context being already established.
-	 * @param context.closeWith - Optional extra state mutation applied inside the closing node,
+	 * @param context.closure - Optional extra state mutation applied inside the closing node,
 	 *   *before* any contextual stack entries are popped. Use this for cleanup that still needs
 	 *   the group's context to be intact (e.g. discarding the active card). It may also return
 	 *   extra props for the closing node.
 	 * @param context.closingNodeType - Optional closing node constructor. Defaults to
 	 *   {@link EndGroup}.
-	 * @param callback - Async function containing all mutations that belong to this group.
+	 * @param callback - Async callback that adds the child nodes for the group, which
+	 *   perform game state mutation.
 	 * @returns The value returned by `callback`.
 	 */
 	async group<P extends GameNodeProps, T, ClosingNodeProps extends EndGroupProps = EndGroupProps>(
@@ -456,8 +457,8 @@ export class GameGraph {
 			reactiveCardId,
 			reactivePlayerId,
 			resolution,
-			openWith,
-			closeWith,
+			opening,
+			closure,
 			closingNodeType
 		} = context;
 		const hasContext =
@@ -469,9 +470,9 @@ export class GameGraph {
 			reactivePlayerId !== undefined ||
 			resolution !== undefined;
 
-		// Merge context stack-pushes (and optional openWith) into the initial node's state mutation.
+		// Merge context stack-pushes (and optional opening) into the initial node's state mutation.
 		const originalState = nodeProps.state;
-		const needsOpenState = hasContext || openWith !== undefined;
+		const needsOpenState = hasContext || opening !== undefined;
 		const mergedState: ReadonlyGameState | ((s: MutableGameState) => void) | undefined =
 			needsOpenState
 				? (state: MutableGameState) => {
@@ -483,7 +484,7 @@ export class GameGraph {
 						if (targetId !== undefined) state.targetStack.push(targetId);
 						if (subjectId !== undefined) state.subjectStack.push(subjectId);
 						if (resolution !== undefined) state.testResolutionStack.push(resolution);
-						if (openWith) openWith(state);
+						if (opening) opening(state);
 					}
 				: originalState;
 
@@ -500,16 +501,16 @@ export class GameGraph {
 		this._currentParent = this._current;
 		const result = await callback();
 
-		// Add the closing node: apply closeWith first (context still intact), then pop stacks.
+		// Add the closing node: apply closure first (context still intact), then pop stacks.
 		const closingType = closingNodeType ?? (EndGroup as new (props: ClosingNodeProps) => GameNode);
-		const needsClosingNodeState = hasContext || closeWith !== undefined;
+		const needsClosingNodeState = hasContext || closure !== undefined;
 		let closingProps: ClosingNodeExtraProps<ClosingNodeProps> | undefined;
 		let closingState: ReadonlyGameState | undefined;
 		if (needsClosingNodeState) {
 			try {
 				closingState = this._current.state.mutate((state) => {
-					if (closeWith) {
-						closingProps = closeWith(state) as ClosingNodeExtraProps<ClosingNodeProps> | undefined;
+					if (closure) {
+						closingProps = closure(state) as ClosingNodeExtraProps<ClosingNodeProps> | undefined;
 					}
 					if (resolution !== undefined) {
 						const resolvedTestResolution = state.requireActiveTestResolution().readonly();

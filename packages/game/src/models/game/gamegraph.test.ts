@@ -158,7 +158,7 @@ describe('GameGraph.group', () => {
 		expect(result).toBe(42);
 	});
 
-	it('supports custom closing node props returned by closeWith', async () => {
+	it('supports custom closing node props returned by closure', async () => {
 		interface TaggedEndGroupProps extends EndGroupProps {
 			tag: string;
 		}
@@ -178,7 +178,7 @@ describe('GameGraph.group', () => {
 			{ values: {} },
 			{
 				closingNodeType: TaggedEndGroup,
-				closeWith: () => ({ tag: 'custom-close' })
+				closure: () => ({ tag: 'custom-close' })
 			},
 			async () => {}
 		);

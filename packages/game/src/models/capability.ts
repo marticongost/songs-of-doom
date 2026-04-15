@@ -40,13 +40,13 @@ export abstract class Capability {
 				...this.getTriggerContext(gameGraph, cardId),
 				targetId: cardId,
 				subjectId: cardId,
-				openWith: (state) => {
+				opening: (state) => {
 					const card = state.requireCard(cardId);
 					if (card.container.type === 'hand') {
 						card.moveToStage(state, card.container.playerId);
 					}
 				},
-				closeWith: (state) => {
+				closure: (state) => {
 					const card = state.requireCard(cardId);
 					if (card.container.type === 'stage') {
 						card.moveToTopOfDiscardPile(state, card.container.playerId);

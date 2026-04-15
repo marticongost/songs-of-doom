@@ -22,8 +22,8 @@ describe('Capability.trigger', () => {
 				activeCardId: 'trt1',
 				targetId: 'trt1',
 				subjectId: 'trt1',
-				openWith: expect.any(Function),
-				closeWith: expect.any(Function)
+				opening: expect.any(Function),
+				closure: expect.any(Function)
 			}),
 			expect.any(Function)
 		);
@@ -41,7 +41,7 @@ describe('Capability.trigger', () => {
 		expect(effect.trigger).toHaveBeenCalledWith(graph);
 	});
 
-	it('passes an openWith that moves the active card from hand to stage', async () => {
+	it('passes an opening that moves the active card from hand to stage', async () => {
 		const mutableState = mock<MutableGameState>();
 		const card = mock<MutableCardState>({ container: { type: 'hand', playerId: 'plr1' } });
 		mutableState.requireCard.mockReturnValue(card);
@@ -49,7 +49,7 @@ describe('Capability.trigger', () => {
 		const graph = mock<GameGraph>();
 		let capturedOpenWith: ((s: MutableGameState) => void) | undefined;
 		graph.group.mockImplementation(async (_nodeType, _nodeProps, context) => {
-			capturedOpenWith = context.openWith;
+			capturedOpenWith = context.opening;
 		});
 
 		await new Action({ effects: [] }).trigger({ gameGraph: graph, cardId: 'trt1' });
@@ -58,7 +58,7 @@ describe('Capability.trigger', () => {
 		expect(card.moveToStage).toHaveBeenCalledWith(mutableState, 'plr1');
 	});
 
-	it('passes a closeWith that discards the active card when it is in stage', async () => {
+	it('passes a closure that discards the active card when it is in stage', async () => {
 		const mutableState = mock<MutableGameState>();
 		const card = mock<MutableCardState>({ container: { type: 'stage', playerId: 'plr1' } });
 		mutableState.requireCard.mockReturnValue(card);
@@ -66,7 +66,7 @@ describe('Capability.trigger', () => {
 		const graph = mock<GameGraph>();
 		let capturedCloseWith: ((s: MutableGameState) => void) | undefined;
 		graph.group.mockImplementation(async (_nodeType, _nodeProps, context) => {
-			capturedCloseWith = context.closeWith;
+			capturedCloseWith = context.closure;
 		});
 
 		await new Action({ effects: [] }).trigger({ gameGraph: graph, cardId: 'trt1' });
@@ -75,7 +75,7 @@ describe('Capability.trigger', () => {
 		expect(card.moveToTopOfDiscardPile).toHaveBeenCalledWith(mutableState, 'plr1');
 	});
 
-	it('closeWith does not discard the active card when it is not in hand', async () => {
+	it('closure does not discard the active card when it is not in hand', async () => {
 		const mutableState = mock<MutableGameState>();
 		const card = mock<MutableCardState>({ container: { type: 'deck', playerId: 'plr1' } });
 		mutableState.requireCard.mockReturnValue(card);
@@ -83,7 +83,7 @@ describe('Capability.trigger', () => {
 		const graph = mock<GameGraph>();
 		let capturedCloseWith: ((s: MutableGameState) => void) | undefined;
 		graph.group.mockImplementation(async (_nodeType, _nodeProps, context) => {
-			capturedCloseWith = context.closeWith;
+			capturedCloseWith = context.closure;
 		});
 
 		await new Action({ effects: [] }).trigger({ gameGraph: graph, cardId: 'trt1' });
