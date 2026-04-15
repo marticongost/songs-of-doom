@@ -265,11 +265,6 @@ describe('GameGraph.group', () => {
 		expect((closeNode as TaggedEndGroup).tag).toBe('custom-close');
 		expect((closeNode as TaggedEndGroup).groupNodeId).toBe(initialNode.id);
 	});
-
-	it('endGroup without beginGroup throws', () => {
-		const graph = new GameGraph({ initialState: { players: [] } });
-		expect(() => graph.endGroup()).toThrow();
-	});
 });
 
 // ─── GameGraph.test ───────────────────────────────────────────────────────────

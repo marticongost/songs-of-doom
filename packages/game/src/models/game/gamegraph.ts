@@ -497,7 +497,7 @@ export class GameGraph {
 		}
 		const groupNodeId = this._current.id;
 
-		this.beginGroup();
+		this._currentParent = this._current;
 		const result = await callback();
 
 		// Add the closing node: apply closeWith first (context still intact), then pop stacks.
@@ -541,19 +541,8 @@ export class GameGraph {
 			state?: ReadonlyGameState | ((s: MutableGameState) => void);
 		});
 
-		this.endGroup();
-		return result;
-	}
-
-	beginGroup() {
-		this._currentParent = this._current;
-	}
-
-	endGroup() {
-		if (!this._currentParent) {
-			throw new Error('Cannot readonly container at root level');
-		}
 		this._currentParent = this._currentParent.parent;
+		return result;
 	}
 
 	async eventTriggered(eventType: EventType) {
