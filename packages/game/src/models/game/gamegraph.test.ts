@@ -5,17 +5,19 @@ import { Effect } from '../effects/effect';
 import { events } from '../event';
 import { Target, type TargetType } from '../target';
 import type { MutableCardState, ReadonlyCardState } from './cardstate';
-import { cancelMutation, GameGraph, orderReactiveCapabilities } from './gamegraph';
+import { GameGraph, orderReactiveCapabilities, rollbackEffect } from './gamegraph';
 import {
 	CapabilityTriggered,
 	DrawingFate,
-	EffectTriggered,
+	EffectGroup,
+	EndEffectGroup,
 	EndGroup,
 	EventTriggered,
 	FateDrawn,
 	GameStart,
 	InputReceived,
 	InputRequested,
+	Mutation,
 	type EndGroupProps
 } from './gamenodes';
 import { ReadonlyGameState } from './gamestate';
@@ -23,9 +25,9 @@ import type { CardId } from './identifiers';
 import { CapabilityChoiceField } from './playerinput';
 import type { MutablePlayerState, ReadonlyPlayerState } from './playerstate';
 
-// A minimal concrete Effect for use in effectTriggered tests
+// A minimal concrete Effect for use in triggerEffect tests
 class NoopEffect extends Effect {
-	async trigger(): Promise<void> {}
+	async apply(): Promise<void> {}
 }
 
 function makeInitialState(players: ReadonlyPlayerState[] = []): ReadonlyGameState {
@@ -74,7 +76,7 @@ describe('GameGraph.group', () => {
 	it('nodes inside the callback have the initial node as parent', async () => {
 		const graph = new GameGraph({ initialState: { players: [] } });
 		await graph.group(InputReceived, { values: {} }, {}, async () => {
-			graph.effectTriggered(new NoopEffect(), () => undefined);
+			await graph.triggerEffect(new NoopEffect());
 		});
 		const initialNode = graph.start.next!;
 		const child = initialNode.next!;
@@ -84,11 +86,12 @@ describe('GameGraph.group', () => {
 	it('the initial node accumulates all children including EndGroup', async () => {
 		const graph = new GameGraph({ initialState: { players: [] } });
 		await graph.group(InputReceived, { values: {} }, {}, async () => {
-			graph.effectTriggered(new NoopEffect(), () => undefined);
-			graph.effectTriggered(new NoopEffect(), () => undefined);
+			await graph.triggerEffect(new NoopEffect());
+			await graph.triggerEffect(new NoopEffect());
 		});
 		const initialNode = graph.start.next!;
-		expect(initialNode.children).toHaveLength(3); // two explicit + EndGroup
+		// Two EffectGroups + EndGroup = 3 children (EndEffectGroup is a child of its EffectGroup)
+		expect(initialNode.children).toHaveLength(3);
 		expect(initialNode.children[2]).toBeInstanceOf(EndGroup);
 	});
 
@@ -103,8 +106,9 @@ describe('GameGraph.group', () => {
 	it('nodes added after the group have no parent at root level', async () => {
 		const graph = new GameGraph({ initialState: { players: [] } });
 		await graph.group(InputReceived, { values: {} }, {}, async () => {});
-		graph.effectTriggered(new NoopEffect(), () => undefined);
-		expect(graph.current.parent).toBeUndefined();
+		await graph.triggerEffect(new NoopEffect());
+		// current is EndEffectGroup whose parent is EffectGroup at the root (no parent)
+		expect(graph.current.parent!.parent).toBeUndefined();
 	});
 
 	it('context ids are pushed onto their stacks in the initial node state', async () => {
@@ -250,30 +254,68 @@ describe('GameGraph.test', () => {
 	});
 });
 
-// ─── GameGraph.effectTriggered ────────────────────────────────────────────────
+// ─── GameGraph.triggerEffect ──────────────────────────────────────────────────
 
-describe('GameGraph.effectTriggered', () => {
-	it('adds an EffectTriggered node', () => {
+describe('GameGraph.triggerEffect', () => {
+	it('adds an EffectGroup and EndEffectGroup node', async () => {
 		const graph = new GameGraph({ initialState: { players: [] } });
 		const effect = new NoopEffect();
-		graph.effectTriggered(effect, () => undefined);
-		expect(graph.current).toBeInstanceOf(EffectTriggered);
+		await graph.triggerEffect(effect);
+		expect(graph.start.next).toBeInstanceOf(EffectGroup);
+		expect(graph.current).toBeInstanceOf(EndEffectGroup);
 	});
 
-	it('stores the effect and outcome on the node', () => {
+	it('stores the effect on EffectGroup', async () => {
 		const graph = new GameGraph({ initialState: { players: [] } });
 		const effect = new NoopEffect();
-		graph.effectTriggered(effect, () => undefined);
-		const node = graph.current as EffectTriggered<NoopEffect>;
-		expect(node.effect).toBe(effect);
-		expect(node.outcome).toBeUndefined();
+		await graph.triggerEffect(effect);
+		expect((graph.start.next as EffectGroup).effect).toBe(effect);
 	});
 
-	it('does not add a node when the state callback calls cancelMutation', () => {
+	it('records a Mutation node for each mutate() call', async () => {
+		class MutatingEffect extends Effect {
+			async apply(gameGraph: GameGraph): Promise<void> {
+				gameGraph.mutate(() => {});
+			}
+		}
+		const graph = new GameGraph({ initialState: { players: [] } });
+		await graph.triggerEffect(new MutatingEffect());
+		const effectGroup = graph.start.next!;
+		expect(effectGroup.children[0]).toBeInstanceOf(Mutation);
+	});
+
+	it('rolls back entirely on rollbackEffect — no nodes added', async () => {
+		class RollbackEffect extends Effect {
+			async apply(): Promise<void> {
+				rollbackEffect();
+			}
+		}
 		const graph = new GameGraph({ initialState: { players: [] } });
 		const before = graph.current;
-		graph.effectTriggered(new NoopEffect(), () => cancelMutation());
+		await graph.triggerEffect(new RollbackEffect());
 		expect(graph.current).toBe(before);
+	});
+});
+
+// ─── GameGraph.mutate ─────────────────────────────────────────────────────────
+
+describe('GameGraph.mutate', () => {
+	it('adds a Mutation node', () => {
+		const graph = new GameGraph({ initialState: { players: [] } });
+		graph.mutate(() => 42);
+		expect(graph.current).toBeInstanceOf(Mutation);
+	});
+
+	it('stores the outcome on the Mutation node', () => {
+		const graph = new GameGraph({ initialState: { players: [] } });
+		graph.mutate(() => ({ value: 42 }));
+		expect((graph.current as Mutation).outcome).toEqual({ value: 42 });
+	});
+
+	it('returns the outcome', () => {
+		const graph = new GameGraph({ initialState: { players: [] } });
+		const result = graph.mutate(() => 'hello');
+		expect(result).toBe('hello');
 	});
 });
 
@@ -748,11 +790,11 @@ describe('GameGraph.eventTriggered - iterative input', () => {
 	});
 });
 
-// ─── cancelMutation ───────────────────────────────────────────────────────────
+// ─── rollbackEffect ───────────────────────────────────────────────────────────
 
-describe('cancelMutation', () => {
+describe('rollbackEffect', () => {
 	it('throws when called', () => {
-		expect(() => cancelMutation()).toThrow();
+		expect(() => rollbackEffect()).toThrow();
 	});
 });
 
@@ -771,13 +813,6 @@ describe('GameNode types', () => {
 	it('EndGroup stores the groupNodeId', () => {
 		const node = new EndGroup({ id: 2, state, groupNodeId: 1 });
 		expect(node.groupNodeId).toBe(1);
-	});
-
-	it('EffectTriggered stores effect and outcome', () => {
-		const effect = new NoopEffect();
-		const node = new EffectTriggered({ id: 1, state, effect, outcome: undefined });
-		expect(node.effect).toBe(effect);
-		expect(node.outcome).toBeUndefined();
 	});
 
 	it('EventTriggered stores the event', () => {

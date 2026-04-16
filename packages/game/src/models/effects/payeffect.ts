@@ -1,7 +1,6 @@
 import { finalise } from '@songsofdoom/common';
 import { CapabilityCost, type CapabilityCostProps } from '../capabilitycost';
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import { Effect } from './effect';
 
 /**
@@ -24,10 +23,8 @@ export class PayEffect extends Effect {
 		this.cost = finalise(CapabilityCost, cost);
 	}
 
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<PayEffect>(this, (_state: MutableGameState) => {
-			// TODO
-		});
+	override async apply(_gameGraph: GameGraph) {
+		// TODO
 	}
 }
 

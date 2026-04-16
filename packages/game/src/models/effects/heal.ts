@@ -3,7 +3,7 @@ import type { ScalarExpressionType } from '../expressions';
 import { ScalarExpression } from '../expressions';
 import type { GameGraph } from '../game/gamegraph';
 import { Target, type TargetSpec } from '../target';
-import { EffectWithOutcome } from './effect';
+import { Effect } from './effect';
 
 /**
  * Props for configuring a HealEffect.
@@ -27,7 +27,7 @@ export interface HealOutcome {
 /**
  * An effect that removes damage from a target.
  */
-export class HealEffect extends EffectWithOutcome<HealOutcome> {
+export class HealEffect extends Effect {
 	/** The amount of damage to remove from the target. */
 	readonly amount: ScalarExpressionType;
 	/** Who benefits from the healing. */
@@ -39,8 +39,8 @@ export class HealEffect extends EffectWithOutcome<HealOutcome> {
 		this.target = finalise(Target, target);
 	}
 
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<HealEffect>(this, (state) => {
+	override async apply(gameGraph: GameGraph) {
+		await gameGraph.mutate((state) => {
 			// TODO: Add helper to gameState to request a target or default to the current subject
 			const amount = state.evaluate(this.amount);
 			return { amount, targetId: undefined };

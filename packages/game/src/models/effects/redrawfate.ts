@@ -1,5 +1,4 @@
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import { Effect } from './effect';
 
 /**
@@ -8,10 +7,8 @@ import { Effect } from './effect';
  * a chance to potentially get a better result.
  */
 export class RedrawFateEffect extends Effect {
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<RedrawFateEffect>(this, (_state: MutableGameState) => {
-			// TODO
-		});
+	override async apply(_gameGraph: GameGraph) {
+		// TODO
 	}
 }
 

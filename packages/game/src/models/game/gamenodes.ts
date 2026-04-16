@@ -1,5 +1,5 @@
 import type { Capability } from '../capability';
-import type { Effect, EffectOutcome } from '../effects/effect';
+import type { Effect } from '../effects/effect';
 import type { Event } from '../event';
 import type { ReadonlyGameState } from './gamestate';
 import type { CardId, PlayerId } from './identifiers';
@@ -98,40 +98,31 @@ export class EffectGroup extends GameNode {
 	}
 }
 
-export interface EndEffectGroupProps extends EndGroupProps {
-	/** The outcome produced by the effect. */
-	outcome: EffectOutcome<Effect>;
+export type EndEffectGroupProps = EndGroupProps;
+
+/**
+ * Closes an {@link EffectGroup}.
+ */
+export class EndEffectGroup extends EndGroup {}
+
+export interface MutationProps extends GameNodeProps {
+	/** The outcome produced by the mutation. */
+	outcome: unknown;
 }
 
 /**
- * Closes an {@link EffectGroup}, carrying the outcome of the effect.
+ * Records a state mutation and its outcome. Created by {@link GameGraph.mutate}.
  */
-export class EndEffectGroup extends EndGroup {
-	readonly outcome: EffectOutcome<Effect>;
+export class Mutation extends GameNode {
+	readonly outcome: unknown;
 
-	constructor({ outcome, ...baseProps }: EndEffectGroupProps) {
+	constructor({ outcome, ...baseProps }: MutationProps) {
 		super(baseProps);
 		this.outcome = outcome;
 	}
 }
 
 export class GameStart extends GameNode {}
-
-export interface EffectTriggeredProps<EffectType extends Effect> extends GameNodeProps {
-	effect: EffectType;
-	outcome: EffectOutcome<EffectType>;
-}
-
-export class EffectTriggered<EffectType extends Effect> extends GameNode {
-	readonly effect: EffectType;
-	readonly outcome: EffectOutcome<EffectType>;
-
-	constructor({ effect, outcome, ...baseProps }: EffectTriggeredProps<EffectType>) {
-		super(baseProps);
-		this.effect = effect;
-		this.outcome = outcome;
-	}
-}
 
 export interface EventTriggeredProps extends GameNodeProps {
 	event: Event;

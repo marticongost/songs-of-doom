@@ -7,10 +7,10 @@ import { BeforeTest, Effect } from './effect';
 class BeforeTestEffect extends Effect {
 	override readonly testTiming = BeforeTest;
 
-	async trigger(): Promise<void> {}
+	async apply(): Promise<void> {}
 }
 
-describe('AttackEffect.trigger', () => {
+describe('AttackEffect.apply', () => {
 	it('registers test callbacks that emit attack events', async () => {
 		const graph = mock<GameGraph>();
 		const events: string[] = [];
@@ -29,7 +29,7 @@ describe('AttackEffect.trigger', () => {
 			return 0;
 		});
 
-		await attack({ expression: 1, results: { '0+': 1 } }).trigger(graph);
+		await attack({ expression: 1, results: { '0+': 1 } }).apply(graph);
 
 		expect(capturedTestProps).toMatchObject({
 			subjectId: 'plr1',
@@ -62,7 +62,7 @@ describe('AttackEffect.trigger', () => {
 			return 0;
 		});
 
-		await attack({ expression: 1, results: { '0+': 1 } }).trigger(graph, [beforeTestEffect]);
+		await attack({ expression: 1, results: { '0+': 1 } }).apply(graph, [beforeTestEffect]);
 
 		expect(events).toEqual(['attack', 'beforeTestEffect']);
 	});

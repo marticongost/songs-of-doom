@@ -55,7 +55,7 @@ export abstract class Capability {
 			},
 			async () => {
 				for (const effect of this.effects) {
-					await effect.trigger(gameGraph);
+					await gameGraph.triggerEffect(effect);
 				}
 			}
 		);

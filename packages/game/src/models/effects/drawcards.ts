@@ -1,6 +1,6 @@
 import type { GameGraph } from '../game/gamegraph';
 import type { CardId } from '../game/identifiers';
-import { EffectWithOutcome } from './effect';
+import { Effect } from './effect';
 
 export interface DrawCardsEffectProps {
 	amount: number;
@@ -11,7 +11,7 @@ export interface DrawCardsOutcome {
 	readonly cards: CardId[];
 }
 
-export class DrawCardsEffect extends EffectWithOutcome<DrawCardsOutcome> {
+export class DrawCardsEffect extends Effect {
 	readonly amount: number;
 
 	constructor({ amount }: DrawCardsEffectProps) {
@@ -19,8 +19,8 @@ export class DrawCardsEffect extends EffectWithOutcome<DrawCardsOutcome> {
 		this.amount = amount;
 	}
 
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<DrawCardsEffect>(this, (state) => {
+	override async apply(gameGraph: GameGraph) {
+		await gameGraph.mutate((state) => {
 			const player = state.requireActivePlayer();
 			const drawnCards = player.drawFromDeck(state, this.amount);
 			return { cards: drawnCards.map((card) => card.id) };

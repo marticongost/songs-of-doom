@@ -1,7 +1,6 @@
 import type { ScalarExpressionType } from '../expressions';
 import { ScalarExpression } from '../expressions';
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import { Effect } from './effect';
 
 /**
@@ -25,10 +24,8 @@ export class ModifyCarryingCapacityEffect extends Effect {
 		this.modifier = modifier;
 	}
 
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<ModifyCarryingCapacityEffect>(this, (_state: MutableGameState) => {
-			// TODO
-		});
+	override async apply(_gameGraph: GameGraph) {
+		// TODO
 	}
 }
 

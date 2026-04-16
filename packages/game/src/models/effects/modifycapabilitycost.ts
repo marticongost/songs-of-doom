@@ -6,7 +6,6 @@ import {
 	type ScalarCapabilityCostType
 } from '../capabilitycost';
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import { Effect } from './effect';
 
 export interface ModifyCapabilityCostEffectProps {
@@ -49,10 +48,8 @@ export class ModifyCapabilityCostEffect extends Effect {
 		return groups;
 	}
 
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<ModifyCapabilityCostEffect>(this, (_state: MutableGameState) => {
-			// TODO
-		});
+	override async apply(_gameGraph: GameGraph) {
+		// TODO
 	}
 }
 

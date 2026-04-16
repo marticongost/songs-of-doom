@@ -1,7 +1,6 @@
 import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import { Target, type ActorTargetType, type TargetSpec } from '../target';
 import { Effect } from './effect';
 import { ResultsTableEffect, type ResultsTableEffectProps } from './resultstable';
@@ -49,10 +48,8 @@ export class TestEffect extends Effect {
 		this.results = finalise(ResultsTableEffect, results);
 	}
 
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<TestEffect>(this, (_state: MutableGameState) => {
-			// TODO
-		});
+	override async apply(_gameGraph: GameGraph) {
+		// TODO
 	}
 }
 

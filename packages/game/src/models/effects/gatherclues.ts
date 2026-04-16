@@ -5,7 +5,7 @@ import type { GameGraph } from '../game/gamegraph';
 import type { CardId } from '../game/identifiers';
 import type { MutableLocationState } from '../game/locationstate';
 import { currentLocation, Target, type LocationTargetType, type TargetSpec } from '../target';
-import { EffectWithOutcome } from './effect';
+import { Effect } from './effect';
 
 /**
  * Props for configuring a GatherCluesEffect.
@@ -26,7 +26,7 @@ export interface GatherCluesOutcome {
 /**
  * An effect that gathers clues from a location.
  */
-export class GatherCluesEffect extends EffectWithOutcome<GatherCluesOutcome> {
+export class GatherCluesEffect extends Effect {
 	/** The amount of clues to gather. */
 	readonly amount: ScalarExpressionType;
 
@@ -39,13 +39,13 @@ export class GatherCluesEffect extends EffectWithOutcome<GatherCluesOutcome> {
 		this.target = (finalise(Target, target) ?? currentLocation) as Target<LocationTargetType>;
 	}
 
-	override async trigger(gameGraph: GameGraph) {
+	override async apply(gameGraph: GameGraph) {
 		const subjectId = gameGraph.requireSubject().id;
 		const targetIds = (await gameGraph.requestTargets(this.target, {
 			default: () => [gameGraph.current.state.requireTarget().id]
 		})) as Array<CardId>;
 
-		gameGraph.effectTriggered<GatherCluesEffect>(this, (state) => {
+		gameGraph.mutate((state) => {
 			const subject = state.requireEntityState(subjectId);
 			const gatheredClues = new Counter<CardId>();
 			for (const targetId of targetIds) {

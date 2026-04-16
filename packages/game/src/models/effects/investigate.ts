@@ -1,6 +1,5 @@
 import type { ScalarExpressionType } from '../expressions';
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import type { Property } from '../properties';
 import { parseResultString, type ResultString } from '../results';
 import { Effect } from './effect';
@@ -46,10 +45,8 @@ export class InvestigateEffect extends Effect {
 		this.properties = properties ?? [];
 	}
 
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<InvestigateEffect>(this, (_state: MutableGameState) => {
-			// TODO
-		});
+	override async apply(_gameGraph: GameGraph) {
+		// TODO
 	}
 }
 

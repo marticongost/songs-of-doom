@@ -1,7 +1,7 @@
 import { groupBy } from '@songsofdoom/common';
 import { Obligation } from '../capabilities';
 import type { Effect } from '../effects';
-import { AfterTest, BeforeTest, DuringTest, type EffectOutcome } from '../effects/effect';
+import { AfterTest, BeforeTest, DuringTest } from '../effects/effect';
 import { events, type EventContext, type EventEnvelope, type EventType } from '../event';
 import type { ScalarExpressionType } from '../expressions';
 import type { Property } from '../properties';
@@ -11,7 +11,8 @@ import type { CapabilityRef } from './cardstate';
 import {
 	CHILDREN,
 	DrawingFate,
-	EffectTriggered,
+	EffectGroup,
+	EndEffectGroup,
 	EndGroup,
 	EventTriggered,
 	FateDrawn,
@@ -19,10 +20,12 @@ import {
 	GameStart,
 	InputReceived,
 	InputRequested,
+	Mutation,
 	NEXT,
-	type EffectTriggeredProps,
+	type EffectGroupProps,
 	type EndGroupProps,
-	type GameNodeProps
+	type GameNodeProps,
+	type MutationProps
 } from './gamenodes';
 import { ReadonlyGameState, type GameStateProps, type MutableGameState } from './gamestate';
 import { type CardId, type EntityId, type PlayerId } from './identifiers';
@@ -175,21 +178,32 @@ export class GameGraph {
 		return this._current;
 	}
 
-	private add<P extends GameNodeProps>(
-		nodeType: new (props: P) => GameNode,
-		props: Omit<P, 'id' | 'parent' | 'previous' | 'state'> & {
-			state?: ReadonlyGameState | ((stateAlteration: MutableGameState) => void);
+	private add<
+		P extends GameNodeProps,
+		N extends GameNode,
+		Extra extends Partial<Omit<P, BaseNodeProps>> | void = void
+	>(
+		nodeType: new (props: P) => N,
+		props: Omit<P, BaseNodeProps | (Extra extends void ? never : keyof Extra)> & {
+			state?: ReadonlyGameState | ((stateAlteration: MutableGameState) => Extra);
 		}
-	) {
+	): N | undefined {
 		let state: ReadonlyGameState;
+		let extraProps: Partial<Omit<P, BaseNodeProps>> = {};
 		if (props.state instanceof ReadonlyGameState) {
 			state = props.state;
 		} else if (typeof props.state === 'function') {
+			const stateCallback = props.state;
 			try {
-				state = this._current.state.mutate(props.state);
+				state = this._current.state.mutate((s) => {
+					const result = stateCallback(s);
+					if (result !== undefined && result !== null) {
+						extraProps = result as Partial<Omit<P, BaseNodeProps>>;
+					}
+				});
 			} catch (e) {
 				if (e instanceof GameStateMutationCancelled) {
-					return;
+					return undefined;
 				} else {
 					throw e;
 				}
@@ -203,6 +217,7 @@ export class GameGraph {
 			parent: this._currentParent,
 			previous: this._current,
 			...props,
+			...extraProps,
 			state
 		} as P);
 
@@ -216,25 +231,48 @@ export class GameGraph {
 		if (this._onChange) {
 			this._onChange();
 		}
+
+		return node;
 	}
 
-	effectTriggered<E extends Effect>(effect: E, state: (s: MutableGameState) => EffectOutcome<E>) {
-		const mutableState = this._current.state.mutable();
-		let outcome: EffectOutcome<E>;
+	async triggerEffect(effect: Effect): Promise<void> {
+		const nodeBeforeGroup = this._current;
+		const parentBeforeGroup = this._currentParent;
+		const parentChildrenLen = this._currentParent ? this._currentParent[CHILDREN].length : 0;
+
 		try {
-			outcome = state(mutableState);
+			await this.group<EffectGroupProps, void>(
+				EffectGroup,
+				{ effect },
+				{ closingNodeType: EndEffectGroup },
+				async () => {
+					await effect.apply(this);
+				}
+			);
 		} catch (e) {
-			if (e instanceof GameStateMutationCancelled) {
-				return;
+			if (e instanceof EffectRolledBack) {
+				// Rewind the node chain to before the EffectGroup was added.
+				nodeBeforeGroup[NEXT] = undefined;
+				this._current = nodeBeforeGroup;
+				this._currentParent = parentBeforeGroup;
+				if (parentBeforeGroup) {
+					parentBeforeGroup[CHILDREN].length = parentChildrenLen;
+				}
 			} else {
 				throw e;
 			}
 		}
-		this.add(EffectTriggered as new (props: EffectTriggeredProps<E>) => EffectTriggered<E>, {
-			effect,
-			outcome,
-			state
+	}
+
+	mutate<Outcome>(fn: (state: MutableGameState) => Outcome): Outcome {
+		let outcome!: Outcome;
+		this.add<MutationProps, Mutation, { outcome: Outcome }>(Mutation, {
+			state: (s) => {
+				outcome = fn(s);
+				return { outcome };
+			}
 		});
+		return outcome;
 	}
 
 	async requestInput(
@@ -390,19 +428,19 @@ export class GameGraph {
 				await beforeTest?.(this);
 				this.eventTriggered('beforeDrawingFate');
 				for (const effect of effectsByTiming.get(BeforeTest) ?? []) {
-					effect.trigger(this);
+					await this.triggerEffect(effect);
 				}
 
 				const { result } = await this.requestInput([new ResultField({ name: 'result' })]);
 				this.eventTriggered('fateTokenRevealed');
 				for (const effect of effectsByTiming.get(DuringTest) ?? []) {
-					effect.trigger(this);
+					await this.triggerEffect(effect);
 				}
 
 				await afterTest?.(this);
 				this.eventTriggered('afterDrawingFate');
 				for (const effect of effectsByTiming.get(AfterTest) ?? []) {
-					effect.trigger(this);
+					await this.triggerEffect(effect);
 				}
 				return result;
 			}
@@ -646,15 +684,14 @@ export class GameGraph {
  */
 class GameStateMutationCancelled extends Error {}
 
+/** An error indicating the entire effect group should be cancelled and rewound. */
+class EffectRolledBack extends Error {}
+
 /**
- * Indicates that the current game state mutation should be cancelled and rolled back.
- * This should be used by effects to signal their changes to the state are redundant
- * or not applicable.
- *
- * Example: an effect that exhausts a card might check if the card is already exhausted,
- * and if so, call `cancelMutation()` to avoid unnecessarily changing the game state
- * with a no-op mutation.
+ * Cancels and rolls back the entire currently-executing effect group, rewinding the
+ * game graph to the node before the effect started. Use this when an effect determines
+ * it should not apply at all (e.g. exhausting a card that is already exhausted).
  */
-export const cancelMutation = () => {
-	throw new GameStateMutationCancelled();
+export const rollbackEffect = () => {
+	throw new EffectRolledBack();
 };

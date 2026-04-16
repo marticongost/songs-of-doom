@@ -14,12 +14,5 @@ export abstract class Effect {
 		return currentValue;
 	}
 
-	abstract trigger(gameGraph: GameGraph): Promise<void>;
+	abstract apply(gameGraph: GameGraph): Promise<void>;
 }
-
-export abstract class EffectWithOutcome<Outcome> extends Effect {
-	declare readonly _outcome: Outcome;
-}
-
-export type EffectOutcome<E extends Effect> =
-	E extends EffectWithOutcome<infer Outcome> ? Outcome : undefined;

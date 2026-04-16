@@ -2,7 +2,7 @@ import { finalise } from '@songsofdoom/common';
 import { type GameGraph } from '../game/gamegraph';
 import type { CardId, PlayerId } from '../game/identifiers';
 import { Target, type PlayerTargetType, type SkillTargetType, type TargetSpec } from '../target';
-import { EffectWithOutcome } from './effect';
+import { Effect } from './effect';
 
 export type DiscardFromHandSelection = 'owner' | 'random';
 
@@ -25,7 +25,7 @@ export interface DiscardFromHandOutcome {
 /**
  * An effect that discards cards from the hand of the target.
  */
-export class DiscardFromHandEffect extends EffectWithOutcome<DiscardFromHandOutcome> {
+export class DiscardFromHandEffect extends Effect {
 	/** The cards to discard. */
 	readonly cards: Target<SkillTargetType>;
 
@@ -38,7 +38,7 @@ export class DiscardFromHandEffect extends EffectWithOutcome<DiscardFromHandOutc
 		this.players = finalise(Target, players);
 	}
 
-	override async trigger(gameGraph: GameGraph) {
+	override async apply(gameGraph: GameGraph) {
 		const playerIds = await gameGraph.requestPlayers(this.players, {
 			default: () => [gameGraph.current.state.requireActivePlayer().id]
 		});
@@ -47,7 +47,7 @@ export class DiscardFromHandEffect extends EffectWithOutcome<DiscardFromHandOutc
 			const cardIds = (await gameGraph.requestInput(this.cards)).target as CardId[];
 			playerDiscards.set(playerId, cardIds);
 		}
-		gameGraph.effectTriggered<DiscardFromHandEffect>(this, (state) => {
+		gameGraph.mutate((state) => {
 			for (const [playerId, cardIds] of playerDiscards) {
 				const playerState = state.requirePlayer(playerId);
 				for (const cardId of cardIds) {

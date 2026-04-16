@@ -1,7 +1,6 @@
 import type { ScalarExpressionType } from '../expressions';
 import { ScalarExpression } from '../expressions';
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import { Effect } from './effect';
 
 export interface ModifyRollEffectProps {
@@ -16,10 +15,8 @@ export class ModifyRollEffect extends Effect {
 		this.modifier = modifier;
 	}
 
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<ModifyRollEffect>(this, (_state: MutableGameState) => {
-			// TODO
-		});
+	override async apply(_gameGraph: GameGraph) {
+		// TODO
 	}
 }
 

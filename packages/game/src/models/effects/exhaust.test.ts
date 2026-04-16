@@ -22,9 +22,9 @@ describe('ExhaustEffect construction', () => {
 	});
 });
 
-// ─── ExhaustEffect.trigger ────────────────────────────────────────────────────
+// ─── ExhaustEffect.apply ────────────────────────────────────────────────────
 
-describe('ExhaustEffect.trigger', () => {
+describe('ExhaustEffect.apply', () => {
 	it.each([
 		{ label: 'without a target', target: undefined },
 		{ label: 'with a target', target: new Target({}) }
@@ -37,11 +37,12 @@ describe('ExhaustEffect.trigger', () => {
 			.calledWith(target, expect.objectContaining({ default: expect.any(Function) }))
 			.mockResolvedValue('trt1');
 		let callbackReturn: unknown;
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callbackReturn = callback(mutableState);
+		graph.mutate.mockImplementation((fn) => {
+			callbackReturn = fn(mutableState);
+			return callbackReturn;
 		});
 
-		await exhaust({ target }).trigger(graph);
+		await exhaust({ target }).apply(graph);
 
 		expect(card.exhausted).toBe(true);
 		expect(callbackReturn).toEqual({ card: 'trt1' });
@@ -53,13 +54,8 @@ describe('ExhaustEffect.trigger', () => {
 		mutableState.requireCard.calledWith('trt1').mockReturnValue(card);
 		const graph = mock<GameGraph>();
 		graph.requestSingleTarget.mockResolvedValue('trt1');
-		let capturedCallback!: (state: MutableGameState) => unknown;
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			capturedCallback = callback;
-		});
+		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
-		await exhaust().trigger(graph);
-
-		expect(() => capturedCallback(mutableState)).toThrow();
+		await expect(exhaust().apply(graph)).rejects.toThrow();
 	});
 });

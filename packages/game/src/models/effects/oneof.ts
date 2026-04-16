@@ -21,7 +21,7 @@ export class OneOfEffect extends Effect {
 		this.effects = effects;
 	}
 
-	override async trigger(_gameGraph: GameGraph) {
+	override async apply(_gameGraph: GameGraph) {
 		// TODO: prompt the player for the chosen option, and trigger it
 	}
 }

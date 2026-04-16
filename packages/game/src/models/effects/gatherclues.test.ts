@@ -53,9 +53,9 @@ describe('GatherCluesEffect construction', () => {
 	});
 });
 
-// ─── GatherCluesEffect.trigger ────────────────────────────────────────────────
+// ─── GatherCluesEffect.apply ────────────────────────────────────────────────────
 
-describe('GatherCluesEffect.trigger', () => {
+describe('GatherCluesEffect.apply', () => {
 	it('transfers clues from the location to the subject and returns the outcome', async () => {
 		const subject = makeSubject('trt1', 0);
 		const location = makeLocation('loc2', 5);
@@ -69,11 +69,12 @@ describe('GatherCluesEffect.trigger', () => {
 		graph.requireSubject.mockReturnValue(subject);
 		graph.requestTargets.mockResolvedValue(['loc2']);
 		let callbackReturn: unknown;
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callbackReturn = callback(mutableState);
+		graph.mutate.mockImplementation((fn) => {
+			callbackReturn = fn(mutableState);
+			return callbackReturn;
 		});
 
-		await gatherClues(3).trigger(graph);
+		await gatherClues(3).apply(graph);
 
 		expect(subject.clues).toBe(3);
 		expect(location.clues).toBe(2);
@@ -93,11 +94,9 @@ describe('GatherCluesEffect.trigger', () => {
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(subject);
 		graph.requestTargets.mockResolvedValue(['loc2']);
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callback(mutableState);
-		});
+		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
-		await gatherClues(5).trigger(graph);
+		await gatherClues(5).apply(graph);
 
 		expect(subject.clues).toBe(2);
 		expect(location.clues).toBe(0);
@@ -120,11 +119,12 @@ describe('GatherCluesEffect.trigger', () => {
 		graph.requireSubject.mockReturnValue(subject);
 		graph.requestTargets.mockResolvedValue(['loc2', 'loc3']);
 		let callbackReturn: unknown;
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callbackReturn = callback(mutableState);
+		graph.mutate.mockImplementation((fn) => {
+			callbackReturn = fn(mutableState);
+			return callbackReturn;
 		});
 
-		await gatherClues(2).trigger(graph);
+		await gatherClues(2).apply(graph);
 
 		expect(subject.clues).toBe(4);
 		expect(loc1.clues).toBe(1);

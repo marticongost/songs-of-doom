@@ -2,7 +2,6 @@ import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
 import { ScalarExpression } from '../expressions';
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -32,10 +31,8 @@ export class RecoverSanityEffect extends Effect {
 		this.target = finalise(Target, target);
 	}
 
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<RecoverSanityEffect>(this, (_state: MutableGameState) => {
-			// TODO
-		});
+	override async apply(_gameGraph: GameGraph) {
+		// TODO
 	}
 }
 

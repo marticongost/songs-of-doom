@@ -36,15 +36,15 @@ export class ConditionalEffect extends Effect {
 		});
 	}
 
-	override async trigger(gameGraph: GameGraph) {
+	override async apply(gameGraph: GameGraph) {
 		for (const { condition, effects } of this.cases) {
 			if (gameGraph.current.state.evaluate(condition)) {
 				for (const effect of effects) {
-					await effect.trigger(gameGraph);
+					await gameGraph.triggerEffect(effect);
 				}
 			} else if (this.default) {
 				for (const effect of this.default) {
-					await effect.trigger(gameGraph);
+					await gameGraph.triggerEffect(effect);
 				}
 			}
 		}

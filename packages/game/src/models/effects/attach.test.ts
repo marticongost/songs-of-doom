@@ -27,9 +27,9 @@ describe('AttachEffect construction', () => {
 	});
 });
 
-// ─── AttachEffect.trigger ─────────────────────────────────────────────────────
+// ─── AttachEffect.apply ─────────────────────────────────────────────────
 
-describe('AttachEffect.trigger', () => {
+describe('AttachEffect.apply', () => {
 	it('attaches the card to the given target, defaulting to the active card', async () => {
 		const target = new Target({});
 		const mutableState = mock<MutableGameState>();
@@ -41,11 +41,9 @@ describe('AttachEffect.trigger', () => {
 		graph.requestSingleTarget
 			.calledWith(target, expect.objectContaining({ default: expect.any(Function) }))
 			.mockResolvedValue('trt2');
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callback(mutableState);
-		});
+		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
-		await attach({ target }).trigger(graph);
+		await attach({ target }).apply(graph);
 
 		expect(targetCard.addAttachment).toHaveBeenCalledWith(mutableState, attachmentCard);
 	});

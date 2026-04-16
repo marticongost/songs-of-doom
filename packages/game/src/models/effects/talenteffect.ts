@@ -1,5 +1,4 @@
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import type { Talent } from '../talent';
 import { Effect } from './effect';
 
@@ -23,10 +22,8 @@ export class TalentEffect extends Effect {
 		this.talents = talents;
 	}
 
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<TalentEffect>(this, (_state: MutableGameState) => {
-			// TODO
-		});
+	override async apply(_gameGraph: GameGraph) {
+		// TODO
 	}
 }
 

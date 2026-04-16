@@ -59,23 +59,23 @@ describe('EngageEffect construction', () => {
 	});
 });
 
-// ─── EngageEffect.trigger — input validation ───────────────────────────────────
+// ─── EngageEffect.apply — input validation ────────────────────────────────────
 
-describe('EngageEffect.trigger — input validation', () => {
+describe('EngageEffect.apply — input validation', () => {
 	it('throws when no targets are chosen', async () => {
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(makePlayer('plr1'));
 		graph.requestInput.mockResolvedValue({ target: [] });
 
-		await expect(engage({ target: { type: 'enemy' } }).trigger(graph)).rejects.toThrow(
+		await expect(engage({ target: { type: 'enemy' } }).apply(graph)).rejects.toThrow(
 			'At least one target must be chosen to engage'
 		);
 	});
 });
 
-// ─── EngageEffect.trigger ──────────────────────────────────────────────────────
+// ─── EngageEffect.apply ──────────────────────────────────────────────────
 
-describe('EngageEffect.trigger', () => {
+describe('EngageEffect.apply', () => {
 	it('attaches the creature to the player when subject is a player and target is a creature', async () => {
 		const player = makePlayer('plr1');
 		const creature = makeCreature('crt1');
@@ -86,11 +86,9 @@ describe('EngageEffect.trigger', () => {
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(player);
 		graph.requestInput.mockResolvedValue({ target: ['crt1'] });
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callback(mutableState);
-		});
+		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
-		await engage({ target: { type: 'enemy' } }).trigger(graph);
+		await engage({ target: { type: 'enemy' } }).apply(graph);
 
 		expect(player.addAttachment).toHaveBeenCalledWith(mutableState, creature);
 	});
@@ -107,11 +105,9 @@ describe('EngageEffect.trigger', () => {
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(player);
 		graph.requestInput.mockResolvedValue({ target: ['crt1', 'crt2'] });
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callback(mutableState);
-		});
+		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
-		await engage({ target: { type: 'enemy' } }).trigger(graph);
+		await engage({ target: { type: 'enemy' } }).apply(graph);
 
 		expect(player.addAttachment).toHaveBeenCalledWith(mutableState, c1);
 		expect(player.addAttachment).toHaveBeenCalledWith(mutableState, c2);
@@ -127,11 +123,9 @@ describe('EngageEffect.trigger', () => {
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(ally);
 		graph.requestInput.mockResolvedValue({ target: ['crt1'] });
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callback(mutableState);
-		});
+		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
-		await engage({ target: { type: 'enemy' } }).trigger(graph);
+		await engage({ target: { type: 'enemy' } }).apply(graph);
 
 		expect(ally.addAttachment).toHaveBeenCalledWith(mutableState, creature);
 	});
@@ -146,11 +140,9 @@ describe('EngageEffect.trigger', () => {
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(creature);
 		graph.requestInput.mockResolvedValue({ target: ['plr1'] });
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callback(mutableState);
-		});
+		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
-		await engage({ target: { type: 'player' } }).trigger(graph);
+		await engage({ target: { type: 'player' } }).apply(graph);
 
 		expect(player.addAttachment).toHaveBeenCalledWith(mutableState, creature);
 	});
@@ -166,11 +158,9 @@ describe('EngageEffect.trigger', () => {
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(creature);
 		graph.requestInput.mockResolvedValue({ target: ['plr1', 'plr2'] });
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callback(mutableState);
-		});
+		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
-		await expect(engage({ target: { type: 'player' } }).trigger(graph)).rejects.toThrow(
+		await expect(engage({ target: { type: 'player' } }).apply(graph)).rejects.toThrow(
 			'Enemies can only be engaged to a single opponent'
 		);
 	});
@@ -184,11 +174,9 @@ describe('EngageEffect.trigger', () => {
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(player);
 		graph.requestInput.mockResolvedValue({ target: ['crt1'] });
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callback(mutableState);
-		});
+		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
-		await expect(engage({ target: { type: 'enemy' } }).trigger(graph)).rejects.toThrow(
+		await expect(engage({ target: { type: 'enemy' } }).apply(graph)).rejects.toThrow(
 			'Invalid subject/target combination'
 		);
 	});
@@ -202,11 +190,9 @@ describe('EngageEffect.trigger', () => {
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(creature);
 		graph.requestInput.mockResolvedValue({ target: ['crt2'] });
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callback(mutableState);
-		});
+		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
-		await expect(engage({ target: { type: 'enemy' } }).trigger(graph)).rejects.toThrow(
+		await expect(engage({ target: { type: 'enemy' } }).apply(graph)).rejects.toThrow(
 			'Invalid subject/target combination'
 		);
 	});
@@ -220,11 +206,9 @@ describe('EngageEffect.trigger', () => {
 		const graph = mock<GameGraph>();
 		graph.requireSubject.mockReturnValue(c1);
 		graph.requestInput.mockResolvedValue({ target: ['crt2'] });
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callback(mutableState);
-		});
+		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
-		await expect(engage({ target: { type: 'enemy' } }).trigger(graph)).rejects.toThrow(
+		await expect(engage({ target: { type: 'enemy' } }).apply(graph)).rejects.toThrow(
 			'Invalid subject/target combination'
 		);
 	});

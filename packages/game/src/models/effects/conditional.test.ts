@@ -88,22 +88,22 @@ describe('ConditionalEffect.orElse', () => {
 	});
 });
 
-// ─── ConditionalEffect.trigger ────────────────────────────────────────────────
+// ─── ConditionalEffect.apply ─────────────────────────────────────────────────
 
 function makeGraph(evaluate: (condition: BooleanExpressionType) => boolean): GameGraph {
 	const state = mock<ReadonlyGameState>({ evaluate: evaluate as ReadonlyGameState['evaluate'] });
 	return mock<GameGraph>({ current: mock<GameNode>({ state }) });
 }
 
-describe('ConditionalEffect.trigger', () => {
+describe('ConditionalEffect.apply', () => {
 	it('triggers case effects when the condition is true', async () => {
 		const condition = mock<BooleanExpression>();
 		const caseEffect = mock<Effect>();
 		const graph = makeGraph(() => true);
 
-		await conditional([{ condition, effects: [caseEffect] }]).trigger(graph);
+		await conditional([{ condition, effects: [caseEffect] }]).apply(graph);
 
-		expect(caseEffect.trigger).toHaveBeenCalledWith(graph);
+		expect(graph.triggerEffect).toHaveBeenCalledWith(caseEffect);
 	});
 
 	it('does not trigger default effects when the condition is true', async () => {
@@ -111,9 +111,9 @@ describe('ConditionalEffect.trigger', () => {
 		const defaultEffect = mock<Effect>();
 		const graph = makeGraph(() => true);
 
-		await conditional([{ condition, effects: [] }], [defaultEffect]).trigger(graph);
+		await conditional([{ condition, effects: [] }], [defaultEffect]).apply(graph);
 
-		expect(defaultEffect.trigger).not.toHaveBeenCalled();
+		expect(graph.triggerEffect).not.toHaveBeenCalledWith(defaultEffect);
 	});
 
 	it('triggers default effects when the condition is false', async () => {
@@ -121,9 +121,9 @@ describe('ConditionalEffect.trigger', () => {
 		const defaultEffect = mock<Effect>();
 		const graph = makeGraph(() => false);
 
-		await conditional([{ condition, effects: [] }], [defaultEffect]).trigger(graph);
+		await conditional([{ condition, effects: [] }], [defaultEffect]).apply(graph);
 
-		expect(defaultEffect.trigger).toHaveBeenCalledWith(graph);
+		expect(graph.triggerEffect).toHaveBeenCalledWith(defaultEffect);
 	});
 
 	it('does not trigger anything when the condition is false and there is no default', async () => {
@@ -131,9 +131,9 @@ describe('ConditionalEffect.trigger', () => {
 		const caseEffect = mock<Effect>();
 		const graph = makeGraph(() => false);
 
-		await conditional([{ condition, effects: [caseEffect] }]).trigger(graph);
+		await conditional([{ condition, effects: [caseEffect] }]).apply(graph);
 
-		expect(caseEffect.trigger).not.toHaveBeenCalled();
+		expect(graph.triggerEffect).not.toHaveBeenCalled();
 	});
 
 	it('evaluates each case independently', async () => {
@@ -146,9 +146,9 @@ describe('ConditionalEffect.trigger', () => {
 		await conditional([
 			{ condition: conditionTrue, effects: [trueEffect] },
 			{ condition: conditionFalse, effects: [falseEffect] }
-		]).trigger(graph);
+		]).apply(graph);
 
-		expect(trueEffect.trigger).toHaveBeenCalledWith(graph);
-		expect(falseEffect.trigger).not.toHaveBeenCalled();
+		expect(graph.triggerEffect).toHaveBeenCalledWith(trueEffect);
+		expect(graph.triggerEffect).not.toHaveBeenCalledWith(falseEffect);
 	});
 });

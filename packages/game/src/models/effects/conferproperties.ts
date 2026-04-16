@@ -1,6 +1,5 @@
 import type { MutableEntityState } from '../game/entitystate';
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import type { EntityId } from '../game/identifiers';
 import type { Property } from '../properties';
 import { Effect } from './effect';
@@ -31,8 +30,8 @@ export class ConferPropertiesEffect extends Effect {
 		this.properties = properties;
 	}
 
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<ConferPropertiesEffect>(this, (state: MutableGameState) => {
+	override async apply(gameGraph: GameGraph) {
+		gameGraph.mutate((state) => {
 			const target = state.requireTarget();
 			for (const conferedProperty of this.properties) {
 				this.addProperty(conferedProperty, target);

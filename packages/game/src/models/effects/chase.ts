@@ -1,5 +1,4 @@
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import { Effect } from './effect';
 
 /**
@@ -8,10 +7,8 @@ import { Effect } from './effect';
  * If already at the same location as the prey, the creature engages it instead.
  */
 export class ChaseEffect extends Effect {
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<ChaseEffect>(this, (_state: MutableGameState) => {
-			// TODO
-		});
+	override async apply(_gameGraph: GameGraph) {
+		// TODO
 	}
 }
 

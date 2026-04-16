@@ -3,7 +3,7 @@ import type { FocusToken } from '../..';
 import type { GameGraph } from '../game/gamegraph';
 import type { PlayerId } from '../game/identifiers';
 import type { PlayerTargetType, Target } from '../target';
-import { EffectWithOutcome } from './effect';
+import { Effect } from './effect';
 
 export interface DrawFocusEffectProps {
 	/** The amount of focus tokens to draw. */
@@ -18,7 +18,7 @@ export interface DrawFocusOutcome {
 	readonly playerDrawnTokens: ReadonlyMap<PlayerId, ReadonlyCounter<FocusToken>>;
 }
 
-export class DrawFocusEffect extends EffectWithOutcome<DrawFocusOutcome> {
+export class DrawFocusEffect extends Effect {
 	/** The amount of focus tokens to draw. */
 	readonly amount: number;
 
@@ -31,11 +31,11 @@ export class DrawFocusEffect extends EffectWithOutcome<DrawFocusOutcome> {
 		this.players = props.players;
 	}
 
-	override async trigger(gameGraph: GameGraph) {
+	override async apply(gameGraph: GameGraph) {
 		const playerIds = await gameGraph.requestPlayers(this.players, {
 			default: () => [gameGraph.current.state.requireActivePlayer().id]
 		});
-		gameGraph.effectTriggered<DrawFocusEffect>(this, (state) => {
+		gameGraph.mutate((state) => {
 			const playerDrawnTokens = new Map<PlayerId, Counter<FocusToken>>();
 			for (const playerId of playerIds) {
 				const playerState = state.requirePlayer(playerId);

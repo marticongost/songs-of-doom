@@ -38,16 +38,11 @@ export class AttackEffect extends Effect {
 		this.properties = properties ?? [];
 	}
 
-	override async trigger(
-		gameGraph: GameGraph,
-		additionalEffects: Array<Effect> = []
-	): Promise<void> {
+	override async apply(gameGraph: GameGraph, additionalEffects: Array<Effect> = []): Promise<void> {
 		const attackerId = gameGraph.requireSubject().id;
 		const defenderIds = await gameGraph.requestTargets(this.target, {
 			default: () => [gameGraph.current.state.requireTarget().id]
 		});
-
-		gameGraph.effectTriggered<AttackEffect>(this, (_state) => {});
 
 		for (const defenderId of defenderIds) {
 			await gameGraph.test({

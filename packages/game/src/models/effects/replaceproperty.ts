@@ -1,5 +1,4 @@
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import type { Property } from '../properties';
 import { Effect } from './effect';
 
@@ -39,10 +38,8 @@ export class ReplacePropertyEffect extends Effect {
 		this.replacement = replacement;
 	}
 
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<ReplacePropertyEffect>(this, (_state: MutableGameState) => {
-			// TODO
-		});
+	override async apply(_gameGraph: GameGraph) {
+		// TODO
 	}
 }
 

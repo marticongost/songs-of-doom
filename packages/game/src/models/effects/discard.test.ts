@@ -13,20 +13,18 @@ describe('DiscardEffect construction', () => {
 	});
 });
 
-// ─── DiscardEffect.trigger ────────────────────────────────────────────────────
+// ─── DiscardEffect.apply ────────────────────────────────────────────────────
 
-describe('DiscardEffect.trigger', () => {
+describe('DiscardEffect.apply', () => {
 	it('moves the active card to the top of the discard pile', async () => {
 		const activeCard = mock<MutableCardState>();
 		const mutableState = mock<MutableGameState>({
 			requireActiveCard: () => activeCard
 		});
 		const graph = mock<GameGraph>();
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callback(mutableState);
-		});
+		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
-		await discard().trigger(graph);
+		await discard().apply(graph);
 
 		expect(activeCard.moveToTopOfDiscardPile).toHaveBeenCalledWith(mutableState);
 	});

@@ -1,15 +1,12 @@
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import { Effect } from './effect';
 
 /**
  * An effect that allows repeating a capability.
  */
 export class RepeatCapabilityEffect extends Effect {
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<RepeatCapabilityEffect>(this, (_state: MutableGameState) => {
-			// TODO
-		});
+	override async apply(_gameGraph: GameGraph) {
+		// TODO
 	}
 }
 

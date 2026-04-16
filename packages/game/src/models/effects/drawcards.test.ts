@@ -22,9 +22,9 @@ describe('DrawCardsEffect construction', () => {
 	});
 });
 
-// ─── DrawCardsEffect.trigger ──────────────────────────────────────────────────
+// ─── DrawCardsEffect.apply ──────────────────────────────────────────────────
 
-describe('DrawCardsEffect.trigger', () => {
+describe('DrawCardsEffect.apply', () => {
 	it('draws the given number of cards from the active player and returns their ids', async () => {
 		const c1 = mock<MutableCardState>({ id: 'trt1' });
 		const c2 = mock<MutableCardState>({ id: 'trt2' });
@@ -34,11 +34,12 @@ describe('DrawCardsEffect.trigger', () => {
 		mutableState.requireActivePlayer.mockReturnValue(player);
 		const graph = mock<GameGraph>();
 		let callbackReturn: unknown;
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callbackReturn = callback(mutableState);
+		graph.mutate.mockImplementation((fn) => {
+			callbackReturn = fn(mutableState);
+			return callbackReturn;
 		});
 
-		await drawCards(2).trigger(graph);
+		await drawCards(2).apply(graph);
 
 		expect(callbackReturn).toEqual({ cards: ['trt1', 'trt2'] });
 	});

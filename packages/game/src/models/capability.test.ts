@@ -38,7 +38,7 @@ describe('Capability.trigger', () => {
 
 		await new Action({ effects: [effect] }).trigger({ gameGraph: graph, cardId: 'trt1' });
 
-		expect(effect.trigger).toHaveBeenCalledWith(graph);
+		expect(graph.triggerEffect).toHaveBeenCalledWith(effect);
 	});
 
 	it('passes an opening that moves the active card from hand to stage', async () => {

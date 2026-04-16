@@ -1,6 +1,5 @@
 import { finalise } from '@songsofdoom/common';
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -25,10 +24,8 @@ export class GoTowardsEffect extends Effect {
 		this.destination = finalise(Target, destination)!;
 	}
 
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<GoTowardsEffect>(this, (_state: MutableGameState) => {
-			// TODO
-		});
+	override async apply(_gameGraph: GameGraph) {
+		// TODO
 	}
 }
 

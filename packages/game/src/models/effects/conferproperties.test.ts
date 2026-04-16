@@ -28,9 +28,9 @@ describe('ConferPropertiesEffect construction', () => {
 	});
 });
 
-// ─── ConferPropertiesEffect.trigger ──────────────────────────────────────────
+// ─── ConferPropertiesEffect.apply ─────────────────────────────────────────────────
 
-describe('ConferPropertiesEffect.trigger', () => {
+describe('ConferPropertiesEffect.apply', () => {
 	it('adds a property that the implicit target does not already have', async () => {
 		const grantedProperty = mock<Property>();
 		const target = mock<MutableCardState>({ properties: [] });
@@ -38,11 +38,9 @@ describe('ConferPropertiesEffect.trigger', () => {
 		const mutableState = mock<MutableGameState>();
 		mutableState.requireTarget.mockReturnValue(target);
 		const graph = mock<GameGraph>();
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callback(mutableState);
-		});
+		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
-		await conferProperties([grantedProperty]).trigger(graph);
+		await conferProperties([grantedProperty]).apply(graph);
 
 		expect(target.properties).toEqual([grantedProperty]);
 	});
@@ -57,11 +55,9 @@ describe('ConferPropertiesEffect.trigger', () => {
 		const mutableState = mock<MutableGameState>();
 		mutableState.requireTarget.mockReturnValue(target);
 		const graph = mock<GameGraph>();
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callback(mutableState);
-		});
+		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
-		await conferProperties([grantedProperty]).trigger(graph);
+		await conferProperties([grantedProperty]).apply(graph);
 
 		expect(target.properties).toEqual([mergedProperty]);
 	});

@@ -1,5 +1,4 @@
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import { Effect } from './effect';
 
 /**
@@ -7,10 +6,8 @@ import { Effect } from './effect';
  * location to an adjacent, accessible location.
  */
 export class MoveEffect extends Effect {
-	override async trigger(gameGraph: GameGraph) {
-		gameGraph.effectTriggered<MoveEffect>(this, (_state: MutableGameState) => {
-			// TODO
-		});
+	override async apply(_gameGraph: GameGraph) {
+		// TODO
 	}
 }
 

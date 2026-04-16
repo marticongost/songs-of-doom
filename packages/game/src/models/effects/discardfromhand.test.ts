@@ -20,9 +20,9 @@ describe('DiscardFromHandEffect construction', () => {
 	});
 });
 
-// ─── DiscardFromHandEffect.trigger ───────────────────────────────────────────
+// ─── DiscardFromHandEffect.apply ───────────────────────────────────────────
 
-describe('DiscardFromHandEffect.trigger', () => {
+describe('DiscardFromHandEffect.apply', () => {
 	it.each([
 		{ label: 'without players target', players: undefined },
 		{ label: 'with players target', players: new Target({ type: 'player' }) }
@@ -41,11 +41,12 @@ describe('DiscardFromHandEffect.trigger', () => {
 		const cardsRequestArg = effect.cards as unknown as ReadonlyArray<never>;
 		graph.requestInput.calledWith(cardsRequestArg).mockResolvedValue({ target: ['trt1'] });
 		let callbackReturn: unknown;
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callbackReturn = callback(mutableState);
+		graph.mutate.mockImplementation((fn) => {
+			callbackReturn = fn(mutableState);
+			return callbackReturn;
 		});
 
-		await effect.trigger(graph);
+		await effect.apply(graph);
 
 		expect(card.moveToTopOfDiscardPile).toHaveBeenCalledWith(mutableState);
 		expect(callbackReturn).toEqual({ playerDiscards: new Map([['plr1', ['trt1']]]) });
@@ -73,11 +74,12 @@ describe('DiscardFromHandEffect.trigger', () => {
 		requestInput.mockResolvedValueOnce({ target: ['trt1', 'trt2'] });
 		requestInput.mockResolvedValueOnce({ target: ['trt3'] });
 		let callbackReturn: unknown;
-		graph.effectTriggered.mockImplementation((_effect, callback) => {
-			callbackReturn = callback(mutableState);
+		graph.mutate.mockImplementation((fn) => {
+			callbackReturn = fn(mutableState);
+			return callbackReturn;
 		});
 
-		await effect.trigger(graph);
+		await effect.apply(graph);
 
 		expect(p1c1.moveToTopOfDiscardPile).toHaveBeenCalledWith(mutableState);
 		expect(p1c2.moveToTopOfDiscardPile).toHaveBeenCalledWith(mutableState);

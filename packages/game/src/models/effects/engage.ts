@@ -2,7 +2,6 @@ import { finalise } from '@songsofdoom/common';
 import type { MutableCardState } from '../game/cardstate';
 import type { EntityState, MutableEntityState } from '../game/entitystate';
 import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
 import { isCardId, type EntityId } from '../game/identifiers';
 import { Target, type ActorTargetType, type TargetSpec } from '../target';
 import { Effect } from './effect';
@@ -25,7 +24,7 @@ export class EngageEffect extends Effect {
 		this.target = finalise(Target, target);
 	}
 
-	override async trigger(gameGraph: GameGraph) {
+	override async apply(gameGraph: GameGraph) {
 		const subjectId = gameGraph.requireSubject().id;
 		const targetIds = (await gameGraph.requestInput(this.target)).target;
 
@@ -33,7 +32,7 @@ export class EngageEffect extends Effect {
 			throw new Error('At least one target must be chosen to engage');
 		}
 
-		gameGraph.effectTriggered<EngageEffect>(this, (state: MutableGameState) => {
+		gameGraph.mutate((state) => {
 			const subject = state.requireEntityState(subjectId);
 			const targets = targetIds.map((id) => state.requireEntityState(id));
 
