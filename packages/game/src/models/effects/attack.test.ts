@@ -20,7 +20,7 @@ describe('AttackEffect.apply', () => {
 		graph.requestTargets
 			.calledWith(undefined, expect.objectContaining({ default: expect.any(Function) }))
 			.mockResolvedValue(['plr2']);
-		graph.eventTriggered.mockImplementation(async (eventType) => {
+		graph.triggerEvent.mockImplementation(async (eventType) => {
 			events.push(eventType);
 		});
 		graph.test.mockImplementation(async (props) => {
@@ -49,7 +49,7 @@ describe('AttackEffect.apply', () => {
 		graph.requestTargets
 			.calledWith(undefined, expect.objectContaining({ default: expect.any(Function) }))
 			.mockResolvedValue(['plr2']);
-		graph.eventTriggered.mockImplementation(async (eventType) => {
+		graph.triggerEvent.mockImplementation(async (eventType) => {
 			events.push(eventType);
 		});
 		graph.test.mockImplementation(async (props) => {

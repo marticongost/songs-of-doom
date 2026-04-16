@@ -424,19 +424,19 @@ export class GameGraph {
 				const effectsByTiming = groupBy(effects, (effect) => effect.testTiming);
 
 				await beforeTest?.(this);
-				this.eventTriggered('beforeDrawingFate');
+				this.triggerEvent('beforeDrawingFate');
 				for (const effect of effectsByTiming.get(BeforeTest) ?? []) {
 					await this.triggerEffect(effect);
 				}
 
 				const { result } = await this.requestInput([new ResultField({ name: 'result' })]);
-				this.eventTriggered('fateTokenRevealed');
+				this.triggerEvent('fateTokenRevealed');
 				for (const effect of effectsByTiming.get(DuringTest) ?? []) {
 					await this.triggerEffect(effect);
 				}
 
 				await afterTest?.(this);
-				this.eventTriggered('afterDrawingFate');
+				this.triggerEvent('afterDrawingFate');
 				for (const effect of effectsByTiming.get(AfterTest) ?? []) {
 					await this.triggerEffect(effect);
 				}
@@ -582,7 +582,7 @@ export class GameGraph {
 		return result;
 	}
 
-	async eventTriggered(eventType: EventType) {
+	async triggerEvent(eventType: EventType) {
 		const activePlayerId =
 			this._current.state.getActivePlayer()?.id ?? this._current.state.players[0]?.id;
 		if (activePlayerId === undefined) {
