@@ -155,6 +155,11 @@ export class GameState<
 		return player;
 	}
 
+	getPlayerLocation(player: PlayerId | TPlayer): TLocation | undefined {
+		const playerId = typeof player === 'string' ? player : player.id;
+		return this.locations.find((loc) => loc.players.includes(playerId));
+	}
+
 	clockwise(startingPlayer: PlayerId): Array<PlayerId> {
 		const startIndex = this.players.findIndex((player) => player.id === startingPlayer);
 		if (startIndex === -1) {
@@ -377,6 +382,23 @@ export class MutableGameState extends GameState<
 		if (ctx.reactiveCardId !== undefined) this.reactiveCardStack.pop();
 		if (ctx.activePlayerId !== undefined) this.activePlayerStack.pop();
 		if (ctx.activeCardId !== undefined) this.activeCardStack.pop();
+	}
+
+	setPlayerLocation(
+		player: PlayerId | MutablePlayerState,
+		location: LocationId | MutableLocationState
+	): void {
+		const playerId = typeof player === 'string' ? player : player.id;
+		const locationId = typeof location === 'string' ? location : location.id;
+		const origin = this.getPlayerLocation(playerId);
+		if (origin) {
+			const idx = origin.players.indexOf(playerId);
+			if (idx !== -1) origin.players.splice(idx, 1);
+		}
+		const destination = this.locations.find((loc) => loc.id === locationId);
+		if (destination) {
+			destination.players.push(playerId);
+		}
 	}
 
 	readonly(): ReadonlyGameState {

@@ -6,7 +6,7 @@ import type { ScalarExpression } from '../expressions/scalar';
 import { strength } from '../stats';
 import type { ReadonlyCardState } from './cardstate';
 import { ReadonlyGameState, type GameContext } from './gamestate';
-import type { CardId, EntityId, PlayerId } from './identifiers';
+import type { CardId, EntityId, LocationId, PlayerId } from './identifiers';
 import {
 	ReadonlyLocationState,
 	type MutableLocationState,
@@ -20,6 +20,17 @@ function makeGameState(
 	locations: ReadonlyLocationStateType[] = []
 ): ReadonlyGameState {
 	return new ReadonlyGameState({ players, locations });
+}
+
+function makeLocation(id: LocationId, players: PlayerId[] = []): ReadonlyLocationStateType {
+	return new ReadonlyLocationState({
+		id,
+		card: mock<Entity>(),
+		ownerId: 'plr1',
+		container: { type: 'location', locationId: id },
+		players,
+		properties: []
+	});
 }
 
 function makeTestResolution(proficiency = 0): ReadonlyTestResolution {
@@ -895,5 +906,73 @@ describe('MutableGameState pushContext / popContext round-trip', () => {
 		state.popContext(ctx);
 		expect(state.reactiveCardStack).toEqual(['trt9']);
 		expect(state.reactivePlayerStack).toEqual(['plr9']);
+	});
+});
+
+// ─── GameState.getPlayerLocation ─────────────────────────────────────────────
+
+describe('GameState.getPlayerLocation', () => {
+	it('returns the location containing the player when given a PlayerId', () => {
+		const loc1 = makeLocation('loc1', ['plr1']);
+		const loc2 = makeLocation('loc2');
+		const state = makeGameState([mock<ReadonlyPlayerState>({ id: 'plr1' })], [loc1, loc2]);
+
+		expect(state.getPlayerLocation('plr1')).toBe(loc1);
+	});
+
+	it('returns the location containing the player when given a player object', () => {
+		const loc1 = makeLocation('loc1', ['plr1']);
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
+		const state = makeGameState([p1], [loc1]);
+
+		expect(state.getPlayerLocation(p1)).toBe(loc1);
+	});
+
+	it('returns undefined when the player is not in any location', () => {
+		const loc1 = makeLocation('loc1');
+		const state = makeGameState([mock<ReadonlyPlayerState>({ id: 'plr1' })], [loc1]);
+
+		expect(state.getPlayerLocation('plr1')).toBeUndefined();
+	});
+});
+
+// ─── MutableGameState.setPlayerLocation ──────────────────────────────────────
+
+describe('MutableGameState.setPlayerLocation', () => {
+	it('adds the player to the destination when not in any location', () => {
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer('plr1')],
+			locations: [makeLocation('loc1')]
+		}).mutable();
+
+		state.setPlayerLocation('plr1', 'loc1');
+
+		expect(state.locations[0].players).toContain('plr1');
+	});
+
+	it('removes the player from the origin and adds them to the destination', () => {
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer('plr1')],
+			locations: [makeLocation('loc1', ['plr1']), makeLocation('loc2')]
+		}).mutable();
+
+		state.setPlayerLocation('plr1', 'loc2');
+
+		expect(state.locations[0].players).not.toContain('plr1');
+		expect(state.locations[1].players).toContain('plr1');
+	});
+
+	it('accepts player and location objects in place of ids', () => {
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer('plr1')],
+			locations: [makeLocation('loc1', ['plr1']), makeLocation('loc2')]
+		}).mutable();
+		const player = state.players[0];
+		const destination = state.locations[1];
+
+		state.setPlayerLocation(player, destination);
+
+		expect(state.locations[0].players).not.toContain('plr1');
+		expect(state.locations[1].players).toContain('plr1');
 	});
 });
