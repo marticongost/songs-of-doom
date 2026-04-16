@@ -2,6 +2,7 @@ import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
 import { ScalarExpression } from '../expressions';
 import type { GameGraph } from '../game/gamegraph';
+import type { EntityId } from '../game/identifiers';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -20,8 +21,8 @@ export interface HealOutcome {
 	/** The amount of damage that was healed. */
 	readonly amount: number;
 
-	/** The card that received the healing. */
-	readonly targetId?: number;
+	/** The entity that received the healing. */
+	readonly targetId: EntityId;
 }
 
 /**
@@ -39,11 +40,17 @@ export class HealEffect extends Effect {
 		this.target = finalise(Target, target);
 	}
 
-	override async apply(gameGraph: GameGraph) {
-		await gameGraph.mutate((state) => {
-			// TODO: Add helper to gameState to request a target or default to the current subject
+	override async apply(gameGraph: GameGraph): Promise<void> {
+		const targetId = this.target
+			? await gameGraph.requestSingleTarget(this.target)
+			: gameGraph.requireSubject().id;
+
+		gameGraph.mutate((state) => {
 			const amount = state.evaluate(this.amount);
-			return { amount, targetId: undefined };
+			const target = state.requireEntityState(targetId) as { physicalTrauma: number };
+			const actualAmount = Math.min(amount, target.physicalTrauma);
+			target.physicalTrauma -= actualAmount;
+			return { amount: actualAmount, targetId } satisfies HealOutcome;
 		});
 	}
 }
