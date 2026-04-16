@@ -74,8 +74,6 @@ export interface RequestInputOptions {
 	playerId?: PlayerId;
 }
 
-type EventContextWithActivePlayer = EventContext & { activePlayerId: PlayerId };
-
 export interface RequestSingleTargetOptions {
 	playerId?: PlayerId;
 	default?: () => EntityId | undefined;
@@ -585,30 +583,24 @@ export class GameGraph {
 	}
 
 	async eventTriggered(eventType: EventType) {
-		const inferredActivePlayerId =
+		const activePlayerId =
 			this._current.state.getActivePlayer()?.id ?? this._current.state.players[0]?.id;
-		if (inferredActivePlayerId === undefined) {
+		if (activePlayerId === undefined) {
 			throw new Error('Cannot resolve active player when triggering an event');
 		}
 
-		const inferredContext: EventContextWithActivePlayer = {
+		const eventContext: EventContext = {
 			actorId: this._current.state.getSubject()?.id,
 			subjectId: this._current.state.getSubject()?.id,
 			targetId: this._current.state.getTarget()?.id,
-			activePlayerId: inferredActivePlayerId,
+			activePlayerId,
 			reactiveCardId: this._current.state.getReactiveCard()?.id,
 			reactivePlayerId: this._current.state.getReactivePlayer()?.id
-		};
-		const eventContext: EventContextWithActivePlayer = {
-			...inferredContext,
-			activePlayerId: inferredActivePlayerId
 		};
 		const eventEnvelope: EventEnvelope = {
 			event: events[eventType],
 			context: eventContext
 		};
-
-		const currentPlayerId = eventContext.activePlayerId;
 
 		const reactiveCapabilities: Array<OrderedReactionRef> = this._current.state
 			.cards({ ready: true })
@@ -623,7 +615,7 @@ export class GameGraph {
 			});
 
 		if (reactiveCapabilities.length > 0) {
-			const clockwisePlayerOrder = this._current.state.clockwise(currentPlayerId);
+			const clockwisePlayerOrder = this._current.state.clockwise(activePlayerId);
 
 			const consumeReactions = async (
 				reactions: Array<OrderedReactionRef>,
@@ -669,7 +661,7 @@ export class GameGraph {
 			await this.group(EventTriggered, { event: events[eventType] }, {}, async () => {
 				for (const reactionGroup of orderReactiveCapabilities(
 					reactiveCapabilities,
-					currentPlayerId,
+					activePlayerId,
 					clockwisePlayerOrder
 				)) {
 					await consumeReactions(reactionGroup.reactions, reactionGroup.decidingPlayerId);
