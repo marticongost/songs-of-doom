@@ -378,6 +378,56 @@ const eventData: Record<string, Omit<EventProps, 'type'>> = {
 			}
 		]
 	},
+	leavingLocation: {
+		name: {
+			ca: "Quan s'abandoni una localització",
+			es: 'Cuando se abandone una localización',
+			en: 'When a location is abandoned'
+		},
+		shortForms: [
+			{
+				match: conditionIsExactly(reactivePlayerIsSubject),
+				description: {
+					ca: "Quan surtis d'una localització",
+					es: 'Cuando salgas de una localización',
+					en: 'When you leave a location'
+				}
+			},
+			{
+				match: conditionIsExactly(reactiveCardIsTarget),
+				description: {
+					ca: "Quan s'abandoni aquesta localització",
+					es: 'Cuando se abandone esta localización',
+					en: 'When leaving this location'
+				}
+			}
+		]
+	},
+	locationEntered: {
+		name: {
+			ca: "Quan s'entri a una localització",
+			es: 'Cuando se entre en una localización',
+			en: 'When a location is entered'
+		},
+		shortForms: [
+			{
+				match: conditionIsExactly(reactivePlayerIsSubject),
+				description: {
+					ca: 'Quan entris a una localització',
+					es: 'Cuando entres en una localización',
+					en: 'When you enter a location'
+				}
+			},
+			{
+				match: conditionIsExactly(reactiveCardIsTarget),
+				description: {
+					ca: "Quan s'entri a aquesta localització",
+					es: 'Cuando se entre en esta localización',
+					en: 'When entering this location'
+				}
+			}
+		]
+	},
 	fullyDischarged: {
 		name: {
 			ca: 'Quan una carta perdi totes les càrregues',
