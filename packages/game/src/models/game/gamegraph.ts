@@ -2,7 +2,7 @@ import { groupBy } from '@songsofdoom/common';
 import { Obligation } from '../capabilities';
 import type { Effect } from '../effects';
 import { AfterTest, BeforeTest, DuringTest } from '../effects/effect';
-import { events, type EventContext, type EventEnvelope, type EventType } from '../event';
+import { events, type EventContext, type EventType } from '../event';
 import type { ScalarExpressionType } from '../expressions';
 import type { Property } from '../properties';
 import type { Result } from '../results';
@@ -27,19 +27,18 @@ import {
 	type GameNodeProps,
 	type MutationProps
 } from './gamenodes';
-import { ReadonlyGameState, type GameStateProps, type MutableGameState } from './gamestate';
-import { type CardId, type EntityId, type PlayerId } from './identifiers';
+import {
+	ReadonlyGameState,
+	type GameContext,
+	type GameStateProps,
+	type MutableGameState
+} from './gamestate';
+import { type EntityId, type PlayerId } from './identifiers';
 import type { Field } from './playerinput';
 import { CapabilityChoiceField, ResultField, TargetField } from './playerinput';
 import { MutableTestResolution, type TestResolutionProps } from './testresolution';
 
-export type GroupContext<ClosingNodeProps extends EndGroupProps = EndGroupProps> = {
-	subjectId?: EntityId;
-	targetId?: EntityId;
-	activeCardId?: CardId;
-	activePlayerId?: PlayerId;
-	reactiveCardId?: CardId;
-	reactivePlayerId?: PlayerId;
+export type GroupContext<ClosingNodeProps extends EndGroupProps = EndGroupProps> = GameContext & {
 	resolution?: MutableTestResolution;
 	opening?: (state: MutableGameState) => void;
 	closure?: (state: MutableGameState) => ClosingNodeExtraProps<ClosingNodeProps> | void;
@@ -485,25 +484,14 @@ export class GameGraph {
 		context: GroupContext<ClosingNodeProps>,
 		callback: () => Promise<T>
 	): Promise<T> {
-		const {
-			subjectId,
-			targetId,
-			activeCardId,
-			activePlayerId,
-			reactiveCardId,
-			reactivePlayerId,
-			resolution,
-			opening,
-			closure,
-			closingNodeType
-		} = context;
+		const { resolution, opening, closure, closingNodeType } = context;
 		const hasContext =
-			subjectId !== undefined ||
-			targetId !== undefined ||
-			activeCardId !== undefined ||
-			activePlayerId !== undefined ||
-			reactiveCardId !== undefined ||
-			reactivePlayerId !== undefined ||
+			context.activeCardId !== undefined ||
+			context.activePlayerId !== undefined ||
+			context.reactiveCardId !== undefined ||
+			context.reactivePlayerId !== undefined ||
+			context.subjectId !== undefined ||
+			context.targetId !== undefined ||
 			resolution !== undefined;
 
 		// Merge context stack-pushes (and optional opening) into the initial node's state mutation.
@@ -513,12 +501,7 @@ export class GameGraph {
 			needsOpenState
 				? (state: MutableGameState) => {
 						if (typeof originalState === 'function') originalState(state);
-						if (activeCardId !== undefined) state.activeCardStack.push(activeCardId);
-						if (activePlayerId !== undefined) state.activePlayerStack.push(activePlayerId);
-						if (reactiveCardId !== undefined) state.reactiveCardStack.push(reactiveCardId);
-						if (reactivePlayerId !== undefined) state.reactivePlayerStack.push(reactivePlayerId);
-						if (targetId !== undefined) state.targetStack.push(targetId);
-						if (subjectId !== undefined) state.subjectStack.push(subjectId);
+						state.pushContext(context);
 						if (resolution !== undefined) state.testResolutionStack.push(resolution);
 						if (opening) opening(state);
 					}
@@ -556,12 +539,7 @@ export class GameGraph {
 							resolution: resolvedTestResolution
 						} as unknown as ClosingNodeExtraProps<ClosingNodeProps>;
 					}
-					if (subjectId !== undefined) state.subjectStack.pop();
-					if (targetId !== undefined) state.targetStack.pop();
-					if (reactivePlayerId !== undefined) state.reactivePlayerStack.pop();
-					if (reactiveCardId !== undefined) state.reactiveCardStack.pop();
-					if (activePlayerId !== undefined) state.activePlayerStack.pop();
-					if (activeCardId !== undefined) state.activeCardStack.pop();
+					state.popContext(context);
 				});
 			} catch (e) {
 				if (!(e instanceof GameStateMutationCancelled)) {
@@ -582,91 +560,89 @@ export class GameGraph {
 		return result;
 	}
 
-	async triggerEvent(eventType: EventType) {
+	async triggerEvent(eventType: EventType, eventContext: Partial<EventContext> = {}) {
 		const activePlayerId =
-			this._current.state.getActivePlayer()?.id ?? this._current.state.players[0]?.id;
+			eventContext.activePlayerId ??
+			this._current.state.getActivePlayer()?.id ??
+			this._current.state.players[0]?.id;
 		if (activePlayerId === undefined) {
 			throw new Error('Cannot resolve active player when triggering an event');
 		}
 
-		const eventContext: EventContext = {
-			actorId: this._current.state.getSubject()?.id,
-			subjectId: this._current.state.getSubject()?.id,
-			targetId: this._current.state.getTarget()?.id,
-			activePlayerId,
-			reactiveCardId: this._current.state.getReactiveCard()?.id,
-			reactivePlayerId: this._current.state.getReactivePlayer()?.id
-		};
-		const eventEnvelope: EventEnvelope = {
-			event: events[eventType],
-			context: eventContext
-		};
-
-		const reactiveCapabilities: Array<OrderedReactionRef> = this._current.state
-			.cards({ ready: true })
-			.flatMap((card) => {
-				const reactionOrder = card.card.reactionOrder;
-				return card.getReactionsToEvent(eventEnvelope, this._current.state).map((reaction) => ({
-					cardId: card.id,
-					ownerId: card.ownerId,
-					reactionOrder,
-					capability: reaction
-				}));
-			});
-
-		if (reactiveCapabilities.length > 0) {
-			const clockwisePlayerOrder = this._current.state.clockwise(activePlayerId);
-
-			const consumeReactions = async (
-				reactions: Array<OrderedReactionRef>,
-				decidingPlayerId: PlayerId
-			) => {
-				while (reactions.length > 0) {
-					if (reactions.length === 1 && reactions[0].capability instanceof Obligation) {
-						const [onlyReaction] = reactions;
-						await onlyReaction.capability.trigger({
-							gameGraph: this,
-							cardId: onlyReaction.cardId
-						});
-						reactions.splice(0, 1);
-						continue;
-					}
-
-					const { selection } = await this.requestInput(
-						[
-							new CapabilityChoiceField({
-								name: 'selection',
-								choices: new Set(reactions),
-								required: true
-							})
-						],
-						{ playerId: decidingPlayerId }
-					);
-					if (selection === undefined) {
-						throw new Error('Reaction selection is required when multiple reactions are available');
-					}
-
-					await selection.capability.trigger({
-						gameGraph: this,
-						cardId: selection.cardId
-					});
-
-					const selectedIndex = reactions.indexOf(selection as OrderedReactionRef);
-					if (selectedIndex !== -1) {
-						reactions.splice(selectedIndex, 1);
-					}
-				}
-			};
-
-			await this.group(EventTriggered, { event: events[eventType] }, {}, async () => {
+		await this.group(
+			EventTriggered,
+			{ event: events[eventType] },
+			{
+				subjectId: eventContext.subjectId,
+				targetId: eventContext.targetId,
+				activePlayerId: eventContext.activePlayerId,
+				reactiveCardId: eventContext.reactiveCardId,
+				reactivePlayerId: eventContext.reactivePlayerId
+			},
+			async () => {
+				const reactiveCapabilities = this.collectReactiveCapabilities(eventType);
+				const clockwisePlayerOrder = this._current.state.clockwise(activePlayerId);
 				for (const reactionGroup of orderReactiveCapabilities(
 					reactiveCapabilities,
 					activePlayerId,
 					clockwisePlayerOrder
 				)) {
-					await consumeReactions(reactionGroup.reactions, reactionGroup.decidingPlayerId);
+					await this.consumeReactions(reactionGroup.reactions, reactionGroup.decidingPlayerId);
 				}
+			}
+		);
+	}
+
+	private collectReactiveCapabilities(eventType: EventType): Array<OrderedReactionRef> {
+		return this._current.state.cards({ ready: true }).flatMap((card) => {
+			const reactionOrder = card.card.reactionOrder;
+			return card.getReactionsToEvent(events[eventType], this._current.state).map((reaction) => ({
+				cardId: card.id,
+				ownerId: card.ownerId,
+				reactionOrder,
+				capability: reaction
+			}));
+		});
+	}
+
+	private async consumeReactions(
+		reactions: Array<OrderedReactionRef>,
+		decidingPlayerId: PlayerId
+	): Promise<void> {
+		while (reactions.length > 0) {
+			if (reactions.length === 1 && reactions[0].capability instanceof Obligation) {
+				const [onlyReaction] = reactions;
+				await onlyReaction.capability.trigger({
+					gameGraph: this,
+					cardId: onlyReaction.cardId
+				});
+				reactions.splice(0, 1);
+				continue;
+			}
+
+			const { selection } = await this.requestInput(
+				[
+					new CapabilityChoiceField({
+						name: 'selection',
+						choices: new Set(reactions),
+						required: true
+					})
+				],
+				{ playerId: decidingPlayerId }
+			);
+			if (selection === undefined) {
+				throw new Error('Reaction selection is required when multiple reactions are available');
+			}
+
+			await selection.capability.trigger({
+				gameGraph: this,
+				cardId: selection.cardId
 			});
+
+			const selectedIndex = reactions.indexOf(selection as OrderedReactionRef);
+			if (selectedIndex !== -1) {
+				reactions.splice(selectedIndex, 1);
+			}
 		}
 	}
 }

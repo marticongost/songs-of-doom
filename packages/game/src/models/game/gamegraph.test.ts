@@ -536,21 +536,19 @@ describe('GameGraph.requestPlayers', () => {
 // ─── GameGraph.triggerEvent ─────────────────────────────────────────────────
 
 describe('GameGraph.triggerEvent', () => {
-	it('does not add any node when no ready card has reactions', async () => {
+	it('adds an EventTriggered node even when no ready card has reactions', async () => {
 		const card = mock<ReadonlyCardState>({ getReactionsToEvent: () => [] });
 		const p1 = mock<ReadonlyPlayerState>({ cards: () => [card] });
 		const graph = new GameGraph({ initialState: { players: [p1] } });
-		const before = graph.current;
 		await graph.triggerEvent('attack');
-		expect(graph.current).toBe(before);
+		expect(graph.start.next).toBeInstanceOf(EventTriggered);
 	});
 
-	it('does not react for exhausted cards', async () => {
+	it('adds an EventTriggered node when there are no ready cards', async () => {
 		const p1 = mock<ReadonlyPlayerState>({ cards: () => [] });
 		const graph = new GameGraph({ initialState: { players: [p1] } });
-		const before = graph.current;
 		await graph.triggerEvent('attack');
-		expect(graph.current).toBe(before);
+		expect(graph.start.next).toBeInstanceOf(EventTriggered);
 	});
 
 	it('adds an EventTriggered node when a ready card has matching reactions', async () => {

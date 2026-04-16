@@ -24,6 +24,15 @@ import { mutate } from './mutate';
 import { PlayerState, type MutablePlayerState, type ReadonlyPlayerState } from './playerstate';
 import { MutableTestResolution, ReadonlyTestResolution, TestResolution } from './testresolution';
 
+export interface GameContext {
+	activeCardId?: CardId;
+	activePlayerId?: PlayerId;
+	reactiveCardId?: CardId;
+	reactivePlayerId?: PlayerId;
+	subjectId?: EntityId;
+	targetId?: EntityId;
+}
+
 export interface GameStateProps {
 	players: ReadonlyArray<PlayerState>;
 	locations?: ReadonlyArray<LocationState>;
@@ -350,6 +359,24 @@ export class MutableGameState extends GameState<
 			throw new Error('No active attack resolution');
 		}
 		return resolution;
+	}
+
+	pushContext(ctx: GameContext): void {
+		if (ctx.activeCardId !== undefined) this.activeCardStack.push(ctx.activeCardId);
+		if (ctx.activePlayerId !== undefined) this.activePlayerStack.push(ctx.activePlayerId);
+		if (ctx.reactiveCardId !== undefined) this.reactiveCardStack.push(ctx.reactiveCardId);
+		if (ctx.reactivePlayerId !== undefined) this.reactivePlayerStack.push(ctx.reactivePlayerId);
+		if (ctx.subjectId !== undefined) this.subjectStack.push(ctx.subjectId);
+		if (ctx.targetId !== undefined) this.targetStack.push(ctx.targetId);
+	}
+
+	popContext(ctx: GameContext): void {
+		if (ctx.targetId !== undefined) this.targetStack.pop();
+		if (ctx.subjectId !== undefined) this.subjectStack.pop();
+		if (ctx.reactivePlayerId !== undefined) this.reactivePlayerStack.pop();
+		if (ctx.reactiveCardId !== undefined) this.reactiveCardStack.pop();
+		if (ctx.activePlayerId !== undefined) this.activePlayerStack.pop();
+		if (ctx.activeCardId !== undefined) this.activeCardStack.pop();
 	}
 
 	readonly(): ReadonlyGameState {

@@ -419,11 +419,6 @@ export interface EventContext {
 	reactivePlayerId?: PlayerId;
 }
 
-export interface EventEnvelope {
-	event: Event;
-	context?: EventContext;
-}
-
 export const events: Record<EventType, Event> = mapToRecord(eventData, {
 	mapEntries: ([type, data]: [string, Omit<EventProps, 'type'>]) => [
 		type as EventType,

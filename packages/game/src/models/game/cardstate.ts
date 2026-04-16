@@ -1,7 +1,7 @@
 import { isSkill, type Capability, type Property } from '../..';
 import { Reaction } from '../capabilities/reaction';
 import type { Entity } from '../entities';
-import type { EventEnvelope } from '../event';
+import { type Event } from '../event';
 import { EntityState, type MutableEntityState } from './entitystate';
 import type { MutableGameState, ReadonlyGameState } from './gamestate';
 import type { CardId, LocationId, PlayerId } from './identifiers';
@@ -105,12 +105,7 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 		return this.container.type === 'card' || this.container.type === 'player';
 	}
 
-	getReactionsToEvent(
-		eventEnvelope: EventEnvelope,
-		gameState?: ReadonlyGameState
-	): Array<Reaction> {
-		const context = eventEnvelope.context ?? {};
-
+	getReactionsToEvent(event: Event, gameState: ReadonlyGameState): Array<Reaction> {
 		let capabilities: Array<Capability>;
 		if (isSkill(this.card)) {
 			capabilities = this.isAttached() ? this.card.attachmentCapabilities : this.card.capabilities;
@@ -121,37 +116,17 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 			];
 		}
 
-		const scopedGameState =
-			gameState === undefined
-				? undefined
-				: gameState.mutate((state) => {
-						state.activeCardStack.push(this.id);
-						state.reactiveCardStack.push(context.reactiveCardId ?? this.id);
-						state.reactivePlayerStack.push(context.reactivePlayerId ?? this.ownerId);
-						if (context.subjectId !== undefined) {
-							state.subjectStack.push(context.subjectId);
-						}
-						if (context.targetId !== undefined) {
-							state.targetStack.push(context.targetId);
-						}
-						if (context.activePlayerId !== undefined) {
-							state.activePlayerStack.push(context.activePlayerId);
-						}
-					});
-
 		const reactions: Reaction[] = capabilities.filter((capability) => {
 			if (!(capability instanceof Reaction)) {
 				return false;
 			}
+			const triggerContext = capability.getTriggerContext(gameState, this.id);
+			const scopedGameState = gameState.mutate((state) => state.pushContext(triggerContext));
 			return capability.triggers.some((spec) => {
-				if (spec.event !== eventEnvelope.event) {
+				if (spec.event !== event) {
 					return false;
 				}
-				if (
-					spec.condition !== undefined &&
-					scopedGameState !== undefined &&
-					!scopedGameState.evaluate(spec.condition)
-				) {
+				if (spec.condition !== undefined && !scopedGameState.evaluate(spec.condition)) {
 					return false;
 				}
 				return true;

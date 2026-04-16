@@ -3,9 +3,8 @@ import { describe, expect, it } from 'vitest';
 import type { Capability, Entity, Property } from '../..';
 import { Obligation } from '../capabilities/reaction';
 import { CharacterState } from '../characters';
-import { events, type EventEnvelope } from '../event';
+import { events } from '../event';
 import {
-	activeCardIsTarget,
 	reactiveCardIsTarget,
 	reactivePlayerIsNotActivePlayer,
 	reactivePlayerIsSubject,
@@ -353,7 +352,7 @@ describe('CardState', () => {
 		});
 		const attachmentReaction = new Obligation({
 			effects: [],
-			triggers: [{ event: 'attack', condition: activeCardIsTarget }]
+			triggers: [{ event: 'attack', condition: reactiveCardIsTarget }]
 		});
 
 		it('returns matching reactions for non-skill entities', () => {
@@ -362,16 +361,10 @@ describe('CardState', () => {
 				capabilities: [reaction]
 			});
 			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' }, { entity });
-			expect(card.getReactionsToEvent({ event: events['attack'] })).toContain(reaction);
-		});
-
-		it('accepts an Event object through EventEnvelope', () => {
-			const entity = makeEntity({
-				type: trait,
-				capabilities: [reaction]
-			});
-			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' }, { entity });
-			expect(card.getReactionsToEvent({ event: events['attack'] })).toContain(reaction);
+			const state = makeReadonlyGameState([makeReadonlyPlayer('plr1', { hand: [card] })]).mutate(
+				(s) => s.subjectStack.push('plr1')
+			);
+			expect(card.getReactionsToEvent(events['attack'], state)).toContain(reaction);
 		});
 
 		it('does not return reactions for non-matching events', () => {
@@ -380,7 +373,8 @@ describe('CardState', () => {
 				capabilities: [reaction]
 			});
 			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' }, { entity });
-			expect(card.getReactionsToEvent({ event: events['investigation'] })).toEqual([]);
+			const state = makeReadonlyGameState([makeReadonlyPlayer('plr1', { hand: [card] })]);
+			expect(card.getReactionsToEvent(events['investigation'], state)).toEqual([]);
 		});
 
 		it('includes attachment capabilities for non-skill entities when attached', () => {
@@ -390,7 +384,10 @@ describe('CardState', () => {
 				attachmentCapabilities: [attachmentReaction]
 			});
 			const card = makeReadonlyCard('trt2', 'plr1', { type: 'card', cardId: 'trt1' }, { entity });
-			const results = card.getReactionsToEvent({ event: events['attack'] });
+			const state = makeReadonlyGameState([makeReadonlyPlayer('plr1', { hand: [card] })]).mutate(
+				(s) => s.targetStack.push('trt2')
+			);
+			const results = card.getReactionsToEvent(events['attack'], state);
 			expect(results).toContain(attachmentReaction);
 		});
 
@@ -402,7 +399,10 @@ describe('CardState', () => {
 			});
 			const card = makeReadonlyCard('trt2', 'plr1', { type: 'card', cardId: 'trt1' }, { entity });
 			// skill entity when attached: only attachmentCapabilities are used
-			expect(card.getReactionsToEvent({ event: events['attack'] })).toEqual([attachmentReaction]);
+			const state = makeReadonlyGameState([makeReadonlyPlayer('plr1', { hand: [card] })]).mutate(
+				(s) => s.targetStack.push('trt2')
+			);
+			expect(card.getReactionsToEvent(events['attack'], state)).toEqual([attachmentReaction]);
 		});
 
 		it('uses only regular capabilities for skill entities when not attached', () => {
@@ -412,7 +412,10 @@ describe('CardState', () => {
 				attachmentCapabilities: [attachmentReaction]
 			});
 			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' }, { entity });
-			expect(card.getReactionsToEvent({ event: events['attack'] })).toEqual([reaction]);
+			const state = makeReadonlyGameState([makeReadonlyPlayer('plr1', { hand: [card] })]).mutate(
+				(s) => s.subjectStack.push('plr1')
+			);
+			expect(card.getReactionsToEvent(events['attack'], state)).toEqual([reaction]);
 		});
 
 		it('filters attack reactions by subject when context is provided', () => {
@@ -437,16 +440,18 @@ describe('CardState', () => {
 				makeReadonlyPlayer('plr2', { hand: [observer] })
 			]);
 
-			const event: EventEnvelope = { event: events['attack'], context: { subjectId: 'plr1' } };
+			const stateWithSubject = state.mutate((s) => {
+				s.subjectStack.push('plr1');
+			});
 
-			expect(attacker.getReactionsToEvent(event, state)).toContain(reaction);
-			expect(observer.getReactionsToEvent(event, state)).toEqual([]);
+			expect(attacker.getReactionsToEvent(events['attack'], stateWithSubject)).toContain(reaction);
+			expect(observer.getReactionsToEvent(events['attack'], stateWithSubject)).toEqual([]);
 		});
 
 		it('filters attack reactions by target when context is provided', () => {
 			const receivingAttackReaction = new Obligation({
 				effects: [],
-				triggers: [{ event: 'attack', condition: activeCardIsTarget }]
+				triggers: [{ event: 'attack', condition: reactiveCardIsTarget }]
 			});
 			const entity = makeEntity({
 				type: trait,
@@ -469,10 +474,14 @@ describe('CardState', () => {
 				makeReadonlyPlayer('plr2', { hand: [observer] })
 			]);
 
-			const event: EventEnvelope = { event: events['attack'], context: { targetId: 'trt1' } };
+			const stateWithTarget = state.mutate((s) => {
+				s.targetStack.push('trt1');
+			});
 
-			expect(defender.getReactionsToEvent(event, state)).toContain(receivingAttackReaction);
-			expect(observer.getReactionsToEvent(event, state)).toEqual([]);
+			expect(defender.getReactionsToEvent(events['attack'], stateWithTarget)).toContain(
+				receivingAttackReaction
+			);
+			expect(observer.getReactionsToEvent(events['attack'], stateWithTarget)).toEqual([]);
 		});
 
 		it('supports explicit trigger.when expressions without participation', () => {
@@ -482,7 +491,7 @@ describe('CardState', () => {
 			});
 			const receivingAttackReaction = new Obligation({
 				effects: [],
-				triggers: [{ event: 'attack', condition: activeCardIsTarget }]
+				triggers: [{ event: 'attack', condition: reactiveCardIsTarget }]
 			});
 			const otherPlayerReaction = new Obligation({
 				effects: [],
@@ -516,28 +525,25 @@ describe('CardState', () => {
 				mutableState.activePlayerStack.push('plr1');
 			});
 
-			expect(
-				card1.getReactionsToEvent(
-					{ event: events['attack'], context: { subjectId: 'plr1' } },
-					state
-				)
-			).toContain(attackingReaction);
-			expect(
-				card2.getReactionsToEvent(
-					{ event: events['attack'], context: { subjectId: 'plr1' } },
-					state
-				)
-			).toEqual([]);
+			const stateWithSubjectPlr1 = state.mutate((s) => {
+				s.subjectStack.push('plr1');
+			});
+			const stateWithTargetTrt1 = state.mutate((s) => {
+				s.targetStack.push('trt1');
+			});
 
-			expect(
-				card1.getReactionsToEvent({ event: events['attack'], context: { targetId: 'trt1' } }, state)
-			).toContain(receivingAttackReaction);
-			expect(
-				card2.getReactionsToEvent({ event: events['attack'], context: { targetId: 'trt1' } }, state)
-			).toEqual([]);
+			expect(card1.getReactionsToEvent(events['attack'], stateWithSubjectPlr1)).toContain(
+				attackingReaction
+			);
+			expect(card2.getReactionsToEvent(events['attack'], stateWithSubjectPlr1)).toEqual([]);
 
-			expect(card1.getReactionsToEvent({ event: events['beforeDrawingFate'] }, state)).toEqual([]);
-			expect(card2.getReactionsToEvent({ event: events['beforeDrawingFate'] }, state)).toContain(
+			expect(card1.getReactionsToEvent(events['attack'], stateWithTargetTrt1)).toContain(
+				receivingAttackReaction
+			);
+			expect(card2.getReactionsToEvent(events['attack'], stateWithTargetTrt1)).toEqual([]);
+
+			expect(card1.getReactionsToEvent(events['beforeDrawingFate'], state)).toEqual([]);
+			expect(card2.getReactionsToEvent(events['beforeDrawingFate'], state)).toContain(
 				otherPlayerReaction
 			);
 		});
@@ -568,18 +574,14 @@ describe('CardState', () => {
 				makeReadonlyPlayer('plr2', { hand: [otherPlayerCard] })
 			]);
 
-			expect(
-				ownerReactiveCard.getReactionsToEvent(
-					{ event: events['attack'], context: { targetId: 'plr1' } },
-					state
-				)
-			).toContain(ownerTargetReaction);
-			expect(
-				otherPlayerCard.getReactionsToEvent(
-					{ event: events['attack'], context: { targetId: 'plr1' } },
-					state
-				)
-			).toEqual([]);
+			const stateWithTarget = state.mutate((s) => {
+				s.targetStack.push('plr1');
+			});
+
+			expect(ownerReactiveCard.getReactionsToEvent(events['attack'], stateWithTarget)).toContain(
+				ownerTargetReaction
+			);
+			expect(otherPlayerCard.getReactionsToEvent(events['attack'], stateWithTarget)).toEqual([]);
 		});
 
 		it('supports card-targeted attack reactions via reactiveCardIsTarget', () => {
@@ -614,24 +616,15 @@ describe('CardState', () => {
 				makeReadonlyPlayer('plr2', { hand: [otherPlayerCard] })
 			]);
 
-			expect(
-				targetedCard.getReactionsToEvent(
-					{ event: events['attack'], context: { targetId: 'trt10' } },
-					state
-				)
-			).toContain(cardTargetReaction);
-			expect(
-				sameOwnerOtherCard.getReactionsToEvent(
-					{ event: events['attack'], context: { targetId: 'trt10' } },
-					state
-				)
-			).toEqual([]);
-			expect(
-				otherPlayerCard.getReactionsToEvent(
-					{ event: events['attack'], context: { targetId: 'trt10' } },
-					state
-				)
-			).toEqual([]);
+			const stateWithTarget = state.mutate((s) => {
+				s.targetStack.push('trt10');
+			});
+
+			expect(targetedCard.getReactionsToEvent(events['attack'], stateWithTarget)).toContain(
+				cardTargetReaction
+			);
+			expect(sameOwnerOtherCard.getReactionsToEvent(events['attack'], stateWithTarget)).toEqual([]);
+			expect(otherPlayerCard.getReactionsToEvent(events['attack'], stateWithTarget)).toEqual([]);
 		});
 	});
 });

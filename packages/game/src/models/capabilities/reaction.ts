@@ -2,7 +2,7 @@ import { finalise } from '@songsofdoom/common';
 import { Capability, type CapabilityProps } from '../capability';
 import { Event, events, type EventType } from '../event';
 import { type BooleanExpressionType } from '../expressions';
-import type { GameGraph, GroupContext } from '../game/gamegraph';
+import type { GameContext, ReadonlyGameState } from '../game/gamestate';
 import type { CardId } from '../game/identifiers';
 
 export type EventTriggerSpec = Event | EventType | EventTriggerProps;
@@ -59,11 +59,8 @@ export abstract class Reaction extends Capability {
 		this.triggers = triggers.map((spec) => finalise(EventTrigger, spec));
 	}
 
-	protected override getTriggerContext(
-		gameGraph: GameGraph,
-		cardId: CardId
-	): Partial<GroupContext> {
-		const ownerId = gameGraph.current.state.requireCard(cardId).ownerId;
+	override getTriggerContext(state: ReadonlyGameState, cardId: CardId): GameContext {
+		const ownerId = state.requireCard(cardId).ownerId;
 		return { reactiveCardId: cardId, reactivePlayerId: ownerId };
 	}
 }

@@ -1,8 +1,9 @@
 import { finalise } from '@songsofdoom/common';
 import { CapabilityCost, type CapabilityCostProps } from './capabilitycost';
 import type { Effect } from './effects/effect';
-import type { GameGraph, GroupContext } from './game/gamegraph';
+import type { GameGraph } from './game/gamegraph';
 import { CapabilityTriggered } from './game/gamenodes';
+import type { GameContext, ReadonlyGameState } from './game/gamestate';
 import type { CardId } from './game/identifiers';
 
 export interface CapabilityProps {
@@ -28,7 +29,7 @@ export abstract class Capability {
 		return [];
 	}
 
-	protected getTriggerContext(_gameGraph: GameGraph, cardId: CardId): Partial<GroupContext> {
+	getTriggerContext(_state: ReadonlyGameState, cardId: CardId): GameContext {
 		return { activeCardId: cardId };
 	}
 
@@ -37,7 +38,7 @@ export abstract class Capability {
 			CapabilityTriggered,
 			{ capability: this, cardId },
 			{
-				...this.getTriggerContext(gameGraph, cardId),
+				...this.getTriggerContext(gameGraph.current.state, cardId),
 				targetId: cardId,
 				subjectId: cardId,
 				opening: (state) => {

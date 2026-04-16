@@ -5,7 +5,8 @@ import type { BooleanExpression } from '../expressions/boolean';
 import type { ScalarExpression } from '../expressions/scalar';
 import { strength } from '../stats';
 import type { ReadonlyCardState } from './cardstate';
-import { ReadonlyGameState } from './gamestate';
+import { ReadonlyGameState, type GameContext } from './gamestate';
+import type { CardId, EntityId, PlayerId } from './identifiers';
 import {
 	ReadonlyLocationState,
 	type MutableLocationState,
@@ -718,5 +719,181 @@ describe('ReadonlyGameState', () => {
 			});
 			expect(state.activePlayerStack).toEqual([]);
 		});
+	});
+});
+
+// ─── MutableGameState.pushContext / popContext ────────────────────────────────
+
+function makeMutableState(overrides?: {
+	activeCardStack?: CardId[];
+	activePlayerStack?: PlayerId[];
+	reactiveCardStack?: CardId[];
+	reactivePlayerStack?: PlayerId[];
+	subjectStack?: EntityId[];
+	targetStack?: EntityId[];
+}): ReturnType<ReadonlyGameState['mutable']> {
+	const p1 = mock<ReadonlyPlayerState>();
+	p1.mutable.mockReturnValue({ id: 'plr1', readonly: () => p1 } as unknown as MutablePlayerState);
+	return new ReadonlyGameState({ players: [p1], ...overrides }).mutable();
+}
+
+describe('MutableGameState.pushContext', () => {
+	it('pushes activeCardId onto activeCardStack', () => {
+		const state = makeMutableState();
+		state.pushContext({ activeCardId: 'trt1' });
+		expect(state.activeCardStack).toEqual(['trt1']);
+	});
+
+	it('pushes activePlayerId onto activePlayerStack', () => {
+		const state = makeMutableState();
+		state.pushContext({ activePlayerId: 'plr1' });
+		expect(state.activePlayerStack).toEqual(['plr1']);
+	});
+
+	it('pushes reactiveCardId onto reactiveCardStack', () => {
+		const state = makeMutableState();
+		state.pushContext({ reactiveCardId: 'trt1' });
+		expect(state.reactiveCardStack).toEqual(['trt1']);
+	});
+
+	it('pushes reactivePlayerId onto reactivePlayerStack', () => {
+		const state = makeMutableState();
+		state.pushContext({ reactivePlayerId: 'plr1' });
+		expect(state.reactivePlayerStack).toEqual(['plr1']);
+	});
+
+	it('pushes subjectId onto subjectStack', () => {
+		const state = makeMutableState();
+		state.pushContext({ subjectId: 'plr1' });
+		expect(state.subjectStack).toEqual(['plr1']);
+	});
+
+	it('pushes targetId onto targetStack', () => {
+		const state = makeMutableState();
+		state.pushContext({ targetId: 'trt1' });
+		expect(state.targetStack).toEqual(['trt1']);
+	});
+
+	it('pushes all provided fields at once', () => {
+		const state = makeMutableState();
+		state.pushContext({
+			activeCardId: 'trt1',
+			activePlayerId: 'plr1',
+			reactiveCardId: 'trt2',
+			reactivePlayerId: 'plr2',
+			subjectId: 'plr1',
+			targetId: 'trt1'
+		});
+		expect(state.activeCardStack).toEqual(['trt1']);
+		expect(state.activePlayerStack).toEqual(['plr1']);
+		expect(state.reactiveCardStack).toEqual(['trt2']);
+		expect(state.reactivePlayerStack).toEqual(['plr2']);
+		expect(state.subjectStack).toEqual(['plr1']);
+		expect(state.targetStack).toEqual(['trt1']);
+	});
+
+	it('does not touch stacks for undefined fields', () => {
+		const state = makeMutableState({ activeCardStack: ['trt9'] });
+		state.pushContext({ reactiveCardId: 'trt1' });
+		expect(state.activeCardStack).toEqual(['trt9']);
+		expect(state.reactiveCardStack).toEqual(['trt1']);
+	});
+
+	it('pushes onto existing stack entries', () => {
+		const state = makeMutableState({ reactiveCardStack: ['trt1'] });
+		state.pushContext({ reactiveCardId: 'trt2' });
+		expect(state.reactiveCardStack).toEqual(['trt1', 'trt2']);
+	});
+});
+
+describe('MutableGameState.popContext', () => {
+	it('pops activeCardId from activeCardStack', () => {
+		const state = makeMutableState({ activeCardStack: ['trt1'] });
+		state.popContext({ activeCardId: 'trt1' });
+		expect(state.activeCardStack).toEqual([]);
+	});
+
+	it('pops reactiveCardId from reactiveCardStack', () => {
+		const state = makeMutableState({ reactiveCardStack: ['trt1'] });
+		state.popContext({ reactiveCardId: 'trt1' });
+		expect(state.reactiveCardStack).toEqual([]);
+	});
+
+	it('pops reactivePlayerId from reactivePlayerStack', () => {
+		const state = makeMutableState({ reactivePlayerStack: ['plr1'] });
+		state.popContext({ reactivePlayerId: 'plr1' });
+		expect(state.reactivePlayerStack).toEqual([]);
+	});
+
+	it('pops all provided fields in reverse order', () => {
+		const state = makeMutableState({
+			activeCardStack: ['trt1'],
+			activePlayerStack: ['plr1'],
+			reactiveCardStack: ['trt2'],
+			reactivePlayerStack: ['plr2'],
+			subjectStack: ['plr1'],
+			targetStack: ['trt1']
+		});
+		state.popContext({
+			activeCardId: 'trt1',
+			activePlayerId: 'plr1',
+			reactiveCardId: 'trt2',
+			reactivePlayerId: 'plr2',
+			subjectId: 'plr1',
+			targetId: 'trt1'
+		});
+		expect(state.activeCardStack).toEqual([]);
+		expect(state.activePlayerStack).toEqual([]);
+		expect(state.reactiveCardStack).toEqual([]);
+		expect(state.reactivePlayerStack).toEqual([]);
+		expect(state.subjectStack).toEqual([]);
+		expect(state.targetStack).toEqual([]);
+	});
+
+	it('does not touch stacks for undefined fields', () => {
+		const state = makeMutableState({ activeCardStack: ['trt9'], reactiveCardStack: ['trt1'] });
+		state.popContext({ reactiveCardId: 'trt1' });
+		expect(state.activeCardStack).toEqual(['trt9']);
+		expect(state.reactiveCardStack).toEqual([]);
+	});
+
+	it('only pops the top entry, leaving preceding entries intact', () => {
+		const state = makeMutableState({ reactiveCardStack: ['trt1', 'trt2'] });
+		state.popContext({ reactiveCardId: 'trt2' });
+		expect(state.reactiveCardStack).toEqual(['trt1']);
+	});
+});
+
+describe('MutableGameState pushContext / popContext round-trip', () => {
+	it('restores all stacks to their original state', () => {
+		const ctx: GameContext = {
+			activeCardId: 'trt1',
+			activePlayerId: 'plr1',
+			reactiveCardId: 'trt2',
+			reactivePlayerId: 'plr2',
+			subjectId: 'plr1',
+			targetId: 'trt1'
+		};
+		const state = makeMutableState();
+		state.pushContext(ctx);
+		state.popContext(ctx);
+		expect(state.activeCardStack).toEqual([]);
+		expect(state.activePlayerStack).toEqual([]);
+		expect(state.reactiveCardStack).toEqual([]);
+		expect(state.reactivePlayerStack).toEqual([]);
+		expect(state.subjectStack).toEqual([]);
+		expect(state.targetStack).toEqual([]);
+	});
+
+	it('preserves pre-existing entries after a push/pop cycle', () => {
+		const state = makeMutableState({
+			reactiveCardStack: ['trt9'],
+			reactivePlayerStack: ['plr9']
+		});
+		const ctx: GameContext = { reactiveCardId: 'trt1', reactivePlayerId: 'plr1' };
+		state.pushContext(ctx);
+		state.popContext(ctx);
+		expect(state.reactiveCardStack).toEqual(['trt9']);
+		expect(state.reactivePlayerStack).toEqual(['plr9']);
 	});
 });
