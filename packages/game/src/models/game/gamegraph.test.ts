@@ -1,6 +1,8 @@
+import { Counter } from '@songsofdoom/common';
 import { advanceTicks, mock } from '@songsofdoom/common/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import { Obligation, Opportunity } from '../capabilities/reaction';
+import type { CharacterState } from '../characters';
 import { Effect } from '../effects/effect';
 import { events } from '../event';
 import { Target, type TargetType } from '../target';
@@ -23,7 +25,8 @@ import {
 import { ReadonlyGameState } from './gamestate';
 import type { CardId } from './identifiers';
 import { CapabilityChoiceField } from './playerinput';
-import type { MutablePlayerState, ReadonlyPlayerState } from './playerstate';
+import type { MutablePlayerState } from './playerstate';
+import { ReadonlyPlayerState } from './playerstate';
 
 // A minimal concrete Effect for use in triggerEffect tests
 class NoopEffect extends Effect {
@@ -843,5 +846,57 @@ describe('GameNode types', () => {
 	it('GameNode.next is initially undefined', () => {
 		const graph = new GameGraph({ initialState: { players: [] } });
 		expect(graph.start.next).toBeUndefined();
+	});
+});
+
+// ─── GameGraph.defeat ─────────────────────────────────────────────────────────
+
+describe('GameGraph.defeat', () => {
+	function makeRealPlayer(id: 'plr1' | 'plr2'): ReadonlyPlayerState {
+		return new ReadonlyPlayerState({
+			id,
+			character: mock<CharacterState>(),
+			deck: [],
+			hand: [],
+			discardPile: [],
+			focusesBag: new Counter(),
+			focusesDiscardPile: new Counter(),
+			focusesHand: new Counter(),
+			physicalTrauma: 0,
+			mentalTrauma: 0
+		});
+	}
+
+	it('sets defeated to true on the player state', async () => {
+		const player = makeRealPlayer('plr1');
+		const graph = new GameGraph({ initialState: { players: [player] } });
+		await graph.defeat('plr1');
+		expect(graph.current.state.requirePlayer('plr1').defeated).toBe(true);
+	});
+
+	it('accepts a PlayerState instead of a PlayerId', async () => {
+		const player = makeRealPlayer('plr1');
+		const graph = new GameGraph({ initialState: { players: [player] } });
+		await graph.defeat(player);
+		expect(graph.current.state.requirePlayer('plr1').defeated).toBe(true);
+	});
+
+	it('emits a playerDefeated EventTriggered node', async () => {
+		const player = makeRealPlayer('plr1');
+		const graph = new GameGraph({ initialState: { players: [player] } });
+		await graph.defeat('plr1');
+		const mutationNode = graph.start.next!;
+		const eventNode = mutationNode.next!;
+		expect(eventNode).toBeInstanceOf(EventTriggered);
+		expect((eventNode as EventTriggered).event).toBe(events['playerDefeated']);
+	});
+
+	it('sets the player as the subject of the playerDefeated event', async () => {
+		const player = makeRealPlayer('plr1');
+		const graph = new GameGraph({ initialState: { players: [player] } });
+		await graph.defeat('plr1');
+		const mutationNode = graph.start.next!;
+		const eventNode = mutationNode.next!;
+		expect(eventNode.state.getSubject()?.id).toBe('plr1');
 	});
 });

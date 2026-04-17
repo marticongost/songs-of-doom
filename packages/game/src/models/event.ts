@@ -444,6 +444,23 @@ const eventData: Record<string, Omit<EventProps, 'type'>> = {
 				}
 			}
 		]
+	},
+	playerDefeated: {
+		name: {
+			ca: 'Quan un jugador sigui derrotat',
+			es: 'Cuando un jugador sea derrotado',
+			en: 'When a player is defeated'
+		},
+		shortForms: [
+			{
+				match: conditionIsExactly(reactivePlayerIsSubject),
+				description: {
+					ca: 'Quan siguis derrotat',
+					es: 'Cuando seas derrotado',
+					en: 'When you are defeated'
+				}
+			}
+		]
 	}
 };
 

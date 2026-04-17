@@ -28,6 +28,7 @@ export interface PlayerStateProps {
 	focusesHand: ReadonlyCounter<FocusToken>;
 	physicalTrauma: number;
 	mentalTrauma: number;
+	defeated?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,6 +45,7 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 	readonly focusesBag: ReadonlyCounter<FocusToken>;
 	readonly focusesDiscardPile: ReadonlyCounter<FocusToken>;
 	readonly focusesHand: ReadonlyCounter<FocusToken>;
+	readonly defeated: boolean;
 
 	constructor({
 		id,
@@ -59,7 +61,8 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 		focusesDiscardPile,
 		focusesHand,
 		physicalTrauma,
-		mentalTrauma
+		mentalTrauma,
+		defeated = false
 	}: PlayerStateProps) {
 		super({ id, attachments, properties: properties ?? [], physicalTrauma, mentalTrauma });
 		this.character = character;
@@ -71,6 +74,7 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 		this.focusesBag = focusesBag;
 		this.focusesDiscardPile = focusesDiscardPile;
 		this.focusesHand = focusesHand;
+		this.defeated = defeated;
 	}
 
 	cards(options?: CardOptions): Array<TCard> {
@@ -128,6 +132,7 @@ export class MutablePlayerState
 	declare clues: number;
 	declare physicalTrauma: number;
 	declare mentalTrauma: number;
+	declare defeated: boolean;
 	declare focusesBag: Counter<FocusToken>;
 	declare focusesHand: Counter<FocusToken>;
 	declare focusesDiscardPile: Counter<FocusToken>;
@@ -145,6 +150,7 @@ export class MutablePlayerState
 			clues: playerState.clues,
 			physicalTrauma: playerState.physicalTrauma,
 			mentalTrauma: playerState.mentalTrauma,
+			defeated: playerState.defeated,
 			focusesBag: new Counter(playerState.focusesBag),
 			focusesHand: new Counter(playerState.focusesHand),
 			focusesDiscardPile: new Counter(playerState.focusesDiscardPile)
@@ -164,6 +170,7 @@ export class MutablePlayerState
 			clues: this.clues,
 			physicalTrauma: this.physicalTrauma,
 			mentalTrauma: this.mentalTrauma,
+			defeated: this.defeated,
 			focusesBag: new Counter(this.focusesBag),
 			focusesHand: new Counter(this.focusesHand),
 			focusesDiscardPile: new Counter(this.focusesDiscardPile)

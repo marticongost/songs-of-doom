@@ -218,6 +218,30 @@ describe('ReadonlyPlayerState', () => {
 			expect(mutable.physicalTrauma).toBe(3);
 			expect(mutable.mentalTrauma).toBe(2);
 		});
+
+		it('defaults defeated to false', () => {
+			const player = makePlayer('plr1');
+			expect(player.defeated).toBe(false);
+		});
+
+		it('copies defeated when true', () => {
+			const player = new ReadonlyPlayerState({
+				id: 'plr1',
+				character: mock<CharacterState>(),
+				deck: [],
+				hand: [],
+				discardPile: [],
+				attachments: [],
+				focusesBag: new Counter(),
+				focusesDiscardPile: new Counter(),
+				focusesHand: new Counter(),
+				physicalTrauma: 0,
+				mentalTrauma: 0,
+				defeated: true
+			});
+			const mutable = player.mutable();
+			expect(mutable.defeated).toBe(true);
+		});
 	});
 
 	describe('mutate', () => {
@@ -236,6 +260,15 @@ describe('ReadonlyPlayerState', () => {
 				m.mentalTrauma = 99;
 			});
 			expect(player.mentalTrauma).toBe(0);
+		});
+
+		it('preserves defeated through mutate round-trip', () => {
+			const player = makePlayer('plr1');
+			const updated = player.mutate((m) => {
+				m.defeated = true;
+			});
+			expect(updated.defeated).toBe(true);
+			expect(player.defeated).toBe(false);
 		});
 	});
 });

@@ -36,6 +36,7 @@ import {
 import { type EntityId, type PlayerId } from './identifiers';
 import type { Field } from './playerinput';
 import { CapabilityChoiceField, ResultField, TargetField } from './playerinput';
+import type { PlayerState } from './playerstate';
 import { MutableTestResolution, type TestResolutionProps } from './testresolution';
 
 export type GroupContext<ClosingNodeProps extends EndGroupProps = EndGroupProps> = GameContext & {
@@ -382,6 +383,14 @@ export class GameGraph {
 
 	requireSubject(): { id: EntityId } {
 		return this._current.state.requireSubject();
+	}
+
+	async defeat(player: PlayerId | PlayerState): Promise<void> {
+		const playerId = typeof player === 'string' ? player : player.id;
+		this.mutate((state) => {
+			state.requirePlayer(playerId).defeated = true;
+		});
+		await this.triggerEvent('playerDefeated', { subjectId: playerId });
 	}
 
 	async requestPlayers(
