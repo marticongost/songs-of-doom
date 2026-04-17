@@ -4,7 +4,7 @@ import type { Entity } from '../entities';
 import type { BooleanExpression } from '../expressions/boolean';
 import type { ScalarExpression } from '../expressions/scalar';
 import { strength } from '../stats';
-import type { ReadonlyCardState } from './cardstate';
+import type { MutableCardState, ReadonlyCardState } from './cardstate';
 import { ReadonlyGameState, type GameContext } from './gamestate';
 import type { CardId, EntityId, LocationId, PlayerId } from './identifiers';
 import {
@@ -701,6 +701,28 @@ describe('ReadonlyGameState', () => {
 
 			expect(mutable.locations).toMatchObject([{ id: 'loc9' }]);
 		});
+
+		it('converts encounter deck cards to mutable', () => {
+			const card = mock<ReadonlyCardState>();
+			const mutableCard = mock<MutableCardState>();
+			card.mutable.mockReturnValue(mutableCard);
+			const state = new ReadonlyGameState({
+				players: [makeMutablePlayer()],
+				encounterDeck: [card]
+			});
+			expect(state.mutable().encounterDeck[0]).toBe(mutableCard);
+		});
+
+		it('converts encounter discard pile cards to mutable', () => {
+			const card = mock<ReadonlyCardState>();
+			const mutableCard = mock<MutableCardState>();
+			card.mutable.mockReturnValue(mutableCard);
+			const state = new ReadonlyGameState({
+				players: [makeMutablePlayer()],
+				encounterDiscardPile: [card]
+			});
+			expect(state.mutable().encounterDiscardPile[0]).toBe(mutableCard);
+		});
 	});
 
 	describe('mutate', () => {
@@ -974,5 +996,33 @@ describe('MutableGameState.setPlayerLocation', () => {
 
 		expect(state.locations[0].players).not.toContain('plr1');
 		expect(state.locations[1].players).toContain('plr1');
+	});
+});
+
+// ─── GameState encounterDeck / encounterDiscardPile ───────────────────────────
+
+describe('GameState encounterDeck', () => {
+	it('defaults to an empty array when not provided', () => {
+		const state = makeGameState([]);
+		expect(state.encounterDeck).toEqual([]);
+	});
+
+	it('stores provided encounter deck cards', () => {
+		const card = mock<ReadonlyCardState>();
+		const state = new ReadonlyGameState({ players: [], encounterDeck: [card] });
+		expect(state.encounterDeck[0]).toBe(card);
+	});
+});
+
+describe('GameState encounterDiscardPile', () => {
+	it('defaults to an empty array when not provided', () => {
+		const state = makeGameState([]);
+		expect(state.encounterDiscardPile).toEqual([]);
+	});
+
+	it('stores provided encounter discard pile cards', () => {
+		const card = mock<ReadonlyCardState>();
+		const state = new ReadonlyGameState({ players: [], encounterDiscardPile: [card] });
+		expect(state.encounterDiscardPile[0]).toBe(card);
 	});
 });

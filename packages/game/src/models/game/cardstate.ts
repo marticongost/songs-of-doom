@@ -1,4 +1,4 @@
-import { isSkill, type Capability, type Property } from '../..';
+import { isCreature, isEncounter, isSkill, type Capability, type Property } from '../..';
 import { Reaction } from '../capabilities/reaction';
 import type { Entity } from '../entities';
 import { type Event } from '../event';
@@ -24,7 +24,9 @@ export type CardParent =
 	| { type: 'card'; cardId: CardId }
 	| { type: 'player'; playerId: PlayerId }
 	| { type: 'location'; locationId: LocationId }
-	| { type: 'banish'; playerId: PlayerId };
+	| { type: 'banish'; playerId: PlayerId }
+	| { type: 'encounter-deck' }
+	| { type: 'encounter-discard' };
 
 export interface CardStateProps {
 	id: CardId;
@@ -207,22 +209,40 @@ export class MutableCardState
 	}
 
 	moveToTopOfDiscardPile(gameState: MutableGameState, playerId: PlayerId | undefined = undefined) {
-		playerId = playerId ?? this.ownerId;
-		this.removeFromCurrentParent(gameState);
-		this.container = { type: 'discard', playerId };
-		const playerState = gameState.requirePlayer(playerId);
-		playerState.discardPile.unshift(this);
+		if (isCreature(this.card) || isEncounter(this.card)) {
+			if (playerId !== undefined) {
+				throw new Error('Encounter/creature cards do not belong to a player discard pile');
+			}
+			this.removeFromCurrentParent(gameState);
+			this.container = { type: 'encounter-discard' };
+			gameState.encounterDiscardPile.unshift(this);
+		} else {
+			playerId = playerId ?? this.ownerId;
+			this.removeFromCurrentParent(gameState);
+			this.container = { type: 'discard', playerId };
+			const playerState = gameState.requirePlayer(playerId);
+			playerState.discardPile.unshift(this);
+		}
 	}
 
 	moveToBottomOfDiscardPile(
 		gameState: MutableGameState,
 		playerId: PlayerId | undefined = undefined
 	) {
-		playerId = playerId ?? this.ownerId;
-		this.removeFromCurrentParent(gameState);
-		this.container = { type: 'discard', playerId };
-		const playerState = gameState.requirePlayer(playerId);
-		playerState.discardPile.push(this);
+		if (isCreature(this.card) || isEncounter(this.card)) {
+			if (playerId !== undefined) {
+				throw new Error('Encounter/creature cards do not belong to a player discard pile');
+			}
+			this.removeFromCurrentParent(gameState);
+			this.container = { type: 'encounter-discard' };
+			gameState.encounterDiscardPile.push(this);
+		} else {
+			playerId = playerId ?? this.ownerId;
+			this.removeFromCurrentParent(gameState);
+			this.container = { type: 'discard', playerId };
+			const playerState = gameState.requirePlayer(playerId);
+			playerState.discardPile.push(this);
+		}
 	}
 
 	moveToHand(gameState: MutableGameState, playerId: PlayerId) {
@@ -240,19 +260,37 @@ export class MutableCardState
 	}
 
 	moveToTopOfDeck(gameState: MutableGameState, playerId: PlayerId | undefined = undefined) {
-		playerId = playerId ?? this.ownerId;
-		this.removeFromCurrentParent(gameState);
-		this.container = { type: 'deck', playerId };
-		const playerState = gameState.requirePlayer(playerId);
-		playerState.deck.unshift(this);
+		if (isCreature(this.card) || isEncounter(this.card)) {
+			if (playerId !== undefined) {
+				throw new Error('Encounter/creature cards do not belong to a player deck');
+			}
+			this.removeFromCurrentParent(gameState);
+			this.container = { type: 'encounter-deck' };
+			gameState.encounterDeck.unshift(this);
+		} else {
+			playerId = playerId ?? this.ownerId;
+			this.removeFromCurrentParent(gameState);
+			this.container = { type: 'deck', playerId };
+			const playerState = gameState.requirePlayer(playerId);
+			playerState.deck.unshift(this);
+		}
 	}
 
 	moveToBottomOfDeck(gameState: MutableGameState, playerId: PlayerId | undefined = undefined) {
-		playerId = playerId ?? this.ownerId;
-		this.removeFromCurrentParent(gameState);
-		this.container = { type: 'deck', playerId };
-		const playerState = gameState.requirePlayer(playerId);
-		playerState.deck.push(this);
+		if (isCreature(this.card) || isEncounter(this.card)) {
+			if (playerId !== undefined) {
+				throw new Error('Encounter/creature cards do not belong to a player deck');
+			}
+			this.removeFromCurrentParent(gameState);
+			this.container = { type: 'encounter-deck' };
+			gameState.encounterDeck.push(this);
+		} else {
+			playerId = playerId ?? this.ownerId;
+			this.removeFromCurrentParent(gameState);
+			this.container = { type: 'deck', playerId };
+			const playerState = gameState.requirePlayer(playerId);
+			playerState.deck.push(this);
+		}
 	}
 
 	moveToLocation(gameState: MutableGameState, locationId: LocationId) {
@@ -295,6 +333,12 @@ export class MutableCardState
 		} else if (this.container.type === 'banish') {
 			const playerState = gameState.requirePlayer(this.container.playerId);
 			playerState.banishedCards = playerState.banishedCards.filter((c) => c.id !== this.id);
+		} else if (this.container.type === 'encounter-deck') {
+			gameState.encounterDeck = gameState.encounterDeck.filter((c) => c.id !== this.id);
+		} else if (this.container.type === 'encounter-discard') {
+			gameState.encounterDiscardPile = gameState.encounterDiscardPile.filter(
+				(c) => c.id !== this.id
+			);
 		}
 	}
 }

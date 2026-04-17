@@ -36,6 +36,8 @@ export interface GameContext {
 export interface GameStateProps {
 	players: ReadonlyArray<PlayerState>;
 	locations?: ReadonlyArray<LocationState>;
+	encounterDeck?: ReadonlyArray<CardState>;
+	encounterDiscardPile?: ReadonlyArray<CardState>;
 	activeCardStack?: Array<CardId>;
 	activePlayerStack?: Array<PlayerId>;
 	reactiveCardStack?: Array<CardId>;
@@ -52,6 +54,8 @@ export class GameState<
 > {
 	readonly players: ReadonlyArray<TPlayer>;
 	readonly locations: ReadonlyArray<TLocation>;
+	readonly encounterDeck: ReadonlyArray<TCard>;
+	readonly encounterDiscardPile: ReadonlyArray<TCard>;
 	readonly activeCardStack: Array<CardId>;
 	readonly activePlayerStack: Array<PlayerId>;
 	readonly reactiveCardStack: Array<CardId>;
@@ -63,6 +67,8 @@ export class GameState<
 	constructor({
 		players,
 		locations,
+		encounterDeck,
+		encounterDiscardPile,
 		activeCardStack,
 		activePlayerStack,
 		reactiveCardStack,
@@ -73,6 +79,8 @@ export class GameState<
 	}: GameStateProps) {
 		this.players = players as ReadonlyArray<TPlayer>;
 		this.locations = (locations ?? []) as ReadonlyArray<TLocation>;
+		this.encounterDeck = (encounterDeck ?? []) as ReadonlyArray<TCard>;
+		this.encounterDiscardPile = (encounterDiscardPile ?? []) as ReadonlyArray<TCard>;
 		this.activeCardStack = activeCardStack ?? [];
 		this.activePlayerStack = activePlayerStack ?? [];
 		this.reactiveCardStack = reactiveCardStack ?? [];
@@ -325,6 +333,8 @@ export class MutableGameState extends GameState<
 > {
 	declare players: Array<MutablePlayerState>;
 	declare locations: Array<MutableLocationState>;
+	declare encounterDeck: Array<MutableCardState>;
+	declare encounterDiscardPile: Array<MutableCardState>;
 	declare activeCardStack: Array<CardId>;
 	declare activePlayerStack: Array<PlayerId>;
 	declare reactiveCardStack: Array<CardId>;
@@ -338,6 +348,8 @@ export class MutableGameState extends GameState<
 		super({
 			players: gameState.players.map((player) => player.mutable()),
 			locations: gameState.locations.map((location) => location.mutable()),
+			encounterDeck: gameState.encounterDeck.map((c) => c.mutable()),
+			encounterDiscardPile: gameState.encounterDiscardPile.map((c) => c.mutable()),
 			activeCardStack: [...gameState.activeCardStack],
 			activePlayerStack: [...gameState.activePlayerStack],
 			reactiveCardStack: [...gameState.reactiveCardStack],
@@ -405,6 +417,8 @@ export class MutableGameState extends GameState<
 		return new ReadonlyGameState({
 			players: this.players.map((playerAlteration) => playerAlteration.readonly()),
 			locations: this.locations.map((location) => location.readonly()),
+			encounterDeck: this.encounterDeck.map((c) => c.readonly()),
+			encounterDiscardPile: this.encounterDiscardPile.map((c) => c.readonly()),
 			activeCardStack: [...this.activeCardStack],
 			activePlayerStack: [...this.activePlayerStack],
 			reactiveCardStack: [...this.reactiveCardStack],

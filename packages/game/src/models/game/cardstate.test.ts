@@ -10,7 +10,7 @@ import {
 	reactivePlayerIsSubject,
 	reactivePlayerIsTarget
 } from '../expressions';
-import { skill, trait } from '../properties';
+import { creature, encounter, skill, trait } from '../properties';
 import { MutableCardState, ReadonlyCardState, type CardParent } from './cardstate';
 import { ReadonlyGameState } from './gamestate';
 import type { CardId, LocationId, PlayerId } from './identifiers';
@@ -110,9 +110,11 @@ function makeReadonlyPlayer(
 
 function makeReadonlyGameState(
 	players: ReadonlyPlayerState[],
-	locations: ReadonlyLocationState[] = []
+	locations: ReadonlyLocationState[] = [],
+	encounterDeck: ReadonlyArray<ReadonlyCardState> = [],
+	encounterDiscardPile: ReadonlyArray<ReadonlyCardState> = []
 ): ReadonlyGameState {
-	return new ReadonlyGameState({ players, locations });
+	return new ReadonlyGameState({ players, locations, encounterDeck, encounterDiscardPile });
 }
 
 // ─── CardState ───────────────────────────────────────────────────────────────
@@ -776,6 +778,55 @@ describe('MutableCardState', () => {
 
 			expect(mutableCard.container).toEqual({ type: 'discard', playerId: 'plr1' });
 		});
+
+		it('routes a creature card to the encounter discard pile', () => {
+			const card = makeReadonlyCard(
+				'crt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
+				{ entity: makeEntity({ type: creature }) }
+			);
+			const player = makeReadonlyPlayer('plr1', { hand: [card] });
+			const gameState = makeReadonlyGameState([player]).mutable();
+
+			const mutableCard = gameState.requireCard('crt1');
+			mutableCard.moveToTopOfDiscardPile(gameState);
+
+			expect(mutableCard.container).toEqual({ type: 'encounter-discard' });
+			expect(gameState.encounterDiscardPile[0]).toBe(mutableCard);
+			expect(gameState.requirePlayer('plr1').hand).not.toContain(mutableCard);
+		});
+
+		it('routes an encounter card to the encounter discard pile', () => {
+			const card = makeReadonlyCard(
+				'trt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
+				{ entity: makeEntity({ type: encounter }) }
+			);
+			const player = makeReadonlyPlayer('plr1', { hand: [card] });
+			const gameState = makeReadonlyGameState([player]).mutable();
+
+			const mutableCard = gameState.requireCard('trt1');
+			mutableCard.moveToTopOfDiscardPile(gameState);
+
+			expect(mutableCard.container).toEqual({ type: 'encounter-discard' });
+			expect(gameState.encounterDiscardPile[0]).toBe(mutableCard);
+		});
+
+		it('throws when a playerId is supplied for a creature card', () => {
+			const card = makeReadonlyCard(
+				'crt1',
+				'plr1',
+				{ type: 'encounter-deck' },
+				{ entity: makeEntity({ type: creature }) }
+			);
+			const player = makeReadonlyPlayer('plr1');
+			const gameState = makeReadonlyGameState([player], [], [card]).mutable();
+
+			const mutableCard = gameState.encounterDeck[0];
+			expect(() => mutableCard.moveToTopOfDiscardPile(gameState, 'plr1')).toThrow();
+		});
 	});
 
 	describe('moveToBottomOfDiscardPile', () => {
@@ -790,6 +841,43 @@ describe('MutableCardState', () => {
 
 			const discard = gameState.requirePlayer('plr1').discardPile;
 			expect(discard[discard.length - 1]).toBe(mutableCard);
+		});
+
+		it('routes a creature card to the end of the encounter discard pile', () => {
+			const existing = makeReadonlyCard(
+				'crt2',
+				'plr1',
+				{ type: 'encounter-discard' },
+				{ entity: makeEntity({ type: creature }) }
+			);
+			const card = makeReadonlyCard(
+				'crt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
+				{ entity: makeEntity({ type: creature }) }
+			);
+			const player = makeReadonlyPlayer('plr1', { hand: [card] });
+			const gameState = makeReadonlyGameState([player], [], [], [existing]).mutable();
+
+			const mutableCard = gameState.requireCard('crt1');
+			mutableCard.moveToBottomOfDiscardPile(gameState);
+
+			const pile = gameState.encounterDiscardPile;
+			expect(pile[pile.length - 1]).toBe(mutableCard);
+		});
+
+		it('throws when a playerId is supplied for an encounter card', () => {
+			const card = makeReadonlyCard(
+				'trt1',
+				'plr1',
+				{ type: 'encounter-deck' },
+				{ entity: makeEntity({ type: encounter }) }
+			);
+			const player = makeReadonlyPlayer('plr1');
+			const gameState = makeReadonlyGameState([player], [], [card]).mutable();
+
+			const mutableCard = gameState.encounterDeck[0];
+			expect(() => mutableCard.moveToBottomOfDiscardPile(gameState, 'plr1')).toThrow();
 		});
 	});
 
@@ -806,6 +894,55 @@ describe('MutableCardState', () => {
 			const deck = gameState.requirePlayer('plr1').deck;
 			expect(deck[0]).toBe(mutableCard);
 		});
+
+		it('routes a creature card to the encounter deck', () => {
+			const card = makeReadonlyCard(
+				'crt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
+				{ entity: makeEntity({ type: creature }) }
+			);
+			const player = makeReadonlyPlayer('plr1', { hand: [card] });
+			const gameState = makeReadonlyGameState([player]).mutable();
+
+			const mutableCard = gameState.requireCard('crt1');
+			mutableCard.moveToTopOfDeck(gameState);
+
+			expect(mutableCard.container).toEqual({ type: 'encounter-deck' });
+			expect(gameState.encounterDeck[0]).toBe(mutableCard);
+			expect(gameState.requirePlayer('plr1').hand).not.toContain(mutableCard);
+		});
+
+		it('routes an encounter card to the encounter deck', () => {
+			const card = makeReadonlyCard(
+				'trt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
+				{ entity: makeEntity({ type: encounter }) }
+			);
+			const player = makeReadonlyPlayer('plr1', { hand: [card] });
+			const gameState = makeReadonlyGameState([player]).mutable();
+
+			const mutableCard = gameState.requireCard('trt1');
+			mutableCard.moveToTopOfDeck(gameState);
+
+			expect(mutableCard.container).toEqual({ type: 'encounter-deck' });
+			expect(gameState.encounterDeck[0]).toBe(mutableCard);
+		});
+
+		it('throws when a playerId is supplied for a creature card', () => {
+			const card = makeReadonlyCard(
+				'crt1',
+				'plr1',
+				{ type: 'encounter-discard' },
+				{ entity: makeEntity({ type: creature }) }
+			);
+			const player = makeReadonlyPlayer('plr1');
+			const gameState = makeReadonlyGameState([player], [], [], [card]).mutable();
+
+			const mutableCard = gameState.encounterDiscardPile[0];
+			expect(() => mutableCard.moveToTopOfDeck(gameState, 'plr1')).toThrow();
+		});
 	});
 
 	describe('moveToBottomOfDeck', () => {
@@ -820,6 +957,43 @@ describe('MutableCardState', () => {
 
 			const deck = gameState.requirePlayer('plr1').deck;
 			expect(deck[deck.length - 1]).toBe(mutableCard);
+		});
+
+		it('routes a creature card to the end of the encounter deck', () => {
+			const existing = makeReadonlyCard(
+				'crt2',
+				'plr1',
+				{ type: 'encounter-deck' },
+				{ entity: makeEntity({ type: creature }) }
+			);
+			const card = makeReadonlyCard(
+				'crt1',
+				'plr1',
+				{ type: 'hand', playerId: 'plr1' },
+				{ entity: makeEntity({ type: creature }) }
+			);
+			const player = makeReadonlyPlayer('plr1', { hand: [card] });
+			const gameState = makeReadonlyGameState([player], [], [existing]).mutable();
+
+			const mutableCard = gameState.requireCard('crt1');
+			mutableCard.moveToBottomOfDeck(gameState);
+
+			const deck = gameState.encounterDeck;
+			expect(deck[deck.length - 1]).toBe(mutableCard);
+		});
+
+		it('throws when a playerId is supplied for an encounter card', () => {
+			const card = makeReadonlyCard(
+				'trt1',
+				'plr1',
+				{ type: 'encounter-discard' },
+				{ entity: makeEntity({ type: encounter }) }
+			);
+			const player = makeReadonlyPlayer('plr1');
+			const gameState = makeReadonlyGameState([player], [], [], [card]).mutable();
+
+			const mutableCard = gameState.encounterDiscardPile[0];
+			expect(() => mutableCard.moveToBottomOfDeck(gameState, 'plr1')).toThrow();
 		});
 	});
 
@@ -891,6 +1065,42 @@ describe('MutableCardState', () => {
 			expect(mutableCard.container).toEqual({ type: 'hand', playerId: 'plr1' });
 			expect(gameState.requirePlayer('plr1').banishedCards).not.toContain(mutableCard);
 			expect(gameState.requirePlayer('plr1').hand).toContain(mutableCard);
+		});
+	});
+
+	describe('encounter-deck / encounter-discard round-trips', () => {
+		it('removes a card from the encounter deck when it moves to the encounter discard pile', () => {
+			const card = makeReadonlyCard(
+				'crt1',
+				'plr1',
+				{ type: 'encounter-deck' },
+				{ entity: makeEntity({ type: creature }) }
+			);
+			const player = makeReadonlyPlayer('plr1');
+			const gameState = makeReadonlyGameState([player], [], [card]).mutable();
+
+			const mutableCard = gameState.encounterDeck[0];
+			mutableCard.moveToTopOfDiscardPile(gameState);
+
+			expect(gameState.encounterDeck).not.toContain(mutableCard);
+			expect(gameState.encounterDiscardPile).toContain(mutableCard);
+		});
+
+		it('removes a card from the encounter discard pile when it moves to the encounter deck', () => {
+			const card = makeReadonlyCard(
+				'trt1',
+				'plr1',
+				{ type: 'encounter-discard' },
+				{ entity: makeEntity({ type: encounter }) }
+			);
+			const player = makeReadonlyPlayer('plr1');
+			const gameState = makeReadonlyGameState([player], [], [], [card]).mutable();
+
+			const mutableCard = gameState.encounterDiscardPile[0];
+			mutableCard.moveToTopOfDeck(gameState);
+
+			expect(gameState.encounterDiscardPile).not.toContain(mutableCard);
+			expect(gameState.encounterDeck).toContain(mutableCard);
 		});
 	});
 });
