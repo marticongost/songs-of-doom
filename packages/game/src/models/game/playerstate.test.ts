@@ -16,6 +16,7 @@ function makePlayer(
 		stage?: ReadonlyCardState[];
 		discard?: ReadonlyCardState[];
 		attachments?: ReadonlyCardState[];
+		banished?: ReadonlyCardState[];
 	} = {}
 ): ReadonlyPlayerState {
 	return new ReadonlyPlayerState({
@@ -25,6 +26,7 @@ function makePlayer(
 		hand: cards.hand ?? [],
 		stage: cards.stage ?? [],
 		discardPile: cards.discard ?? [],
+		banishedCards: cards.banished ?? [],
 		attachments: cards.attachments ?? [],
 		focusesBag: new Counter(),
 		focusesDiscardPile: new Counter(),
@@ -56,6 +58,12 @@ describe('PlayerState.cards', () => {
 		expect(all).toContain(inStage);
 		expect(all).toContain(inDiscard);
 		expect(all).toContain(attached);
+	});
+
+	it('returns banished cards', () => {
+		const banished = mock<ReadonlyCardState>();
+		const player = makePlayer('plr1', { banished: [banished] });
+		expect(player.cards()).toContain(banished);
 	});
 
 	it('with ready:true returns only non-exhausted hand, stage and attachment cards', () => {
@@ -114,6 +122,13 @@ describe('PlayerState.getCard', () => {
 		expect(player.getCard('trt1')).toBe(c1);
 	});
 
+	it('finds a card in banished cards', () => {
+		const c1 = mock<ReadonlyCardState>();
+		c1.getCard.mockImplementation((id) => (id === 'trt1' ? c1 : undefined));
+		const player = makePlayer('plr1', { banished: [c1] });
+		expect(player.getCard('trt1')).toBe(c1);
+	});
+
 	it('finds a nested attachment on a hand card', () => {
 		const nested = mock<ReadonlyCardState>();
 		const parent = mock<ReadonlyCardState>();
@@ -161,6 +176,13 @@ describe('PlayerState.requireCard', () => {
 		expect(player.requireCard('trt1')).toBe(c1);
 	});
 
+	it('finds a card in banished cards', () => {
+		const c1 = mock<ReadonlyCardState>();
+		c1.getCard.mockImplementation((id) => (id === 'trt1' ? c1 : undefined));
+		const player = makePlayer('plr1', { banished: [c1] });
+		expect(player.requireCard('trt1')).toBe(c1);
+	});
+
 	it('finds a nested attachment on a hand card', () => {
 		const nested = mock<ReadonlyCardState>();
 		const parent = mock<ReadonlyCardState>();
@@ -198,6 +220,19 @@ describe('ReadonlyPlayerState', () => {
 			const player = makePlayer('plr1', { hand: [c1] });
 			const mutable = player.mutable();
 			expect(mutable.hand[0]).toBeInstanceOf(MutableCardState);
+		});
+
+		it('converts banished cards to MutableCardState', () => {
+			const c1 = new ReadonlyCardState({
+				id: 'trt1',
+				card: mock<Entity>(),
+				ownerId: 'plr1',
+				container: { type: 'banish', playerId: 'plr1' },
+				properties: []
+			});
+			const player = makePlayer('plr1', { banished: [c1] });
+			const mutable = player.mutable();
+			expect(mutable.banishedCards[0]).toBeInstanceOf(MutableCardState);
 		});
 
 		it('copies trauma values', () => {
@@ -269,6 +304,20 @@ describe('ReadonlyPlayerState', () => {
 			});
 			expect(updated.defeated).toBe(true);
 			expect(player.defeated).toBe(false);
+		});
+
+		it('preserves banished cards through mutable/readonly round-trip', () => {
+			const c1 = new ReadonlyCardState({
+				id: 'trt1',
+				card: mock<Entity>(),
+				ownerId: 'plr1',
+				container: { type: 'banish', playerId: 'plr1' },
+				properties: []
+			});
+			const player = makePlayer('plr1', { banished: [c1] });
+			const roundTripped = player.mutable().readonly();
+			expect(roundTripped.banishedCards).toHaveLength(1);
+			expect(roundTripped.banishedCards[0].id).toBe('trt1');
 		});
 	});
 });

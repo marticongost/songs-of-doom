@@ -89,6 +89,7 @@ function makeReadonlyPlayer(
 		hand?: ReadonlyCardState[];
 		discard?: ReadonlyCardState[];
 		attachments?: ReadonlyCardState[];
+		banished?: ReadonlyCardState[];
 	} = {}
 ): ReadonlyPlayerState {
 	return new ReadonlyPlayerState({
@@ -97,6 +98,7 @@ function makeReadonlyPlayer(
 		deck: cards.deck ?? [],
 		hand: cards.hand ?? [],
 		discardPile: cards.discard ?? [],
+		banishedCards: cards.banished ?? [],
 		attachments: cards.attachments ?? [],
 		focusesBag: new Counter(),
 		focusesDiscardPile: new Counter(),
@@ -850,6 +852,45 @@ describe('MutableCardState', () => {
 			expect(mutableCard.container).toEqual({ type: 'location', locationId: 'loc9' });
 			expect(mutableLocation.attachments).toContain(mutableCard);
 			expect(gameState.requirePlayer('plr1').hand).not.toContain(mutableCard);
+		});
+	});
+
+	describe('banish', () => {
+		it('moves a card from hand to banished cards', () => {
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
+			const player = makeReadonlyPlayer('plr1', { hand: [card] });
+			const gameState = makeReadonlyGameState([player]).mutable();
+
+			const mutableCard = gameState.requireCard('trt1');
+			mutableCard.banish(gameState);
+
+			expect(mutableCard.container).toEqual({ type: 'banish', playerId: 'plr1' });
+			expect(gameState.requirePlayer('plr1').banishedCards).toContain(mutableCard);
+			expect(gameState.requirePlayer('plr1').hand).not.toContain(mutableCard);
+		});
+
+		it('uses the card owner when no playerId is given', () => {
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'deck', playerId: 'plr1' });
+			const player = makeReadonlyPlayer('plr1', { deck: [card] });
+			const gameState = makeReadonlyGameState([player]).mutable();
+
+			const mutableCard = gameState.requireCard('trt1');
+			mutableCard.banish(gameState);
+
+			expect(mutableCard.container).toEqual({ type: 'banish', playerId: 'plr1' });
+		});
+
+		it('removes the card from banishedCards when it is subsequently moved elsewhere', () => {
+			const card = makeReadonlyCard('trt1', 'plr1', { type: 'banish', playerId: 'plr1' });
+			const player = makeReadonlyPlayer('plr1', { banished: [card] });
+			const gameState = makeReadonlyGameState([player]).mutable();
+
+			const mutableCard = gameState.requireCard('trt1');
+			mutableCard.moveToHand(gameState, 'plr1');
+
+			expect(mutableCard.container).toEqual({ type: 'hand', playerId: 'plr1' });
+			expect(gameState.requirePlayer('plr1').banishedCards).not.toContain(mutableCard);
+			expect(gameState.requirePlayer('plr1').hand).toContain(mutableCard);
 		});
 	});
 });
