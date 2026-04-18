@@ -40,13 +40,12 @@ export class GatherCluesEffect extends Effect {
 	}
 
 	override async apply(gameGraph: GameGraph) {
-		const subjectId = gameGraph.requireSubject().id;
 		const targetIds = (await gameGraph.requestTargets(this.target, {
 			default: 'current-target'
 		})) as Array<CardId>;
 
 		gameGraph.mutate((state) => {
-			const subject = state.requireEntityState(subjectId);
+			const subject = state.requireSubject();
 			const gatheredClues = new Counter<CardId>();
 			for (const targetId of targetIds) {
 				const location = state.requireCard(targetId) as unknown as MutableLocationState;

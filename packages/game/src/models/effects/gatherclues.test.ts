@@ -65,8 +65,8 @@ describe('GatherCluesEffect.apply', () => {
 			.calledWith('loc2')
 			.mockReturnValue(location as unknown as MutableCardState);
 		mutableState.evaluate.calledWith(3).mockReturnValue(3);
+		mutableState.requireSubject.mockReturnValue(subject);
 		const graph = mock<GameGraph>();
-		graph.requireSubject.mockReturnValue(subject);
 		graph.requestTargets.mockResolvedValue(['loc2']);
 		let callbackReturn: unknown;
 		graph.mutate.mockImplementation((fn) => {
@@ -91,8 +91,8 @@ describe('GatherCluesEffect.apply', () => {
 			.calledWith('loc2')
 			.mockReturnValue(location as unknown as MutableCardState);
 		mutableState.evaluate.calledWith(5).mockReturnValue(5);
+		mutableState.requireSubject.mockReturnValue(subject);
 		const graph = mock<GameGraph>();
-		graph.requireSubject.mockReturnValue(subject);
 		graph.requestTargets.mockResolvedValue(['loc2']);
 		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
@@ -115,8 +115,8 @@ describe('GatherCluesEffect.apply', () => {
 			.calledWith('loc3')
 			.mockReturnValue(loc2 as unknown as MutableCardState);
 		mutableState.evaluate.calledWith(2).mockReturnValue(2);
+		mutableState.requireSubject.mockReturnValue(subject);
 		const graph = mock<GameGraph>();
-		graph.requireSubject.mockReturnValue(subject);
 		graph.requestTargets.mockResolvedValue(['loc2', 'loc3']);
 		let callbackReturn: unknown;
 		graph.mutate.mockImplementation((fn) => {

@@ -1,6 +1,7 @@
 import { mock } from '@songsofdoom/common/test-utils';
 import { describe, expect, it } from 'vitest';
 import type { GameGraph, TestProps } from '../game/gamegraph';
+import type { ReadonlyGameState } from '../game/gamestate';
 import { attack } from './attack';
 import { BeforeTest, Effect } from './effect';
 
@@ -13,10 +14,12 @@ class BeforeTestEffect extends Effect {
 describe('AttackEffect.apply', () => {
 	it('registers test callbacks that emit attack events', async () => {
 		const graph = mock<GameGraph>();
+		const state = mock<ReadonlyGameState>();
+		Object.defineProperty(graph, 'current', { get: () => ({ state }), configurable: true });
+		state.requireSubject.mockReturnValue({ id: 'plr1' } as never);
 		const events: string[] = [];
 		let capturedTestProps: TestProps | undefined;
 
-		graph.requireSubject.mockReturnValue({ id: 'plr1' });
 		graph.requestTargets.calledWith(undefined).mockResolvedValue(['plr2']);
 		graph.triggerEvent.mockImplementation(async (eventType) => {
 			events.push(eventType);
@@ -40,10 +43,12 @@ describe('AttackEffect.apply', () => {
 
 	it('keeps attack event callbacks ahead of other before-test effects', async () => {
 		const graph = mock<GameGraph>();
+		const state = mock<ReadonlyGameState>();
+		Object.defineProperty(graph, 'current', { get: () => ({ state }), configurable: true });
+		state.requireSubject.mockReturnValue({ id: 'plr1' } as never);
 		const events: string[] = [];
 		const beforeTestEffect = new BeforeTestEffect();
 
-		graph.requireSubject.mockReturnValue({ id: 'plr1' });
 		graph.requestTargets.calledWith(undefined).mockResolvedValue(['plr2']);
 		graph.triggerEvent.mockImplementation(async (eventType) => {
 			events.push(eventType);

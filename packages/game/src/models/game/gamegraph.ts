@@ -395,10 +395,6 @@ export class GameGraph {
 		return (await this.requestInput(target, { playerId: options.playerId })).target as PlayerId[];
 	}
 
-	requireSubject(): { id: EntityId } {
-		return this._current.state.requireSubject();
-	}
-
 	async defeat(player: PlayerId | PlayerState): Promise<void> {
 		const playerId = typeof player === 'string' ? player : player.id;
 		this.mutate((state) => {

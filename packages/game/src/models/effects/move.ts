@@ -15,7 +15,7 @@ export interface MoveOutcome {
  */
 export class MoveEffect extends Effect {
 	override async apply(gameGraph: GameGraph) {
-		const subjectId = gameGraph.requireSubject().id;
+		const subjectId = gameGraph.current.state.requireSubject().id;
 		if (!isPlayerId(subjectId)) return;
 
 		const state = gameGraph.current.state;

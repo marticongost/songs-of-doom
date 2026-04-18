@@ -64,7 +64,6 @@ describe('EngageEffect construction', () => {
 describe('EngageEffect.apply — input validation', () => {
 	it('throws when no targets are chosen', async () => {
 		const graph = mock<GameGraph>();
-		graph.requireSubject.mockReturnValue(makePlayer('plr1'));
 		graph.requestInput.mockResolvedValue({ target: [] });
 
 		await expect(engage({ target: { type: 'enemy' } }).apply(graph)).rejects.toThrow(
@@ -83,8 +82,8 @@ describe('EngageEffect.apply', () => {
 		const mutableState = mock<MutableGameState>();
 		mutableState.requireEntityState.calledWith('plr1').mockReturnValue(player);
 		mutableState.requireEntityState.calledWith('crt1').mockReturnValue(creature);
+		mutableState.requireSubject.mockReturnValue(player);
 		const graph = mock<GameGraph>();
-		graph.requireSubject.mockReturnValue(player);
 		graph.requestInput.mockResolvedValue({ target: ['crt1'] });
 		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
@@ -102,8 +101,8 @@ describe('EngageEffect.apply', () => {
 		mutableState.requireEntityState.calledWith('plr1').mockReturnValue(player);
 		mutableState.requireEntityState.calledWith('crt1').mockReturnValue(c1);
 		mutableState.requireEntityState.calledWith('crt2').mockReturnValue(c2);
+		mutableState.requireSubject.mockReturnValue(player);
 		const graph = mock<GameGraph>();
-		graph.requireSubject.mockReturnValue(player);
 		graph.requestInput.mockResolvedValue({ target: ['crt1', 'crt2'] });
 		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
@@ -120,8 +119,8 @@ describe('EngageEffect.apply', () => {
 		const mutableState = mock<MutableGameState>();
 		mutableState.requireEntityState.calledWith('crt0').mockReturnValue(ally);
 		mutableState.requireEntityState.calledWith('crt1').mockReturnValue(creature);
+		mutableState.requireSubject.mockReturnValue(ally);
 		const graph = mock<GameGraph>();
-		graph.requireSubject.mockReturnValue(ally);
 		graph.requestInput.mockResolvedValue({ target: ['crt1'] });
 		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
@@ -137,8 +136,8 @@ describe('EngageEffect.apply', () => {
 		const mutableState = mock<MutableGameState>();
 		mutableState.requireEntityState.calledWith('crt1').mockReturnValue(creature);
 		mutableState.requireEntityState.calledWith('plr1').mockReturnValue(player);
+		mutableState.requireSubject.mockReturnValue(creature);
 		const graph = mock<GameGraph>();
-		graph.requireSubject.mockReturnValue(creature);
 		graph.requestInput.mockResolvedValue({ target: ['plr1'] });
 		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
@@ -155,8 +154,8 @@ describe('EngageEffect.apply', () => {
 		mutableState.requireEntityState.calledWith('crt1').mockReturnValue(creature);
 		mutableState.requireEntityState.calledWith('plr1').mockReturnValue(player);
 		mutableState.requireEntityState.calledWith('plr2').mockReturnValue(p2);
+		mutableState.requireSubject.mockReturnValue(creature);
 		const graph = mock<GameGraph>();
-		graph.requireSubject.mockReturnValue(creature);
 		graph.requestInput.mockResolvedValue({ target: ['plr1', 'plr2'] });
 		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
@@ -171,8 +170,8 @@ describe('EngageEffect.apply', () => {
 		const mutableState = mock<MutableGameState>();
 		mutableState.requireEntityState.calledWith('plr1').mockReturnValue(player);
 		mutableState.requireEntityState.calledWith('crt1').mockReturnValue(ally);
+		mutableState.requireSubject.mockReturnValue(player);
 		const graph = mock<GameGraph>();
-		graph.requireSubject.mockReturnValue(player);
 		graph.requestInput.mockResolvedValue({ target: ['crt1'] });
 		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
@@ -187,8 +186,8 @@ describe('EngageEffect.apply', () => {
 		const mutableState = mock<MutableGameState>();
 		mutableState.requireEntityState.calledWith('crt1').mockReturnValue(creature);
 		mutableState.requireEntityState.calledWith('crt2').mockReturnValue(c2);
+		mutableState.requireSubject.mockReturnValue(creature);
 		const graph = mock<GameGraph>();
-		graph.requireSubject.mockReturnValue(creature);
 		graph.requestInput.mockResolvedValue({ target: ['crt2'] });
 		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
@@ -203,8 +202,8 @@ describe('EngageEffect.apply', () => {
 		const mutableState = mock<MutableGameState>();
 		mutableState.requireEntityState.calledWith('crt1').mockReturnValue(c1);
 		mutableState.requireEntityState.calledWith('crt2').mockReturnValue(c2);
+		mutableState.requireSubject.mockReturnValue(c1);
 		const graph = mock<GameGraph>();
-		graph.requireSubject.mockReturnValue(c1);
 		graph.requestInput.mockResolvedValue({ target: ['crt2'] });
 		graph.mutate.mockImplementation((fn) => fn(mutableState));
 

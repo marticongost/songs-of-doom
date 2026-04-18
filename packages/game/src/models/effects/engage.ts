@@ -25,7 +25,6 @@ export class EngageEffect extends Effect {
 	}
 
 	override async apply(gameGraph: GameGraph) {
-		const subjectId = gameGraph.requireSubject().id;
 		const targetIds = (await gameGraph.requestInput(this.target)).target;
 
 		if (targetIds.length === 0) {
@@ -33,7 +32,7 @@ export class EngageEffect extends Effect {
 		}
 
 		gameGraph.mutate((state) => {
-			const subject = state.requireEntityState(subjectId);
+			const subject = state.requireSubject();
 			const targets = targetIds.map((id) => state.requireEntityState(id));
 
 			type CardLike = EntityState<EntityId> & {
