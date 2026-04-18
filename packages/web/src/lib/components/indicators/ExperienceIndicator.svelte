@@ -16,11 +16,12 @@
 </script>
 
 <script lang="ts">
+	import type { ScalarExpressionType } from '@songsofdoom/game';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import Indicator from './Indicator.svelte';
 
 	interface Props extends StandardAttributeProps {
-		amount: number;
+		amount: ScalarExpressionType;
 	}
 
 	const { amount, ...attributes }: Props = $props();
@@ -29,7 +30,7 @@
 <Indicator
 	{...standardAttributes(
 		attributes,
-		cx(styles.experienceIndicator, { [styles.negative]: amount < 0 })
+		cx(styles.experienceIndicator, { [styles.negative]: typeof amount === 'number' && amount < 0 })
 	)}
 	{amount}
 	icon="experience.svg"

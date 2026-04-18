@@ -1,5 +1,6 @@
 <script lang="ts" module>
 	import * as css from '$lib/styles';
+	import type { ScalarExpressionType } from '@songsofdoom/game';
 
 	const styles = css.styles({
 		goldIndicator: {
@@ -15,7 +16,7 @@
 	import Indicator from './Indicator.svelte';
 
 	interface Props extends StandardAttributeProps {
-		amount: number;
+		amount: ScalarExpressionType;
 	}
 
 	const { amount, ...attributes }: Props = $props();

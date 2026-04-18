@@ -60,12 +60,15 @@ Customize appearance via CSS custom properties:
 </script>
 
 <script lang="ts">
+	import type { ScalarExpressionType } from '@songsofdoom/game';
+	import ExpressionChip from '../expressions/ExpressionChip.svelte';
 	import InlineSvg from '../InlineSvg.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
+	import Operator from '../structured-text/Operator.svelte';
 
 	interface Props extends StandardAttributeProps {
 		/** The numeric value to display */
-		amount: number;
+		amount: ScalarExpressionType;
 		/** Path to the SVG icon (relative to assets/svg/) */
 		icon: string;
 		/** Whether to add a drop-shadow for contrast on busy backgrounds */
@@ -76,6 +79,12 @@ Customize appearance via CSS custom properties:
 </script>
 
 <span {...standardAttributes(attributes, styles.indicatorIcon)}>
-	<span class={styles.value}>{amount}</span>
+	{#if typeof amount === 'number'}
+		<span class={styles.value}>{amount}</span>
+	{/if}
 	<InlineSvg class={cx(styles.icon, { [styles.contrastingIcon]: contrast })} src={icon} />
+	{#if typeof amount !== 'number'}
+		<Operator>=</Operator>
+		<ExpressionChip expression={amount} />
+	{/if}
 </span>
