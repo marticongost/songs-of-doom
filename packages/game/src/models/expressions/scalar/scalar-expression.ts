@@ -35,3 +35,6 @@ export abstract class ScalarExpression extends Expression {
  * Includes primitives (number, Stat) and complex expressions (ScalarExpression).
  */
 export type ScalarExpressionType = number | ScalarExpression;
+
+export const isScalarExpression = (value: unknown): value is ScalarExpressionType =>
+	typeof value === 'number' || value instanceof ScalarExpression;

@@ -1,5 +1,6 @@
 import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
+import { isScalarExpression } from '../expressions/scalar/scalar-expression';
 import { MutableAttackResolution } from '../game/attackresolution';
 import type { GameGraph } from '../game/gamegraph';
 import type { Property } from '../properties';
@@ -32,7 +33,9 @@ export class AttackEffect extends Effect {
 				: resultsTable({
 						entries: Object.entries(results).map(([result, outcome]) => ({
 							result: parseResultString(result as ResultString),
-							effects: typeof outcome === 'number' ? [wound(outcome)] : outcome
+							effects: isScalarExpression(outcome)
+								? [wound({ damage: outcome, causedByAttack: true })]
+								: outcome
 						}))
 					});
 		this.properties = properties ?? [];
