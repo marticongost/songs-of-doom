@@ -36,7 +36,7 @@ describe('DiscardFromHandEffect.apply', () => {
 		mutableState.requirePlayer.calledWith('plr1').mockReturnValue(player);
 		const graph = mock<GameGraph>();
 		graph.requestPlayers
-			.calledWith(effect.players, expect.objectContaining({ default: expect.any(Function) }))
+			.calledWith(effect.players, expect.objectContaining({ default: 'active-player' }))
 			.mockResolvedValue(['plr1']);
 		const cardsRequestArg = effect.cards as unknown as ReadonlyArray<never>;
 		graph.requestInput.calledWith(cardsRequestArg).mockResolvedValue({ target: ['trt1'] });
@@ -67,7 +67,7 @@ describe('DiscardFromHandEffect.apply', () => {
 		mutableState.requirePlayer.calledWith('plr2').mockReturnValue(p2);
 		const graph = mock<GameGraph>();
 		graph.requestPlayers
-			.calledWith(effect.players, expect.objectContaining({ default: expect.any(Function) }))
+			.calledWith(effect.players, expect.objectContaining({ default: 'active-player' }))
 			.mockResolvedValue(['plr1', 'plr2']);
 		const cardsRequestArg = effect.cards as unknown as ReadonlyArray<never>;
 		const requestInput = graph.requestInput.calledWith(cardsRequestArg);

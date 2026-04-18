@@ -39,7 +39,7 @@ describe('AttachEffect.apply', () => {
 		mutableState.requireActiveCard.mockReturnValue(attachmentCard);
 		const graph = mock<GameGraph>();
 		graph.requestSingleTarget
-			.calledWith(target, expect.objectContaining({ default: expect.any(Function) }))
+			.calledWith(target, expect.objectContaining({ default: 'active-card' }))
 			.mockResolvedValue('trt2');
 		graph.mutate.mockImplementation((fn) => fn(mutableState));
 

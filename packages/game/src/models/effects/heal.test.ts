@@ -54,7 +54,7 @@ describe('HealEffect.apply — no explicit target', () => {
 		mutableState.evaluate.mockReturnValue(3);
 		mutableState.requireEntityState.calledWith('plr1').mockReturnValue(subject);
 		const graph = mock<GameGraph>();
-		graph.requireSubject.mockReturnValue(subject);
+		graph.requestSingleTarget.mockResolvedValue('plr1');
 		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
 		await heal(3).apply(graph);
@@ -68,7 +68,7 @@ describe('HealEffect.apply — no explicit target', () => {
 		mutableState.evaluate.mockReturnValue(5);
 		mutableState.requireEntityState.calledWith('plr1').mockReturnValue(subject);
 		const graph = mock<GameGraph>();
-		graph.requireSubject.mockReturnValue(subject);
+		graph.requestSingleTarget.mockResolvedValue('plr1');
 		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
 		await heal(5).apply(graph);

@@ -33,7 +33,7 @@ export class DrawFocusEffect extends Effect {
 
 	override async apply(gameGraph: GameGraph) {
 		const playerIds = await gameGraph.requestPlayers(this.players, {
-			default: () => [gameGraph.current.state.requireActivePlayer().id]
+			default: 'active-player'
 		});
 		gameGraph.mutate((state) => {
 			const playerDrawnTokens = new Map<PlayerId, Counter<FocusToken>>();

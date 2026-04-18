@@ -38,9 +38,9 @@ export class AttachEffect extends Effect {
 	}
 
 	override async apply(gameGraph: GameGraph) {
-		const targetId = (await gameGraph.requestSingleTarget(this.target, {
-			default: () => gameGraph.current.state.requireActiveCard().id
-		})) as EntityId;
+		const targetId = await gameGraph.requestSingleTarget(this.target, {
+			default: 'active-card'
+		});
 		await gameGraph.mutate((state) => {
 			const target = state.requireCard(targetId as CardId);
 			const attachment = state.requireActiveCard();

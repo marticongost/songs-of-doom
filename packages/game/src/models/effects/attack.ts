@@ -40,10 +40,7 @@ export class AttackEffect extends Effect {
 
 	override async apply(gameGraph: GameGraph, additionalEffects: Array<Effect> = []): Promise<void> {
 		const attackerId = gameGraph.requireSubject().id;
-		const defenderIds = await gameGraph.requestTargets(this.target, {
-			default: () => [gameGraph.current.state.requireTarget().id]
-		});
-
+		const defenderIds = await gameGraph.requestTargets(this.target);
 		for (const defenderId of defenderIds) {
 			await gameGraph.test({
 				subjectId: attackerId,

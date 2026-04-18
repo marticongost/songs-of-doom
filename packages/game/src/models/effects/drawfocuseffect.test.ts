@@ -42,7 +42,7 @@ describe('DrawFocusEffect.apply', () => {
 			player.drawFocusToken.calledWith(mutableState).mockReturnValue('strength-1');
 			const graph = mock<GameGraph>();
 			graph.requestPlayers
-				.calledWith(effect.players, expect.objectContaining({ default: expect.any(Function) }))
+				.calledWith(effect.players, expect.objectContaining({ default: 'active-player' }))
 				.mockResolvedValue(['plr1']);
 			let callbackReturn: unknown;
 			graph.mutate.mockImplementation((fn) => {

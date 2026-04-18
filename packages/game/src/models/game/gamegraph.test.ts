@@ -380,7 +380,7 @@ describe('GameGraph.requestSingleTarget', () => {
 			initialState: { players: [p1], activeCardStack: ['trt1'] }
 		});
 		const result = await graph.requestSingleTarget(undefined, {
-			default: () => graph.current.state.requireActiveCard().id
+			default: 'active-card'
 		});
 		expect(result).toBe('trt1');
 	});
@@ -421,7 +421,7 @@ describe('GameGraph.requestSinglePlayer', () => {
 			initialState: { players: [p1], activePlayerStack: ['plr1'] }
 		});
 		const result = await graph.requestSinglePlayer(undefined, {
-			default: () => graph.current.state.requireActivePlayer().id
+			default: 'active-player'
 		});
 		expect(result).toBe('plr1');
 	});
@@ -462,7 +462,7 @@ describe('GameGraph.requestTargets', () => {
 			initialState: { players: [p1], targetStack: ['trt1'] }
 		});
 		const result = await graph.requestTargets(undefined, {
-			default: () => [graph.current.state.requireTarget().id]
+			default: 'current-target'
 		});
 		expect(result).toEqual(['trt1']);
 	});
@@ -506,7 +506,7 @@ describe('GameGraph.requestPlayers', () => {
 			initialState: { players: [p1], activePlayerStack: ['plr1'] }
 		});
 		const result = await graph.requestPlayers(undefined, {
-			default: () => [graph.current.state.requireActivePlayer().id]
+			default: 'active-player'
 		});
 		expect(result).toEqual(['plr1']);
 	});

@@ -34,7 +34,7 @@ describe('ExhaustEffect.apply', () => {
 		mutableState.requireCard.calledWith('trt1').mockReturnValue(card);
 		const graph = mock<GameGraph>();
 		graph.requestSingleTarget
-			.calledWith(target, expect.objectContaining({ default: expect.any(Function) }))
+			.calledWith(target, expect.objectContaining({ default: 'active-card' }))
 			.mockResolvedValue('trt1');
 		let callbackReturn: unknown;
 		graph.mutate.mockImplementation((fn) => {

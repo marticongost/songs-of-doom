@@ -41,17 +41,19 @@ export class RecoverSanityEffect extends Effect {
 	}
 
 	override async apply(gameGraph: GameGraph): Promise<void> {
-		const targetId = this.target
-			? await gameGraph.requestSingleTarget(this.target)
-			: gameGraph.requireSubject().id;
-
-		gameGraph.mutate((state) => {
-			const amount = state.evaluate(this.amount);
-			const target = state.requireEntityState(targetId) as { mentalTrauma: number };
-			const actualAmount = Math.min(amount, target.mentalTrauma);
-			target.mentalTrauma -= actualAmount;
-			return { amount: actualAmount, targetId } satisfies RecoverSanityOutcome;
+		const targetId = await gameGraph.requestSingleTarget(this.target, {
+			default: 'current-subject'
 		});
+
+		if (targetId) {
+			gameGraph.mutate((state) => {
+				const amount = state.evaluate(this.amount);
+				const target = state.requireEntityState(targetId) as { mentalTrauma: number };
+				const actualAmount = Math.min(amount, target.mentalTrauma);
+				target.mentalTrauma -= actualAmount;
+				return { amount: actualAmount, targetId } satisfies RecoverSanityOutcome;
+			});
+		}
 	}
 }
 

@@ -31,7 +31,7 @@ export class ExhaustEffect extends Effect {
 
 	override async apply(gameGraph: GameGraph) {
 		const cardId = (await gameGraph.requestSingleTarget(this.target, {
-			default: () => gameGraph.current.state.requireActiveCard().id
+			default: 'active-card'
 		})) as CardId;
 		gameGraph.mutate((state) => {
 			const card = state.requireCard(cardId);

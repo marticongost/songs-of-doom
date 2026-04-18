@@ -42,7 +42,7 @@ export class GatherCluesEffect extends Effect {
 	override async apply(gameGraph: GameGraph) {
 		const subjectId = gameGraph.requireSubject().id;
 		const targetIds = (await gameGraph.requestTargets(this.target, {
-			default: () => [gameGraph.current.state.requireTarget().id]
+			default: 'current-target'
 		})) as Array<CardId>;
 
 		gameGraph.mutate((state) => {

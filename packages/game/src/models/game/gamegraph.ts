@@ -33,7 +33,7 @@ import {
 	type GameStateProps,
 	type MutableGameState
 } from './gamestate';
-import { type EntityId, type PlayerId } from './identifiers';
+import { isPlayerId, type EntityId, type PlayerId } from './identifiers';
 import type { Field } from './playerinput';
 import { CapabilityChoiceField, ResultField, TargetField } from './playerinput';
 import type { PlayerState } from './playerstate';
@@ -74,24 +74,17 @@ export interface RequestInputOptions {
 	playerId?: PlayerId;
 }
 
-export interface RequestSingleTargetOptions {
-	playerId?: PlayerId;
-	default?: () => EntityId | undefined;
-}
+export type ContextualEntity =
+	| 'active-player'
+	| 'active-card'
+	| 'reactive-player'
+	| 'reactive-card'
+	| 'current-subject'
+	| 'current-target';
 
-export interface RequestSinglePlayerOptions {
+export interface RequestEntityOptions {
 	playerId?: PlayerId;
-	default?: () => PlayerId | undefined;
-}
-
-export interface RequestTargetsOptions {
-	playerId?: PlayerId;
-	default?: () => Array<EntityId>;
-}
-
-export interface RequestPlayersOptions {
-	playerId?: PlayerId;
-	default?: () => Array<PlayerId>;
+	default?: ContextualEntity;
 }
 
 export const orderReactiveCapabilities = (
@@ -316,24 +309,34 @@ export class GameGraph {
 		}
 	}
 
-	async requestSingleTarget(
-		target: Target,
-		options?: RequestSingleTargetOptions
-	): Promise<EntityId>;
-	async requestSingleTarget(
-		target: undefined,
-		options: RequestSingleTargetOptions & { default: () => EntityId }
-	): Promise<EntityId>;
+	private getContextualEntityId(type: ContextualEntity): EntityId | undefined {
+		switch (type) {
+			case 'active-player':
+				return this._current.state.getActivePlayer()?.id;
+			case 'active-card':
+				return this._current.state.getActiveCard()?.id;
+			case 'reactive-player':
+				return this._current.state.getReactivePlayer()?.id;
+			case 'reactive-card':
+				return this._current.state.getReactiveCard()?.id;
+			case 'current-subject':
+				return this._current.state.getSubject()?.id;
+			case 'current-target':
+				return this._current.state.getTarget()?.id;
+		}
+	}
+
+	private getContextualEntityIdList(type: ContextualEntity): Array<EntityId> {
+		const id = this.getContextualEntityId(type);
+		return id !== undefined ? [id] : [];
+	}
+
 	async requestSingleTarget(
 		target?: Target,
-		options?: RequestSingleTargetOptions
-	): Promise<EntityId | undefined>;
-	async requestSingleTarget(
-		target?: Target,
-		options: RequestSingleTargetOptions = {}
+		options: RequestEntityOptions = {}
 	): Promise<EntityId | undefined> {
 		if (target === undefined) {
-			return options.default?.();
+			return options.default ? this.getContextualEntityId(options.default) : undefined;
 		}
 		const targetIds = (await this.requestInput(target, { playerId: options.playerId })).target;
 		if (targetIds.length !== 1) {
@@ -343,23 +346,15 @@ export class GameGraph {
 	}
 
 	async requestSinglePlayer(
-		target: Target,
-		options?: RequestSinglePlayerOptions
-	): Promise<PlayerId>;
-	async requestSinglePlayer(
-		target: undefined,
-		options: RequestSinglePlayerOptions & { default: () => PlayerId }
-	): Promise<PlayerId>;
-	async requestSinglePlayer(
 		target?: Target,
-		options?: RequestSinglePlayerOptions
-	): Promise<PlayerId | undefined>;
-	async requestSinglePlayer(
-		target?: Target,
-		options: RequestSinglePlayerOptions = {}
+		options: RequestEntityOptions = {}
 	): Promise<PlayerId | undefined> {
 		if (target === undefined) {
-			return options.default?.();
+			const id = options.default ? this.getContextualEntityId(options.default) : undefined;
+			if (id && !isPlayerId(id)) {
+				throw new Error(`Expected ${options.default} to resolve to a player id`);
+			}
+			return id;
 		}
 		if (!target.matchesType('player')) {
 			throw new Error('Expected target to be of type player');
@@ -373,12 +368,31 @@ export class GameGraph {
 
 	async requestTargets(
 		target?: Target,
-		options: RequestTargetsOptions = {}
+		options: RequestEntityOptions = {}
 	): Promise<Array<EntityId>> {
 		if (target === undefined) {
-			return options.default?.() ?? [];
+			return options.default ? this.getContextualEntityIdList(options.default) : [];
 		}
 		return (await this.requestInput(target, { playerId: options.playerId })).target;
+	}
+
+	async requestPlayers(
+		target?: Target,
+		options: RequestEntityOptions = {}
+	): Promise<Array<PlayerId>> {
+		if (target === undefined) {
+			const ids = options.default ? this.getContextualEntityIdList(options.default) : [];
+			for (const id of ids) {
+				if (!isPlayerId(id)) {
+					throw new Error(`Expected ${options.default} to resolve to player ids`);
+				}
+			}
+			return ids as Array<PlayerId>;
+		}
+		if (!target.matchesType('player')) {
+			throw new Error('Expected target to be of type player');
+		}
+		return (await this.requestInput(target, { playerId: options.playerId })).target as PlayerId[];
 	}
 
 	requireSubject(): { id: EntityId } {
@@ -391,19 +405,6 @@ export class GameGraph {
 			state.requirePlayer(playerId).defeated = true;
 		});
 		await this.triggerEvent('playerDefeated', { subjectId: playerId });
-	}
-
-	async requestPlayers(
-		target?: Target,
-		options: RequestPlayersOptions = {}
-	): Promise<Array<PlayerId>> {
-		if (target === undefined) {
-			return options.default?.() ?? [];
-		}
-		if (!target.matchesType('player')) {
-			throw new Error('Expected target to be of type player');
-		}
-		return (await this.requestInput(target, { playerId: options.playerId })).target as PlayerId[];
 	}
 
 	async test({

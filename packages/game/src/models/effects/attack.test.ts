@@ -17,9 +17,7 @@ describe('AttackEffect.apply', () => {
 		let capturedTestProps: TestProps | undefined;
 
 		graph.requireSubject.mockReturnValue({ id: 'plr1' });
-		graph.requestTargets
-			.calledWith(undefined, expect.objectContaining({ default: expect.any(Function) }))
-			.mockResolvedValue(['plr2']);
+		graph.requestTargets.calledWith(undefined).mockResolvedValue(['plr2']);
 		graph.triggerEvent.mockImplementation(async (eventType) => {
 			events.push(eventType);
 		});
@@ -46,9 +44,7 @@ describe('AttackEffect.apply', () => {
 		const beforeTestEffect = new BeforeTestEffect();
 
 		graph.requireSubject.mockReturnValue({ id: 'plr1' });
-		graph.requestTargets
-			.calledWith(undefined, expect.objectContaining({ default: expect.any(Function) }))
-			.mockResolvedValue(['plr2']);
+		graph.requestTargets.calledWith(undefined).mockResolvedValue(['plr2']);
 		graph.triggerEvent.mockImplementation(async (eventType) => {
 			events.push(eventType);
 		});

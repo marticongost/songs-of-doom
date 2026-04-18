@@ -40,7 +40,7 @@ export class DiscardFromHandEffect extends Effect {
 
 	override async apply(gameGraph: GameGraph) {
 		const playerIds = await gameGraph.requestPlayers(this.players, {
-			default: () => [gameGraph.current.state.requireActivePlayer().id]
+			default: 'active-player'
 		});
 		const playerDiscards = new Map<PlayerId, CardId[]>();
 		for (const playerId of playerIds) {
