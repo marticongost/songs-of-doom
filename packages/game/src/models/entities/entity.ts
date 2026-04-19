@@ -1,6 +1,6 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
-import { getEntryMetadata } from '../../catalog';
 import { standard } from '../../data/properties';
+import { getEntryMetadata } from '../../entry-metadata';
 import type { Capability } from '../capability';
 import type { Effect } from '../effects';
 import type { Property } from '../properties';
