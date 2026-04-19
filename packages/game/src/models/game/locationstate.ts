@@ -174,6 +174,8 @@ export class MutableLocationState extends LocationState {
 	declare attachments: Array<MutableCardState>;
 	declare players: Array<PlayerId>;
 	declare connections: Array<LocationId>;
+	declare physicalTrauma: number;
+	declare mentalTrauma: number;
 
 	constructor(locationState: ReadonlyLocationState) {
 		super({

@@ -1,5 +1,6 @@
 import type { ScalarExpressionType } from '../expressions';
 import { ScalarExpression } from '../expressions';
+import { MutableAttackResolution } from '../game/attackresolution';
 import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
@@ -23,8 +24,18 @@ export class ModifyDamageEffect extends Effect {
 		this.amount = amount;
 	}
 
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
+	override async apply(gameGraph: GameGraph) {
+		gameGraph.mutate((state) => {
+			const woundRes = state.getActiveWoundResolution();
+			if (woundRes) {
+				woundRes.damageModifier += state.evaluate(this.amount);
+			} else {
+				const attackRes = state.getActiveTestResolution();
+				if (attackRes instanceof MutableAttackResolution) {
+					attackRes.damageModifier += state.evaluate(this.amount);
+				}
+			}
+		});
 	}
 }
 

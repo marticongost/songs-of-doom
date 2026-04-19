@@ -1,6 +1,15 @@
-import { isCreature, isEncounter, isSkill, type Capability, type Property } from '../..';
+import {
+	isAlly,
+	isCreature,
+	isEncounter,
+	isSkill,
+	type Capability,
+	type Property,
+	type Stat,
+	type StatType
+} from '../..';
 import { Reaction } from '../capabilities/reaction';
-import type { Entity } from '../entities';
+import type { CreatureStatType, Entity } from '../entities';
 import { type Event } from '../event';
 import { EntityState, type MutableEntityState } from './entitystate';
 import type { MutableGameState, ReadonlyGameState } from './gamestate';
@@ -137,6 +146,16 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 		}) as Reaction[];
 
 		return reactions;
+	}
+
+	getStat(stat: Stat | StatType): number | undefined {
+		const statType = typeof stat === 'string' ? stat : stat.type;
+		if (isCreature(this.card)) {
+			return stat === 'sanity' ? undefined : this.card.stats[statType as CreatureStatType];
+		} else if (isAlly(this.card)) {
+			return this.card.stats[statType];
+		}
+		return undefined;
 	}
 }
 

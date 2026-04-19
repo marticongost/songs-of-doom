@@ -10,7 +10,8 @@ import {
 	reactivePlayerIsSubject,
 	reactivePlayerIsTarget
 } from '../expressions';
-import { creature, encounter, skill, trait } from '../properties';
+import { ally, creature, encounter, skill, trait } from '../properties';
+import { strength } from '../stats';
 import { MutableCardState, ReadonlyCardState, type CardParent } from './cardstate';
 import { ReadonlyGameState } from './gamestate';
 import type { CardId, LocationId, PlayerId } from './identifiers';
@@ -1102,5 +1103,115 @@ describe('MutableCardState', () => {
 			expect(gameState.encounterDiscardPile).not.toContain(mutableCard);
 			expect(gameState.encounterDeck).toContain(mutableCard);
 		});
+	});
+});
+
+// ─── CardState.getStat ────────────────────────────────────────────────────────
+
+function makeCreatureEntity(stats: Record<string, number>): Entity {
+	return {
+		type: creature,
+		get properties() {
+			return [creature];
+		},
+		capabilities: [],
+		attachmentCapabilities: [],
+		stats
+	} as unknown as Entity;
+}
+
+function makeAllyEntity(stats: Record<string, number>): Entity {
+	return {
+		type: ally,
+		get properties() {
+			return [ally];
+		},
+		capabilities: [],
+		attachmentCapabilities: [],
+		stats
+	} as unknown as Entity;
+}
+
+describe('CardState.getStat', () => {
+	it('returns the stat value from a creature card by StatType string', () => {
+		const card = makeReadonlyCard(
+			'trt1',
+			'plr1',
+			{ type: 'hand', playerId: 'plr1' },
+			{
+				entity: makeCreatureEntity({
+					strength: 4,
+					agility: 2,
+					intelligence: 1,
+					charisma: 1,
+					will: 1,
+					health: 6
+				})
+			}
+		);
+		expect(card.getStat('strength')).toBe(4);
+	});
+
+	it('returns the stat value from a creature card by Stat object', () => {
+		const card = makeReadonlyCard(
+			'trt1',
+			'plr1',
+			{ type: 'hand', playerId: 'plr1' },
+			{
+				entity: makeCreatureEntity({
+					strength: 3,
+					agility: 2,
+					intelligence: 1,
+					charisma: 1,
+					will: 1,
+					health: 5
+				})
+			}
+		);
+		expect(card.getStat(strength)).toBe(3);
+	});
+
+	it('returns undefined for sanity on a creature card', () => {
+		const card = makeReadonlyCard(
+			'trt1',
+			'plr1',
+			{ type: 'hand', playerId: 'plr1' },
+			{
+				entity: makeCreatureEntity({
+					strength: 3,
+					agility: 2,
+					intelligence: 1,
+					charisma: 1,
+					will: 1,
+					health: 5
+				})
+			}
+		);
+		expect(card.getStat('sanity')).toBeUndefined();
+	});
+
+	it('returns the stat value from an ally card', () => {
+		const card = makeReadonlyCard(
+			'trt1',
+			'plr1',
+			{ type: 'hand', playerId: 'plr1' },
+			{
+				entity: makeAllyEntity({
+					strength: 2,
+					agility: 3,
+					intelligence: 4,
+					charisma: 5,
+					will: 2,
+					health: 8,
+					sanity: 6
+				})
+			}
+		);
+		expect(card.getStat('health')).toBe(8);
+	});
+
+	it('returns undefined for a trait card', () => {
+		const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
+		expect(card.getStat('strength')).toBeUndefined();
 	});
 });

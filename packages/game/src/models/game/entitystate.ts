@@ -66,6 +66,8 @@ export abstract class EntityState<
 export interface MutableEntityState<Id extends EntityId> extends EntityState<Id, MutableCardState> {
 	attachments: Array<MutableCardState>;
 	properties: Array<Property>;
+	physicalTrauma: number;
+	mentalTrauma: number;
 
 	addAttachment(gameState: MutableGameState, attachment: MutableCardState): void;
 }

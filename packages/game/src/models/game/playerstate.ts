@@ -1,5 +1,5 @@
 import { Counter, shuffle, weightedChoice, type ReadonlyCounter } from '@songsofdoom/common';
-import type { FocusToken, Property, Stat } from '../..';
+import type { FocusToken, Property, Stat, StatType } from '../..';
 import type { CharacterState } from '../characters';
 import {
 	CardState,
@@ -113,7 +113,7 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 		return card;
 	}
 
-	getStat(stat: Stat): number {
+	getStat(stat: Stat | StatType): number {
 		// TODO: Apply transient effects
 		return this.character.getBaseStat(stat);
 	}

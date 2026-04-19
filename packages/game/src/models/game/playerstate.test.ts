@@ -1,8 +1,9 @@
 import { Counter } from '@songsofdoom/common';
 import { mock } from '@songsofdoom/common/test-utils';
 import { describe, expect, it } from 'vitest';
-import type { CharacterState } from '../characters';
+import { CharacterState } from '../characters';
 import type { Entity } from '../entities';
+import { health, strength } from '../stats';
 import { MutableCardState, ReadonlyCardState } from './cardstate';
 import type { MutableGameState } from './gamestate';
 import type { PlayerId } from './identifiers';
@@ -526,5 +527,47 @@ describe('MutablePlayerState.addAttachment', () => {
 		expect(mutableCard.container).toEqual({ type: 'player', playerId: 'plr1' });
 		expect(mutablePlayer.attachments).toContain(mutableCard);
 		expect(mutablePlayer.hand).not.toContain(mutableCard);
+	});
+});
+
+// ─── PlayerState.getStat ──────────────────────────────────────────────────────
+
+function makePlayerWithCharacter(id: PlayerId): ReadonlyPlayerState {
+	return new ReadonlyPlayerState({
+		id,
+		character: CharacterState.initial(),
+		deck: [],
+		hand: [],
+		discardPile: [],
+		attachments: [],
+		focusesBag: new Counter(),
+		focusesDiscardPile: new Counter(),
+		focusesHand: new Counter(),
+		physicalTrauma: 0,
+		mentalTrauma: 0
+	});
+}
+
+describe('PlayerState.getStat', () => {
+	it('getStat(Stat) returns the base attribute value for a fresh character', () => {
+		const player = makePlayerWithCharacter('plr1');
+		// CharacterState.initial() starts attributes at STARTING_ATTRIBUTE_VALUE = 3
+		expect(player.getStat(strength)).toBe(3);
+	});
+
+	it('getStat(StatType string) returns the same value as getStat(Stat)', () => {
+		const player = makePlayerWithCharacter('plr1');
+		expect(player.getStat('strength')).toBe(player.getStat(strength));
+	});
+
+	it('getStat(StatType string) returns indicator values', () => {
+		const player = makePlayerWithCharacter('plr1');
+		// CharacterState.initial() starts indicators at STARTING_INDICATOR_VALUE = 7
+		expect(player.getStat('health')).toBe(7);
+	});
+
+	it('getStat(Stat indicator) returns the indicator value', () => {
+		const player = makePlayerWithCharacter('plr1');
+		expect(player.getStat(health)).toBe(7);
 	});
 });

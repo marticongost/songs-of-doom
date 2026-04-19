@@ -10,7 +10,8 @@ import {
 
 export interface AttackResolutionProps extends TestResolutionProps {
 	defenderId: EntityId;
-	baseDamage?: number;
+	damageModifier?: number;
+	negated?: boolean;
 }
 
 export interface defenderIdtatus {
@@ -19,12 +20,14 @@ export interface defenderIdtatus {
 
 export abstract class AttackResolution extends TestResolution {
 	readonly defenderId: EntityId;
-	readonly baseDamage: number;
+	readonly damageModifier: number;
+	readonly negated: boolean;
 
-	constructor({ defenderId, baseDamage, ...baseProps }: AttackResolutionProps) {
+	constructor({ defenderId, damageModifier, negated, ...baseProps }: AttackResolutionProps) {
 		super(baseProps);
 		this.defenderId = defenderId;
-		this.baseDamage = baseDamage ?? 0;
+		this.damageModifier = damageModifier ?? 0;
+		this.negated = negated ?? false;
 	}
 }
 
@@ -36,7 +39,8 @@ export class ReadonlyAttackResolution extends AttackResolution implements Readon
 			defenderId: this.defenderId,
 			properties: this.properties,
 			result: this.result,
-			baseDamage: this.baseDamage
+			damageModifier: this.damageModifier,
+			negated: this.negated
 		});
 	}
 
@@ -50,7 +54,8 @@ export class MutableAttackResolution extends AttackResolution implements Mutable
 	declare defenderId: EntityId;
 	declare properties: Array<Property>;
 	declare result?: Result;
-	declare baseDamage: number;
+	declare damageModifier: number;
+	declare negated: boolean;
 
 	readonly(): ReadonlyAttackResolution {
 		return new ReadonlyAttackResolution({
@@ -59,7 +64,8 @@ export class MutableAttackResolution extends AttackResolution implements Mutable
 			defenderId: this.defenderId,
 			properties: this.properties,
 			result: this.result,
-			baseDamage: this.baseDamage
+			damageModifier: this.damageModifier,
+			negated: this.negated
 		});
 	}
 }

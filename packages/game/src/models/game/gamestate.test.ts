@@ -14,6 +14,7 @@ import {
 } from './locationstate';
 import type { MutablePlayerState, ReadonlyPlayerState } from './playerstate';
 import { MutableTestResolution, ReadonlyTestResolution } from './testresolution';
+import { MutableWoundResolution, ReadonlyWoundResolution } from './woundresolution';
 
 function makeGameState(
 	players: ReadonlyPlayerState[],
@@ -35,6 +36,10 @@ function makeLocation(id: LocationId, players: PlayerId[] = []): ReadonlyLocatio
 
 function makeTestResolution(proficiency = 0): ReadonlyTestResolution {
 	return new ReadonlyTestResolution({ subjectId: 'trt1', proficiency, properties: [] });
+}
+
+function makeWoundResolution(damageDealt = 3): ReadonlyWoundResolution {
+	return new ReadonlyWoundResolution({ targetId: 'trt1', damageDealt });
 }
 
 function makeMutablePlayer(id = 'plr1'): ReadonlyPlayerState {
@@ -1024,5 +1029,76 @@ describe('GameState encounterDiscardPile', () => {
 		const card = mock<ReadonlyCardState>();
 		const state = new ReadonlyGameState({ players: [], encounterDiscardPile: [card] });
 		expect(state.encounterDiscardPile[0]).toBe(card);
+	});
+});
+
+// ─── MutableGameState wound resolution stack ──────────────────────────────────
+
+describe('MutableGameState wound resolution stack', () => {
+	it('is empty when the source stack is empty', () => {
+		const state = new ReadonlyGameState({ players: [makeMutablePlayer()] });
+		expect(state.mutable().woundResolutionStack).toEqual([]);
+	});
+
+	it('converts the last element to MutableWoundResolution', () => {
+		const w1 = makeWoundResolution(5);
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			woundResolutionStack: [w1]
+		});
+		const mutable = state.mutable();
+		expect(mutable.woundResolutionStack[0]).toBeInstanceOf(MutableWoundResolution);
+	});
+
+	it('leaves preceding elements as ReadonlyWoundResolution', () => {
+		const w1 = makeWoundResolution(1);
+		const w2 = makeWoundResolution(2);
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			woundResolutionStack: [w1, w2]
+		});
+		const mutable = state.mutable();
+		expect(mutable.woundResolutionStack[0]).toBeInstanceOf(ReadonlyWoundResolution);
+		expect(mutable.woundResolutionStack[1]).toBeInstanceOf(MutableWoundResolution);
+	});
+
+	it('getActiveWoundResolution returns undefined when the stack is empty', () => {
+		const state = new ReadonlyGameState({ players: [makeMutablePlayer()] });
+		expect(state.mutable().getActiveWoundResolution()).toBeUndefined();
+	});
+
+	it('getActiveWoundResolution returns the last element as MutableWoundResolution', () => {
+		const w1 = makeWoundResolution(4);
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			woundResolutionStack: [w1]
+		});
+		expect(state.mutable().getActiveWoundResolution()).toBeInstanceOf(MutableWoundResolution);
+	});
+
+	it('requireActiveWoundResolution throws when the stack is empty', () => {
+		const state = new ReadonlyGameState({ players: [makeMutablePlayer()] });
+		expect(() => state.mutable().requireActiveWoundResolution()).toThrow();
+	});
+
+	it('requireActiveWoundResolution returns the last element as MutableWoundResolution', () => {
+		const w1 = makeWoundResolution(3);
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			woundResolutionStack: [w1]
+		});
+		expect(state.mutable().requireActiveWoundResolution()).toBeInstanceOf(MutableWoundResolution);
+	});
+
+	it('preserves damageDealt values through the mutable conversion', () => {
+		const w1 = makeWoundResolution(3);
+		const w2 = makeWoundResolution(7);
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			woundResolutionStack: [w1, w2]
+		});
+		const mutable = state.mutable();
+		expect(mutable.woundResolutionStack[0].damageDealt).toBe(3);
+		expect(mutable.woundResolutionStack[1].damageDealt).toBe(7);
 	});
 });

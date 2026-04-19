@@ -23,6 +23,11 @@ import {
 import { mutate } from './mutate';
 import { PlayerState, type MutablePlayerState, type ReadonlyPlayerState } from './playerstate';
 import { MutableTestResolution, ReadonlyTestResolution, TestResolution } from './testresolution';
+import {
+	MutableWoundResolution,
+	ReadonlyWoundResolution,
+	WoundResolution
+} from './woundresolution';
 
 export interface GameContext {
 	activeCardId?: CardId;
@@ -45,6 +50,7 @@ export interface GameStateProps {
 	targetStack?: Array<EntityId>;
 	subjectStack?: Array<EntityId>;
 	testResolutionStack?: Array<TestResolution>;
+	woundResolutionStack?: Array<WoundResolution>;
 }
 
 export class GameState<
@@ -63,6 +69,7 @@ export class GameState<
 	readonly targetStack: Array<EntityId>;
 	readonly subjectStack: Array<EntityId>;
 	readonly testResolutionStack: Array<TestResolution>;
+	readonly woundResolutionStack: Array<WoundResolution>;
 
 	constructor({
 		players,
@@ -75,7 +82,8 @@ export class GameState<
 		reactivePlayerStack,
 		targetStack,
 		subjectStack,
-		testResolutionStack
+		testResolutionStack,
+		woundResolutionStack
 	}: GameStateProps) {
 		this.players = players as ReadonlyArray<TPlayer>;
 		this.locations = (locations ?? []) as ReadonlyArray<TLocation>;
@@ -88,6 +96,7 @@ export class GameState<
 		this.targetStack = targetStack ?? [];
 		this.subjectStack = subjectStack ?? [];
 		this.testResolutionStack = testResolutionStack ?? [];
+		this.woundResolutionStack = woundResolutionStack ?? [];
 	}
 
 	getEntityState(entityId: LocationId): TLocation | undefined;
@@ -342,9 +351,11 @@ export class MutableGameState extends GameState<
 	declare targetStack: Array<EntityId>;
 	declare subjectStack: Array<EntityId>;
 	declare testResolutionStack: Array<ReadonlyTestResolution | MutableTestResolution>;
+	declare woundResolutionStack: Array<ReadonlyWoundResolution | MutableWoundResolution>;
 
 	constructor(gameState: ReadonlyGameState) {
 		const stack = gameState.testResolutionStack as Array<ReadonlyTestResolution>;
+		const woundStack = gameState.woundResolutionStack as Array<ReadonlyWoundResolution>;
 		super({
 			players: gameState.players.map((player) => player.mutable()),
 			locations: gameState.locations.map((location) => location.mutable()),
@@ -359,6 +370,10 @@ export class MutableGameState extends GameState<
 			testResolutionStack: [
 				...stack.slice(0, -1),
 				...(stack.length > 0 ? [stack[stack.length - 1].mutable()] : [])
+			],
+			woundResolutionStack: [
+				...woundStack.slice(0, -1),
+				...(woundStack.length > 0 ? [woundStack[woundStack.length - 1].mutable()] : [])
 			]
 		});
 	}
@@ -374,6 +389,23 @@ export class MutableGameState extends GameState<
 		const resolution = this.getActiveTestResolution();
 		if (!resolution) {
 			throw new Error('No active attack resolution');
+		}
+		return resolution;
+	}
+
+	getActiveWoundResolution(): MutableWoundResolution | undefined {
+		if (this.woundResolutionStack.length === 0) {
+			return undefined;
+		}
+		return this.woundResolutionStack[
+			this.woundResolutionStack.length - 1
+		] as MutableWoundResolution;
+	}
+
+	requireActiveWoundResolution(): MutableWoundResolution {
+		const resolution = this.getActiveWoundResolution();
+		if (!resolution) {
+			throw new Error('No active wound resolution');
 		}
 		return resolution;
 	}
@@ -427,6 +459,9 @@ export class MutableGameState extends GameState<
 			subjectStack: [...this.subjectStack],
 			testResolutionStack: this.testResolutionStack.map((r) =>
 				r instanceof MutableTestResolution ? r.readonly() : r
+			),
+			woundResolutionStack: this.woundResolutionStack.map((r) =>
+				r instanceof MutableWoundResolution ? r.readonly() : r
 			)
 		});
 	}

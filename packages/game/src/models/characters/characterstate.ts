@@ -368,8 +368,9 @@ export class CharacterState {
 
 	/** Gets the base value for a given character stat from permanent upgrades (ignores
 	 * transient effects, such as equipment or temporary buffs). */
-	getBaseStat(stat: Stat): number {
+	getBaseStat(stat: Stat | StatType): number {
 		const baseStats = this.getBaseStats();
+		stat = typeof stat === 'string' ? stats[stat] : stat;
 		return baseStats.get(stat) ?? 0;
 	}
 
