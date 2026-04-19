@@ -256,3 +256,4 @@ Don't suppress linting errors! If that seems to be the only way of fixing an iss
   - Rules reference: `packages/web/src/lib/rules-reference/entries/{slug}/`
   - Server-only code: `packages/web/src/lib/server/`
 - **Formatting**: Run `npm run format` after editing files to ensure consistent formatting via Prettier
+- **Function length**: Break down complex or lengthy functions and methods into smaller private helper functions/methods. Each function should have a single, clear responsibility.
