@@ -33,10 +33,10 @@ import {
 	type GameStateProps,
 	type MutableGameState
 } from './gamestate';
-import { isPlayerId, type EntityId, type PlayerId } from './identifiers';
+import { isPlayerId, type CardId, type EntityId, type PlayerId } from './identifiers';
 import type { Field } from './playerinput';
 import { CapabilityChoiceField, ResultField, TargetField } from './playerinput';
-import type { PlayerState } from './playerstate';
+import type { ReadonlyPlayerState } from './playerstate';
 import { MutableTestResolution, type TestResolutionProps } from './testresolution';
 
 export type GroupContext<ClosingNodeProps extends EndGroupProps = EndGroupProps> = GameContext & {
@@ -395,12 +395,24 @@ export class GameGraph {
 		return (await this.requestInput(target, { playerId: options.playerId })).target as PlayerId[];
 	}
 
-	async defeat(player: PlayerId | PlayerState): Promise<void> {
-		const playerId = typeof player === 'string' ? player : player.id;
+	async defeat(targetId: CardId | PlayerId | ReadonlyPlayerState): Promise<void> {
+		const playerId =
+			typeof targetId !== 'string' ? targetId.id : isPlayerId(targetId) ? targetId : undefined;
 		this.mutate((state) => {
-			state.requirePlayer(playerId).defeated = true;
+			if (playerId !== undefined) {
+				state.requirePlayer(playerId).defeated = true;
+			} else {
+				const cardState = state.requireCard(targetId as CardId);
+				if (cardState.card.type.id === 'ally') {
+					cardState.banish(state);
+				} else {
+					cardState.moveToTopOfDiscardPile(state);
+				}
+			}
 		});
-		await this.triggerEvent('playerDefeated', { subjectId: playerId });
+		if (playerId !== undefined) {
+			await this.triggerEvent('playerDefeated', { subjectId: playerId });
+		}
 	}
 
 	async test({

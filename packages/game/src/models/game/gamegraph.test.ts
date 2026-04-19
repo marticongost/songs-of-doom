@@ -899,4 +899,38 @@ describe('GameGraph.defeat', () => {
 		const eventNode = mutationNode.next!;
 		expect(eventNode.state.getSubject()?.id).toBe('plr1');
 	});
+
+	it('banishes an ally card', async () => {
+		const mutableCard = mock<MutableCardState>({
+			card: { type: { id: 'ally' } } as never
+		});
+		const mutablePlayer = mock<MutablePlayerState>({
+			id: 'plr1',
+			getCard: (id) => (id === 'crt1' ? mutableCard : undefined)
+		});
+		const player = mock<ReadonlyPlayerState>({ id: 'plr1' });
+		player.cards.mockReturnValue([]);
+		player.mutable.mockReturnValue(mutablePlayer);
+		mutablePlayer.readonly.mockReturnValue(player);
+		const graph = new GameGraph({ initialState: { players: [player] } });
+		await graph.defeat('crt1');
+		expect(mutableCard.banish).toHaveBeenCalled();
+	});
+
+	it('moves a non-ally card to the top of the discard pile', async () => {
+		const mutableCard = mock<MutableCardState>({
+			card: { type: { id: 'trait' } } as never
+		});
+		const mutablePlayer = mock<MutablePlayerState>({
+			id: 'plr1',
+			getCard: (id) => (id === 'trt1' ? mutableCard : undefined)
+		});
+		const player = mock<ReadonlyPlayerState>({ id: 'plr1' });
+		player.cards.mockReturnValue([]);
+		player.mutable.mockReturnValue(mutablePlayer);
+		mutablePlayer.readonly.mockReturnValue(player);
+		const graph = new GameGraph({ initialState: { players: [player] } });
+		await graph.defeat('trt1');
+		expect(mutableCard.moveToTopOfDiscardPile).toHaveBeenCalled();
+	});
 });
