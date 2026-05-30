@@ -23,7 +23,7 @@ export class DrawCardsEffect extends Effect {
 		await gameGraph.mutate((state) => {
 			const player = state.requireActivePlayer();
 			const drawnCards = player.drawFromDeck(state, this.amount);
-			return { cards: drawnCards.map((card) => card.id) };
+			return { cards: (Array.isArray(drawnCards) ? drawnCards : []).map((card) => card.id) };
 		});
 	}
 }

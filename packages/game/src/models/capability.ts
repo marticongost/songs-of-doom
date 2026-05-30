@@ -14,6 +14,7 @@ export interface CapabilityProps {
 export interface TriggerCapabilityProps {
 	gameGraph: GameGraph;
 	cardId: CardId;
+	context?: GameContext;
 }
 
 export abstract class Capability {
@@ -25,6 +26,11 @@ export abstract class Capability {
 		this.effects = effects;
 	}
 
+	isFeasible(state: ReadonlyGameState, cardId: CardId): boolean {
+		const card = state.requireCard(cardId);
+		return this.cost.charges === 0 || card.charges >= this.cost.charges;
+	}
+
 	constantEffects(): Array<Effect> {
 		return [];
 	}
@@ -33,7 +39,7 @@ export abstract class Capability {
 		return { activeCardId: cardId };
 	}
 
-	async trigger({ gameGraph, cardId }: TriggerCapabilityProps) {
+	async trigger({ gameGraph, cardId, context }: TriggerCapabilityProps) {
 		await gameGraph.group(
 			CapabilityTriggered,
 			{ capability: this, cardId },
@@ -41,6 +47,7 @@ export abstract class Capability {
 				...this.getTriggerContext(gameGraph.current.state, cardId),
 				targetId: cardId,
 				subjectId: cardId,
+				...context,
 				opening: (state) => {
 					const card = state.requireCard(cardId);
 					if (card.container.type === 'hand') {

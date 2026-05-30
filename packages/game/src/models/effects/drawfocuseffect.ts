@@ -1,4 +1,4 @@
-import { Counter, ReadonlyCounter } from '@songsofdoom/common';
+import { Counter } from '@songsofdoom/common';
 import type { FocusToken } from '../..';
 import type { GameGraph } from '../game/gamegraph';
 import type { PlayerId } from '../game/identifiers';
@@ -15,7 +15,7 @@ export interface DrawFocusEffectProps {
 
 export interface DrawFocusOutcome {
 	/** The focus tokens that were drawn. */
-	readonly playerDrawnTokens: ReadonlyMap<PlayerId, ReadonlyCounter<FocusToken>>;
+	readonly playerDrawnTokens: ReadonlyMap<PlayerId, Counter<FocusToken>>;
 }
 
 export class DrawFocusEffect extends Effect {

@@ -1,4 +1,4 @@
-import { Counter, type ReadonlyCounter } from '@songsofdoom/common';
+import { Counter, ReadonlyCounter } from '@songsofdoom/common';
 import { entities } from '../../catalog';
 import { innate, permanent } from '../../data/properties';
 import { Ally } from '../entities/ally';

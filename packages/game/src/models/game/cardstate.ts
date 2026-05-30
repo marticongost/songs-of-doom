@@ -16,13 +16,9 @@ import type { MutableGameState, ReadonlyGameState } from './gamestate';
 import type { CardId, LocationId, PlayerId } from './identifiers';
 import { mutate } from './mutate';
 
-export interface CardOptions {
-	ready?: boolean;
-}
-
-export interface CapabilityRef {
+export interface CapabilityRef<T extends Capability = Capability> {
 	cardId: CardId;
-	capability: Capability;
+	capability: T;
 }
 
 export type CardParent =
@@ -156,6 +152,20 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 			return this.card.stats[statType];
 		}
 		return undefined;
+	}
+
+	inPlay(): boolean {
+		return (
+			this.container.type === 'hand' ||
+			this.container.type === 'stage' ||
+			this.container.type === 'player' ||
+			this.container.type === 'card' ||
+			this.container.type === 'location'
+		);
+	}
+
+	getPlayerId(): PlayerId | undefined {
+		return 'playerId' in this.container ? this.container.playerId : undefined;
 	}
 }
 

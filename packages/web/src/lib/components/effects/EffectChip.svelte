@@ -21,8 +21,10 @@
 		LooseGoldEffect,
 		ModifyCapabilityCostEffect,
 		ModifyCarryingCapacityEffect,
+		ModifyConcentrationEffect,
 		ModifyDamageEffect,
 		ModifyGatheredCluesEffect,
+		ModifyInitiativeEffect,
 		ModifyRollEffect,
 		MoveEffect,
 		NarrationEventEffect,
@@ -39,9 +41,9 @@
 		ReplaceEncounterEffect,
 		ReplacePropertyEffect,
 		ResolveEncounterEffect,
-		SaveTargetToVariableEffect,
 		ResultsTableEffect,
 		SanityLossEffect,
+		SaveTargetToVariableEffect,
 		SetRollResultEffect,
 		TalentEffect,
 		TestEffect,
@@ -75,8 +77,10 @@
 	import LooseGoldEffectChip from './LooseGoldEffectChip.svelte';
 	import ModifyCapabilityCostEffectChip from './ModifyCapabilityCostEffectChip.svelte';
 	import ModifyCarryingCapacityEffectChip from './ModifyCarryingCapacityEffectChip.svelte';
+	import ModifyConcentrationEffectChip from './ModifyConcentrationEffectChip.svelte';
 	import ModifyDamageEffectChip from './ModifyDamageEffectChip.svelte';
 	import ModifyGatheredCluesEffectChip from './ModifyGatheredCluesEffectChip.svelte';
+	import ModifyInitiativeEffectChip from './ModifyInitiativeEffectChip.svelte';
 	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
 	import MoveEffectChip from './MoveEffectChip.svelte';
 	import NarrationEventEffectChip from './NarrationEventEffectChip.svelte';
@@ -93,9 +97,9 @@
 	import ReplaceEncounterEffectChip from './ReplaceEncounterEffectChip.svelte';
 	import ReplacePropertyEffectChip from './ReplacePropertyEffectChip.svelte';
 	import ResolveEncounterEffectChip from './ResolveEncounterEffectChip.svelte';
-	import SaveTargetToVariableEffectChip from './SaveTargetToVariableEffectChip.svelte';
 	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
 	import SanityLossEffectChip from './SanityLossEffectChip.svelte';
+	import SaveTargetToVariableEffectChip from './SaveTargetToVariableEffectChip.svelte';
 	import SetRollResultEffectChip from './SetRollResultEffectChip.svelte';
 	import TalentEffectChip from './TalentEffectChip.svelte';
 	import TestEffectChip from './TestEffectChip.svelte';
@@ -124,6 +128,10 @@
 		<ModifyCapabilityCostEffectChip {effect} />
 	{:else if effect instanceof ModifyCarryingCapacityEffect}
 		<ModifyCarryingCapacityEffectChip {effect} />
+	{:else if effect instanceof ModifyConcentrationEffect}
+		<ModifyConcentrationEffectChip {effect} />
+	{:else if effect instanceof ModifyInitiativeEffect}
+		<ModifyInitiativeEffectChip {effect} />
 	{:else if effect instanceof LooseGoldEffect}
 		<LooseGoldEffectChip {effect} />
 	{:else if effect instanceof ChangeStatsEffect}

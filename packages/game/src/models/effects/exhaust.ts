@@ -1,6 +1,7 @@
 import { finalise } from '@songsofdoom/common';
-import { rollbackEffect, type GameGraph } from '../game/gamegraph';
+import { type GameGraph } from '../game/gamegraph';
 import type { CardId } from '../game/identifiers';
+import { rollbackEffect } from '../game/rollback';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 

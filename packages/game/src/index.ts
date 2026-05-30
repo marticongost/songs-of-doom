@@ -122,3 +122,11 @@ export * as propertyData from './data/properties';
 
 // Characters
 export * from './models/characters';
+
+// Game sequence
+export {
+	ChapterPhaseNode,
+	TurnPhaseNode,
+	type ChapterPhase,
+	type TurnPhase
+} from './models/game/gamenodes';

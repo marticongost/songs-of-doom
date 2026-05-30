@@ -7,7 +7,7 @@ import { Effect } from '../effects/effect';
 import { events } from '../event';
 import { Target, type TargetType } from '../target';
 import type { MutableCardState, ReadonlyCardState } from './cardstate';
-import { GameGraph, orderReactiveCapabilities, rollbackEffect } from './gamegraph';
+import { GameGraph, orderReactiveCapabilities } from './gamegraph';
 import {
 	CapabilityTriggered,
 	DrawingFate,
@@ -27,6 +27,7 @@ import type { CardId } from './identifiers';
 import { CapabilityChoiceField } from './playerinput';
 import type { MutablePlayerState } from './playerstate';
 import { ReadonlyPlayerState } from './playerstate';
+import { rollbackEffect } from './rollback';
 
 // A minimal concrete Effect for use in triggerEffect tests
 class NoopEffect extends Effect {
@@ -663,7 +664,13 @@ describe('GameGraph.triggerEvent - iterative input', () => {
 		reaction: Obligation | Opportunity,
 		ownerId: 'plr1' | 'plr2' = 'plr1'
 	): ReadonlyCardState {
-		return mock<ReadonlyCardState>({ id, ownerId, getReactionsToEvent: () => [reaction] });
+		return mock<ReadonlyCardState>({
+			id,
+			ownerId,
+			exhausted: false,
+			attachments: [],
+			getReactionsToEvent: () => [reaction]
+		});
 	}
 
 	function graphWithReactions(cards: ReadonlyCardState[]) {

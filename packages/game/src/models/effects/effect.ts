@@ -14,5 +14,13 @@ export abstract class Effect {
 		return currentValue;
 	}
 
+	setInitiative(currentValue: number): number {
+		return currentValue;
+	}
+
+	setConcentration(currentValue: number): number {
+		return currentValue;
+	}
+
 	abstract apply(gameGraph: GameGraph): Promise<void>;
 }

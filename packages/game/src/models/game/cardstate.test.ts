@@ -1215,3 +1215,57 @@ describe('CardState.getStat', () => {
 		expect(card.getStat('strength')).toBeUndefined();
 	});
 });
+
+// ─── CardState.getPlayerId ────────────────────────────────────────────────────
+
+describe('CardState.getPlayerId', () => {
+	it('returns the playerId from a hand container', () => {
+		const card = makeReadonlyCard('trt1', 'plr1', { type: 'hand', playerId: 'plr1' });
+		expect(card.getPlayerId()).toBe('plr1');
+	});
+
+	it('returns the playerId from a deck container', () => {
+		const card = makeReadonlyCard('trt1', 'plr1', { type: 'deck', playerId: 'plr1' });
+		expect(card.getPlayerId()).toBe('plr1');
+	});
+
+	it('returns the playerId from a stage container', () => {
+		const card = makeReadonlyCard('trt1', 'plr1', { type: 'stage', playerId: 'plr1' });
+		expect(card.getPlayerId()).toBe('plr1');
+	});
+
+	it('returns the playerId from a discard container', () => {
+		const card = makeReadonlyCard('trt1', 'plr1', { type: 'discard', playerId: 'plr1' });
+		expect(card.getPlayerId()).toBe('plr1');
+	});
+
+	it('returns the playerId from a banish container', () => {
+		const card = makeReadonlyCard('trt1', 'plr1', { type: 'banish', playerId: 'plr1' });
+		expect(card.getPlayerId()).toBe('plr1');
+	});
+
+	it('returns the playerId from a player container', () => {
+		const card = makeReadonlyCard('trt1', 'plr1', { type: 'player', playerId: 'plr1' });
+		expect(card.getPlayerId()).toBe('plr1');
+	});
+
+	it('returns undefined for a card container (no playerId)', () => {
+		const card = makeReadonlyCard('trt2', 'plr1', { type: 'card', cardId: 'trt1' });
+		expect(card.getPlayerId()).toBeUndefined();
+	});
+
+	it('returns undefined for a location container (no playerId)', () => {
+		const card = makeReadonlyCard('trt1', 'plr1', { type: 'location', locationId: 'loc1' });
+		expect(card.getPlayerId()).toBeUndefined();
+	});
+
+	it('returns undefined for an encounter-deck container (no playerId)', () => {
+		const card = makeReadonlyCard('crt1', 'plr1', { type: 'encounter-deck' });
+		expect(card.getPlayerId()).toBeUndefined();
+	});
+
+	it('returns undefined for an encounter-discard container (no playerId)', () => {
+		const card = makeReadonlyCard('crt1', 'plr1', { type: 'encounter-discard' });
+		expect(card.getPlayerId()).toBeUndefined();
+	});
+});

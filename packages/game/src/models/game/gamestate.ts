@@ -1,16 +1,18 @@
+import type { EntityTypeId } from '../..';
+import { Action } from '../capabilities/action';
+import { type Capability } from '../capability';
+import type { Effect } from '../effects/effect';
 import type { BooleanExpressionType } from '../expressions/boolean/boolean-expression';
 import type { ScalarExpressionType } from '../expressions/scalar/scalar-expression';
-import {
-	CardState,
-	type CardOptions,
-	type MutableCardState,
-	type ReadonlyCardState
-} from './cardstate';
+import { focuses, type FocusType } from '../focus';
+import { CardState, type MutableCardState, type ReadonlyCardState } from './cardstate';
+import type { PlannedAction } from './gamesequence';
 import {
 	isCardId,
 	isLocationId,
 	isPlayerId,
 	type CardId,
+	type CreatureId,
 	type EntityId,
 	type LocationId,
 	type PlayerId
@@ -51,6 +53,12 @@ export interface GameStateProps {
 	subjectStack?: Array<EntityId>;
 	testResolutionStack?: Array<TestResolution>;
 	woundResolutionStack?: Array<WoundResolution>;
+	plannedActions?: ReadonlyMap<CardId, PlannedAction>;
+}
+
+export interface CardOptions {
+	ready?: boolean;
+	type?: EntityTypeId;
 }
 
 export class GameState<
@@ -70,6 +78,7 @@ export class GameState<
 	readonly subjectStack: Array<EntityId>;
 	readonly testResolutionStack: Array<TestResolution>;
 	readonly woundResolutionStack: Array<WoundResolution>;
+	readonly plannedActions: ReadonlyMap<CardId, PlannedAction>;
 
 	constructor({
 		players,
@@ -83,7 +92,8 @@ export class GameState<
 		targetStack,
 		subjectStack,
 		testResolutionStack,
-		woundResolutionStack
+		woundResolutionStack,
+		plannedActions
 	}: GameStateProps) {
 		this.players = players as ReadonlyArray<TPlayer>;
 		this.locations = (locations ?? []) as ReadonlyArray<TLocation>;
@@ -97,6 +107,7 @@ export class GameState<
 		this.subjectStack = subjectStack ?? [];
 		this.testResolutionStack = testResolutionStack ?? [];
 		this.woundResolutionStack = woundResolutionStack ?? [];
+		this.plannedActions = plannedActions ?? new Map();
 	}
 
 	getEntityState(entityId: LocationId): TLocation | undefined;
@@ -125,8 +136,27 @@ export class GameState<
 	}
 
 	cards(options?: CardOptions): Array<TCard> {
-		const playerCards = this.players.flatMap((player) => player.cards(options)) as Array<TCard>;
-		return options?.ready ? playerCards : ([...this.locations, ...playerCards] as Array<TCard>);
+		const cards: TCard[] = [];
+
+		const visit = (cardState: CardState) => {
+			if (options?.ready && cardState.exhausted) {
+				return;
+			}
+			if (!options?.type || cardState.card.type.id === options.type) {
+				cards.push(cardState as TCard);
+			}
+			cardState.attachments.forEach(visit);
+		};
+
+		this.locations.forEach(visit);
+		this.players.forEach((player) => player.cards(options).forEach(visit));
+
+		if (!options?.ready) {
+			this.encounterDeck.forEach(visit);
+			this.encounterDiscardPile.forEach(visit);
+		}
+
+		return cards;
 	}
 
 	getCard(cardId: LocationId): TLocation | undefined;
@@ -319,6 +349,59 @@ export class GameState<
 		if (typeof expr === 'number') return expr;
 		return (expr as { evaluate(state: GameState): boolean | number }).evaluate(this);
 	}
+
+	/**
+	 * Returns the concentration value for the given player.
+	 * Concentration = max(0, 1 + sum of all modifyConcentration modifiers from Constant
+	 * capabilities in cards under the player's control).
+	 */
+	getConcentration(playerId: PlayerId): number {
+		const player = this.requirePlayer(playerId);
+		const allCards = [...player.hand, ...player.attachments];
+		const base = 1;
+		const modifier = allCards
+			.flatMap((card) => card.card.capabilities.flatMap((cap) => cap.constantEffects()))
+			.reduce((value, effect) => effect.setConcentration(value), base);
+		return Math.max(0, modifier);
+	}
+
+	/**
+	 * Calculates the initiative for an entity executing a given action.
+	 * Initiative = entity's agility stat + modifyInitiative modifiers from Constant
+	 * capabilities on the entity's card and attachments + modifyInitiative effects on the
+	 * action itself.
+	 */
+	calculateInitiative(entityId: EntityId, action: Action): number {
+		let base: number;
+		let constantEffects: Array<Effect>;
+		if (isPlayerId(entityId)) {
+			const player = this.requirePlayer(entityId);
+			base = player.getStat('agility');
+			constantEffects = player.attachments.flatMap((att) =>
+				att.card.capabilities.flatMap((cap) => cap.constantEffects())
+			);
+		} else {
+			const card = this.requireCard(entityId as CardId);
+			base = card.getStat('agility') ?? 0;
+			constantEffects = [
+				...card.card.capabilities.flatMap((cap) => cap.constantEffects()),
+				...card.attachments.flatMap((att) =>
+					att.card.attachmentCapabilities.flatMap((cap) => cap.constantEffects())
+				)
+			];
+		}
+		const initiative = [...constantEffects, ...action.effects].reduce(
+			(value, effect) => effect.setInitiative(value),
+			base
+		);
+		return initiative;
+	}
+
+	get creatures(): Array<TCard> {
+		return this.cards().filter(
+			(cardState) => cardState.card.type.id === 'creature'
+		) as Array<TCard>;
+	}
 }
 
 export class ReadonlyGameState extends GameState<
@@ -352,6 +435,7 @@ export class MutableGameState extends GameState<
 	declare subjectStack: Array<EntityId>;
 	declare testResolutionStack: Array<ReadonlyTestResolution | MutableTestResolution>;
 	declare woundResolutionStack: Array<ReadonlyWoundResolution | MutableWoundResolution>;
+	declare plannedActions: Map<CardId, PlannedAction>;
 
 	constructor(gameState: ReadonlyGameState) {
 		const stack = gameState.testResolutionStack as Array<ReadonlyTestResolution>;
@@ -374,7 +458,8 @@ export class MutableGameState extends GameState<
 			woundResolutionStack: [
 				...woundStack.slice(0, -1),
 				...(woundStack.length > 0 ? [woundStack[woundStack.length - 1].mutable()] : [])
-			]
+			],
+			plannedActions: new Map(gameState.plannedActions)
 		});
 	}
 
@@ -462,7 +547,64 @@ export class MutableGameState extends GameState<
 			),
 			woundResolutionStack: this.woundResolutionStack.map((r) =>
 				r instanceof MutableWoundResolution ? r.readonly() : r
-			)
+			),
+			plannedActions: new Map(this.plannedActions)
 		});
 	}
+
+	getCapabilityImpediment(
+		capability: Capability,
+		cardId: CardId,
+		actorId: PlayerId | CreatureId
+	): CapabilityImpediment | undefined {
+		const actor = this.requireEntityState(actorId);
+		const player = actor instanceof PlayerState ? actor : undefined;
+		if (capability.cost) {
+			const card = this.requireCard(cardId);
+
+			// Charges
+			if (capability.cost.charges) {
+				if (card.charges < capability.cost.charges) {
+					return 'insufficient-charges';
+				}
+			}
+
+			// Card transition
+			if (capability.cost.cardTransition) {
+				if (!card.inPlay()) {
+					return 'card-unavailable';
+				}
+				if (capability.cost.cardTransition.type === 'exhaust') {
+					if (card.exhausted) {
+						return 'card-exhausted';
+					}
+				}
+			}
+
+			// Gold
+			if (capability.cost.gold && !(player && player.gold >= capability.cost.gold)) {
+				return 'insufficient-gold';
+			}
+
+			// Focuses
+			for (const focus of Object.keys(focuses) as Array<FocusType>) {
+				const focusCostExpr = capability.cost.getCostForType(focus);
+				const focusCost = focusCostExpr && this.evaluate(focusCostExpr);
+				if (focusCost && !(player && player.hasEnoughFocusOfType(focus, focusCost))) {
+					return 'insufficient-focus';
+				}
+			}
+		}
+		return undefined;
+		// TODO: What about capabilities that alter the costs of other capabilities or
+		// the state of the game in a way that would make the capability feasible / not
+		// feasible anymore?
+	}
 }
+
+type CapabilityImpediment =
+	| 'insufficient-charges'
+	| 'card-exhausted'
+	| 'card-unavailable'
+	| 'insufficient-gold'
+	| 'insufficient-focus';

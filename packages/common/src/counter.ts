@@ -122,7 +122,7 @@ export class Counter<T> extends BaseCounter<T> {
 		this.itemCounts.clear();
 	}
 
-	/** Returns an immutable {@link ReadonlyCounter} snapshot of the current state. */
+	/** Returns an immutable {@link Counter} snapshot of the current state. */
 	readonly(): ReadonlyCounter<T> {
 		return new ReadonlyCounter(this);
 	}

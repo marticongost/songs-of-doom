@@ -180,3 +180,46 @@ export class FateDrawn extends EndGroup {
 		this.resolution = resolution;
 	}
 }
+
+export type ChapterPhase = 'chapter-start' | 'focus' | 'turns' | 'draw' | 'encounters' | 'cleanup';
+
+export type TurnPhase =
+	| 'turn-start'
+	| 'enemy-planning'
+	| 'player-planning'
+	| 'execution'
+	| 'turn-end';
+
+export interface ChapterPhaseNodeProps extends GameNodeProps {
+	phase: ChapterPhase;
+}
+
+/**
+ * Opens a group for a chapter phase. Closed by {@link EndGroup}.
+ */
+export class ChapterPhaseNode extends GameNode {
+	readonly phase: ChapterPhase;
+
+	constructor({ phase, ...baseProps }: ChapterPhaseNodeProps) {
+		super(baseProps);
+		this.phase = phase;
+	}
+}
+
+export interface TurnPhaseNodeProps extends GameNodeProps {
+	phase: TurnPhase;
+}
+
+/**
+ * Opens a group for a turn phase. Closed by {@link EndGroup}.
+ */
+export class TurnPhaseNode extends GameNode {
+	readonly phase: TurnPhase;
+
+	constructor({ phase, ...baseProps }: TurnPhaseNodeProps) {
+		super(baseProps);
+		this.phase = phase;
+	}
+}
+
+export class PlayerFocusNode extends GameNode {}

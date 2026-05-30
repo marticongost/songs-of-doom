@@ -27,6 +27,7 @@ import {
 	type GameNodeProps,
 	type MutationProps
 } from './gamenodes';
+import { runChapter } from './gamesequence';
 import {
 	ReadonlyGameState,
 	type GameContext,
@@ -37,6 +38,7 @@ import { isPlayerId, type CardId, type EntityId, type PlayerId } from './identif
 import type { Field } from './playerinput';
 import { CapabilityChoiceField, ResultField, TargetField } from './playerinput';
 import type { ReadonlyPlayerState } from './playerstate';
+import { EffectRolledBack } from './rollback';
 import { MutableTestResolution, type TestResolutionProps } from './testresolution';
 
 export type GroupContext<ClosingNodeProps extends EndGroupProps = EndGroupProps> = GameContext & {
@@ -226,7 +228,7 @@ export class GameGraph {
 		return node;
 	}
 
-	async triggerEffect(effect: Effect): Promise<void> {
+	async triggerEffect(effect: Effect, context?: GameContext): Promise<void> {
 		const nodeBeforeGroup = this._current;
 		const parentBeforeGroup = this._currentParent;
 		const parentChildrenLen = this._currentParent ? this._currentParent[CHILDREN].length : 0;
@@ -235,7 +237,7 @@ export class GameGraph {
 			await this.group<EffectGroupProps, void>(
 				EffectGroup,
 				{ effect },
-				{ closingNodeType: EndEffectGroup },
+				{ closingNodeType: EndEffectGroup, ...context },
 				async () => {
 					await effect.apply(this);
 				}
@@ -266,15 +268,12 @@ export class GameGraph {
 		return outcome;
 	}
 
-	async requestInput(
-		target: Target,
-		options?: RequestInputOptions
-	): Promise<{ target: EntityId[] }>;
-	async requestInput<const Fields extends ReadonlyArray<Field<unknown, string, boolean>>>(
+	requestInput(target: Target, options?: RequestInputOptions): Promise<{ target: EntityId[] }>;
+	requestInput<const Fields extends ReadonlyArray<Field<unknown, string, boolean>>>(
 		fields: Fields,
 		options?: RequestInputOptions
 	): Promise<FieldsResult<Fields>>;
-	async requestInput<const Fields extends ReadonlyArray<Field<unknown, string, boolean>>>(
+	requestInput<const Fields extends ReadonlyArray<Field<unknown, string, boolean>>>(
 		fieldsOrTarget: Fields | Target,
 		options: RequestInputOptions = {}
 	): Promise<FieldsResult<Fields> | { target: EntityId[] }> {
@@ -583,9 +582,6 @@ export class GameGraph {
 			eventContext.activePlayerId ??
 			this._current.state.getActivePlayer()?.id ??
 			this._current.state.players[0]?.id;
-		if (activePlayerId === undefined) {
-			throw new Error('Cannot resolve active player when triggering an event');
-		}
 
 		await this.group(
 			EventTriggered,
@@ -598,6 +594,7 @@ export class GameGraph {
 				reactivePlayerId: eventContext.reactivePlayerId
 			},
 			async () => {
+				if (activePlayerId === undefined) return;
 				const reactiveCapabilities = this.collectReactiveCapabilities(eventType);
 				const clockwisePlayerOrder = this._current.state.clockwise(activePlayerId);
 				for (const reactionGroup of orderReactiveCapabilities(
@@ -663,21 +660,14 @@ export class GameGraph {
 			}
 		}
 	}
+
+	/** Runs a full game chapter (phases: chapter-start, focus, turns, draw, encounters, cleanup). */
+	async runChapter(): Promise<void> {
+		return runChapter(this);
+	}
 }
 
 /** An error indicating a game state mutation was deemed unnecessary or invalid, and
  * was rolled back.
  */
 class GameStateMutationCancelled extends Error {}
-
-/** An error indicating the entire effect group should be cancelled and rewound. */
-class EffectRolledBack extends Error {}
-
-/**
- * Cancels and rolls back the entire currently-executing effect group, rewinding the
- * game graph to the node before the effect started. Use this when an effect determines
- * it should not apply at all (e.g. exhausting a card that is already exhausted).
- */
-export const rollbackEffect = () => {
-	throw new EffectRolledBack();
-};

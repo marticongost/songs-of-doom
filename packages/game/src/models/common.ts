@@ -1,5 +1,8 @@
 import { Obligation, Opportunity } from './capabilities';
-import { addCharges, attach, replaceEncounter, triggerAttack } from './effects';
+import { attach } from './effects/attach';
+import { addCharges } from './effects/recharge';
+import { replaceEncounter } from './effects/replaceencounter';
+import { triggerAttack } from './effects/triggerattack';
 import {
 	copyAlreadyAttached,
 	distance,

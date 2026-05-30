@@ -1,15 +1,22 @@
-import { Counter, shuffle, weightedChoice, type ReadonlyCounter } from '@songsofdoom/common';
-import type { FocusToken, Property, Stat, StatType } from '../..';
+import { Counter, shuffle, weightedChoice } from '@songsofdoom/common';
+import {
+	getFocusTokenType,
+	getFocusTokenValue,
+	type FocusToken,
+	type FocusType,
+	type Property,
+	type Stat,
+	type StatType
+} from '../..';
 import type { CharacterState } from '../characters';
 import {
 	CardState,
-	type CardOptions,
 	type CardParent,
 	type MutableCardState,
 	type ReadonlyCardState
 } from './cardstate';
 import { EntityState, type MutableEntityState } from './entitystate';
-import type { MutableGameState } from './gamestate';
+import type { CardOptions, MutableGameState } from './gamestate';
 import type { CardId, PlayerId } from './identifiers';
 import { mutate } from './mutate';
 
@@ -24,9 +31,10 @@ export interface PlayerStateProps {
 	attachments?: ReadonlyArray<CardState>;
 	properties?: ReadonlyArray<Property>;
 	clues?: number;
-	focusesBag: ReadonlyCounter<FocusToken>;
-	focusesDiscardPile: ReadonlyCounter<FocusToken>;
-	focusesHand: ReadonlyCounter<FocusToken>;
+	gold?: number;
+	focusesBag: Counter<FocusToken>;
+	focusesDiscardPile: Counter<FocusToken>;
+	focusesHand: Counter<FocusToken>;
 	physicalTrauma: number;
 	mentalTrauma: number;
 	defeated?: boolean;
@@ -44,9 +52,10 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 	readonly discardPile: ReadonlyArray<TCard>;
 	readonly banishedCards: ReadonlyArray<TCard>;
 	readonly clues: number;
-	readonly focusesBag: ReadonlyCounter<FocusToken>;
-	readonly focusesDiscardPile: ReadonlyCounter<FocusToken>;
-	readonly focusesHand: ReadonlyCounter<FocusToken>;
+	readonly gold: number;
+	readonly focusesBag: Counter<FocusToken>;
+	readonly focusesDiscardPile: Counter<FocusToken>;
+	readonly focusesHand: Counter<FocusToken>;
 	readonly defeated: boolean;
 
 	constructor({
@@ -60,6 +69,7 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 		attachments = [],
 		properties,
 		clues = 0,
+		gold = 0,
 		focusesBag,
 		focusesDiscardPile,
 		focusesHand,
@@ -75,6 +85,7 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 		this.discardPile = discardPile as ReadonlyArray<TCard>;
 		this.banishedCards = banishedCards as ReadonlyArray<TCard>;
 		this.clues = clues;
+		this.gold = gold;
 		this.focusesBag = focusesBag;
 		this.focusesDiscardPile = focusesDiscardPile;
 		this.focusesHand = focusesHand;
@@ -82,17 +93,29 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 	}
 
 	cards(options?: CardOptions): Array<TCard> {
-		if (options?.ready) {
-			return [...this.hand, ...this.stage, ...this.attachments].filter((card) => !card.exhausted);
+		const cards: TCard[] = [];
+
+		const visit = (cardState: CardState) => {
+			if (options?.ready && cardState.exhausted) {
+				return;
+			}
+			if (!options?.type || cardState.card.type.id === options.type) {
+				cards.push(cardState as TCard);
+			}
+			cardState.attachments.forEach(visit);
+		};
+
+		this.hand.forEach(visit);
+		this.stage.forEach(visit);
+		this.attachments.forEach(visit);
+
+		if (!options?.ready) {
+			this.deck.forEach(visit);
+			this.discardPile.forEach(visit);
+			this.banishedCards.forEach(visit);
 		}
-		return [
-			...this.deck,
-			...this.hand,
-			...this.stage,
-			...this.discardPile,
-			...this.attachments,
-			...this.banishedCards
-		];
+
+		return cards;
 	}
 
 	getCard(id: CardId): TCard | undefined {
@@ -116,6 +139,19 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 	getStat(stat: Stat | StatType): number {
 		// TODO: Apply transient effects
 		return this.character.getBaseStat(stat);
+	}
+
+	hasEnoughFocusOfType(focusType: FocusType, requiredAmount: number): boolean {
+		let availableFocusOfType = 0;
+		for (const [token, amount] of this.focusesBag.entries()) {
+			if (getFocusTokenType(token) === focusType) {
+				availableFocusOfType += getFocusTokenValue(token) * amount;
+			}
+			if (availableFocusOfType >= requiredAmount) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
 
@@ -148,6 +184,7 @@ export class MutablePlayerState
 	declare focusesBag: Counter<FocusToken>;
 	declare focusesHand: Counter<FocusToken>;
 	declare focusesDiscardPile: Counter<FocusToken>;
+	declare gold: number;
 
 	constructor(playerState: ReadonlyPlayerState) {
 		super({
@@ -161,6 +198,7 @@ export class MutablePlayerState
 			attachments: playerState.attachments.map((card) => card.mutable()),
 			properties: [...playerState.properties],
 			clues: playerState.clues,
+			gold: playerState.gold,
 			physicalTrauma: playerState.physicalTrauma,
 			mentalTrauma: playerState.mentalTrauma,
 			defeated: playerState.defeated,
@@ -187,7 +225,8 @@ export class MutablePlayerState
 			defeated: this.defeated,
 			focusesBag: new Counter(this.focusesBag),
 			focusesHand: new Counter(this.focusesHand),
-			focusesDiscardPile: new Counter(this.focusesDiscardPile)
+			focusesDiscardPile: new Counter(this.focusesDiscardPile),
+			gold: this.gold
 		});
 	}
 

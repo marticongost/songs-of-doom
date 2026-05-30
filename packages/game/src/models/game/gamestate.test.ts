@@ -1,5 +1,9 @@
 import { mock } from '@songsofdoom/common/test-utils';
 import { describe, expect, it } from 'vitest';
+import { Action } from '../capabilities/action';
+import { Constant } from '../capabilities/constant';
+import { modifyConcentration } from '../effects/modifyconcentration';
+import { modifyInitiative } from '../effects/modifyinitiative';
 import type { Entity } from '../entities';
 import type { BooleanExpression } from '../expressions/boolean';
 import type { ScalarExpression } from '../expressions/scalar';
@@ -52,8 +56,8 @@ function makeMutablePlayer(id = 'plr1'): ReadonlyPlayerState {
 
 describe('GameState.cards', () => {
 	it('returns all cards across all players', () => {
-		const c1 = mock<ReadonlyCardState>();
-		const c2 = mock<ReadonlyCardState>();
+		const c1 = mock<ReadonlyCardState>({ attachments: [] });
+		const c2 = mock<ReadonlyCardState>({ attachments: [] });
 		const state = makeGameState([
 			mock<ReadonlyPlayerState>({ cards: () => [c1] }),
 			mock<ReadonlyPlayerState>({ cards: () => [c2] })
@@ -72,9 +76,112 @@ describe('GameState.cards', () => {
 	});
 
 	it('includes top-level locations', () => {
-		const location = mock<ReadonlyLocationStateType>();
+		const location = mock<ReadonlyLocationStateType>({ attachments: [] });
 		const state = makeGameState([mock<ReadonlyPlayerState>({ cards: () => [] })], [location]);
 		expect(state.cards()).toContain(location);
+	});
+
+	it('includes encounter deck cards', () => {
+		const c1 = mock<ReadonlyCardState>({ attachments: [] });
+		const state = new ReadonlyGameState({
+			players: [mock<ReadonlyPlayerState>({ cards: () => [] })],
+			encounterDeck: [c1]
+		});
+		expect(state.cards()).toContain(c1);
+	});
+
+	it('includes encounter discard pile cards', () => {
+		const c1 = mock<ReadonlyCardState>({ attachments: [] });
+		const state = new ReadonlyGameState({
+			players: [mock<ReadonlyPlayerState>({ cards: () => [] })],
+			encounterDiscardPile: [c1]
+		});
+		expect(state.cards()).toContain(c1);
+	});
+
+	it('with ready:true excludes encounter deck and discard pile', () => {
+		const deckCard = mock<ReadonlyCardState>({ attachments: [] });
+		const discardCard = mock<ReadonlyCardState>({ attachments: [] });
+		const state = new ReadonlyGameState({
+			players: [mock<ReadonlyPlayerState>({ cards: () => [] })],
+			encounterDeck: [deckCard],
+			encounterDiscardPile: [discardCard]
+		});
+		const ready = state.cards({ ready: true });
+		expect(ready).not.toContain(deckCard);
+		expect(ready).not.toContain(discardCard);
+	});
+
+	it('with ready:true skips exhausted location cards', () => {
+		const readyLocation = mock<ReadonlyLocationStateType>({ attachments: [], exhausted: false });
+		const exhaustedLocation = mock<ReadonlyLocationStateType>({ attachments: [], exhausted: true });
+		const state = makeGameState(
+			[mock<ReadonlyPlayerState>({ cards: () => [] })],
+			[readyLocation, exhaustedLocation]
+		);
+		const ready = state.cards({ ready: true });
+		expect(ready).toContain(readyLocation);
+		expect(ready).not.toContain(exhaustedLocation);
+	});
+
+	it('filters by entity type', () => {
+		const skillCard = mock<ReadonlyCardState>({
+			attachments: [],
+			card: { type: { id: 'skill' } } as Entity
+		});
+		const itemCard = mock<ReadonlyCardState>({
+			attachments: [],
+			card: { type: { id: 'item' } } as Entity
+		});
+		const state = makeGameState([
+			mock<ReadonlyPlayerState>({ cards: () => [skillCard, itemCard] })
+		]);
+		const skills = state.cards({ type: 'skill' });
+		expect(skills).toContain(skillCard);
+		expect(skills).not.toContain(itemCard);
+	});
+
+	it('includes cards attached to locations', () => {
+		const attached = mock<ReadonlyCardState>({ attachments: [] });
+		const location = mock<ReadonlyLocationStateType>({ attachments: [attached] });
+		const state = makeGameState([mock<ReadonlyPlayerState>({ cards: () => [] })], [location]);
+		expect(state.cards()).toContain(attached);
+	});
+
+	it('includes cards attached to player cards', () => {
+		const attached = mock<ReadonlyCardState>({ attachments: [] });
+		const playerCard = mock<ReadonlyCardState>({ attachments: [attached] });
+		const state = makeGameState([mock<ReadonlyPlayerState>({ cards: () => [playerCard] })]);
+		expect(state.cards()).toContain(attached);
+	});
+
+	it('with ready:true skips exhausted player cards', () => {
+		const readyCard = mock<ReadonlyCardState>({ attachments: [], exhausted: false });
+		const exhaustedCard = mock<ReadonlyCardState>({ attachments: [], exhausted: true });
+		const state = makeGameState([
+			mock<ReadonlyPlayerState>({ cards: () => [readyCard, exhaustedCard] })
+		]);
+		const ready = state.cards({ ready: true });
+		expect(ready).toContain(readyCard);
+		expect(ready).not.toContain(exhaustedCard);
+	});
+
+	it('filters locations by entity type', () => {
+		const matchingLoc = mock<ReadonlyLocationStateType>({
+			attachments: [],
+			card: { type: { id: 'location' } } as Entity
+		});
+		const otherLoc = mock<ReadonlyLocationStateType>({
+			attachments: [],
+			card: { type: { id: 'creature' } } as Entity
+		});
+		const state = makeGameState(
+			[mock<ReadonlyPlayerState>({ cards: () => [] })],
+			[matchingLoc, otherLoc]
+		);
+		const locations = state.cards({ type: 'location' });
+		expect(locations).toContain(matchingLoc);
+		expect(locations).not.toContain(otherLoc);
 	});
 });
 
@@ -591,6 +698,142 @@ describe('GameState.evaluate', () => {
 		const state = new ReadonlyGameState({ players: [] });
 		expect(state.evaluate(expr)).toBe(5);
 		expect(expr.evaluate).toHaveBeenCalledWith(state);
+	});
+});
+
+// ─── GameState.getConcentration ──────────────────────────────────────────────
+
+describe('GameState.getConcentration', () => {
+	it('returns 1 when the player has no cards', () => {
+		const player = mock<ReadonlyPlayerState>({ id: 'plr1', hand: [], attachments: [] });
+		const state = new ReadonlyGameState({ players: [player] });
+
+		expect(state.getConcentration('plr1')).toBe(1);
+	});
+
+	it('adds modifier from a Constant capability in hand', () => {
+		const cap = new Constant({ effects: [modifyConcentration(2)] });
+		const entity = mock<Entity>({ capabilities: [cap], attachmentCapabilities: [] });
+		const card = mock<ReadonlyCardState>({ card: entity, attachments: [] });
+		const player = mock<ReadonlyPlayerState>({
+			id: 'plr1',
+			hand: [card],
+			attachments: []
+		});
+		const state = new ReadonlyGameState({ players: [player] });
+
+		expect(state.getConcentration('plr1')).toBe(3);
+	});
+
+	it('adds modifier from a Constant capability on an attached card', () => {
+		const cap = new Constant({ effects: [modifyConcentration(1)] });
+		const entity = mock<Entity>({ capabilities: [cap], attachmentCapabilities: [] });
+		const attachedCard = mock<ReadonlyCardState>({ card: entity, attachments: [] });
+		const player = mock<ReadonlyPlayerState>({
+			id: 'plr1',
+			hand: [],
+			attachments: [attachedCard]
+		});
+		const state = new ReadonlyGameState({ players: [player] });
+
+		expect(state.getConcentration('plr1')).toBe(2);
+	});
+
+	it('sums modifiers from multiple cards', () => {
+		const cap1 = new Constant({ effects: [modifyConcentration(1)] });
+		const cap2 = new Constant({ effects: [modifyConcentration(2)] });
+		const e1 = mock<Entity>({ capabilities: [cap1], attachmentCapabilities: [] });
+		const e2 = mock<Entity>({ capabilities: [cap2], attachmentCapabilities: [] });
+		const c1 = mock<ReadonlyCardState>({ card: e1, attachments: [] });
+		const c2 = mock<ReadonlyCardState>({ card: e2, attachments: [] });
+		const player = mock<ReadonlyPlayerState>({ id: 'plr1', hand: [c1, c2], attachments: [] });
+		const state = new ReadonlyGameState({ players: [player] });
+
+		expect(state.getConcentration('plr1')).toBe(4);
+	});
+
+	it('is clamped to a minimum of 0', () => {
+		const cap = new Constant({ effects: [modifyConcentration(-5)] });
+		const entity = mock<Entity>({ capabilities: [cap], attachmentCapabilities: [] });
+		const card = mock<ReadonlyCardState>({ card: entity, attachments: [] });
+		const player = mock<ReadonlyPlayerState>({ id: 'plr1', hand: [card], attachments: [] });
+		const state = new ReadonlyGameState({ players: [player] });
+
+		expect(state.getConcentration('plr1')).toBe(0);
+	});
+
+	it('ignores non-Constant capabilities', () => {
+		const action = new Action({ effects: [modifyConcentration(10)] });
+		const entity = mock<Entity>({ capabilities: [action], attachmentCapabilities: [] });
+		const card = mock<ReadonlyCardState>({ card: entity, attachments: [] });
+		const player = mock<ReadonlyPlayerState>({ id: 'plr1', hand: [card], attachments: [] });
+		const state = new ReadonlyGameState({ players: [player] });
+
+		// Action.constantEffects() returns [] so the modifier should be ignored
+		expect(state.getConcentration('plr1')).toBe(1);
+	});
+});
+
+// ─── GameState.calculateInitiative ───────────────────────────────────────────
+
+describe('GameState.calculateInitiative', () => {
+	it('returns the entity agility stat for an action with no modifiers', () => {
+		const action = new Action({ effects: [] });
+		const player = mock<ReadonlyPlayerState>({
+			id: 'plr1',
+			hand: [],
+			attachments: [],
+			getStat: () => 4
+		});
+		const state = new ReadonlyGameState({ players: [player] });
+
+		expect(state.calculateInitiative('plr1', action)).toBe(4);
+	});
+
+	it('adds modifyInitiative modifiers from Constant capabilities on the entity', () => {
+		const cap = new Constant({ effects: [modifyInitiative(2)] });
+		const entity = mock<Entity>({ capabilities: [cap], attachmentCapabilities: [] });
+		const attachedCard = mock<ReadonlyCardState>({ card: entity, attachments: [] });
+		const action = new Action({ effects: [] });
+		const player = mock<ReadonlyPlayerState>({
+			id: 'plr1',
+			hand: [],
+			attachments: [attachedCard],
+			getStat: () => 3
+		});
+		const state = new ReadonlyGameState({ players: [player] });
+
+		expect(state.calculateInitiative('plr1', action)).toBe(5);
+	});
+
+	it('adds modifyInitiative effects on the action itself', () => {
+		const action = new Action({ effects: [modifyInitiative(3)] });
+		const player = mock<ReadonlyPlayerState>({
+			id: 'plr1',
+			hand: [],
+			attachments: [],
+			getStat: () => 2
+		});
+		const state = new ReadonlyGameState({ players: [player] });
+
+		expect(state.calculateInitiative('plr1', action)).toBe(5);
+	});
+
+	it('sums all initiative modifiers together', () => {
+		const constCap = new Constant({ effects: [modifyInitiative(1)] });
+		const entity = mock<Entity>({ capabilities: [constCap], attachmentCapabilities: [] });
+		const attachedCard = mock<ReadonlyCardState>({ card: entity, attachments: [] });
+		const action = new Action({ effects: [modifyInitiative(2)] });
+		const player = mock<ReadonlyPlayerState>({
+			id: 'plr1',
+			hand: [],
+			attachments: [attachedCard],
+			getStat: () => 3
+		});
+		const state = new ReadonlyGameState({ players: [player] });
+
+		// agility(3) + constant modifier(1) + action modifier(2) = 6
+		expect(state.calculateInitiative('plr1', action)).toBe(6);
 	});
 });
 

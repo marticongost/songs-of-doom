@@ -1,5 +1,5 @@
-import type { ReadonlyCounter } from '@songsofdoom/common';
-import type { FocusToken, FocusType } from '../focus';
+import { ReadonlyCounter } from '@songsofdoom/common';
+import type { FocusToken } from '../focus';
 import type { Result } from '../results';
 import type { Target } from '../target';
 import type { CapabilityRef } from './cardstate';
@@ -44,7 +44,8 @@ export interface FocusesFieldProps<
 	N extends string = string,
 	R extends boolean = true
 > extends FieldProps<N, R> {
-	focuses: Partial<Record<FocusType, [number, number]>>;
+	focuses: ReadonlyCounter<FocusToken>;
+	maxTotalTokens?: number;
 }
 
 export class FocusesField<N extends string = string, R extends boolean = true> extends Field<
@@ -52,11 +53,13 @@ export class FocusesField<N extends string = string, R extends boolean = true> e
 	N,
 	R
 > {
-	readonly focuses: Partial<Record<FocusType, [number, number]>>;
+	readonly focuses: ReadonlyCounter<FocusToken>;
+	readonly maxTotalTokens?: number;
 
-	constructor({ focuses, ...baseProps }: FocusesFieldProps<N, R>) {
+	constructor({ focuses, maxTotalTokens, ...baseProps }: FocusesFieldProps<N, R>) {
 		super(baseProps);
 		this.focuses = focuses;
+		this.maxTotalTokens = maxTotalTokens;
 	}
 }
 

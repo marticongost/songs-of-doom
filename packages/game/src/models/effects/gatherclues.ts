@@ -1,4 +1,4 @@
-import { Counter, finalise, type ReadonlyCounter } from '@songsofdoom/common';
+import { Counter, finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
 import { ScalarExpression } from '../expressions';
 import type { GameGraph } from '../game/gamegraph';
@@ -20,7 +20,7 @@ export interface GatherCluesEffectProps {
 
 export interface GatherCluesOutcome {
 	/** The clues that were gathered at each location. */
-	readonly gatheredClues: ReadonlyCounter<CardId>;
+	readonly gatheredClues: Counter<CardId>;
 }
 
 /**
