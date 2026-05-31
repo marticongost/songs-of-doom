@@ -51,6 +51,7 @@ export {
 export { addCharges, AddChargesEffect, type RechargeAmount } from './recharge';
 export { recoverSanity, RecoverSanityEffect, type RecoverSanityEffectProps } from './recoversanity';
 export { redrawFate, RedrawFateEffect } from './redrawfate';
+export { redrawFocus, RedrawFocusEffect, type RedrawFocusEffectProps } from './redrawfocus';
 export { removeCharges, RemoveChargesEffect } from './removecharges';
 export { repeatCapability, RepeatCapabilityEffect } from './repeatcapability';
 export { replaceEncounter, ReplaceEncounterEffect } from './replaceencounter';

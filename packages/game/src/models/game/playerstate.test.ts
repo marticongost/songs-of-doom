@@ -533,6 +533,50 @@ describe('MutablePlayerState.drawFocusToken', () => {
 	});
 });
 
+// ─── MutablePlayerState.discardFocusToken ─────────────────────────────────────
+
+describe('MutablePlayerState.discardFocusToken', () => {
+	it('can discard a single token from hand to discard pile', () => {
+		const mutablePlayer = makePlayer('plr1').mutable();
+		mutablePlayer.focusesHand.add('strength-1', 1);
+
+		mutablePlayer.discardFocusToken('strength-1');
+
+		expect(mutablePlayer.focusesHand.get('strength-1')).toBe(0);
+		expect(mutablePlayer.focusesDiscardPile.get('strength-1')).toBe(1);
+	});
+
+	it('can discard all tokens at once', () => {
+		const mutablePlayer = makePlayer('plr1').mutable();
+		mutablePlayer.focusesHand.add('agility-2', 3);
+
+		mutablePlayer.discardFocusToken('agility-2', 3);
+
+		expect(mutablePlayer.focusesHand.get('agility-2')).toBe(0);
+		expect(mutablePlayer.focusesDiscardPile.get('agility-2')).toBe(3);
+	});
+
+	it('can discard a partial amount of tokens', () => {
+		const mutablePlayer = makePlayer('plr1').mutable();
+		mutablePlayer.focusesHand.add('strength-1', 5);
+
+		mutablePlayer.discardFocusToken('strength-1', 2);
+
+		expect(mutablePlayer.focusesHand.get('strength-1')).toBe(3);
+		expect(mutablePlayer.focusesDiscardPile.get('strength-1')).toBe(2);
+	});
+
+	it('defaults to discarding a single token', () => {
+		const mutablePlayer = makePlayer('plr1').mutable();
+		mutablePlayer.focusesHand.add('heroism-3', 1);
+
+		mutablePlayer.discardFocusToken('heroism-3');
+
+		expect(mutablePlayer.focusesHand.get('heroism-3')).toBe(0);
+		expect(mutablePlayer.focusesDiscardPile.get('heroism-3')).toBe(1);
+	});
+});
+
 // ─── MutablePlayerState.shuffleDiscardIntoDeck ──────────────────────────────
 
 describe('MutablePlayerState.shuffleDiscardIntoDeck', () => {

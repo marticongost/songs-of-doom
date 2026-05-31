@@ -36,6 +36,7 @@
 		ReceiveOpportunityAttacksEffect,
 		RecoverSanityEffect,
 		RedrawFateEffect,
+		RedrawFocusEffect,
 		RemoveChargesEffect,
 		RepeatCapabilityEffect,
 		ReplaceEncounterEffect,
@@ -92,6 +93,7 @@
 	import ReceiveOpportunityAttacksEffectChip from './ReceiveOpportunityAttacksEffectChip.svelte';
 	import RecoverSanityEffectChip from './RecoverSanityEffectChip.svelte';
 	import RedrawFateEffectChip from './RedrawFateEffectChip.svelte';
+	import RedrawFocusEffectChip from './RedrawFocusEffectChip.svelte';
 	import RemoveChargesEffectChip from './RemoveChargesEffectChip.svelte';
 	import RepeatCapabilityEffectChip from './RepeatCapabilityEffectChip.svelte';
 	import ReplaceEncounterEffectChip from './ReplaceEncounterEffectChip.svelte';
@@ -178,6 +180,8 @@
 		<RepeatCapabilityEffectChip {effect} />
 	{:else if effect instanceof RedrawFateEffect}
 		<RedrawFateEffectChip {effect} />
+	{:else if effect instanceof RedrawFocusEffect}
+		<RedrawFocusEffectChip {effect} />
 	{:else if effect instanceof RemoveChargesEffect}
 		<RemoveChargesEffectChip {effect} />
 	{:else if effect instanceof ReplaceEncounterEffect}

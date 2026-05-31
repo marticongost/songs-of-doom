@@ -260,6 +260,11 @@ export class MutablePlayerState
 		shuffle(this.deck);
 	}
 
+	discardFocusToken(token: FocusToken, count: number = 1): void {
+		this.focusesHand.remove(token, count);
+		this.focusesDiscardPile.add(token, count);
+	}
+
 	drawFocusToken(gameState: MutableGameState): FocusToken {
 		if (this.focusesBag.isEmpty()) {
 			this.refillFocusBag(gameState);
