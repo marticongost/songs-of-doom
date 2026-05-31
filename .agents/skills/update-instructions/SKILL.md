@@ -26,6 +26,7 @@ The following files comprise the full set of agent instructions:
 | `.claude/skills/add-property/SKILL.md`           | Steps and conventions for adding a new property                           |
 | `.claude/skills/update-rules-reference/SKILL.md` | Creating/updating rules reference entries; understanding game concepts    |
 | `.claude/skills/generate-images/SKILL.md`        | Orchestrating card image generation with the Gemini script                |
+| `.claude/skills/add-card/SKILL.md`               | End-to-end workflow for creating a new card from a textual description    |
 | `.claude/skills/update-instructions/SKILL.md`    | This skill (update its file list if new skills are added)                 |
 
 ## Process
