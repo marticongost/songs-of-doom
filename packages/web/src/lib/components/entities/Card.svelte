@@ -215,6 +215,21 @@
 			transform: 'translateY(var(--card-toolbar-container-offset))',
 			transition: 'transform 0.2s ease-out',
 			willChange: 'transform'
+		},
+		failed: {
+			position: 'absolute',
+			left: 0,
+			top: 0,
+			bottom: 0,
+			right: 0,
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'center',
+			color: css.text.negativeColor,
+
+			code: {
+				fontWeight: 'bold'
+			}
 		}
 	});
 
@@ -328,106 +343,118 @@
 	data-entity={entity.id}
 	onfocus={hasToolbar ? passFocusToToolbar : undefined}
 >
-	<div class={styles.content}>
-		<div class={styles.header}>
-			{#if entity.set}
-				<div class={styles.setFrame}>
-					<InlineSvg class={styles.setIcon} src={getSetIcon(entity.set)} />
-				</div>
-			{/if}
-			<div class={styles.title}><Text {...entity.title} /></div>
-			<CardLevel {entity} />
-			<div class={styles.acquisition}>
-				{#if entity.requiredEntity}
-					<div class={styles.requiredEntity}>
-						<Text {...entity.requiredEntity.title} />
+	<svelte:boundary>
+		<div class={styles.content}>
+			<div class={styles.header}>
+				{#if entity.set}
+					<div class={styles.setFrame}>
+						<InlineSvg class={styles.setIcon} src={getSetIcon(entity.set)} />
 					</div>
 				{/if}
-				{#if entity.xpCost !== undefined}
-					<ExperienceIndicator amount={entity.xpCost} class={styles.acquisitionIndicator} />
+				<div class={styles.title}><Text {...entity.title} /></div>
+				<CardLevel {entity} />
+				<div class={styles.acquisition}>
+					{#if entity.requiredEntity}
+						<div class={styles.requiredEntity}>
+							<Text {...entity.requiredEntity.title} />
+						</div>
+					{/if}
+					{#if entity.xpCost !== undefined}
+						<ExperienceIndicator amount={entity.xpCost} class={styles.acquisitionIndicator} />
+					{/if}
+					{#if entity.goldCost !== undefined}
+						<GoldIndicator amount={entity.goldCost} class={styles.acquisitionIndicator} />
+					{/if}
+					{#if entityManager}
+						<div class={styles.entityManagerIndicators}>
+							<CardCopiesIndicator amount={entityManager.getNumberOfOwnedCopies(entity)} />
+						</div>
+					{/if}
+				</div>
+			</div>
+			{#if hasImage}
+				<div class={styles.imageRow}>
+					{#if entity instanceof Creature || entity instanceof Ally}
+						<AttributesSheet stats={entity.stats} statTypes={attributeTypes} />
+						<div class={styles.indicators}>
+							<HealthIndicator amount={entity.stats.health} contrast={true} />
+							{#if entity instanceof Ally}
+								<SanityIndicator amount={entity.stats.sanity} contrast={true} />
+							{/if}
+						</div>
+					{/if}
+					<Image
+						class={cx(styles.image, { [styles.dimmedImage]: dimmed })}
+						src="cards/{entity.id}.jpg"
+					/>
+					{#if discardReward && !discardReward.empty()}
+						<CapabilityCostList class={styles.discardReward} cost={discardReward} layout="column" />
+					{/if}
+				</div>
+			{/if}
+			{#if hasDetails}
+				<div class={styles.details}>
+					<PropertyList style="margin-right: auto" properties={entity.properties} />
+					{#if entity.maxCharges}
+						<ChargesChip charges={entity.maxCharges} />
+					{/if}
+					{#if entity instanceof Item && entity.slot}
+						<InlineSvg src="slots/{entity.slot.type}.svg" />
+					{/if}
+				</div>
+			{/if}
+			<div class={cx(styles.body, isStory(entity) && styles.storyBody)}>
+				{#if entity.description}
+					<div>{entity.description}</div>
 				{/if}
-				{#if entity.goldCost !== undefined}
-					<GoldIndicator amount={entity.goldCost} class={styles.acquisitionIndicator} />
+
+				{#if isScenario(entity)}
+					<ScenarioSigils sigils={entity.sigils} />
 				{/if}
-				{#if entityManager}
-					<div class={styles.entityManagerIndicators}>
-						<CardCopiesIndicator amount={entityManager.getNumberOfOwnedCopies(entity)} />
+
+				{#if isItem(entity) && entity.requiredTalent}
+					<div class={styles.requiredTalent}>
+						<span class={styles.requiredTalentTitle}>
+							<InlineSvg class={styles.requiredTalentIcon} src="lock.svg" />
+							<Text ca="Requereix:" es="Requiere:" en="Requires:" />
+						</span>
+						<TalentChip talent={entity.requiredTalent} />
+					</div>
+				{:else if isArchetype(entity) && entity.disciplines.length}
+					<div class={styles.disciplines}>
+						<span class={styles.disciplinesTitle}>
+							<InlineSvg src="unlock.svg" />
+							<Text ca="Disciplines:" es="Disciplinas:" en="Disciplines:" />
+						</span>
+						<DisciplineList disciplines={entity.disciplines} />
+					</div>
+				{/if}
+
+				<CapabilityList class={styles.capabilities} capabilities={entity.capabilities} />
+				{#if entity.attachmentCapabilities.length > 0}
+					<div class={styles.attachment}>
+						<div class={styles.attachmentTitle}>
+							<Text
+								ca="Mentre estigui vinculada"
+								es="Mientras esté vinculada"
+								en="While attached"
+							/>
+						</div>
+						<CapabilityList capabilities={entity.attachmentCapabilities} />
 					</div>
 				{/if}
 			</div>
 		</div>
-		{#if hasImage}
-			<div class={styles.imageRow}>
-				{#if entity instanceof Creature || entity instanceof Ally}
-					<AttributesSheet stats={entity.stats} statTypes={attributeTypes} />
-					<div class={styles.indicators}>
-						<HealthIndicator amount={entity.stats.health} contrast={true} />
-						{#if entity instanceof Ally}
-							<SanityIndicator amount={entity.stats.sanity} contrast={true} />
-						{/if}
-					</div>
-				{/if}
-				<Image
-					class={cx(styles.image, { [styles.dimmedImage]: dimmed })}
-					src="cards/{entity.id}.jpg"
-				/>
-				{#if discardReward && !discardReward.empty()}
-					<CapabilityCostList class={styles.discardReward} cost={discardReward} layout="column" />
-				{/if}
+		{#if entityManager && hasToolbar}
+			<div class={styles.toolbarContainer}>
+				<EntityToolbar {entity} {entityManager} />
 			</div>
 		{/if}
-		{#if hasDetails}
-			<div class={styles.details}>
-				<PropertyList style="margin-right: auto" properties={entity.properties} />
-				{#if entity.maxCharges}
-					<ChargesChip charges={entity.maxCharges} />
-				{/if}
-				{#if entity instanceof Item && entity.slot}
-					<InlineSvg src="slots/{entity.slot.type}.svg" />
-				{/if}
+		{#snippet pending()}{/snippet}
+		{#snippet failed(_error: unknown)}
+			<div class={styles.failed}>
+				Failed to render card&nbsp;<code>{entity.id}</code>
 			</div>
-		{/if}
-		<div class={cx(styles.body, isStory(entity) && styles.storyBody)}>
-			{#if entity.description}
-				<div>{entity.description}</div>
-			{/if}
-
-			{#if isScenario(entity)}
-				<ScenarioSigils sigils={entity.sigils} />
-			{/if}
-
-			{#if isItem(entity) && entity.requiredTalent}
-				<div class={styles.requiredTalent}>
-					<span class={styles.requiredTalentTitle}>
-						<InlineSvg class={styles.requiredTalentIcon} src="lock.svg" />
-						<Text ca="Requereix:" es="Requiere:" en="Requires:" />
-					</span>
-					<TalentChip talent={entity.requiredTalent} />
-				</div>
-			{:else if isArchetype(entity) && entity.disciplines.length}
-				<div class={styles.disciplines}>
-					<span class={styles.disciplinesTitle}>
-						<InlineSvg src="unlock.svg" />
-						<Text ca="Disciplines:" es="Disciplinas:" en="Disciplines:" />
-					</span>
-					<DisciplineList disciplines={entity.disciplines} />
-				</div>
-			{/if}
-
-			<CapabilityList class={styles.capabilities} capabilities={entity.capabilities} />
-			{#if entity.attachmentCapabilities.length > 0}
-				<div class={styles.attachment}>
-					<div class={styles.attachmentTitle}>
-						<Text ca="Mentre estigui vinculada" es="Mientras esté vinculada" en="While attached" />
-					</div>
-					<CapabilityList capabilities={entity.attachmentCapabilities} />
-				</div>
-			{/if}
-		</div>
-	</div>
-	{#if entityManager && hasToolbar}
-		<div class={styles.toolbarContainer}>
-			<EntityToolbar {entity} {entityManager} />
-		</div>
-	{/if}
+		{/snippet}
+	</svelte:boundary>
 </svelte:element>
