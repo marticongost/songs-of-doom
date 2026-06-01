@@ -1,4 +1,6 @@
 import type { Property, Result } from '../..';
+import type { Reaction } from '../capabilities/reaction';
+import type { CapabilityRef } from './cardstate';
 import type { EntityId } from './identifiers';
 import { mutate } from './mutate';
 import {
@@ -39,6 +41,7 @@ export class ReadonlyAttackResolution extends AttackResolution implements Readon
 			defenderId: this.defenderId,
 			properties: this.properties,
 			result: this.result,
+			additionalReactions: this.additionalReactions,
 			damageModifier: this.damageModifier,
 			negated: this.negated
 		});
@@ -56,6 +59,15 @@ export class MutableAttackResolution extends AttackResolution implements Mutable
 	declare result?: Result;
 	declare damageModifier: number;
 	declare negated: boolean;
+	declare additionalReactions?: Array<CapabilityRef<Reaction>>;
+
+	/** Appends a reaction to the test's additional reactions list. */
+	addReaction(reaction: CapabilityRef<Reaction>): void {
+		if (!this.additionalReactions) {
+			this.additionalReactions = [];
+		}
+		this.additionalReactions.push(reaction);
+	}
 
 	readonly(): ReadonlyAttackResolution {
 		return new ReadonlyAttackResolution({
@@ -64,6 +76,7 @@ export class MutableAttackResolution extends AttackResolution implements Mutable
 			defenderId: this.defenderId,
 			properties: this.properties,
 			result: this.result,
+			additionalReactions: this.additionalReactions,
 			damageModifier: this.damageModifier,
 			negated: this.negated
 		});

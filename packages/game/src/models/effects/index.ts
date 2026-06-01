@@ -71,6 +71,7 @@ export {
 export { setRollResult, SetRollResultEffect, type SetRollResultEffectProps } from './setrollresult';
 export { talent, TalentEffect, type TalentEffectProps } from './talenteffect';
 export { test, TestEffect } from './test';
+export { testObligation, testOpportunity, TestReactionEffect } from './testreaction';
 export { transformFocus, TransformFocusEffect } from './transformfocus';
 export { triggerAttack, TriggerAttackEffect } from './triggerattack';
 export { wound, WoundEffect } from './wound';

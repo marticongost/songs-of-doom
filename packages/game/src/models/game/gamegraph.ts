@@ -1,7 +1,5 @@
-import { groupBy } from '@songsofdoom/common';
-import { Obligation } from '../capabilities';
+import { Obligation, type Reaction } from '../capabilities';
 import type { Effect } from '../effects';
-import { AfterTest, BeforeTest, DuringTest } from '../effects/effect';
 import { events, type EventContext, type EventType } from '../event';
 import type { ScalarExpressionType } from '../expressions';
 import type { Property } from '../properties';
@@ -145,6 +143,9 @@ export interface TestProps {
 
 	/** Effects to trigger before, during and after the test. */
 	effects?: Array<Effect>;
+
+	/** Additional reactions to attach to the test for its duration. */
+	additionalReactions?: Array<CapabilityRef<Reaction>>;
 
 	/** Optional callback run before the token is drawn. */
 	beforeTest?: (gameGraph: GameGraph) => void | Promise<void>;
@@ -420,7 +421,8 @@ export class GameGraph {
 		proficiency,
 		properties,
 		resolutionFactory,
-		effects = [],
+		effects: _effects = [],
+		additionalReactions,
 		beforeTest,
 		afterTest
 	}: TestProps): Promise<Result> {
@@ -429,7 +431,8 @@ export class GameGraph {
 		const resolution = factory({
 			subjectId,
 			proficiency,
-			properties: properties ? [...properties] : []
+			properties: properties ? [...properties] : [],
+			additionalReactions
 		});
 
 		return await this.group(
@@ -437,25 +440,14 @@ export class GameGraph {
 			{},
 			{ closingNodeType: FateDrawn, resolution, subjectId, targetId },
 			async () => {
-				const effectsByTiming = groupBy(effects, (effect) => effect.testTiming);
-
 				await beforeTest?.(this);
-				this.triggerEvent('beforeDrawingFate');
-				for (const effect of effectsByTiming.get(BeforeTest) ?? []) {
-					await this.triggerEffect(effect);
-				}
+				await this.triggerEvent('beforeDrawingFate');
 
 				const { result } = await this.requestInput([new ResultField({ name: 'result' })]);
-				this.triggerEvent('fateTokenRevealed');
-				for (const effect of effectsByTiming.get(DuringTest) ?? []) {
-					await this.triggerEffect(effect);
-				}
+				await this.triggerEvent('fateTokenRevealed');
 
 				await afterTest?.(this);
-				this.triggerEvent('afterDrawingFate');
-				for (const effect of effectsByTiming.get(AfterTest) ?? []) {
-					await this.triggerEffect(effect);
-				}
+				await this.triggerEvent('afterDrawingFate');
 				return result;
 			}
 		);
@@ -608,8 +600,16 @@ export class GameGraph {
 		);
 	}
 
+	/**
+	 * Collects reactive capabilities for the given event type.
+	 *
+	 * Reactions are collected once per {@link triggerEvent} call from all ready cards,
+	 * plus any additional reactions attached to the active test resolution (if any).
+	 * Reactions added to the test resolution during this same event trigger cycle
+	 * will not be seen until the next event fires.
+	 */
 	private collectReactiveCapabilities(eventType: EventType): Array<OrderedReactionRef> {
-		return this._current.state.cards({ ready: true }).flatMap((card) => {
+		const cardReactions = this._current.state.cards({ ready: true }).flatMap((card) => {
 			const reactionOrder = card.card.reactionOrder;
 			return card.getReactionsToEvent(events[eventType], this._current.state).map((reaction) => ({
 				cardId: card.id,
@@ -618,6 +618,22 @@ export class GameGraph {
 				capability: reaction
 			}));
 		});
+
+		const testResolution = this._current.state.getActiveTestResolution();
+		const testReactions =
+			testResolution?.additionalReactions
+				?.filter((ref) => ref.capability.triggers.some((t) => t.event.type === eventType))
+				.map((ref) => {
+					const card = this._current.state.requireCard(ref.cardId);
+					return {
+						cardId: ref.cardId,
+						ownerId: card.ownerId,
+						reactionOrder: card.card.reactionOrder,
+						capability: ref.capability
+					} satisfies OrderedReactionRef;
+				}) ?? [];
+
+		return [...cardReactions, ...testReactions];
 	}
 
 	private async consumeReactions(

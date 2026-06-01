@@ -1,14 +1,15 @@
+import type { EventType } from '../event';
 import { type GameGraph } from '../game/gamegraph';
 import type { StatType } from '../stats';
 
-export const BeforeTest = -1;
-export const DuringTest = 0;
-export const AfterTest = 1;
-
-export type EffectTestTiming = typeof BeforeTest | typeof DuringTest | typeof AfterTest;
-
 export abstract class Effect {
-	readonly testTiming: EffectTestTiming = AfterTest;
+	/**
+	 * Default event this effect should be triggered on when wrapped in a
+	 * {@link TestReactionEffect} via {@link testObligation} or {@link testOpportunity}
+	 * without an explicit event. Effects that only make sense at a single point
+	 * in the test lifecycle should set this.
+	 */
+	readonly defaultEvent?: EventType;
 
 	setStat(_stat: StatType, currentValue: number): number {
 		return currentValue;

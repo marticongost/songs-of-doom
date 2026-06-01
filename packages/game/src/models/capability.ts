@@ -44,9 +44,10 @@ export abstract class Capability {
 			CapabilityTriggered,
 			{ capability: this, cardId },
 			{
-				...this.getTriggerContext(gameGraph.current.state, cardId),
+				currentCardId: cardId,
 				targetId: cardId,
 				subjectId: cardId,
+				...this.getTriggerContext(gameGraph.current.state, cardId),
 				...context,
 				opening: (state) => {
 					const card = state.requireCard(cardId);

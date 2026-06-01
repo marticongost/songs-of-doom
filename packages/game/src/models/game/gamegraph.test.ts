@@ -206,7 +206,7 @@ describe('GameGraph.test', () => {
 		const p1 = makePlayer('plr1');
 		const graph = new GameGraph({ initialState: { players: [p1] } });
 		const promise = graph.test({ subjectId: 'trt1', proficiency: 1 });
-		await advanceTicks(1);
+		await advanceTicks(5);
 		await graph.supplyInput({ result: 2 });
 		await promise;
 
@@ -244,7 +244,7 @@ describe('GameGraph.test', () => {
 			}
 		});
 
-		await advanceTicks(1);
+		await advanceTicks(10);
 		await graph.supplyInput({ result: 2 });
 		await promise;
 

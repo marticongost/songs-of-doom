@@ -42,7 +42,7 @@ describe('Capability.trigger', () => {
 	});
 
 	it('passes an opening that moves the active card from hand to stage', async () => {
-		const mutableState = mock<MutableGameState>();
+		const mutableState = mock<MutableGameState>({ currentCardStack: [] });
 		const card = mock<MutableCardState>({ container: { type: 'hand', playerId: 'plr1' } });
 		mutableState.requireCard.mockReturnValue(card);
 
@@ -59,7 +59,7 @@ describe('Capability.trigger', () => {
 	});
 
 	it('passes a closure that discards the active card when it is in stage', async () => {
-		const mutableState = mock<MutableGameState>();
+		const mutableState = mock<MutableGameState>({ currentCardStack: [] });
 		const card = mock<MutableCardState>({ container: { type: 'stage', playerId: 'plr1' } });
 		mutableState.requireCard.mockReturnValue(card);
 
@@ -76,7 +76,7 @@ describe('Capability.trigger', () => {
 	});
 
 	it('closure does not discard the active card when it is not in hand', async () => {
-		const mutableState = mock<MutableGameState>();
+		const mutableState = mock<MutableGameState>({ currentCardStack: [] });
 		const card = mock<MutableCardState>({ container: { type: 'deck', playerId: 'plr1' } });
 		mutableState.requireCard.mockReturnValue(card);
 

@@ -32,6 +32,7 @@ import {
 } from './woundresolution';
 
 export interface GameContext {
+	currentCardId?: CardId;
 	activeCardId?: CardId;
 	activePlayerId?: PlayerId;
 	reactiveCardId?: CardId;
@@ -49,6 +50,7 @@ export interface GameStateProps {
 	activePlayerStack?: Array<PlayerId>;
 	reactiveCardStack?: Array<CardId>;
 	reactivePlayerStack?: Array<PlayerId>;
+	currentCardStack?: Array<CardId>;
 	targetStack?: Array<EntityId>;
 	subjectStack?: Array<EntityId>;
 	testResolutionStack?: Array<TestResolution>;
@@ -74,6 +76,7 @@ export class GameState<
 	readonly activePlayerStack: Array<PlayerId>;
 	readonly reactiveCardStack: Array<CardId>;
 	readonly reactivePlayerStack: Array<PlayerId>;
+	readonly currentCardStack: Array<CardId>;
 	readonly targetStack: Array<EntityId>;
 	readonly subjectStack: Array<EntityId>;
 	readonly testResolutionStack: Array<TestResolution>;
@@ -89,6 +92,7 @@ export class GameState<
 		activePlayerStack,
 		reactiveCardStack,
 		reactivePlayerStack,
+		currentCardStack,
 		targetStack,
 		subjectStack,
 		testResolutionStack,
@@ -103,6 +107,7 @@ export class GameState<
 		this.activePlayerStack = activePlayerStack ?? [];
 		this.reactiveCardStack = reactiveCardStack ?? [];
 		this.reactivePlayerStack = reactivePlayerStack ?? [];
+		this.currentCardStack = currentCardStack ?? [];
 		this.targetStack = targetStack ?? [];
 		this.subjectStack = subjectStack ?? [];
 		this.testResolutionStack = testResolutionStack ?? [];
@@ -282,6 +287,22 @@ export class GameState<
 		return reactivePlayer;
 	}
 
+	getCurrentCard(): TCard | undefined {
+		if (this.currentCardStack.length === 0) {
+			return undefined;
+		}
+		const currentCardId = this.currentCardStack[this.currentCardStack.length - 1];
+		return this.requireCard(currentCardId);
+	}
+
+	requireCurrentCard(): TCard {
+		const currentCard = this.getCurrentCard();
+		if (!currentCard) {
+			throw new Error('No current card');
+		}
+		return currentCard;
+	}
+
 	/**
 	 * Returns the implicit target for the current context, if any.
 	 *
@@ -431,6 +452,7 @@ export class MutableGameState extends GameState<
 	declare activePlayerStack: Array<PlayerId>;
 	declare reactiveCardStack: Array<CardId>;
 	declare reactivePlayerStack: Array<PlayerId>;
+	declare currentCardStack: Array<CardId>;
 	declare targetStack: Array<EntityId>;
 	declare subjectStack: Array<EntityId>;
 	declare testResolutionStack: Array<ReadonlyTestResolution | MutableTestResolution>;
@@ -449,6 +471,7 @@ export class MutableGameState extends GameState<
 			activePlayerStack: [...gameState.activePlayerStack],
 			reactiveCardStack: [...gameState.reactiveCardStack],
 			reactivePlayerStack: [...gameState.reactivePlayerStack],
+			currentCardStack: [...gameState.currentCardStack],
 			targetStack: [...gameState.targetStack],
 			subjectStack: [...gameState.subjectStack],
 			testResolutionStack: [
@@ -496,6 +519,7 @@ export class MutableGameState extends GameState<
 	}
 
 	pushContext(ctx: GameContext): void {
+		if (ctx.currentCardId !== undefined) this.currentCardStack.push(ctx.currentCardId);
 		if (ctx.activeCardId !== undefined) this.activeCardStack.push(ctx.activeCardId);
 		if (ctx.activePlayerId !== undefined) this.activePlayerStack.push(ctx.activePlayerId);
 		if (ctx.reactiveCardId !== undefined) this.reactiveCardStack.push(ctx.reactiveCardId);
@@ -505,6 +529,7 @@ export class MutableGameState extends GameState<
 	}
 
 	popContext(ctx: GameContext): void {
+		if (ctx.currentCardId !== undefined) this.currentCardStack.pop();
 		if (ctx.targetId !== undefined) this.targetStack.pop();
 		if (ctx.subjectId !== undefined) this.subjectStack.pop();
 		if (ctx.reactivePlayerId !== undefined) this.reactivePlayerStack.pop();
