@@ -73,5 +73,5 @@ export { talent, TalentEffect, type TalentEffectProps } from './talenteffect';
 export { test, TestEffect } from './test';
 export { testObligation, testOpportunity, TestReactionEffect } from './testreaction';
 export { transformFocus, TransformFocusEffect } from './transformfocus';
-export { triggerAttack, TriggerAttackEffect } from './triggerattack';
+export { TriggerActionEffect, triggerAttack } from './triggeraction';
 export { wound, WoundEffect } from './wound';

@@ -49,7 +49,7 @@
 		TalentEffect,
 		TestEffect,
 		TransformFocusEffect,
-		TriggerAttackEffect,
+		TriggerActionEffect,
 		WoundEffect,
 		type Effect
 	} from '@songsofdoom/game';
@@ -106,7 +106,7 @@
 	import TalentEffectChip from './TalentEffectChip.svelte';
 	import TestEffectChip from './TestEffectChip.svelte';
 	import TransformFocusEffectChip from './TransformFocusEffectChip.svelte';
-	import TriggerAttackEffectChip from './TriggerAttackEffectChip.svelte';
+	import TriggerActionEffectChip from './TriggerActionEffectChip.svelte';
 	import WoundEffectChip from './WoundEffectChip.svelte';
 
 	interface Props extends StandardAttributeProps {
@@ -172,8 +172,8 @@
 		<NegateDamageEffectChip {effect} />
 	{:else if effect instanceof ConditionalEffect}
 		<ConditionalEffectChip {effect} {compact} />
-	{:else if effect instanceof TriggerAttackEffect}
-		<TriggerAttackEffectChip {effect} />
+	{:else if effect instanceof TriggerActionEffect}
+		<TriggerActionEffectChip {effect} />
 	{:else if effect instanceof ReceiveOpportunityAttacksEffect}
 		<ReceiveOpportunityAttacksEffectChip {effect} />
 	{:else if effect instanceof RepeatCapabilityEffect}

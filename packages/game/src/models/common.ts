@@ -2,7 +2,7 @@ import { Obligation, Opportunity } from './capabilities';
 import { attach } from './effects/attach';
 import { addCharges } from './effects/recharge';
 import { replaceEncounter } from './effects/replaceencounter';
-import { triggerAttack } from './effects/triggerattack';
+import { triggerAttack } from './effects/triggeraction';
 import {
 	copyAlreadyAttached,
 	distance,
