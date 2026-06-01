@@ -66,7 +66,7 @@ const conditionIsExactly =
 	(matchingExpression: BooleanExpressionType) => (expression: BooleanExpressionType) =>
 		expression === matchingExpression;
 
-const eventData: Record<string, Omit<EventProps, 'type'>> = {
+const eventData = {
 	engage: {
 		name: {
 			ca: "Abans d'un enfrontament",
