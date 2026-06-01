@@ -1,5 +1,4 @@
 import { finalise } from '@songsofdoom/common';
-import type { BooleanExpressionType } from '../expressions';
 import type { GameGraph } from '../game/gamegraph';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
@@ -13,13 +12,6 @@ export interface TriggerAttackEffectProps {
 	 * These modifiers can alter damage, add properties, or change other aspects of the attack.
 	 */
 	modifiers?: Array<Effect>;
-
-	/**
-	 * An optional condition that must be satisfied for the triggered attack action to be available.
-	 * This allows for conditional triggering based on game state, such as only triggering if the
-	 * defender has a certain property or if the attack meets specific criteria.
-	 */
-	condition?: BooleanExpressionType;
 
 	/**
 	 * Specifies which cards are eligible for the triggered attack action.
@@ -47,13 +39,6 @@ export class TriggerAttackEffect extends Effect {
 	readonly modifiers: Array<Effect>;
 
 	/**
-	 * An optional condition that must be satisfied for the triggered attack action to be available.
-	 * This allows for conditional triggering based on game state, such as only triggering if the
-	 * defender has a certain property or if the attack meets specific criteria.
-	 */
-	condition?: BooleanExpressionType;
-
-	/**
 	 * Specifies which cards are eligible for the triggered attack action.
 	 */
 	readonly card?: Target;
@@ -64,10 +49,9 @@ export class TriggerAttackEffect extends Effect {
 	 */
 	target?: Target;
 
-	constructor({ modifiers, condition, card, target }: TriggerAttackEffectProps = {}) {
+	constructor({ modifiers, card, target }: TriggerAttackEffectProps = {}) {
 		super();
 		this.modifiers = modifiers ?? [];
-		this.condition = condition;
 		this.card = finalise(Target, card);
 		this.target = finalise(Target, target);
 	}

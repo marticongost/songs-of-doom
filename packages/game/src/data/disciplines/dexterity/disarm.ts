@@ -28,7 +28,7 @@ export default upgradable(Skill, 2, (variants) => ({
 			},
 			effects: [
 				triggerAttack({
-					condition: not(projectile),
+					card: { condition: not(projectile) },
 					modifiers: [
 						modifyCapabilityCost({ cost: { agility: -variants.level } }),
 						resultsTable({

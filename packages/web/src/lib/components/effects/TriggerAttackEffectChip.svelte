@@ -2,7 +2,6 @@
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { TriggerAttackEffect } from '@songsofdoom/game';
 	import Parameters from '../capabilities/Parameters.svelte';
-	import ExpressionChip from '../expressions/ExpressionChip.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import TargetChip from '../targets/TargetChip.svelte';
 	import EffectList from './EffectList.svelte';
@@ -20,7 +19,6 @@
 		es="Activar una acción Atacar"
 		en="Trigger an Attack action"
 	/>
-	<ExpressionChip expression={effect.condition} />
 	<TargetChip target={effect.card} relation="possessive" />
 	{#if effect.target}
 		<Text ca="contra" es="contra" en="against" />
