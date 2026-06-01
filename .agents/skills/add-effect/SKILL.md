@@ -113,6 +113,147 @@ effects: [engage()]; // NOT: effects: [new EngageEffect()] or effects: [engage]
 
 If a field requires transformation (e.g. resolving a Target or CapabilityCost), perform the conversion inside the constructor so the readonly field stores the resolved value.
 
+### Implementing apply()
+
+Every concrete `Effect` class must implement the abstract `apply(gameGraph: GameGraph): Promise<void>` method. This is where the effect's game logic lives.
+
+The `GameGraph` is the central API for reading and mutating game state. Understanding its methods is essential:
+
+#### Core GameGraph API
+
+| Method                                                            | Purpose                                                                                                                                     |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gameGraph.mutate((state) => outcome)`                            | Synchronous state mutation. The callback receives `MutableGameState` and can return an outcome value that will be stored in the graph node. |
+| `await gameGraph.requestTargets(target?, options?)`               | Ask the player to select targets. Returns `Array<EntityId>`.                                                                                |
+| `await gameGraph.requestSingleTarget(target?, options?)`          | Ask for exactly one target. Returns `EntityId \| undefined`.                                                                                |
+| `await gameGraph.requestPlayers(target?, options?)`               | Ask the player to select players. Returns `Array<PlayerId>`.                                                                                |
+| `await gameGraph.test({ subjectId, targetId, proficiency, ... })` | Run a proficiency test (draw fate token, apply modifiers, determine result).                                                                |
+| `await gameGraph.triggerEvent(eventType, context?)`               | Emit a game event that other cards may react to.                                                                                            |
+| `await gameGraph.defeat(targetId)`                                | Defeat a player or discard/banish a card.                                                                                                   |
+| `gameGraph.current.state`                                         | Access the current read-only game state.                                                                                                    |
+
+#### State access via `gameGraph.current.state`
+
+The read-only state provides accessors like:
+
+- `state.requireSubject()` / `state.getSubject()` — the entity performing the effect
+- `state.requireTarget()` / `state.getTarget()` — the current target entity
+- `state.requireActivePlayer()` / `state.getActivePlayer()` — the currently active player
+- `state.requireActiveCard()` / `state.getActiveCard()` — the currently active card
+- `state.requireEntityState(id)` / `state.requirePlayer(id)` / `state.requireCard(id)` — look up an entity by id
+- `state.evaluate(expression)` — evaluate a scalar expression in the current context
+- `state.getPlayerLocation(playerId)` — get a player's current location
+- `state.cards({ ready: true })` — iterate over cards matching a filter
+
+#### Common apply() patterns
+
+**Pattern 1: Simple mutation** — for effects that just modify state without player input:
+
+```typescript
+override async apply(gameGraph: GameGraph) {
+    gameGraph.mutate((state) => {
+        const subject = state.requireSubject();
+        subject.someField = newValue;
+    });
+}
+```
+
+Example: `ConferPropertiesEffect`, `ModifyDamageEffect`.
+
+**Pattern 2: Target + mutation** — for effects that need the player to choose a target first:
+
+```typescript
+override async apply(gameGraph: GameGraph) {
+    const targetIds = await gameGraph.requestTargets(this.target, { default: 'current-target' });
+    for (const targetId of targetIds) {
+        gameGraph.mutate((state) => {
+            const target = state.requireEntityState(targetId);
+            // modify target
+        });
+    }
+}
+```
+
+Example: `WoundEffect`, `AttachEffect`.
+
+**Pattern 3: Event-driven mutation** — for effects that trigger game events around state changes:
+
+```typescript
+override async apply(gameGraph: GameGraph) {
+    // Validate preconditions
+    const subjectId = gameGraph.current.state.requireSubject().id;
+    const player = gameGraph.current.state.requirePlayer(subjectId);
+    if (player.hasProperty(someBlockingProperty)) return;
+
+    await gameGraph.triggerEvent('beforeAction', { subjectId });
+    gameGraph.mutate((state) => {
+        // perform the action
+    });
+    await gameGraph.triggerEvent('afterAction', { subjectId });
+}
+```
+
+Example: `MoveEffect`.
+
+**Pattern 4: Test-based** — for effects that run a proficiency test:
+
+```typescript
+override async apply(gameGraph: GameGraph) {
+    const subjectId = gameGraph.current.state.requireSubject().id;
+    const targetIds = await gameGraph.requestTargets(this.target);
+    for (const targetId of targetIds) {
+        await gameGraph.test({
+            subjectId,
+            targetId,
+            proficiency: this.expression,
+            properties: this.properties,
+            effects: [/* test-modifying effects */],
+            beforeTest: async (graph) => {
+                await graph.triggerEvent('beforeTestEvent');
+            }
+        });
+    }
+}
+```
+
+Example: `AttackEffect`.
+
+**Pattern 5: Request player input** — when the effect needs custom input (not just targets):
+
+```typescript
+override async apply(gameGraph: GameGraph) {
+    const { result } = await gameGraph.requestInput([
+        new SomeCustomField({ name: 'result', ... })
+    ]);
+    // use result
+}
+```
+
+**Pattern 6: Async mutation** — use `await gameGraph.mutate(...)` (note the `await`) when the mutation callback is async or returns a promise:
+
+```typescript
+override async apply(gameGraph: GameGraph) {
+    await gameGraph.mutate((state) => {
+        const player = state.requireActivePlayer();
+        const drawnCards = player.drawFromDeck(state, this.amount);
+        return { cards: drawnCards.map(card => card.id) };
+    });
+}
+```
+
+Example: `DrawCardsEffect`.
+
+#### Design guidelines
+
+- **Prefer `gameGraph.mutate()`** for all state changes. Never modify state objects directly outside of a mutation callback.
+- **Use `gameGraph.current.state`** (read-only) for reading state _before_ deciding what mutations to make.
+- **Use `require*` accessors** (e.g. `requireSubject()`, `requirePlayer(id)`) when the entity must exist — they throw descriptive errors if missing. Use `get*` variants when absence is expected.
+- **Return outcomes from `mutate()`** when the caller needs structured data about what happened (e.g. `DrawCardsOutcome`, `AttachOutcome`). Define an outcome interface inline or in the effect file.
+- **Validate preconditions early** with early returns before any mutations.
+- **Trigger events** for actions other cards might react to (movement, damage, attacks, etc.). Check existing event types in `packages/game/src/models/event.ts`.
+- **Use `testTiming`** (imported from `./effect`: `BeforeTest`, `DuringTest`, `AfterTest`) when the effect modifies a test in progress rather than being a standalone action.
+- **Keep `apply()` focused** — delegate complex sub-logic to private methods (e.g. `WoundEffect` has `computeBaseDamage()` and `applyReductions()` helpers).
+
 ## Component conventions
 
 Chip components are in the `@songsofdoom/web` package:
@@ -152,6 +293,7 @@ specifically instructed to do so.
 1. **Create the model file** in `packages/game/src/models/effects/`:
    - Export a `{ClassName}Props` interface (for effects with parameters)
    - Export the class with readonly fields, a destructured constructor, and JSDoc
+   - Implement the `apply(gameGraph: GameGraph)` method — see [Implementing apply()](#implementing-apply) above for patterns and API reference
    - Export a factory function (camelCase, e.g. `modifyDamage`) — use shorthand support for single-required-property effects
 2. **Barrel-export** from `packages/game/src/models/effects/index.ts`:
    - Export both the factory function and the class
