@@ -9,6 +9,7 @@ export interface ModifyRollEffectProps {
 
 export class ModifyRollEffect extends Effect {
 	readonly modifier: ScalarExpressionType;
+	override readonly defaultEvent = 'beforeDrawingFate';
 
 	constructor({ modifier }: ModifyRollEffectProps) {
 		super();
