@@ -15,22 +15,19 @@ import { Effect } from './effect';
  * on the {@link GameState.testResolutionStack}). Throws if no test is active.
  */
 export class TestReactionEffect extends Effect {
-	readonly reactions: Array<Reaction>;
+	readonly reaction: Reaction;
 
-	constructor(reactions: Array<Reaction>) {
+	constructor(reaction: Reaction) {
 		super();
-		this.reactions = reactions;
+		this.reaction = reaction;
 	}
 
 	override async apply(gameGraph: GameGraph): Promise<void> {
 		const currentCardId = gameGraph.current.state.requireCurrentCard().id;
-		const reactions = this.reactions;
 
 		gameGraph.mutate((state) => {
 			const resolution = state.requireActiveTestResolution();
-			for (const reaction of reactions) {
-				resolution.addReaction({ cardId: currentCardId, capability: reaction });
-			}
+			resolution.addReaction({ cardId: currentCardId, capability: this.reaction });
 		});
 	}
 }
@@ -53,9 +50,9 @@ export const testObligation = (effect: Effect, event?: EventType): TestReactionE
 				'Provide an event parameter or set a defaultEvent on the effect.'
 		);
 	}
-	return new TestReactionEffect([
+	return new TestReactionEffect(
 		new Obligation({ effects: [effect], triggers: [{ event: resolvedEvent }] })
-	]);
+	);
 };
 
 /**
@@ -76,7 +73,7 @@ export const testOpportunity = (effect: Effect, event?: EventType): TestReaction
 				'Provide an event parameter or set a defaultEvent on the effect.'
 		);
 	}
-	return new TestReactionEffect([
+	return new TestReactionEffect(
 		new Opportunity({ effects: [effect], triggers: [{ event: resolvedEvent }] })
-	]);
+	);
 };
