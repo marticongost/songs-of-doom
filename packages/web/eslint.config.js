@@ -32,7 +32,8 @@ export default defineConfig(
 					varsIgnorePattern: '^_'
 				}
 			],
-			'@typescript-eslint/no-this-alias': 'off'
+			'@typescript-eslint/no-this-alias': 'off',
+			'svelte/no-useless-mustaches': 'off'
 		}
 	},
 	{
