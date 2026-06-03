@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { TriggerActionEffect } from '@songsofdoom/game';
+	import CapabilityList from '../capabilities/CapabilityList.svelte';
 	import Parameters from '../capabilities/Parameters.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 	import TargetChip from '../targets/TargetChip.svelte';
-	import EffectList from './EffectList.svelte';
 
 	interface Props extends StandardAttributeProps {
 		effect: TriggerActionEffect;
@@ -42,7 +42,7 @@
 		<Text ca="contra" es="contra" en="against" />
 		<TargetChip target={effect.target} />
 	{/if}
-	{#if effect.modifiers.length}
-		<Parameters><EffectList effects={effect.modifiers} /></Parameters>{/if}<!--
---></span
+	{#if effect.modifiers.length}<Parameters
+			><CapabilityList capabilities={effect.modifiers} nested={true} /></Parameters
+		>{/if}</span
 >

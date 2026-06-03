@@ -42,6 +42,8 @@ const sortedEntries = (entries: ResultsTableEntry[]): ResultsTableEntry[] =>
 	entries.sort((a, b) => resultSortKey(a.result) - resultSortKey(b.result));
 
 export class ResultsTableEffect extends Effect {
+	override readonly defaultEvent = 'afterDrawingFate';
+
 	readonly entries: ResultsTableEntry[];
 
 	constructor(props: ResultsTableEffectProps) {

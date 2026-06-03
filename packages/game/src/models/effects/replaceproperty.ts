@@ -22,6 +22,8 @@ export interface ReplacePropertyEffectProps {
  * out an existing Keyword or Rule for a different one.
  */
 export class ReplacePropertyEffect extends Effect {
+	override readonly defaultEvent = 'beforeDrawingFate';
+
 	/**
 	 * The property to be replaced.
 	 */

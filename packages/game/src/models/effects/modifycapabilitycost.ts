@@ -20,6 +20,7 @@ export interface GrouppedCapabilityCosts {
 
 export class ModifyCapabilityCostEffect extends Effect {
 	readonly cost: CapabilityCost;
+	override readonly defaultEvent = 'payingCapability';
 
 	constructor({ cost }: ModifyCapabilityCostEffectProps) {
 		super();

@@ -16,6 +16,8 @@ export interface ModifyDamageEffectProps {
  * An effect that modifies the damage dealt by an attack.
  */
 export class ModifyDamageEffect extends Effect {
+	override readonly defaultEvent = 'afterDrawingFate';
+
 	/** The amount to modify the damage by. Positive values increase damage, negative values decrease it. */
 	readonly amount: ScalarExpressionType;
 

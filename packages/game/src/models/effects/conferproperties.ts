@@ -20,6 +20,8 @@ export interface ConferPropertiesEffectProps {
  * Piercing (2) to Piercing (3)) for the duration.
  */
 export class ConferPropertiesEffect extends Effect {
+	override readonly defaultEvent = 'beforeDrawingFate';
+
 	/**
 	 * The properties that are granted while the effect lasts.
 	 */
