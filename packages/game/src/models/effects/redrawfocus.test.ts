@@ -36,8 +36,8 @@ describe('RedrawFocusEffect.apply', () => {
 		amount?: number;
 		returnSelection?: Counter<FocusToken>;
 	}) {
-		const currentState = mock<ReadonlyGameState>();
-		currentState.evaluate.mockReturnValue(amount);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const currentState = mock<ReadonlyGameState>({ evaluate: (() => amount) as any });
 
 		const hand = new Counter<FocusToken>();
 		for (const [token, count] of handTokens) {

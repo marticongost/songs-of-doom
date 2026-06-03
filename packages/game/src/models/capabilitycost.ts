@@ -1,6 +1,7 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
 import type { ScalarExpressionType } from './expressions';
 import { focusTypes, type FocusType } from './focus';
+import type { GameState } from './game/gamestate';
 import type { IndicatorType } from './stats';
 
 export type ScalarCapabilityCostType = FocusType | IndicatorType | 'gold' | 'charges';
@@ -42,47 +43,58 @@ export const capabilityCostTypes: Array<CapabilityCostType> = [
 	...cardTransitionTypes
 ];
 
-export type CapabilityCostFocusesProps = Partial<Record<FocusType, ScalarExpressionType>>;
+export type CapabilityCostFocusesProps<N extends ScalarExpressionType> = Partial<
+	Record<FocusType, N>
+>;
 
-export interface CapabilityCostProps extends CapabilityCostFocusesProps {
-	health?: number;
-	sanity?: number;
-	gold?: number;
-	charges?: number;
+export interface CapabilityCostProps<
+	N extends ScalarExpressionType = ScalarExpressionType
+> extends CapabilityCostFocusesProps<N> {
+	health?: N;
+	sanity?: N;
+	gold?: N;
+	charges?: N;
 	cardTransition?: CardTransitionType | CardTransition;
 }
 
-export class CapabilityCost {
-	readonly strength: ScalarExpressionType;
-	readonly agility: ScalarExpressionType;
-	readonly intelligence: ScalarExpressionType;
-	readonly charisma: ScalarExpressionType;
-	readonly will: ScalarExpressionType;
-	readonly heroism: ScalarExpressionType;
-	readonly any: ScalarExpressionType;
-	readonly health: number;
-	readonly sanity: number;
-	readonly gold: number;
-	readonly charges: number;
+export abstract class BaseCapabilityCost<N extends ScalarExpressionType> {
+	readonly strength: N;
+	readonly agility: N;
+	readonly intelligence: N;
+	readonly charisma: N;
+	readonly will: N;
+	readonly heroism: N;
+	readonly any: N;
+	readonly health: N;
+	readonly sanity: N;
+	readonly gold: N;
+	readonly charges: N;
 	readonly cardTransition?: CardTransition;
 
-	constructor({ health, sanity, gold, charges, cardTransition, ...focuses }: CapabilityCostProps) {
-		this.strength = focuses.strength ?? 0;
-		this.agility = focuses.agility ?? 0;
-		this.intelligence = focuses.intelligence ?? 0;
-		this.charisma = focuses.charisma ?? 0;
-		this.will = focuses.will ?? 0;
-		this.heroism = focuses.heroism ?? 0;
-		this.any = focuses.any ?? 0;
-		this.health = health ?? 0;
-		this.sanity = sanity ?? 0;
-		this.gold = gold ?? 0;
-		this.charges = charges ?? 0;
+	constructor({
+		health,
+		sanity,
+		gold,
+		charges,
+		cardTransition,
+		...focuses
+	}: CapabilityCostProps<N>) {
+		this.strength = focuses.strength ?? (0 as N);
+		this.agility = focuses.agility ?? (0 as N);
+		this.intelligence = focuses.intelligence ?? (0 as N);
+		this.charisma = focuses.charisma ?? (0 as N);
+		this.will = focuses.will ?? (0 as N);
+		this.heroism = focuses.heroism ?? (0 as N);
+		this.any = focuses.any ?? (0 as N);
+		this.health = health ?? (0 as N);
+		this.sanity = sanity ?? (0 as N);
+		this.gold = gold ?? (0 as N);
+		this.charges = charges ?? (0 as N);
 		this.cardTransition =
 			typeof cardTransition === 'string' ? cardTransitions[cardTransition] : cardTransition;
 	}
 
-	getCostForType(type: ScalarCapabilityCostType): ScalarExpressionType {
+	getCostForType(type: ScalarCapabilityCostType): N {
 		return this[type];
 	}
 
@@ -102,3 +114,24 @@ export class CapabilityCost {
 		);
 	}
 }
+
+export class CapabilityCost extends BaseCapabilityCost<ScalarExpressionType> {
+	evaluate(state: GameState): ActualCapabilityCost {
+		return new ActualCapabilityCost({
+			strength: state.evaluate(this.strength),
+			agility: state.evaluate(this.agility),
+			intelligence: state.evaluate(this.intelligence),
+			charisma: state.evaluate(this.charisma),
+			will: state.evaluate(this.will),
+			heroism: state.evaluate(this.heroism),
+			any: state.evaluate(this.any),
+			health: state.evaluate(this.health),
+			sanity: state.evaluate(this.sanity),
+			gold: state.evaluate(this.gold),
+			charges: state.evaluate(this.charges),
+			cardTransition: this.cardTransition
+		});
+	}
+}
+
+export class ActualCapabilityCost extends BaseCapabilityCost<number> {}

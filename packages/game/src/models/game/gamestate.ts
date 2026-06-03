@@ -1,6 +1,7 @@
-import type { EntityTypeId } from '../..';
+import { CapabilityCost, type EntityTypeId } from '../..';
 import { Action } from '../capabilities/action';
 import { type Capability } from '../capability';
+import type { ActualCapabilityCost } from '../capabilitycost';
 import type { Effect } from '../effects/effect';
 import type { BooleanExpressionType } from '../expressions/boolean/boolean-expression';
 import type { ScalarExpressionType } from '../expressions/scalar/scalar-expression';
@@ -46,16 +47,16 @@ export interface GameStateProps {
 	locations?: ReadonlyArray<LocationState>;
 	encounterDeck?: ReadonlyArray<CardState>;
 	encounterDiscardPile?: ReadonlyArray<CardState>;
-	activeCardStack?: Array<CardId>;
-	activePlayerStack?: Array<PlayerId>;
-	reactiveCardStack?: Array<CardId>;
-	reactivePlayerStack?: Array<PlayerId>;
-	currentCardStack?: Array<CardId>;
+	activeCardStack?: Array<CardId>; // REDUNDANT
+	activePlayerStack?: Array<PlayerId>; // REDUNDANT
+	reactiveCardStack?: Array<CardId>; // REDUNDANT
+	reactivePlayerStack?: Array<PlayerId>; // REDUNDANT
+	currentCardStack?: Array<CardId>; // REDUNDANT
 	targetStack?: Array<EntityId>;
 	subjectStack?: Array<EntityId>;
 	testResolutionStack?: Array<TestResolution>;
 	woundResolutionStack?: Array<WoundResolution>;
-	plannedActions?: ReadonlyMap<CardId, PlannedAction>;
+	plannedActions?: ReadonlyMap<CardId, PlannedAction>; // Replace PlannedAction with CapabilityResolution
 }
 
 export interface CardOptions {
@@ -365,7 +366,10 @@ export class GameState<
 
 	evaluate(expr: BooleanExpressionType): boolean;
 	evaluate(expr: ScalarExpressionType): number;
-	evaluate(expr: BooleanExpressionType | ScalarExpressionType): boolean | number {
+	evaluate(expr: CapabilityCost): ActualCapabilityCost;
+	evaluate(
+		expr: BooleanExpressionType | ScalarExpressionType | CapabilityCost
+	): boolean | number | ActualCapabilityCost {
 		if (typeof expr === 'boolean') return expr;
 		if (typeof expr === 'number') return expr;
 		return (expr as { evaluate(state: GameState): boolean | number }).evaluate(this);
@@ -589,7 +593,7 @@ export class MutableGameState extends GameState<
 
 			// Charges
 			if (capability.cost.charges) {
-				if (card.charges < capability.cost.charges) {
+				if (card.charges < this.evaluate(capability.cost.charges)) {
 					return 'insufficient-charges';
 				}
 			}
@@ -607,7 +611,7 @@ export class MutableGameState extends GameState<
 			}
 
 			// Gold
-			if (capability.cost.gold && !(player && player.gold >= capability.cost.gold)) {
+			if (capability.cost.gold && !(player && player.gold >= this.evaluate(capability.cost.gold))) {
 				return 'insufficient-gold';
 			}
 

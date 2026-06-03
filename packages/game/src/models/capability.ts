@@ -28,7 +28,7 @@ export abstract class Capability {
 
 	isFeasible(state: ReadonlyGameState, cardId: CardId): boolean {
 		const card = state.requireCard(cardId);
-		return this.cost.charges === 0 || card.charges >= this.cost.charges;
+		return this.cost.charges === 0 || card.charges >= state.evaluate(this.cost.charges);
 	}
 
 	constantEffects(): Array<Effect> {

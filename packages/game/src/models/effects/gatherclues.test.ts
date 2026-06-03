@@ -59,12 +59,14 @@ describe('GatherCluesEffect.apply', () => {
 	it('transfers clues from the location to the subject and returns the outcome', async () => {
 		const subject = makeSubject('trt1', 0);
 		const location = makeLocation('loc2', 5);
-		const mutableState = mock<MutableGameState>();
+		const mutableState = mock<MutableGameState>({
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			evaluate: (() => 3) as any
+		});
 		mutableState.requireEntityState.calledWith('trt1').mockReturnValue(subject);
 		mutableState.requireCard
 			.calledWith('loc2')
 			.mockReturnValue(location as unknown as MutableCardState);
-		mutableState.evaluate.calledWith(3).mockReturnValue(3);
 		mutableState.requireSubject.mockReturnValue(subject);
 		const graph = mock<GameGraph>();
 		graph.requestTargets.mockResolvedValue(['loc2']);
@@ -78,6 +80,7 @@ describe('GatherCluesEffect.apply', () => {
 
 		expect(subject.clues).toBe(3);
 		expect(location.clues).toBe(2);
+		expect(mutableState.evaluate).toHaveBeenCalledWith(3);
 		const outcome = callbackReturn as GatherCluesOutcome;
 		expect(outcome.gatheredClues.get('loc2')).toBe(3);
 	});
@@ -85,12 +88,14 @@ describe('GatherCluesEffect.apply', () => {
 	it('gathers at most the available clues on the location', async () => {
 		const subject = makeSubject('trt1', 0);
 		const location = makeLocation('loc2', 2);
-		const mutableState = mock<MutableGameState>();
+		const mutableState = mock<MutableGameState>({
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			evaluate: (() => 5) as any
+		});
 		mutableState.requireEntityState.calledWith('trt1').mockReturnValue(subject);
 		mutableState.requireCard
 			.calledWith('loc2')
 			.mockReturnValue(location as unknown as MutableCardState);
-		mutableState.evaluate.calledWith(5).mockReturnValue(5);
 		mutableState.requireSubject.mockReturnValue(subject);
 		const graph = mock<GameGraph>();
 		graph.requestTargets.mockResolvedValue(['loc2']);
@@ -106,7 +111,10 @@ describe('GatherCluesEffect.apply', () => {
 		const subject = makeSubject('trt1', 0);
 		const loc1 = makeLocation('loc2', 3);
 		const loc2 = makeLocation('loc3', 4);
-		const mutableState = mock<MutableGameState>();
+		const mutableState = mock<MutableGameState>({
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			evaluate: (() => 2) as any
+		});
 		mutableState.requireEntityState.calledWith('trt1').mockReturnValue(subject);
 		mutableState.requireCard
 			.calledWith('loc2')
@@ -114,7 +122,6 @@ describe('GatherCluesEffect.apply', () => {
 		mutableState.requireCard
 			.calledWith('loc3')
 			.mockReturnValue(loc2 as unknown as MutableCardState);
-		mutableState.evaluate.calledWith(2).mockReturnValue(2);
 		mutableState.requireSubject.mockReturnValue(subject);
 		const graph = mock<GameGraph>();
 		graph.requestTargets.mockResolvedValue(['loc2', 'loc3']);
@@ -129,6 +136,7 @@ describe('GatherCluesEffect.apply', () => {
 		expect(subject.clues).toBe(4);
 		expect(loc1.clues).toBe(1);
 		expect(loc2.clues).toBe(2);
+		expect(mutableState.evaluate).toHaveBeenCalledWith(2);
 		const outcome = callbackReturn as GatherCluesOutcome;
 		expect(outcome.gatheredClues.get('loc2')).toBe(2);
 		expect(outcome.gatheredClues.get('loc3')).toBe(2);

@@ -50,8 +50,8 @@ describe('HealEffect construction', () => {
 describe('HealEffect.apply — no explicit target', () => {
 	it('reduces physicalTrauma of the subject by the heal amount', async () => {
 		const subject = makePlayer('plr1', 5);
-		const mutableState = mock<MutableGameState>();
-		mutableState.evaluate.mockReturnValue(3);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const mutableState = mock<MutableGameState>({ evaluate: (() => 3) as any });
 		mutableState.requireEntityState.calledWith('plr1').mockReturnValue(subject);
 		const graph = mock<GameGraph>();
 		graph.requestSingleTarget.mockResolvedValue('plr1');
@@ -64,8 +64,8 @@ describe('HealEffect.apply — no explicit target', () => {
 
 	it('caps healing at current physicalTrauma (does not go below 0)', async () => {
 		const subject = makePlayer('plr1', 2);
-		const mutableState = mock<MutableGameState>();
-		mutableState.evaluate.mockReturnValue(5);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const mutableState = mock<MutableGameState>({ evaluate: (() => 5) as any });
 		mutableState.requireEntityState.calledWith('plr1').mockReturnValue(subject);
 		const graph = mock<GameGraph>();
 		graph.requestSingleTarget.mockResolvedValue('plr1');
@@ -82,8 +82,8 @@ describe('HealEffect.apply — no explicit target', () => {
 describe('HealEffect.apply — with explicit target', () => {
 	it('requests the chosen target and reduces their physicalTrauma', async () => {
 		const target = makePlayer('plr2', 4);
-		const mutableState = mock<MutableGameState>();
-		mutableState.evaluate.mockReturnValue(2);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const mutableState = mock<MutableGameState>({ evaluate: (() => 2) as any });
 		mutableState.requireEntityState.calledWith('plr2').mockReturnValue(target);
 		const graph = mock<GameGraph>();
 		graph.requestSingleTarget.mockResolvedValue('plr2');
@@ -96,8 +96,8 @@ describe('HealEffect.apply — with explicit target', () => {
 
 	it('caps healing at current physicalTrauma when targeting explicitly', async () => {
 		const target = makePlayer('plr2', 1);
-		const mutableState = mock<MutableGameState>();
-		mutableState.evaluate.mockReturnValue(10);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const mutableState = mock<MutableGameState>({ evaluate: (() => 10) as any });
 		mutableState.requireEntityState.calledWith('plr2').mockReturnValue(target);
 		const graph = mock<GameGraph>();
 		graph.requestSingleTarget.mockResolvedValue('plr2');

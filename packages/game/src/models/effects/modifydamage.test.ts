@@ -28,9 +28,10 @@ describe('ModifyDamageEffect.apply — wound resolution active', () => {
 	it('increments damageModifier on the active wound resolution', async () => {
 		const woundRes = new MutableWoundResolution({ targetId: 'trt1', damageDealt: 5 });
 		const mutableState = mock<MutableGameState>({
-			getActiveWoundResolution: () => woundRes
+			getActiveWoundResolution: () => woundRes,
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			evaluate: (() => 2) as any
 		});
-		mutableState.evaluate.mockReturnValue(2);
 		const graph = mock<GameGraph>();
 		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
@@ -49,9 +50,10 @@ describe('ModifyDamageEffect.apply — wound resolution active', () => {
 		});
 		const mutableState = mock<MutableGameState>({
 			getActiveWoundResolution: () => woundRes,
-			getActiveTestResolution: () => attackRes
+			getActiveTestResolution: () => attackRes,
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			evaluate: (() => 3) as any
 		});
-		mutableState.evaluate.mockReturnValue(3);
 		const graph = mock<GameGraph>();
 		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
@@ -73,9 +75,10 @@ describe('ModifyDamageEffect.apply — attack resolution active', () => {
 		});
 		const mutableState = mock<MutableGameState>({
 			getActiveWoundResolution: () => undefined,
-			getActiveTestResolution: () => attackRes
+			getActiveTestResolution: () => attackRes,
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			evaluate: (() => 3) as any
 		});
-		mutableState.evaluate.mockReturnValue(3);
 		const graph = mock<GameGraph>();
 		graph.mutate.mockImplementation((fn) => fn(mutableState));
 
