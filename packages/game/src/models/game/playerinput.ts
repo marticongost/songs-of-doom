@@ -1,4 +1,5 @@
 import { ReadonlyCounter } from '@songsofdoom/common';
+import type { ActualCapabilityCost, Payment } from '../capabilitycost';
 import type { FocusToken } from '../focus';
 import type { Result } from '../results';
 import type { Target } from '../target';
@@ -93,3 +94,33 @@ export class ResultField<N extends string = string, R extends boolean = true> ex
 	N,
 	R
 > {}
+
+/**
+ * Constructor for {@link PaymentField}.
+ */
+export interface PaymentFieldProps<
+	N extends string = string,
+	R extends boolean = true
+> extends FieldProps<N, R> {
+	/** The cost to be paid. */
+	cost: ActualCapabilityCost;
+}
+
+/**
+ * A type of field that can be used to request a payment from the player. If there are
+ * multiple ways to pay the cost, the player will be asked to choose how they want to
+ * pay it.
+ */
+export class PaymentField<N extends string = string, R extends boolean = true> extends Field<
+	Payment,
+	N,
+	R
+> {
+	/** The cost to be paid. */
+	readonly cost: ActualCapabilityCost;
+
+	constructor({ cost, ...baseProps }: PaymentFieldProps<N, R>) {
+		super(baseProps);
+		this.cost = cost;
+	}
+}

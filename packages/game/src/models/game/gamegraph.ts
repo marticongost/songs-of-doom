@@ -1,4 +1,5 @@
 import { Obligation, type Reaction } from '../capabilities';
+import type { CapabilityCost, Payment } from '../capabilitycost';
 import type { Effect } from '../effects';
 import { events, type EventContext, type EventType } from '../event';
 import type { ScalarExpressionType } from '../expressions';
@@ -34,7 +35,7 @@ import {
 } from './gamestate';
 import { isPlayerId, type CardId, type EntityId, type PlayerId } from './identifiers';
 import type { Field } from './playerinput';
-import { CapabilityChoiceField, ResultField, TargetField } from './playerinput';
+import { CapabilityChoiceField, PaymentField, ResultField, TargetField } from './playerinput';
 import type { ReadonlyPlayerState } from './playerstate';
 import { EffectRolledBack } from './rollback';
 import { MutableTestResolution, type TestResolutionProps } from './testresolution';
@@ -393,6 +394,80 @@ export class GameGraph {
 			throw new Error('Expected target to be of type player');
 		}
 		return (await this.requestInput(target, { playerId: options.playerId })).target as PlayerId[];
+	}
+
+	/** Asks a player to choose the payment form for a given cost, and discards the
+	 * selected resources.
+	 *
+	 * @param cost - The cost to be paid.
+	 * @param playerId - The player who should pay the cost. If empty, defaults to the
+	 *   active player.
+	 * @param cardId - Optional id of the card for which the cost is being paid. Relevant
+	 *   when the cost includes card transitions or charges.
+	 * @returns An object describing the resources the player chose to spend, or undefined
+	 *   if the player couldn't or didn't want to pay the cost.
+	 * */
+	async payment({
+		cost,
+		cardId,
+		playerId
+	}: {
+		cost: CapabilityCost;
+		cardId?: CardId;
+		playerId?: PlayerId;
+	}): Promise<Payment> {
+		if (!playerId) {
+			playerId = this._current.state.requireActivePlayer()?.id;
+		}
+		const actualCost = this._current.state.evaluate(cost);
+		const { payment } = await this.requestInput(
+			[new PaymentField({ name: 'payment', cost: actualCost })] as const,
+			{
+				playerId
+			}
+		);
+		this.mutate((state) => {
+			const player = state.requirePlayer(playerId);
+
+			// Spent focuses
+			for (const [focusToken, amount] of payment.spentFocuses.entries()) {
+				player.discardFocusToken(focusToken, amount);
+			}
+
+			// Spent cards
+			for (const spentCardId of payment.spentCards) {
+				state.requireCard(spentCardId).moveToTopOfDiscardPile(state);
+			}
+
+			// Charges
+			const card = cardId ? state.requireCard(cardId) : undefined;
+			if (payment.spentCharges > 0) {
+				if (!card) {
+					throw new Error('Card id must be provided to pay charges');
+				}
+				card.charges -= payment.spentCharges;
+			}
+
+			// Health, sanity, gold
+			player.physicalTrauma += payment.spentHealth;
+			player.mentalTrauma += payment.spentSanity;
+			player.gold -= payment.spentGold;
+
+			// Card transitions
+			if (payment.cardTransition) {
+				if (!card) {
+					throw new Error('Card id must be provided to pay card transitions');
+				}
+				if (payment.cardTransition.type === 'discard') {
+					card.moveToTopOfDiscardPile(state);
+				} else if (payment.cardTransition.type === 'exhaust') {
+					card.exhausted = true;
+				} else {
+					throw new Error(`Unknown card transition type: ${payment.cardTransition.type}`);
+				}
+			}
+		});
+		return payment;
 	}
 
 	async defeat(targetId: CardId | PlayerId | ReadonlyPlayerState): Promise<void> {
