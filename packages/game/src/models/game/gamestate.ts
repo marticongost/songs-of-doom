@@ -47,16 +47,16 @@ export interface GameStateProps {
 	locations?: ReadonlyArray<LocationState>;
 	encounterDeck?: ReadonlyArray<CardState>;
 	encounterDiscardPile?: ReadonlyArray<CardState>;
-	activeCardStack?: Array<CardId>; // REDUNDANT
-	activePlayerStack?: Array<PlayerId>; // REDUNDANT
-	reactiveCardStack?: Array<CardId>; // REDUNDANT
-	reactivePlayerStack?: Array<PlayerId>; // REDUNDANT
-	currentCardStack?: Array<CardId>; // REDUNDANT
+	activeCardStack?: Array<CardId>;
+	activePlayerStack?: Array<PlayerId>;
+	reactiveCardStack?: Array<CardId>;
+	reactivePlayerStack?: Array<PlayerId>;
+	currentCardStack?: Array<CardId>;
 	targetStack?: Array<EntityId>;
 	subjectStack?: Array<EntityId>;
 	testResolutionStack?: Array<TestResolution>;
 	woundResolutionStack?: Array<WoundResolution>;
-	plannedActions?: ReadonlyMap<CardId, PlannedAction>; // Replace PlannedAction with CapabilityResolution
+	plannedActions?: ReadonlyMap<CardId, PlannedAction>;
 }
 
 export interface CardOptions {
