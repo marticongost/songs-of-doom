@@ -6,8 +6,9 @@ import type { Entity } from '../entities';
 import { health, strength } from '../stats';
 import { MutableCardState, ReadonlyCardState } from './cardstate';
 import type { MutableGameState } from './gamestate';
-import type { PlayerId } from './identifiers';
+import type { CardId, PlayerId } from './identifiers';
 import { ReadonlyPlayerState } from './playerstate';
+import type { CardOptions } from './sequence/cardcontainer';
 
 function makePlayer(
 	id: PlayerId,
@@ -40,168 +41,169 @@ function makePlayer(
 // ─── PlayerState.cards ────────────────────────────────────────────────────────
 
 describe('PlayerState.cards', () => {
-	it('returns all cards from hand, stage, discard, deck, attachments and banished', () => {
-		const inHand = mock<ReadonlyCardState>({ attachments: [] });
-		const inStage = mock<ReadonlyCardState>({ attachments: [] });
-		const inDiscard = mock<ReadonlyCardState>({ attachments: [] });
-		const attached = mock<ReadonlyCardState>({ attachments: [] });
+	const makeMockCard = (cardOptions?: CardOptions): ReadonlyCardState => {
+		const cardState = mock<ReadonlyCardState>();
+		cardState.cards.mockImplementation((options?: CardOptions) => {
+			if (JSON.stringify(options) === JSON.stringify(cardOptions)) {
+				return [cardState];
+			}
+			throw new Error(`Unexpected card option propagation: ${JSON.stringify(options)}`);
+		});
+		return cardState;
+	};
+
+	it('returns cards from all zones (hand, stage, deck, discard, attachments, banished)', () => {
+		const inHand = makeMockCard();
+		const inStage = makeMockCard();
+		const inDeck = makeMockCard();
+		const inDiscard = makeMockCard();
+		const attached = makeMockCard();
+		const banished = makeMockCard();
+
 		const player = makePlayer('plr1', {
 			hand: [inHand],
 			stage: [inStage],
+			deck: [inDeck],
 			discard: [inDiscard],
-			attachments: [attached]
+			attachments: [attached],
+			banished: [banished]
 		});
+
 		const all = player.cards();
 		expect(all).toContain(inHand);
 		expect(all).toContain(inStage);
+		expect(all).toContain(inDeck);
 		expect(all).toContain(inDiscard);
 		expect(all).toContain(attached);
+		expect(all).toContain(banished);
 	});
 
-	it('returns banished cards', () => {
-		const banished = mock<ReadonlyCardState>({ attachments: [] });
-		const player = makePlayer('plr1', { banished: [banished] });
-		expect(player.cards()).toContain(banished);
-	});
+	it('with ready:true excludes deck, discard and banished zones', () => {
+		const inHand = makeMockCard({ ready: true });
+		const inStage = makeMockCard({ ready: true });
+		const attached = makeMockCard({ ready: true });
+		const inDeck = makeMockCard({ ready: true });
+		const inDiscard = makeMockCard({ ready: true });
+		const banished = makeMockCard({ ready: true });
 
-	it('includes deck cards', () => {
-		const inDeck = mock<ReadonlyCardState>({ attachments: [] });
-		const player = makePlayer('plr1', { deck: [inDeck] });
-		expect(player.cards()).toContain(inDeck);
-	});
-
-	it('with ready:true returns only non-exhausted hand, stage and attachment cards', () => {
-		const readyHand = mock<ReadonlyCardState>({ exhausted: false, attachments: [] });
-		const exhaustedHand = mock<ReadonlyCardState>({ exhausted: true, attachments: [] });
-		const readyStage = mock<ReadonlyCardState>({ exhausted: false, attachments: [] });
-		const exhaustedStage = mock<ReadonlyCardState>({ exhausted: true, attachments: [] });
-		const readyAttachment = mock<ReadonlyCardState>({ exhausted: false, attachments: [] });
-		const exhaustedAttachment = mock<ReadonlyCardState>({ exhausted: true, attachments: [] });
-		const inDeck = mock<ReadonlyCardState>({ attachments: [] });
-		const inDiscard = mock<ReadonlyCardState>({ attachments: [] });
 		const player = makePlayer('plr1', {
-			hand: [readyHand, exhaustedHand],
-			stage: [readyStage, exhaustedStage],
-			attachments: [readyAttachment, exhaustedAttachment],
+			hand: [inHand],
+			stage: [inStage],
+			attachments: [attached],
 			deck: [inDeck],
-			discard: [inDiscard]
+			discard: [inDiscard],
+			banished: [banished]
 		});
+
 		const ready = player.cards({ ready: true });
-		expect(ready).toContain(readyHand);
-		expect(ready).toContain(readyStage);
-		expect(ready).toContain(readyAttachment);
-		expect(ready).not.toContain(exhaustedHand);
-		expect(ready).not.toContain(exhaustedStage);
-		expect(ready).not.toContain(exhaustedAttachment);
-		expect(ready).not.toContain(inDiscard); // discard excluded when ready:true
-		expect(ready).not.toContain(inDeck); // deck excluded when ready:true
+		expect(ready).toContain(inHand);
+		expect(ready).toContain(inStage);
+		expect(ready).toContain(attached);
+		expect(ready).not.toContain(inDeck);
+		expect(ready).not.toContain(inDiscard);
+		expect(ready).not.toContain(banished);
 	});
 
-	it('filters by entity type', () => {
-		const skillCard = mock<ReadonlyCardState>({
-			exhausted: false,
-			attachments: [],
-			card: { type: { id: 'skill' } } as Entity
+	it('propagates card type', () => {
+		const inHand = makeMockCard({ type: 'skill' });
+		const inStage = makeMockCard({ type: 'skill' });
+		const attached = makeMockCard({ type: 'skill' });
+		const inDeck = makeMockCard({ type: 'skill' });
+		const inDiscard = makeMockCard({ type: 'skill' });
+		const banished = makeMockCard({ type: 'skill' });
+
+		const player = makePlayer('plr1', {
+			hand: [inHand],
+			stage: [inStage],
+			attachments: [attached],
+			deck: [inDeck],
+			discard: [inDiscard],
+			banished: [banished]
 		});
-		const itemCard = mock<ReadonlyCardState>({
-			exhausted: false,
-			attachments: [],
-			card: { type: { id: 'item' } } as Entity
-		});
-		const player = makePlayer('plr1', { hand: [skillCard, itemCard] });
-		const skills = player.cards({ type: 'skill' });
-		expect(skills).toContain(skillCard);
-		expect(skills).not.toContain(itemCard);
+
+		const ready = player.cards({ type: 'skill' });
+		expect(ready).toContain(inHand);
+		expect(ready).toContain(inStage);
+		expect(ready).toContain(attached);
+		expect(ready).toContain(inDeck);
+		expect(ready).toContain(inDiscard);
+		expect(ready).toContain(banished);
 	});
 
-	it('includes nested attachments', () => {
-		const nested = mock<ReadonlyCardState>({ attachments: [] });
-		const parent = mock<ReadonlyCardState>({ attachments: [nested] });
-		const player = makePlayer('plr1', { hand: [parent] });
-		const all = player.cards();
-		expect(all).toContain(nested);
-	});
+	it('propagates includeAttachments', () => {
+		const inHand = makeMockCard({ includeAttachments: true });
+		const inStage = makeMockCard({ includeAttachments: true });
+		const attached = makeMockCard({ includeAttachments: true });
+		const inDeck = makeMockCard({ includeAttachments: true });
+		const inDiscard = makeMockCard({ includeAttachments: true });
+		const banished = makeMockCard({ includeAttachments: true });
 
-	it('with ready:true skips exhausted nested attachments', () => {
-		const readyNested = mock<ReadonlyCardState>({ exhausted: false, attachments: [] });
-		const exhaustedNested = mock<ReadonlyCardState>({ exhausted: true, attachments: [] });
-		const parent = mock<ReadonlyCardState>({
-			exhausted: false,
-			attachments: [readyNested, exhaustedNested]
+		const player = makePlayer('plr1', {
+			hand: [inHand],
+			stage: [inStage],
+			attachments: [attached],
+			deck: [inDeck],
+			discard: [inDiscard],
+			banished: [banished]
 		});
-		const player = makePlayer('plr1', { hand: [parent] });
-		const ready = player.cards({ ready: true });
-		expect(ready).toContain(readyNested);
-		expect(ready).not.toContain(exhaustedNested);
-	});
 
-	it('filters nested attachments by type', () => {
-		const matching = mock<ReadonlyCardState>({
-			exhausted: false,
-			attachments: [],
-			card: { type: { id: 'skill' } } as Entity
-		});
-		const nonMatching = mock<ReadonlyCardState>({
-			exhausted: false,
-			attachments: [],
-			card: { type: { id: 'item' } } as Entity
-		});
-		const parent = mock<ReadonlyCardState>({
-			exhausted: false,
-			attachments: [matching, nonMatching],
-			card: { type: { id: 'skill' } } as Entity
-		});
-		const player = makePlayer('plr1', { hand: [parent] });
-		const skills = player.cards({ type: 'skill' });
-		expect(skills).toContain(matching);
-		expect(skills).not.toContain(nonMatching);
+		const includeAttachments = player.cards({ includeAttachments: true });
+		expect(includeAttachments).toContain(inHand);
+		expect(includeAttachments).toContain(inStage);
+		expect(includeAttachments).toContain(attached);
+		expect(includeAttachments).toContain(inDeck);
+		expect(includeAttachments).toContain(inDiscard);
+		expect(includeAttachments).toContain(banished);
 	});
 });
 
 // ─── PlayerState.getCard ──────────────────────────────────────────────────────
 
 describe('PlayerState.getCard', () => {
+	const makeMockCard = (id: CardId, child?: ReadonlyCardState): ReadonlyCardState => {
+		const cardState = mock<ReadonlyCardState>({ id });
+		cardState.cards.mockImplementation((_options?: CardOptions) => [cardState]);
+		cardState.getCard.mockImplementation((cardId: string) => {
+			if (cardId === id) return cardState;
+			if (child && child.id === cardId) return child;
+			return undefined;
+		});
+		return cardState;
+	};
+
 	it('finds a card in hand', () => {
-		const c1 = mock<ReadonlyCardState>({ attachments: [] });
-		c1.getCard.mockImplementation((id) => (id === 'trt1' ? c1 : undefined));
+		const c1 = makeMockCard('trt1');
 		const player = makePlayer('plr1', { hand: [c1] });
 		expect(player.getCard('trt1')).toBe(c1);
 	});
 
 	it('finds a card in deck', () => {
-		const c1 = mock<ReadonlyCardState>({ attachments: [] });
-		c1.getCard.mockImplementation((id) => (id === 'trt1' ? c1 : undefined));
+		const c1 = makeMockCard('trt1');
 		const player = makePlayer('plr1', { deck: [c1] });
 		expect(player.getCard('trt1')).toBe(c1);
 	});
 
 	it('finds a card in the discard pile', () => {
-		const c1 = mock<ReadonlyCardState>({ attachments: [] });
-		c1.getCard.mockImplementation((id) => (id === 'trt1' ? c1 : undefined));
+		const c1 = makeMockCard('trt1');
 		const player = makePlayer('plr1', { discard: [c1] });
 		expect(player.getCard('trt1')).toBe(c1);
 	});
 
 	it('finds a card in attachments', () => {
-		const c1 = mock<ReadonlyCardState>({ attachments: [] });
-		c1.getCard.mockImplementation((id) => (id === 'trt1' ? c1 : undefined));
+		const c1 = makeMockCard('trt1');
 		const player = makePlayer('plr1', { attachments: [c1] });
 		expect(player.getCard('trt1')).toBe(c1);
 	});
 
 	it('finds a card in banished cards', () => {
-		const c1 = mock<ReadonlyCardState>({ attachments: [] });
-		c1.getCard.mockImplementation((id) => (id === 'trt1' ? c1 : undefined));
+		const c1 = makeMockCard('trt1');
 		const player = makePlayer('plr1', { banished: [c1] });
 		expect(player.getCard('trt1')).toBe(c1);
 	});
 
 	it('finds a nested attachment on a hand card', () => {
-		const nested = mock<ReadonlyCardState>({ attachments: [] });
-		const parent = mock<ReadonlyCardState>({ attachments: [] });
-		parent.getCard.mockImplementation((id) =>
-			id === 'trt2' ? nested : id === 'trt1' ? parent : undefined
-		);
+		const nested = makeMockCard('trt2');
+		const parent = makeMockCard('trt1', nested);
 		const player = makePlayer('plr1', { hand: [parent] });
 		expect(player.getCard('trt2')).toBe(nested);
 	});
@@ -215,47 +217,50 @@ describe('PlayerState.getCard', () => {
 // ─── PlayerState.requireCard ──────────────────────────────────────────────────
 
 describe('PlayerState.requireCard', () => {
+	const makeMockCard = (id: CardId, child?: ReadonlyCardState): ReadonlyCardState => {
+		const cardState = mock<ReadonlyCardState>({ id });
+		cardState.cards.mockImplementation((_options?: CardOptions) => [cardState]);
+		cardState.getCard.mockImplementation((cardId: string) => {
+			if (cardId === id) return cardState;
+			if (child && child.id === cardId) return child;
+			return undefined;
+		});
+		return cardState;
+	};
+
 	it('finds a card in hand', () => {
-		const c1 = mock<ReadonlyCardState>({ attachments: [] });
-		c1.getCard.mockImplementation((id) => (id === 'trt1' ? c1 : undefined));
+		const c1 = makeMockCard('trt1');
 		const player = makePlayer('plr1', { hand: [c1] });
 		expect(player.requireCard('trt1')).toBe(c1);
 	});
 
 	it('finds a card in deck', () => {
-		const c1 = mock<ReadonlyCardState>({ attachments: [] });
-		c1.getCard.mockImplementation((id) => (id === 'trt1' ? c1 : undefined));
+		const c1 = makeMockCard('trt1');
 		const player = makePlayer('plr1', { deck: [c1] });
 		expect(player.requireCard('trt1')).toBe(c1);
 	});
 
 	it('finds a card in the discard pile', () => {
-		const c1 = mock<ReadonlyCardState>({ attachments: [] });
-		c1.getCard.mockImplementation((id) => (id === 'trt1' ? c1 : undefined));
+		const c1 = makeMockCard('trt1');
 		const player = makePlayer('plr1', { discard: [c1] });
 		expect(player.requireCard('trt1')).toBe(c1);
 	});
 
 	it('finds a card in attachments', () => {
-		const c1 = mock<ReadonlyCardState>({ attachments: [] });
-		c1.getCard.mockImplementation((id) => (id === 'trt1' ? c1 : undefined));
+		const c1 = makeMockCard('trt1');
 		const player = makePlayer('plr1', { attachments: [c1] });
 		expect(player.requireCard('trt1')).toBe(c1);
 	});
 
 	it('finds a card in banished cards', () => {
-		const c1 = mock<ReadonlyCardState>({ attachments: [] });
-		c1.getCard.mockImplementation((id) => (id === 'trt1' ? c1 : undefined));
+		const c1 = makeMockCard('trt1');
 		const player = makePlayer('plr1', { banished: [c1] });
 		expect(player.requireCard('trt1')).toBe(c1);
 	});
 
 	it('finds a nested attachment on a hand card', () => {
-		const nested = mock<ReadonlyCardState>({ attachments: [] });
-		const parent = mock<ReadonlyCardState>({ attachments: [] });
-		parent.getCard.mockImplementation((id) =>
-			id === 'trt2' ? nested : id === 'trt1' ? parent : undefined
-		);
+		const nested = makeMockCard('trt2');
+		const parent = makeMockCard('trt1', nested);
 		const player = makePlayer('plr1', { hand: [parent] });
 		expect(player.requireCard('trt2')).toBe(nested);
 	});

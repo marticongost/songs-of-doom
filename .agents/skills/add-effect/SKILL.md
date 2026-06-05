@@ -142,7 +142,7 @@ The read-only state provides accessors like:
 - `state.requireActiveCard()` / `state.getActiveCard()` — the currently active card
 - `state.requireEntityState(id)` / `state.requirePlayer(id)` / `state.requireCard(id)` — look up an entity by id
 - `state.evaluate(expression)` — evaluate a scalar expression in the current context
-- `state.getPlayerLocation(playerId)` — get a player's current location
+- `state.getEntityLocation(playerId)` — get a player's current location
 - `state.cards({ ready: true })` — iterate over cards matching a filter
 
 #### Common apply() patterns

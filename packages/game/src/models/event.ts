@@ -8,7 +8,7 @@ import {
 	reactivePlayerIsTarget,
 	type BooleanExpressionType
 } from './expressions/boolean';
-import type { CardId, EntityId, PlayerId } from './game/identifiers';
+import type { CardId, EntityId } from './game/identifiers';
 
 export type EventProps = {
 	type: EventType;
@@ -477,13 +477,13 @@ export interface EventContext {
 	targetId?: EntityId;
 
 	/** Currently active player, if any. */
-	activePlayerId?: PlayerId;
+	activePlayerId?: EntityId;
 
 	/** Card currently being evaluated or triggered as a reactor. */
 	reactiveCardId?: CardId;
 
 	/** Player owning the currently evaluated or triggered reactor. */
-	reactivePlayerId?: PlayerId;
+	reactivePlayerId?: EntityId;
 }
 
 export const events: Record<EventType, Event> = mapToRecord(eventData, {

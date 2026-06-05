@@ -1,7 +1,7 @@
 import { Counter } from '@songsofdoom/common';
 import type { FocusToken } from '../..';
 import type { GameGraph } from '../game/gamegraph';
-import type { PlayerId } from '../game/identifiers';
+import type { EntityId } from '../game/identifiers';
 import type { PlayerTargetType, Target } from '../target';
 import { Effect } from './effect';
 
@@ -15,7 +15,7 @@ export interface DrawFocusEffectProps {
 
 export interface DrawFocusOutcome {
 	/** The focus tokens that were drawn. */
-	readonly playerDrawnTokens: ReadonlyMap<PlayerId, Counter<FocusToken>>;
+	readonly playerDrawnTokens: ReadonlyMap<EntityId, Counter<FocusToken>>;
 }
 
 export class DrawFocusEffect extends Effect {
@@ -36,7 +36,7 @@ export class DrawFocusEffect extends Effect {
 			default: 'active-player'
 		});
 		gameGraph.mutate((state) => {
-			const playerDrawnTokens = new Map<PlayerId, Counter<FocusToken>>();
+			const playerDrawnTokens = new Map<EntityId, Counter<FocusToken>>();
 			for (const playerId of playerIds) {
 				const playerState = state.requirePlayer(playerId);
 				for (let i = 0; i < this.amount; i++) {

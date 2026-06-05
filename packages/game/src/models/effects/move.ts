@@ -1,11 +1,11 @@
 import { immobilized } from '../../data/properties';
 import type { GameGraph } from '../game/gamegraph';
-import { isPlayerId, type LocationId, type PlayerId } from '../game/identifiers';
+import { isPlayerId, type EntityId, type LocationId } from '../game/identifiers';
 import { Target, type LocationTargetType } from '../target';
 import { Effect } from './effect';
 
 export interface MoveOutcome {
-	readonly playerId: PlayerId;
+	readonly playerId: EntityId;
 	readonly locationId: LocationId;
 }
 
@@ -22,7 +22,7 @@ export class MoveEffect extends Effect {
 		const player = state.requirePlayer(subjectId);
 		if (player.hasProperty(immobilized)) return;
 
-		const currentLocation = state.getPlayerLocation(subjectId);
+		const currentLocation = state.getEntityLocation(subjectId);
 		if (!currentLocation || currentLocation.connections.length === 0) return;
 
 		const destinationId = (await gameGraph.requestSingleTarget(

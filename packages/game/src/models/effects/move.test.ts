@@ -53,7 +53,7 @@ describe('MoveEffect.apply — early returns', () => {
 		const { graph, state } = makeGraph();
 		state.requireSubject.mockReturnValue({ id: 'plr1' } as never);
 		state.requirePlayer.calledWith('plr1').mockReturnValue(player);
-		state.getPlayerLocation.calledWith('plr1').mockReturnValue(undefined);
+		state.getEntityLocation.calledWith('plr1').mockReturnValue(undefined);
 
 		await move().apply(graph);
 
@@ -67,7 +67,7 @@ describe('MoveEffect.apply — early returns', () => {
 		const { graph, state } = makeGraph();
 		state.requireSubject.mockReturnValue({ id: 'plr1' } as never);
 		state.requirePlayer.calledWith('plr1').mockReturnValue(player);
-		state.getPlayerLocation.calledWith('plr1').mockReturnValue(location);
+		state.getEntityLocation.calledWith('plr1').mockReturnValue(location);
 
 		await move().apply(graph);
 
@@ -84,7 +84,7 @@ describe('MoveEffect.apply — early returns', () => {
 		const { graph, state } = makeGraph();
 		state.requireSubject.mockReturnValue({ id: 'plr1' } as never);
 		state.requirePlayer.calledWith('plr1').mockReturnValue(player);
-		state.getPlayerLocation.calledWith('plr1').mockReturnValue(location);
+		state.getEntityLocation.calledWith('plr1').mockReturnValue(location);
 		graph.requestSingleTarget.mockResolvedValue(undefined);
 
 		await move().apply(graph);
@@ -107,7 +107,7 @@ describe('MoveEffect.apply', () => {
 		const { graph, state } = makeGraph();
 		state.requireSubject.mockReturnValue({ id: 'plr1' } as never);
 		state.requirePlayer.calledWith('plr1').mockReturnValue(player);
-		state.getPlayerLocation.calledWith('plr1').mockReturnValue(location);
+		state.getEntityLocation.calledWith('plr1').mockReturnValue(location);
 		graph.requestSingleTarget.mockResolvedValue('loc2' as LocationId);
 		graph.mutate.mockImplementation((fn) => fn(mutableState));
 

@@ -23,7 +23,6 @@ export { modifyCarryingCapacity, ModifyCarryingCapacityEffect } from './modifyca
 export { modifyConcentration, ModifyConcentrationEffect } from './modifyconcentration';
 export { modifyDamage, ModifyDamageEffect } from './modifydamage';
 export { modifyGatheredClues, ModifyGatheredCluesEffect } from './modifygatheredclues';
-export { modifyInitiative, ModifyInitiativeEffect } from './modifyinitiative';
 export { modifyRoll, ModifyRollEffect } from './modifyroll';
 export { move, MoveEffect } from './move';
 export {

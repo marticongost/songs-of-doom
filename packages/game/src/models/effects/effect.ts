@@ -15,10 +15,6 @@ export abstract class Effect {
 		return currentValue;
 	}
 
-	setInitiative(currentValue: number): number {
-		return currentValue;
-	}
-
 	setConcentration(currentValue: number): number {
 		return currentValue;
 	}

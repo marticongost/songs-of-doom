@@ -17,6 +17,7 @@ export {
 export { and, AndExpression, not, NotExpression, or, OrExpression } from './logical';
 
 // Boolean expressions
+export { activated, ActivatedExpression } from './activated';
 export { copyAlreadyAttached, CopyAlreadyAttachedExpression } from './copy-already-attached';
 export { engaged, EngagedExpression } from './engaged';
 export {
@@ -28,6 +29,7 @@ export {
 	reactivePlayerIsSubject,
 	reactivePlayerIsTarget
 } from './event-context';
+export { exhausted, ExhaustedExpression } from './exhausted';
 export { is, IsExpression, type IsExpressionProps } from './is';
 export { owned, OwnedExpression } from './owned';
 export { wounded } from './wounded';

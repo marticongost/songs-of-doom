@@ -1,10 +1,12 @@
 import { finalise } from '@songsofdoom/common';
+import type { Reaction } from './capabilities';
 import { CapabilityCost, type CapabilityCostProps } from './capabilitycost';
 import type { Effect } from './effects/effect';
+import { MutableCapabilityResolution } from './game/capabilityresolution';
 import type { GameGraph } from './game/gamegraph';
 import { CapabilityTriggered } from './game/gamenodes';
 import type { GameContext, ReadonlyGameState } from './game/gamestate';
-import type { CardId } from './game/identifiers';
+import type { CardId, EntityId } from './game/identifiers';
 
 export interface CapabilityProps {
 	cost?: CapabilityCost | CapabilityCostProps;
@@ -13,8 +15,10 @@ export interface CapabilityProps {
 
 export interface TriggerCapabilityProps {
 	gameGraph: GameGraph;
+	subjectId: EntityId;
 	cardId: CardId;
 	context?: GameContext;
+	additionalReactions?: Array<Reaction>;
 }
 
 export abstract class Capability {
@@ -26,29 +30,26 @@ export abstract class Capability {
 		this.effects = effects;
 	}
 
-	isFeasible(state: ReadonlyGameState, cardId: CardId): boolean {
-		const card = state.requireCard(cardId);
-		return this.cost.charges === 0 || card.charges >= state.evaluate(this.cost.charges);
-	}
-
 	constantEffects(): Array<Effect> {
 		return [];
 	}
 
-	getTriggerContext(_state: ReadonlyGameState, cardId: CardId): GameContext {
-		return { activeCardId: cardId };
+	getTriggerContext(_state: ReadonlyGameState, _cardId: CardId): GameContext {
+		return {};
 	}
 
-	async trigger({ gameGraph, cardId, context }: TriggerCapabilityProps) {
+	async trigger({ gameGraph, subjectId, cardId, additionalReactions }: TriggerCapabilityProps) {
 		await gameGraph.group(
 			CapabilityTriggered,
 			{ capability: this, cardId },
 			{
-				currentCardId: cardId,
+				capabilityResolution: new MutableCapabilityResolution({
+					capability: this,
+					subjectId,
+					cardId,
+					additionalReactions
+				}),
 				targetId: cardId,
-				subjectId: cardId,
-				...this.getTriggerContext(gameGraph.current.state, cardId),
-				...context,
 				opening: (state) => {
 					const card = state.requireCard(cardId);
 					if (card.container.type === 'hand') {

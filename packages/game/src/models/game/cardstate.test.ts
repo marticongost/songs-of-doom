@@ -14,7 +14,7 @@ import { ally, creature, encounter, skill, trait } from '../properties';
 import { strength } from '../stats';
 import { MutableCardState, ReadonlyCardState, type CardParent } from './cardstate';
 import { ReadonlyGameState } from './gamestate';
-import type { CardId, LocationId, PlayerId } from './identifiers';
+import type { CardId, EntityId, LocationId } from './identifiers';
 import { ReadonlyLocationState } from './locationstate';
 import { ReadonlyPlayerState } from './playerstate';
 
@@ -39,7 +39,7 @@ function makeEntity(overrides?: {
 
 function makeReadonlyCard(
 	id: CardId,
-	ownerId: PlayerId,
+	ownerId: EntityId,
 	container: CardParent,
 	overrides?: Partial<{
 		exhausted: boolean;
@@ -66,9 +66,9 @@ function makeReadonlyCard(
 function makeReadonlyLocation(
 	id: LocationId,
 	overrides?: Partial<{
-		ownerId: PlayerId;
+		ownerId: EntityId;
 		clues: number;
-		players: ReadonlyArray<PlayerId>;
+		players: ReadonlyArray<EntityId>;
 		attachments: ReadonlyArray<ReadonlyCardState>;
 	}>
 ): ReadonlyLocationState {
@@ -84,7 +84,7 @@ function makeReadonlyLocation(
 }
 
 function makeReadonlyPlayer(
-	id: PlayerId,
+	id: EntityId,
 	cards: {
 		deck?: ReadonlyCardState[];
 		hand?: ReadonlyCardState[];
@@ -527,7 +527,7 @@ describe('CardState', () => {
 				makeReadonlyPlayer('plr1', { hand: [card1] }),
 				makeReadonlyPlayer('plr2', { hand: [card2] })
 			]).mutate((mutableState) => {
-				mutableState.activePlayerStack.push('plr1');
+				mutableState.subjectStack.push('plr1');
 			});
 
 			const stateWithSubjectPlr1 = state.mutate((s) => {

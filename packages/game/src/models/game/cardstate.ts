@@ -1,20 +1,16 @@
-import {
-	isAlly,
-	isCreature,
-	isEncounter,
-	isSkill,
-	type Capability,
-	type Property,
-	type Stat,
-	type StatType
-} from '../..';
 import { Reaction } from '../capabilities/reaction';
+import type { Capability } from '../capability';
 import type { CreatureStatType, Entity } from '../entities';
+import { isAlly, isCreature, isEncounter, isSkill } from '../entities';
 import { type Event } from '../event';
+import type { Property } from '../properties/property';
+import type { Stat, StatType } from '../stats';
+import { MutableCapabilityResolution } from './capabilityresolution';
 import { EntityState, type MutableEntityState } from './entitystate';
 import type { MutableGameState, ReadonlyGameState } from './gamestate';
-import type { CardId, LocationId, PlayerId } from './identifiers';
+import type { CardId, EntityId, LocationId } from './identifiers';
 import { mutate } from './mutate';
+import type { CardOptions } from './sequence/cardcontainer';
 
 export interface CapabilityRef<T extends Capability = Capability> {
 	cardId: CardId;
@@ -22,23 +18,24 @@ export interface CapabilityRef<T extends Capability = Capability> {
 }
 
 export type CardParent =
-	| { type: 'deck'; playerId: PlayerId }
-	| { type: 'hand'; playerId: PlayerId }
-	| { type: 'stage'; playerId: PlayerId }
-	| { type: 'discard'; playerId: PlayerId }
+	| { type: 'deck'; playerId: EntityId }
+	| { type: 'hand'; playerId: EntityId }
+	| { type: 'stage'; playerId: EntityId }
+	| { type: 'discard'; playerId: EntityId }
 	| { type: 'card'; cardId: CardId }
-	| { type: 'player'; playerId: PlayerId }
+	| { type: 'player'; playerId: EntityId }
 	| { type: 'location'; locationId: LocationId }
-	| { type: 'banish'; playerId: PlayerId }
+	| { type: 'banish'; playerId: EntityId }
 	| { type: 'encounter-deck' }
 	| { type: 'encounter-discard' };
 
 export interface CardStateProps {
 	id: CardId;
 	card: Entity;
-	ownerId: PlayerId;
+	ownerId: EntityId;
 	container: CardParent;
 	exhausted?: boolean;
+	activated?: boolean;
 	charges?: number;
 	clues?: number;
 	attachments?: ReadonlyArray<CardState>;
@@ -53,9 +50,10 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 	Self
 > {
 	readonly card: Entity;
-	readonly ownerId: PlayerId;
+	readonly ownerId: EntityId;
 	readonly container: CardParent;
 	readonly exhausted: boolean;
+	readonly activated: boolean;
 	readonly charges: number;
 	readonly clues: number;
 
@@ -65,6 +63,7 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 		ownerId,
 		container,
 		exhausted = false,
+		activated = false,
 		charges = 0,
 		clues = 0,
 		attachments = [],
@@ -77,14 +76,43 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 			attachments,
 			properties: properties ?? card.properties,
 			physicalTrauma,
-			mentalTrauma
+			mentalTrauma,
+			activated
 		});
 		this.card = card;
 		this.ownerId = ownerId;
 		this.container = container;
 		this.exhausted = exhausted;
+		this.activated = activated;
 		this.charges = charges;
 		this.clues = clues;
+	}
+
+	override get playerId(): EntityId | undefined {
+		return this.container.type === 'player' ? this.container.playerId : undefined;
+	}
+
+	get capabilities(): Array<Capability> {
+		if (this.container.type === 'card') {
+			return this.card.attachmentCapabilities;
+		} else {
+			return this.card.capabilities;
+		}
+	}
+
+	cards(options?: CardOptions): Array<Self> {
+		const includeAttachments = options?.includeAttachments ?? true;
+		const cards: CardState[] = [];
+		if (
+			(!options?.ready || !this.exhausted) &&
+			(!options?.type || this.card.type.id === options.type)
+		) {
+			cards.push(this);
+		}
+		if (includeAttachments) {
+			cards.push(...this.attachments.flatMap((attachment) => attachment.cards(options)));
+		}
+		return cards as Self[];
 	}
 
 	getCard(id: CardId): Self | undefined {
@@ -128,8 +156,14 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 			if (!(capability instanceof Reaction)) {
 				return false;
 			}
-			const triggerContext = capability.getTriggerContext(gameState, this.id);
-			const scopedGameState = gameState.mutate((state) => state.pushContext(triggerContext));
+			const resolution = new MutableCapabilityResolution({
+				subjectId: this.id,
+				cardId: this.id,
+				capability
+			});
+			const scopedGameState = gameState.mutate((state) =>
+				state.pushContext({ capabilityResolution: resolution })
+			);
 			return capability.triggers.some((spec) => {
 				if (spec.event !== event) {
 					return false;
@@ -164,7 +198,7 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 		);
 	}
 
-	getPlayerId(): PlayerId | undefined {
+	getPlayerId(): EntityId | undefined {
 		return 'playerId' in this.container ? this.container.playerId : undefined;
 	}
 }
@@ -184,6 +218,7 @@ export class MutableCardState
 	implements MutableEntityState<CardId>
 {
 	declare exhausted: boolean;
+	declare activated: boolean;
 	declare charges: number;
 	declare clues: number;
 	declare attachments: Array<MutableCardState>;
@@ -199,6 +234,7 @@ export class MutableCardState
 			ownerId: cardState.ownerId,
 			container: cardState.container,
 			exhausted: cardState.exhausted,
+			activated: cardState.activated,
 			charges: cardState.charges,
 			clues: cardState.clues,
 			attachments: cardState.attachments.map((attachment) => attachment.mutable()),
@@ -215,6 +251,7 @@ export class MutableCardState
 			ownerId: this.ownerId,
 			container: this.container,
 			exhausted: this.exhausted,
+			activated: this.activated,
 			charges: this.charges,
 			clues: this.clues,
 			attachments: this.attachments.map((attachment) => attachment.readonly()),
@@ -230,14 +267,14 @@ export class MutableCardState
 		this.attachments.push(attachment);
 	}
 
-	moveToPlayer(gameState: MutableGameState, playerId: PlayerId) {
+	moveToPlayer(gameState: MutableGameState, playerId: EntityId) {
 		this.removeFromCurrentParent(gameState);
 		this.container = { type: 'player', playerId };
 		const playerState = gameState.requirePlayer(playerId);
 		playerState.attachments.push(this);
 	}
 
-	moveToTopOfDiscardPile(gameState: MutableGameState, playerId: PlayerId | undefined = undefined) {
+	moveToTopOfDiscardPile(gameState: MutableGameState, playerId: EntityId | undefined = undefined) {
 		if (isCreature(this.card) || isEncounter(this.card)) {
 			if (playerId !== undefined) {
 				throw new Error('Encounter/creature cards do not belong to a player discard pile');
@@ -256,7 +293,7 @@ export class MutableCardState
 
 	moveToBottomOfDiscardPile(
 		gameState: MutableGameState,
-		playerId: PlayerId | undefined = undefined
+		playerId: EntityId | undefined = undefined
 	) {
 		if (isCreature(this.card) || isEncounter(this.card)) {
 			if (playerId !== undefined) {
@@ -274,21 +311,21 @@ export class MutableCardState
 		}
 	}
 
-	moveToHand(gameState: MutableGameState, playerId: PlayerId) {
+	moveToHand(gameState: MutableGameState, playerId: EntityId) {
 		this.removeFromCurrentParent(gameState);
 		this.container = { type: 'hand', playerId };
 		const playerState = gameState.requirePlayer(playerId);
 		playerState.hand.push(this);
 	}
 
-	moveToStage(gameState: MutableGameState, playerId: PlayerId) {
+	moveToStage(gameState: MutableGameState, playerId: EntityId) {
 		this.removeFromCurrentParent(gameState);
 		this.container = { type: 'stage', playerId };
 		const playerState = gameState.requirePlayer(playerId);
 		playerState.stage.push(this);
 	}
 
-	moveToTopOfDeck(gameState: MutableGameState, playerId: PlayerId | undefined = undefined) {
+	moveToTopOfDeck(gameState: MutableGameState, playerId: EntityId | undefined = undefined) {
 		if (isCreature(this.card) || isEncounter(this.card)) {
 			if (playerId !== undefined) {
 				throw new Error('Encounter/creature cards do not belong to a player deck');
@@ -305,7 +342,7 @@ export class MutableCardState
 		}
 	}
 
-	moveToBottomOfDeck(gameState: MutableGameState, playerId: PlayerId | undefined = undefined) {
+	moveToBottomOfDeck(gameState: MutableGameState, playerId: EntityId | undefined = undefined) {
 		if (isCreature(this.card) || isEncounter(this.card)) {
 			if (playerId !== undefined) {
 				throw new Error('Encounter/creature cards do not belong to a player deck');
@@ -329,7 +366,7 @@ export class MutableCardState
 		locationState.attachments.push(this);
 	}
 
-	banish(gameState: MutableGameState, playerId: PlayerId | undefined = undefined) {
+	banish(gameState: MutableGameState, playerId: EntityId | undefined = undefined) {
 		playerId = playerId ?? this.ownerId;
 		this.removeFromCurrentParent(gameState);
 		this.container = { type: 'banish', playerId };

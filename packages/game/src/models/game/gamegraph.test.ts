@@ -1,11 +1,13 @@
 import { Counter } from '@songsofdoom/common';
 import { advanceTicks, mock } from '@songsofdoom/common/test-utils';
 import { describe, expect, it, vi } from 'vitest';
+import { Action } from '../capabilities/action';
 import { Obligation, Opportunity } from '../capabilities/reaction';
 import type { CharacterState } from '../characters';
 import { Effect } from '../effects/effect';
 import { events } from '../event';
 import { Target, type TargetType } from '../target';
+import { ReadonlyCapabilityResolution } from './capabilityresolution';
 import type { MutableCardState, ReadonlyCardState } from './cardstate';
 import { GameGraph, orderReactiveCapabilities } from './gamegraph';
 import {
@@ -121,18 +123,12 @@ describe('GameGraph.group', () => {
 			InputReceived,
 			{ values: {} },
 			{
-				activeCardId: 'trt1',
-				reactiveCardId: 'trt1',
-				reactivePlayerId: 'plr1',
 				targetId: 'trt1',
 				subjectId: 'trt1'
 			},
 			async () => {}
 		);
 		const initialNode = graph.start.next!;
-		expect(initialNode.state.activeCardStack).toContain('trt1');
-		expect(initialNode.state.reactiveCardStack).toContain('trt1');
-		expect(initialNode.state.reactivePlayerStack).toContain('plr1');
 		expect(initialNode.state.targetStack).toContain('trt1');
 		expect(initialNode.state.subjectStack).toContain('trt1');
 	});
@@ -143,9 +139,6 @@ describe('GameGraph.group', () => {
 			InputReceived,
 			{ values: {} },
 			{
-				activeCardId: 'trt1',
-				reactiveCardId: 'trt1',
-				reactivePlayerId: 'plr1',
 				targetId: 'trt1',
 				subjectId: 'trt1'
 			},
@@ -153,9 +146,6 @@ describe('GameGraph.group', () => {
 		);
 		const initialNode = graph.start.next!;
 		const endGroup = initialNode.children[0];
-		expect(endGroup.state.activeCardStack).not.toContain('trt1');
-		expect(endGroup.state.reactiveCardStack).not.toContain('trt1');
-		expect(endGroup.state.reactivePlayerStack).not.toContain('plr1');
 		expect(endGroup.state.targetStack).not.toContain('trt1');
 		expect(endGroup.state.subjectStack).not.toContain('trt1');
 	});
@@ -341,7 +331,7 @@ describe('GameGraph.requestInput / supplyInput', () => {
 	it('addresses input to the active player when available', async () => {
 		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
 		const graph = new GameGraph({
-			initialState: { players: [p1], activePlayerStack: ['plr1'] }
+			initialState: { players: [p1], subjectStack: ['plr1'] }
 		});
 		const target = new Target('player');
 		const promise = graph.requestInput(target);
@@ -377,8 +367,16 @@ describe('GameGraph.requestSingleTarget', () => {
 	it('returns the provided default when target is undefined', async () => {
 		const c1 = mock<ReadonlyCardState>({ id: 'trt1' });
 		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt1' ? c1 : undefined) });
+		const resolution = new ReadonlyCapabilityResolution({
+			subjectId: 'trt1',
+			cardId: 'trt1',
+			capability: new Action({ effects: [] })
+		});
 		const graph = new GameGraph({
-			initialState: { players: [p1], activeCardStack: ['trt1'] }
+			initialState: {
+				players: [p1],
+				capabilityResolutionStack: [resolution]
+			}
 		});
 		const result = await graph.requestSingleTarget(undefined, {
 			default: 'active-card'
@@ -419,7 +417,7 @@ describe('GameGraph.requestSinglePlayer', () => {
 	it('returns the provided default when target is undefined', async () => {
 		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
 		const graph = new GameGraph({
-			initialState: { players: [p1], activePlayerStack: ['plr1'] }
+			initialState: { players: [p1], subjectStack: ['plr1'] }
 		});
 		const result = await graph.requestSinglePlayer(undefined, {
 			default: 'active-player'
@@ -504,7 +502,7 @@ describe('GameGraph.requestPlayers', () => {
 	it('returns the provided default when target is undefined', async () => {
 		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
 		const graph = new GameGraph({
-			initialState: { players: [p1], activePlayerStack: ['plr1'] }
+			initialState: { players: [p1], subjectStack: ['plr1'] }
 		});
 		const result = await graph.requestPlayers(undefined, {
 			default: 'active-player'

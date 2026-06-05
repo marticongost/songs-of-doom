@@ -26,18 +26,18 @@ import {
 	type GameNodeProps,
 	type MutationProps
 } from './gamenodes';
-import { runChapter } from './gamesequence';
 import {
 	ReadonlyGameState,
 	type GameContext,
 	type GameStateProps,
 	type MutableGameState
 } from './gamestate';
-import { isPlayerId, type CardId, type EntityId, type PlayerId } from './identifiers';
+import { isPlayerId, type CardId, type EntityId } from './identifiers';
 import type { Field } from './playerinput';
 import { CapabilityChoiceField, PaymentField, ResultField, TargetField } from './playerinput';
 import type { ReadonlyPlayerState } from './playerstate';
 import { EffectRolledBack } from './rollback';
+import { runChapter } from './sequence/chapters';
 import { MutableTestResolution, type TestResolutionProps } from './testresolution';
 
 export type GroupContext<ClosingNodeProps extends EndGroupProps = EndGroupProps> = GameContext & {
@@ -63,16 +63,16 @@ type ClosingNodeExtraProps<ClosingNodeProps extends EndGroupProps> = Omit<
 
 interface OrderedReactionRef extends CapabilityRef {
 	reactionOrder: number;
-	ownerId?: PlayerId;
+	ownerId?: EntityId;
 }
 
 interface OrderedReactionGroup {
-	decidingPlayerId: PlayerId;
+	decidingPlayerId: EntityId;
 	reactions: Array<OrderedReactionRef>;
 }
 
 export interface RequestInputOptions {
-	playerId?: PlayerId;
+	playerId?: EntityId;
 }
 
 export type ContextualEntity =
@@ -84,14 +84,14 @@ export type ContextualEntity =
 	| 'current-target';
 
 export interface RequestEntityOptions {
-	playerId?: PlayerId;
+	playerId?: EntityId;
 	default?: ContextualEntity;
 }
 
 export const orderReactiveCapabilities = (
 	reactions: Array<OrderedReactionRef>,
-	currentPlayerId: PlayerId,
-	clockwisePlayerOrder: Array<PlayerId>
+	currentPlayerId: EntityId,
+	clockwisePlayerOrder: Array<EntityId>
 ): Array<OrderedReactionGroup> => {
 	const groups: Array<OrderedReactionGroup> = [];
 	const orderLevels = Array.from(
@@ -349,7 +349,7 @@ export class GameGraph {
 	async requestSinglePlayer(
 		target?: Target,
 		options: RequestEntityOptions = {}
-	): Promise<PlayerId | undefined> {
+	): Promise<EntityId | undefined> {
 		if (target === undefined) {
 			const id = options.default ? this.getContextualEntityId(options.default) : undefined;
 			if (id && !isPlayerId(id)) {
@@ -364,7 +364,7 @@ export class GameGraph {
 		if (playerIds.length !== 1) {
 			throw new Error('Expected exactly one target to be selected');
 		}
-		return playerIds[0] as PlayerId;
+		return playerIds[0] as EntityId;
 	}
 
 	async requestTargets(
@@ -380,7 +380,7 @@ export class GameGraph {
 	async requestPlayers(
 		target?: Target,
 		options: RequestEntityOptions = {}
-	): Promise<Array<PlayerId>> {
+	): Promise<Array<EntityId>> {
 		if (target === undefined) {
 			const ids = options.default ? this.getContextualEntityIdList(options.default) : [];
 			for (const id of ids) {
@@ -388,12 +388,12 @@ export class GameGraph {
 					throw new Error(`Expected ${options.default} to resolve to player ids`);
 				}
 			}
-			return ids as Array<PlayerId>;
+			return ids as Array<EntityId>;
 		}
 		if (!target.matchesType('player')) {
 			throw new Error('Expected target to be of type player');
 		}
-		return (await this.requestInput(target, { playerId: options.playerId })).target as PlayerId[];
+		return (await this.requestInput(target, { playerId: options.playerId })).target as EntityId[];
 	}
 
 	/** Asks a player to choose the payment form for a given cost, and discards the
@@ -414,7 +414,7 @@ export class GameGraph {
 	}: {
 		cost: CapabilityCost;
 		cardId?: CardId;
-		playerId?: PlayerId;
+		playerId?: EntityId;
 	}): Promise<Payment> {
 		if (!playerId) {
 			playerId = this._current.state.requireActivePlayer()?.id;
@@ -470,7 +470,7 @@ export class GameGraph {
 		return payment;
 	}
 
-	async defeat(targetId: CardId | PlayerId | ReadonlyPlayerState): Promise<void> {
+	async defeat(targetId: CardId | EntityId | ReadonlyPlayerState): Promise<void> {
 		const playerId =
 			typeof targetId !== 'string' ? targetId.id : isPlayerId(targetId) ? targetId : undefined;
 		this.mutate((state) => {
@@ -540,10 +540,11 @@ export class GameGraph {
 	 * @param context - Contextual identifiers to push onto the corresponding game-state
 	 *   stacks before the callback runs. Each entry is popped by the automatically added
 	 *   {@link EndGroup} node when the group closes.
+	 * @param context.capabilityResolution - Pushed onto `capabilityResolutionStack` for the
+	 *   duration of the group. The active/reactive/current card and player getters derive
+	 *   their values from the top of this stack.
 	 * @param context.subjectId - Pushed onto `subjectStack` for the duration of the group.
 	 * @param context.targetId - Pushed onto `targetStack` for the duration of the group.
-	 * @param context.activeCardId - Pushed onto `activeCardStack` for the duration of the group.
-	 * @param context.activePlayerId - Pushed onto `activePlayerStack` for the duration of the group.
 	 * @param context.resolution - Optional test resolution to push onto `testResolutionStack`
 	 *   for the duration of the group. The resolution is automatically popped and included in
 	 *   the closing node props.
@@ -570,10 +571,7 @@ export class GameGraph {
 	): Promise<T> {
 		const { resolution, opening, closure, closingNodeType } = context;
 		const hasContext =
-			context.activeCardId !== undefined ||
-			context.activePlayerId !== undefined ||
-			context.reactiveCardId !== undefined ||
-			context.reactivePlayerId !== undefined ||
+			context.capabilityResolution !== undefined ||
 			context.subjectId !== undefined ||
 			context.targetId !== undefined ||
 			resolution !== undefined;
@@ -655,10 +653,7 @@ export class GameGraph {
 			{ event: events[eventType] },
 			{
 				subjectId: eventContext.subjectId,
-				targetId: eventContext.targetId,
-				activePlayerId: eventContext.activePlayerId,
-				reactiveCardId: eventContext.reactiveCardId,
-				reactivePlayerId: eventContext.reactivePlayerId
+				targetId: eventContext.targetId
 			},
 			async () => {
 				if (activePlayerId === undefined) return;
@@ -713,13 +708,14 @@ export class GameGraph {
 
 	private async consumeReactions(
 		reactions: Array<OrderedReactionRef>,
-		decidingPlayerId: PlayerId
+		decidingPlayerId: EntityId
 	): Promise<void> {
 		while (reactions.length > 0) {
 			if (reactions.length === 1 && reactions[0].capability instanceof Obligation) {
 				const [onlyReaction] = reactions;
 				await onlyReaction.capability.trigger({
 					gameGraph: this,
+					subjectId: decidingPlayerId,
 					cardId: onlyReaction.cardId
 				});
 				reactions.splice(0, 1);
@@ -742,6 +738,7 @@ export class GameGraph {
 
 			await selection.capability.trigger({
 				gameGraph: this,
+				subjectId: decidingPlayerId,
 				cardId: selection.cardId
 			});
 

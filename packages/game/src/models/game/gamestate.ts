@@ -1,19 +1,19 @@
-import { CapabilityCost, type EntityTypeId } from '../..';
+import { CapabilityCost } from '../..';
 import { Action } from '../capabilities/action';
+import { Reaction } from '../capabilities/reaction';
 import { type Capability } from '../capability';
 import type { ActualCapabilityCost } from '../capabilitycost';
-import type { Effect } from '../effects/effect';
 import type { BooleanExpressionType } from '../expressions/boolean/boolean-expression';
 import type { ScalarExpressionType } from '../expressions/scalar/scalar-expression';
 import { focuses, type FocusType } from '../focus';
+import { CapabilityResolution, MutableCapabilityResolution } from './capabilityresolution';
 import { CardState, type MutableCardState, type ReadonlyCardState } from './cardstate';
-import type { PlannedAction } from './gamesequence';
+import type { EntityState } from './entitystate';
 import {
 	isCardId,
 	isLocationId,
 	isPlayerId,
 	type CardId,
-	type CreatureId,
 	type EntityId,
 	type LocationId,
 	type PlayerId
@@ -25,6 +25,7 @@ import {
 } from './locationstate';
 import { mutate } from './mutate';
 import { PlayerState, type MutablePlayerState, type ReadonlyPlayerState } from './playerstate';
+import type { CardOptions } from './sequence/cardcontainer';
 import { MutableTestResolution, ReadonlyTestResolution, TestResolution } from './testresolution';
 import {
 	MutableWoundResolution,
@@ -33,35 +34,30 @@ import {
 } from './woundresolution';
 
 export interface GameContext {
-	currentCardId?: CardId;
-	activeCardId?: CardId;
-	activePlayerId?: PlayerId;
-	reactiveCardId?: CardId;
-	reactivePlayerId?: PlayerId;
 	subjectId?: EntityId;
 	targetId?: EntityId;
+
+	/**
+	 * Capability resolution to push onto the stack when triggering a capability. This is
+	 * used to keep track of the current capability being resolved, for the duration of
+	 * the context. The getters for active / action / current card and player derive their
+	 * values from the top of this stack.
+	 */
+	capabilityResolution?: CapabilityResolution;
 }
 
 export interface GameStateProps {
+	chapter?: number;
+	turn?: number;
 	players: ReadonlyArray<PlayerState>;
 	locations?: ReadonlyArray<LocationState>;
 	encounterDeck?: ReadonlyArray<CardState>;
 	encounterDiscardPile?: ReadonlyArray<CardState>;
-	activeCardStack?: Array<CardId>;
-	activePlayerStack?: Array<PlayerId>;
-	reactiveCardStack?: Array<CardId>;
-	reactivePlayerStack?: Array<PlayerId>;
-	currentCardStack?: Array<CardId>;
+	capabilityResolutionStack?: Array<CapabilityResolution>;
 	targetStack?: Array<EntityId>;
 	subjectStack?: Array<EntityId>;
 	testResolutionStack?: Array<TestResolution>;
 	woundResolutionStack?: Array<WoundResolution>;
-	plannedActions?: ReadonlyMap<CardId, PlannedAction>;
-}
-
-export interface CardOptions {
-	ready?: boolean;
-	type?: EntityTypeId;
 }
 
 export class GameState<
@@ -73,52 +69,43 @@ export class GameState<
 	readonly locations: ReadonlyArray<TLocation>;
 	readonly encounterDeck: ReadonlyArray<TCard>;
 	readonly encounterDiscardPile: ReadonlyArray<TCard>;
-	readonly activeCardStack: Array<CardId>;
-	readonly activePlayerStack: Array<PlayerId>;
-	readonly reactiveCardStack: Array<CardId>;
-	readonly reactivePlayerStack: Array<PlayerId>;
-	readonly currentCardStack: Array<CardId>;
+	readonly capabilityResolutionStack: Array<CapabilityResolution>;
 	readonly targetStack: Array<EntityId>;
 	readonly subjectStack: Array<EntityId>;
 	readonly testResolutionStack: Array<TestResolution>;
 	readonly woundResolutionStack: Array<WoundResolution>;
-	readonly plannedActions: ReadonlyMap<CardId, PlannedAction>;
+	readonly chapter: number;
+	readonly turn: number;
 
 	constructor({
 		players,
 		locations,
 		encounterDeck,
 		encounterDiscardPile,
-		activeCardStack,
-		activePlayerStack,
-		reactiveCardStack,
-		reactivePlayerStack,
-		currentCardStack,
+		capabilityResolutionStack,
 		targetStack,
 		subjectStack,
 		testResolutionStack,
 		woundResolutionStack,
-		plannedActions
+		chapter,
+		turn
 	}: GameStateProps) {
+		this.chapter = chapter ?? 0;
+		this.turn = turn ?? 0;
 		this.players = players as ReadonlyArray<TPlayer>;
 		this.locations = (locations ?? []) as ReadonlyArray<TLocation>;
 		this.encounterDeck = (encounterDeck ?? []) as ReadonlyArray<TCard>;
 		this.encounterDiscardPile = (encounterDiscardPile ?? []) as ReadonlyArray<TCard>;
-		this.activeCardStack = activeCardStack ?? [];
-		this.activePlayerStack = activePlayerStack ?? [];
-		this.reactiveCardStack = reactiveCardStack ?? [];
-		this.reactivePlayerStack = reactivePlayerStack ?? [];
-		this.currentCardStack = currentCardStack ?? [];
+		this.capabilityResolutionStack = capabilityResolutionStack ?? [];
 		this.targetStack = targetStack ?? [];
 		this.subjectStack = subjectStack ?? [];
 		this.testResolutionStack = testResolutionStack ?? [];
 		this.woundResolutionStack = woundResolutionStack ?? [];
-		this.plannedActions = plannedActions ?? new Map();
 	}
 
 	getEntityState(entityId: LocationId): TLocation | undefined;
 	getEntityState(entityId: CardId): TCard | undefined;
-	getEntityState(entityId: PlayerId): TPlayer | undefined;
+	getEntityState(entityId: EntityId): TPlayer | undefined;
 	getEntityState(entityId: EntityId): TCard | TLocation | TPlayer | undefined;
 	getEntityState(entityId: EntityId): TCard | TLocation | TPlayer | undefined {
 		if (isCardId(entityId)) {
@@ -143,6 +130,7 @@ export class GameState<
 
 	cards(options?: CardOptions): Array<TCard> {
 		const cards: TCard[] = [];
+		const includeAttachments = options?.includeAttachments ?? true;
 
 		const visit = (cardState: CardState) => {
 			if (options?.ready && cardState.exhausted) {
@@ -151,7 +139,9 @@ export class GameState<
 			if (!options?.type || cardState.card.type.id === options.type) {
 				cards.push(cardState as TCard);
 			}
-			cardState.attachments.forEach(visit);
+			if (includeAttachments) {
+				cardState.attachments.forEach(visit);
+			}
 		};
 
 		this.locations.forEach(visit);
@@ -196,11 +186,11 @@ export class GameState<
 		return card;
 	}
 
-	getPlayer(playerId: PlayerId): TPlayer | undefined {
+	getPlayer(playerId: EntityId): TPlayer | undefined {
 		return this.players.find((player) => player.id === playerId);
 	}
 
-	requirePlayer(playerId: PlayerId): TPlayer {
+	requirePlayer(playerId: EntityId): TPlayer {
 		const player = this.getPlayer(playerId);
 		if (!player) {
 			throw new Error(`Player with id ${playerId} not found`);
@@ -208,12 +198,23 @@ export class GameState<
 		return player;
 	}
 
-	getPlayerLocation(player: PlayerId | TPlayer): TLocation | undefined {
-		const playerId = typeof player === 'string' ? player : player.id;
-		return this.locations.find((loc) => loc.players.includes(playerId));
+	getEntityLocation(entity: EntityId | EntityState): TLocation | undefined {
+		const entityId = typeof entity === 'string' ? entity : entity.id;
+		if (isPlayerId(entityId)) {
+			return this.locations.find((loc) => loc.players.includes(entityId));
+		} else if (isCardId(entityId)) {
+			for (const location of this.locations) {
+				for (const card of location.cards()) {
+					if (card.id === entityId) {
+						return location;
+					}
+				}
+			}
+		}
+		return undefined;
 	}
 
-	clockwise(startingPlayer: PlayerId): Array<PlayerId> {
+	clockwise(startingPlayer: EntityId): Array<EntityId> {
 		const startIndex = this.players.findIndex((player) => player.id === startingPlayer);
 		if (startIndex === -1) {
 			throw new Error(`Player with id ${startingPlayer} not found`);
@@ -225,11 +226,9 @@ export class GameState<
 	}
 
 	getActiveCard(): TCard | undefined {
-		if (this.activeCardStack.length === 0) {
-			return undefined;
-		}
-		const activeCardId = this.activeCardStack[this.activeCardStack.length - 1];
-		return this.requireCard(activeCardId);
+		const resolution = this.getActionResolution();
+		if (!resolution) return undefined;
+		return this.requireCard(resolution.cardId);
 	}
 
 	requireActiveCard(): TCard {
@@ -241,11 +240,15 @@ export class GameState<
 	}
 
 	getActivePlayer(): TPlayer | undefined {
-		if (this.activePlayerStack.length === 0) {
-			return undefined;
+		const card = this.getActiveCard();
+		if (card && isPlayerId(card.ownerId)) return this.getPlayer(card.ownerId);
+		// Fallback: check subjectStack for a player ID (used by phase-level contexts
+		// like focus/draw phases where a player is active without a capability).
+		if (this.subjectStack.length > 0) {
+			const subjectId = this.subjectStack[this.subjectStack.length - 1];
+			if (isPlayerId(subjectId)) return this.getPlayer(subjectId);
 		}
-		const activePlayerId = this.activePlayerStack[this.activePlayerStack.length - 1];
-		return this.requirePlayer(activePlayerId);
+		return undefined;
 	}
 
 	requireActivePlayer(): TPlayer {
@@ -257,11 +260,9 @@ export class GameState<
 	}
 
 	getReactiveCard(): TCard | undefined {
-		if (this.reactiveCardStack.length === 0) {
-			return undefined;
-		}
-		const reactiveCardId = this.reactiveCardStack[this.reactiveCardStack.length - 1];
-		return this.requireCard(reactiveCardId);
+		const resolution = this.getReactionResolution();
+		if (!resolution) return undefined;
+		return this.requireCard(resolution.cardId);
 	}
 
 	requireReactiveCard(): TCard {
@@ -273,11 +274,10 @@ export class GameState<
 	}
 
 	getReactivePlayer(): TPlayer | undefined {
-		if (this.reactivePlayerStack.length === 0) {
-			return undefined;
-		}
-		const reactivePlayerId = this.reactivePlayerStack[this.reactivePlayerStack.length - 1];
-		return this.requirePlayer(reactivePlayerId);
+		const card = this.getReactiveCard();
+		if (!card) return undefined;
+		if (isPlayerId(card.ownerId)) return this.getPlayer(card.ownerId);
+		return undefined;
 	}
 
 	requireReactivePlayer(): TPlayer {
@@ -289,11 +289,9 @@ export class GameState<
 	}
 
 	getCurrentCard(): TCard | undefined {
-		if (this.currentCardStack.length === 0) {
-			return undefined;
-		}
-		const currentCardId = this.currentCardStack[this.currentCardStack.length - 1];
-		return this.requireCard(currentCardId);
+		if (this.capabilityResolutionStack.length === 0) return undefined;
+		const top = this.capabilityResolutionStack[this.capabilityResolutionStack.length - 1];
+		return this.requireCard(top.cardId);
 	}
 
 	requireCurrentCard(): TCard {
@@ -302,6 +300,32 @@ export class GameState<
 			throw new Error('No current card');
 		}
 		return currentCard;
+	}
+
+	/**
+	 * Returns the topmost non-Reaction resolution from the capability resolution stack.
+	 * This represents the card that initiated the current action chain.
+	 */
+	private getActionResolution(): CapabilityResolution | undefined {
+		for (let i = this.capabilityResolutionStack.length - 1; i >= 0; i--) {
+			if (this.capabilityResolutionStack[i].capability instanceof Action) {
+				return this.capabilityResolutionStack[i];
+			}
+		}
+		return undefined;
+	}
+
+	/**
+	 * Returns the topmost Reaction resolution from the capability resolution stack.
+	 * This represents the card that is currently reacting to an event.
+	 */
+	private getReactionResolution(): CapabilityResolution | undefined {
+		for (let i = this.capabilityResolutionStack.length - 1; i >= 0; i--) {
+			if (this.capabilityResolutionStack[i].capability instanceof Reaction) {
+				return this.capabilityResolutionStack[i];
+			}
+		}
+		return undefined;
 	}
 
 	/**
@@ -380,7 +404,7 @@ export class GameState<
 	 * Concentration = max(0, 1 + sum of all modifyConcentration modifiers from Constant
 	 * capabilities in cards under the player's control).
 	 */
-	getConcentration(playerId: PlayerId): number {
+	getConcentration(playerId: EntityId): number {
 		const player = this.requirePlayer(playerId);
 		const allCards = [...player.hand, ...player.attachments];
 		const base = 1;
@@ -390,201 +414,16 @@ export class GameState<
 		return Math.max(0, modifier);
 	}
 
-	/**
-	 * Calculates the initiative for an entity executing a given action.
-	 * Initiative = entity's agility stat + modifyInitiative modifiers from Constant
-	 * capabilities on the entity's card and attachments + modifyInitiative effects on the
-	 * action itself.
-	 */
-	calculateInitiative(entityId: EntityId, action: Action): number {
-		let base: number;
-		let constantEffects: Array<Effect>;
-		if (isPlayerId(entityId)) {
-			const player = this.requirePlayer(entityId);
-			base = player.getStat('agility');
-			constantEffects = player.attachments.flatMap((att) =>
-				att.card.capabilities.flatMap((cap) => cap.constantEffects())
-			);
-		} else {
-			const card = this.requireCard(entityId as CardId);
-			base = card.getStat('agility') ?? 0;
-			constantEffects = [
-				...card.card.capabilities.flatMap((cap) => cap.constantEffects()),
-				...card.attachments.flatMap((att) =>
-					att.card.attachmentCapabilities.flatMap((cap) => cap.constantEffects())
-				)
-			];
-		}
-		const initiative = [...constantEffects, ...action.effects].reduce(
-			(value, effect) => effect.setInitiative(value),
-			base
-		);
-		return initiative;
-	}
-
 	get creatures(): Array<TCard> {
 		return this.cards().filter(
 			(cardState) => cardState.card.type.id === 'creature'
 		) as Array<TCard>;
 	}
-}
-
-export class ReadonlyGameState extends GameState<
-	ReadonlyCardState,
-	ReadonlyPlayerState,
-	ReadonlyLocationState
-> {
-	mutable(): MutableGameState {
-		return new MutableGameState(this);
-	}
-
-	mutate(callback: (mutableState: MutableGameState) => void): ReadonlyGameState {
-		return mutate(this as ReadonlyGameState, callback);
-	}
-}
-
-export class MutableGameState extends GameState<
-	MutableCardState,
-	MutablePlayerState,
-	MutableLocationState
-> {
-	declare players: Array<MutablePlayerState>;
-	declare locations: Array<MutableLocationState>;
-	declare encounterDeck: Array<MutableCardState>;
-	declare encounterDiscardPile: Array<MutableCardState>;
-	declare activeCardStack: Array<CardId>;
-	declare activePlayerStack: Array<PlayerId>;
-	declare reactiveCardStack: Array<CardId>;
-	declare reactivePlayerStack: Array<PlayerId>;
-	declare currentCardStack: Array<CardId>;
-	declare targetStack: Array<EntityId>;
-	declare subjectStack: Array<EntityId>;
-	declare testResolutionStack: Array<ReadonlyTestResolution | MutableTestResolution>;
-	declare woundResolutionStack: Array<ReadonlyWoundResolution | MutableWoundResolution>;
-	declare plannedActions: Map<CardId, PlannedAction>;
-
-	constructor(gameState: ReadonlyGameState) {
-		const stack = gameState.testResolutionStack as Array<ReadonlyTestResolution>;
-		const woundStack = gameState.woundResolutionStack as Array<ReadonlyWoundResolution>;
-		super({
-			players: gameState.players.map((player) => player.mutable()),
-			locations: gameState.locations.map((location) => location.mutable()),
-			encounterDeck: gameState.encounterDeck.map((c) => c.mutable()),
-			encounterDiscardPile: gameState.encounterDiscardPile.map((c) => c.mutable()),
-			activeCardStack: [...gameState.activeCardStack],
-			activePlayerStack: [...gameState.activePlayerStack],
-			reactiveCardStack: [...gameState.reactiveCardStack],
-			reactivePlayerStack: [...gameState.reactivePlayerStack],
-			currentCardStack: [...gameState.currentCardStack],
-			targetStack: [...gameState.targetStack],
-			subjectStack: [...gameState.subjectStack],
-			testResolutionStack: [
-				...stack.slice(0, -1),
-				...(stack.length > 0 ? [stack[stack.length - 1].mutable()] : [])
-			],
-			woundResolutionStack: [
-				...woundStack.slice(0, -1),
-				...(woundStack.length > 0 ? [woundStack[woundStack.length - 1].mutable()] : [])
-			],
-			plannedActions: new Map(gameState.plannedActions)
-		});
-	}
-
-	getActiveTestResolution(): MutableTestResolution | undefined {
-		if (this.testResolutionStack.length === 0) {
-			return undefined;
-		}
-		return this.testResolutionStack[this.testResolutionStack.length - 1] as MutableTestResolution;
-	}
-
-	requireActiveTestResolution(): MutableTestResolution {
-		const resolution = this.getActiveTestResolution();
-		if (!resolution) {
-			throw new Error('No active attack resolution');
-		}
-		return resolution;
-	}
-
-	getActiveWoundResolution(): MutableWoundResolution | undefined {
-		if (this.woundResolutionStack.length === 0) {
-			return undefined;
-		}
-		return this.woundResolutionStack[
-			this.woundResolutionStack.length - 1
-		] as MutableWoundResolution;
-	}
-
-	requireActiveWoundResolution(): MutableWoundResolution {
-		const resolution = this.getActiveWoundResolution();
-		if (!resolution) {
-			throw new Error('No active wound resolution');
-		}
-		return resolution;
-	}
-
-	pushContext(ctx: GameContext): void {
-		if (ctx.currentCardId !== undefined) this.currentCardStack.push(ctx.currentCardId);
-		if (ctx.activeCardId !== undefined) this.activeCardStack.push(ctx.activeCardId);
-		if (ctx.activePlayerId !== undefined) this.activePlayerStack.push(ctx.activePlayerId);
-		if (ctx.reactiveCardId !== undefined) this.reactiveCardStack.push(ctx.reactiveCardId);
-		if (ctx.reactivePlayerId !== undefined) this.reactivePlayerStack.push(ctx.reactivePlayerId);
-		if (ctx.subjectId !== undefined) this.subjectStack.push(ctx.subjectId);
-		if (ctx.targetId !== undefined) this.targetStack.push(ctx.targetId);
-	}
-
-	popContext(ctx: GameContext): void {
-		if (ctx.currentCardId !== undefined) this.currentCardStack.pop();
-		if (ctx.targetId !== undefined) this.targetStack.pop();
-		if (ctx.subjectId !== undefined) this.subjectStack.pop();
-		if (ctx.reactivePlayerId !== undefined) this.reactivePlayerStack.pop();
-		if (ctx.reactiveCardId !== undefined) this.reactiveCardStack.pop();
-		if (ctx.activePlayerId !== undefined) this.activePlayerStack.pop();
-		if (ctx.activeCardId !== undefined) this.activeCardStack.pop();
-	}
-
-	setPlayerLocation(
-		player: PlayerId | MutablePlayerState,
-		location: LocationId | MutableLocationState
-	): void {
-		const playerId = typeof player === 'string' ? player : player.id;
-		const locationId = typeof location === 'string' ? location : location.id;
-		const origin = this.getPlayerLocation(playerId);
-		if (origin) {
-			const idx = origin.players.indexOf(playerId);
-			if (idx !== -1) origin.players.splice(idx, 1);
-		}
-		const destination = this.locations.find((loc) => loc.id === locationId);
-		if (destination) {
-			destination.players.push(playerId);
-		}
-	}
-
-	readonly(): ReadonlyGameState {
-		return new ReadonlyGameState({
-			players: this.players.map((playerAlteration) => playerAlteration.readonly()),
-			locations: this.locations.map((location) => location.readonly()),
-			encounterDeck: this.encounterDeck.map((c) => c.readonly()),
-			encounterDiscardPile: this.encounterDiscardPile.map((c) => c.readonly()),
-			activeCardStack: [...this.activeCardStack],
-			activePlayerStack: [...this.activePlayerStack],
-			reactiveCardStack: [...this.reactiveCardStack],
-			reactivePlayerStack: [...this.reactivePlayerStack],
-			targetStack: [...this.targetStack],
-			subjectStack: [...this.subjectStack],
-			testResolutionStack: this.testResolutionStack.map((r) =>
-				r instanceof MutableTestResolution ? r.readonly() : r
-			),
-			woundResolutionStack: this.woundResolutionStack.map((r) =>
-				r instanceof MutableWoundResolution ? r.readonly() : r
-			),
-			plannedActions: new Map(this.plannedActions)
-		});
-	}
 
 	getCapabilityImpediment(
 		capability: Capability,
 		cardId: CardId,
-		actorId: PlayerId | CreatureId
+		actorId: EntityId
 	): CapabilityImpediment | undefined {
 		const actor = this.requireEntityState(actorId);
 		const player = actor instanceof PlayerState ? actor : undefined;
@@ -628,6 +467,142 @@ export class MutableGameState extends GameState<
 		// TODO: What about capabilities that alter the costs of other capabilities or
 		// the state of the game in a way that would make the capability feasible / not
 		// feasible anymore?
+	}
+}
+
+export class ReadonlyGameState extends GameState<
+	ReadonlyCardState,
+	ReadonlyPlayerState,
+	ReadonlyLocationState
+> {
+	mutable(): MutableGameState {
+		return new MutableGameState(this);
+	}
+
+	mutate(callback: (mutableState: MutableGameState) => void): ReadonlyGameState {
+		return mutate(this as ReadonlyGameState, callback);
+	}
+}
+
+export class MutableGameState extends GameState<
+	MutableCardState,
+	MutablePlayerState,
+	MutableLocationState
+> {
+	declare players: Array<MutablePlayerState>;
+	declare locations: Array<MutableLocationState>;
+	declare encounterDeck: Array<MutableCardState>;
+	declare encounterDiscardPile: Array<MutableCardState>;
+	declare capabilityResolutionStack: Array<MutableCapabilityResolution>;
+	declare targetStack: Array<EntityId>;
+	declare subjectStack: Array<EntityId>;
+	declare testResolutionStack: Array<ReadonlyTestResolution | MutableTestResolution>;
+	declare woundResolutionStack: Array<ReadonlyWoundResolution | MutableWoundResolution>;
+	declare chapter: number;
+	declare turn: number;
+
+	constructor(gameState: ReadonlyGameState) {
+		const stack = gameState.testResolutionStack as Array<ReadonlyTestResolution>;
+		const woundStack = gameState.woundResolutionStack as Array<ReadonlyWoundResolution>;
+		super({
+			players: gameState.players.map((player) => player.mutable()),
+			locations: gameState.locations.map((location) => location.mutable()),
+			encounterDeck: gameState.encounterDeck.map((c) => c.mutable()),
+			encounterDiscardPile: gameState.encounterDiscardPile.map((c) => c.mutable()),
+			capabilityResolutionStack: [...gameState.capabilityResolutionStack],
+			targetStack: [...gameState.targetStack],
+			subjectStack: [...gameState.subjectStack],
+			testResolutionStack: [
+				...stack.slice(0, -1),
+				...(stack.length > 0 ? [stack[stack.length - 1].mutable()] : [])
+			],
+			woundResolutionStack: [
+				...woundStack.slice(0, -1),
+				...(woundStack.length > 0 ? [woundStack[woundStack.length - 1].mutable()] : [])
+			]
+		});
+	}
+
+	getActiveTestResolution(): MutableTestResolution | undefined {
+		if (this.testResolutionStack.length === 0) {
+			return undefined;
+		}
+		return this.testResolutionStack[this.testResolutionStack.length - 1] as MutableTestResolution;
+	}
+
+	requireActiveTestResolution(): MutableTestResolution {
+		const resolution = this.getActiveTestResolution();
+		if (!resolution) {
+			throw new Error('No active attack resolution');
+		}
+		return resolution;
+	}
+
+	getActiveWoundResolution(): MutableWoundResolution | undefined {
+		if (this.woundResolutionStack.length === 0) {
+			return undefined;
+		}
+		return this.woundResolutionStack[
+			this.woundResolutionStack.length - 1
+		] as MutableWoundResolution;
+	}
+
+	requireActiveWoundResolution(): MutableWoundResolution {
+		const resolution = this.getActiveWoundResolution();
+		if (!resolution) {
+			throw new Error('No active wound resolution');
+		}
+		return resolution;
+	}
+
+	pushContext(ctx: GameContext): void {
+		if (ctx.capabilityResolution !== undefined)
+			this.capabilityResolutionStack.push(ctx.capabilityResolution.mutable());
+		if (ctx.subjectId !== undefined) this.subjectStack.push(ctx.subjectId);
+		if (ctx.targetId !== undefined) this.targetStack.push(ctx.targetId);
+	}
+
+	popContext(ctx: GameContext): void {
+		if (ctx.targetId !== undefined) this.targetStack.pop();
+		if (ctx.subjectId !== undefined) this.subjectStack.pop();
+		if (ctx.capabilityResolution !== undefined) this.capabilityResolutionStack.pop();
+	}
+
+	setPlayerLocation(
+		player: EntityId | MutablePlayerState,
+		location: LocationId | MutableLocationState
+	): void {
+		const playerId = typeof player === 'string' ? player : player.id;
+		const locationId = typeof location === 'string' ? location : location.id;
+		const origin = this.getEntityLocation(playerId);
+		if (origin) {
+			const idx = origin.players.indexOf(playerId);
+			if (idx !== -1) origin.players.splice(idx, 1);
+		}
+		const destination = this.locations.find((loc) => loc.id === locationId);
+		if (destination) {
+			destination.players.push(playerId);
+		}
+	}
+
+	readonly(): ReadonlyGameState {
+		return new ReadonlyGameState({
+			chapter: this.chapter,
+			turn: this.turn,
+			players: this.players.map((playerAlteration) => playerAlteration.readonly()),
+			locations: this.locations.map((location) => location.readonly()),
+			encounterDeck: this.encounterDeck.map((c) => c.readonly()),
+			encounterDiscardPile: this.encounterDiscardPile.map((c) => c.readonly()),
+			capabilityResolutionStack: [...this.capabilityResolutionStack],
+			targetStack: [...this.targetStack],
+			subjectStack: [...this.subjectStack],
+			testResolutionStack: this.testResolutionStack.map((r) =>
+				r instanceof MutableTestResolution ? r.readonly() : r
+			),
+			woundResolutionStack: this.woundResolutionStack.map((r) =>
+				r instanceof MutableWoundResolution ? r.readonly() : r
+			)
+		});
 	}
 }
 

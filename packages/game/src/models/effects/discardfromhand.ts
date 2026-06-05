@@ -1,6 +1,6 @@
 import { finalise } from '@songsofdoom/common';
 import { type GameGraph } from '../game/gamegraph';
-import type { CardId, PlayerId } from '../game/identifiers';
+import type { CardId, EntityId } from '../game/identifiers';
 import { Target, type PlayerTargetType, type SkillTargetType, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -19,7 +19,7 @@ export interface DiscardFromHandEffectProps {
 
 export interface DiscardFromHandOutcome {
 	/** The cards that were discarded. */
-	readonly playerDiscards: ReadonlyMap<PlayerId, CardId[]>;
+	readonly playerDiscards: ReadonlyMap<EntityId, CardId[]>;
 }
 
 /**
@@ -42,7 +42,7 @@ export class DiscardFromHandEffect extends Effect {
 		const playerIds = await gameGraph.requestPlayers(this.players, {
 			default: 'active-player'
 		});
-		const playerDiscards = new Map<PlayerId, CardId[]>();
+		const playerDiscards = new Map<EntityId, CardId[]>();
 		for (const playerId of playerIds) {
 			const cardIds = (await gameGraph.requestInput(this.cards)).target as CardId[];
 			playerDiscards.set(playerId, cardIds);

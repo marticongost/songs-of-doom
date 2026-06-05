@@ -16,12 +16,13 @@ import {
 	type ReadonlyCardState
 } from './cardstate';
 import { EntityState, type MutableEntityState } from './entitystate';
-import type { CardOptions, MutableGameState } from './gamestate';
-import type { CardId, PlayerId } from './identifiers';
+import type { MutableGameState } from './gamestate';
+import type { CardId, EntityId } from './identifiers';
 import { mutate } from './mutate';
+import type { CardOptions } from './sequence/cardcontainer';
 
 export interface PlayerStateProps {
-	id: PlayerId;
+	id: EntityId;
 	character: CharacterState;
 	deck: ReadonlyArray<CardState>;
 	hand: ReadonlyArray<CardState>;
@@ -38,11 +39,12 @@ export interface PlayerStateProps {
 	physicalTrauma: number;
 	mentalTrauma: number;
 	defeated?: boolean;
+	activated?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extends EntityState<
-	PlayerId,
+	EntityId,
 	TCard
 > {
 	readonly character: CharacterState;
@@ -57,6 +59,7 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 	readonly focusesDiscardPile: Counter<FocusToken>;
 	readonly focusesHand: Counter<FocusToken>;
 	readonly defeated: boolean;
+	readonly activated: boolean;
 
 	constructor({
 		id,
@@ -75,9 +78,17 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 		focusesHand,
 		physicalTrauma,
 		mentalTrauma,
-		defeated = false
+		defeated = false,
+		activated = false
 	}: PlayerStateProps) {
-		super({ id, attachments, properties: properties ?? [], physicalTrauma, mentalTrauma });
+		super({
+			id,
+			attachments,
+			properties: properties ?? [],
+			physicalTrauma,
+			mentalTrauma,
+			activated
+		});
 		this.character = character;
 		this.deck = deck as ReadonlyArray<TCard>;
 		this.hand = hand as ReadonlyArray<TCard>;
@@ -90,32 +101,24 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 		this.focusesDiscardPile = focusesDiscardPile;
 		this.focusesHand = focusesHand;
 		this.defeated = defeated;
+		this.activated = activated;
+	}
+
+	override get playerId(): EntityId | undefined {
+		return this.id;
 	}
 
 	cards(options?: CardOptions): Array<TCard> {
-		const cards: TCard[] = [];
-
-		const visit = (cardState: CardState) => {
-			if (options?.ready && cardState.exhausted) {
-				return;
-			}
-			if (!options?.type || cardState.card.type.id === options.type) {
-				cards.push(cardState as TCard);
-			}
-			cardState.attachments.forEach(visit);
-		};
-
-		this.hand.forEach(visit);
-		this.stage.forEach(visit);
-		this.attachments.forEach(visit);
-
-		if (!options?.ready) {
-			this.deck.forEach(visit);
-			this.discardPile.forEach(visit);
-			this.banishedCards.forEach(visit);
-		}
-
-		return cards;
+		const ready = options?.ready ?? false;
+		const includeAttachments = options?.includeAttachments ?? true;
+		return [
+			...this.hand.flatMap((card) => card.cards(options)),
+			...this.stage.flatMap((card) => card.cards(options)),
+			...(includeAttachments ? this.attachments.flatMap((card) => card.cards(options)) : []),
+			...(ready ? [] : this.deck.flatMap((card) => card.cards(options))),
+			...(ready ? [] : this.discardPile.flatMap((card) => card.cards(options))),
+			...(ready ? [] : this.banishedCards.flatMap((card) => card.cards(options)))
+		];
 	}
 
 	getCard(id: CardId): TCard | undefined {
@@ -167,7 +170,7 @@ export class ReadonlyPlayerState extends PlayerState<ReadonlyCardState> {
 
 export class MutablePlayerState
 	extends PlayerState<MutableCardState>
-	implements MutableEntityState<PlayerId>
+	implements MutableEntityState<EntityId>
 {
 	declare character: CharacterState;
 	declare deck: Array<MutableCardState>;
@@ -181,6 +184,7 @@ export class MutablePlayerState
 	declare physicalTrauma: number;
 	declare mentalTrauma: number;
 	declare defeated: boolean;
+	declare activated: boolean;
 	declare focusesBag: Counter<FocusToken>;
 	declare focusesHand: Counter<FocusToken>;
 	declare focusesDiscardPile: Counter<FocusToken>;
@@ -202,6 +206,7 @@ export class MutablePlayerState
 			physicalTrauma: playerState.physicalTrauma,
 			mentalTrauma: playerState.mentalTrauma,
 			defeated: playerState.defeated,
+			activated: playerState.activated,
 			focusesBag: new Counter(playerState.focusesBag),
 			focusesHand: new Counter(playerState.focusesHand),
 			focusesDiscardPile: new Counter(playerState.focusesDiscardPile)
@@ -223,6 +228,7 @@ export class MutablePlayerState
 			physicalTrauma: this.physicalTrauma,
 			mentalTrauma: this.mentalTrauma,
 			defeated: this.defeated,
+			activated: this.activated,
 			focusesBag: new Counter(this.focusesBag),
 			focusesHand: new Counter(this.focusesHand),
 			focusesDiscardPile: new Counter(this.focusesDiscardPile),

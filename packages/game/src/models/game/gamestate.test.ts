@@ -2,15 +2,20 @@ import { mock } from '@songsofdoom/common/test-utils';
 import { describe, expect, it } from 'vitest';
 import { Action } from '../capabilities/action';
 import { Constant } from '../capabilities/constant';
+import { Opportunity } from '../capabilities/reaction';
 import { modifyConcentration } from '../effects/modifyconcentration';
-import { modifyInitiative } from '../effects/modifyinitiative';
 import type { Entity } from '../entities';
 import type { BooleanExpression } from '../expressions/boolean';
 import type { ScalarExpression } from '../expressions/scalar';
 import { strength } from '../stats';
+import {
+	MutableCapabilityResolution,
+	ReadonlyCapabilityResolution,
+	type CapabilityResolution
+} from './capabilityresolution';
 import type { MutableCardState, ReadonlyCardState } from './cardstate';
 import { ReadonlyGameState, type GameContext } from './gamestate';
-import type { CardId, EntityId, LocationId, PlayerId } from './identifiers';
+import type { CardId, EntityId, LocationId } from './identifiers';
 import {
 	ReadonlyLocationState,
 	type MutableLocationState,
@@ -27,7 +32,7 @@ function makeGameState(
 	return new ReadonlyGameState({ players, locations });
 }
 
-function makeLocation(id: LocationId, players: PlayerId[] = []): ReadonlyLocationStateType {
+function makeLocation(id: LocationId, players: EntityId[] = []): ReadonlyLocationStateType {
 	return new ReadonlyLocationState({
 		id,
 		card: mock<Entity>(),
@@ -338,156 +343,163 @@ describe('GameState.requireEntityState', () => {
 	});
 });
 
-// ─── GameState active card stack ──────────────────────────────────────────────
+// ─── GameState getters from capabilityResolutionStack ─────────────────────────
 
-describe('GameState active card stack', () => {
-	it('getActiveCard returns undefined when the stack is empty', () => {
-		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(state.getActiveCard()).toBeUndefined();
+function makeResolution(
+	cardId: CardId,
+	opts?: { reaction?: boolean; cardMock?: ReadonlyCardState }
+): CapabilityResolution {
+	const capability = opts?.reaction
+		? new Opportunity({ effects: [], triggers: ['turnStart'] })
+		: new Action({ effects: [] });
+	return new ReadonlyCapabilityResolution({
+		subjectId: cardId,
+		cardId,
+		capability
 	});
+}
 
-	it('requireActiveCard throws when the stack is empty', () => {
-		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(() => state.requireActiveCard()).toThrow();
-	});
-
-	it('getActiveCard returns the top card of the stack', () => {
-		const c1 = mock<ReadonlyCardState>();
-		const c2 = mock<ReadonlyCardState>();
-		const p1 = mock<ReadonlyPlayerState>({
-			getCard: (id) => (id === 'trt1' ? c1 : id === 'trt2' ? c2 : undefined)
+describe('GameState capability resolution stack getters', () => {
+	describe('getActiveCard / requireActiveCard', () => {
+		it('getActiveCard returns undefined when the stack is empty', () => {
+			const state = makeGameState([mock<ReadonlyPlayerState>()]);
+			expect(state.getActiveCard()).toBeUndefined();
 		});
-		const state = new ReadonlyGameState({ players: [p1], activeCardStack: ['trt1', 'trt2'] });
-		expect(state.getActiveCard()).toBe(c2);
-	});
 
-	it('requireActiveCard returns the top card of the stack', () => {
-		const c1 = mock<ReadonlyCardState>();
-		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt1' ? c1 : undefined) });
-		const state = new ReadonlyGameState({ players: [p1], activeCardStack: ['trt1'] });
-		expect(state.requireActiveCard()).toBe(c1);
-	});
-});
-
-// ─── GameState current card stack ─────────────────────────────────────────────
-
-describe('GameState current card stack', () => {
-	it('getCurrentCard returns undefined when the stack is empty', () => {
-		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(state.getCurrentCard()).toBeUndefined();
-	});
-
-	it('requireCurrentCard throws when the stack is empty', () => {
-		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(() => state.requireCurrentCard()).toThrow();
-	});
-
-	it('getCurrentCard returns the top card of the stack', () => {
-		const c1 = mock<ReadonlyCardState>();
-		const c2 = mock<ReadonlyCardState>();
-		const p1 = mock<ReadonlyPlayerState>({
-			getCard: (id) => (id === 'trt1' ? c1 : id === 'trt2' ? c2 : undefined)
+		it('requireActiveCard throws when the stack is empty', () => {
+			const state = makeGameState([mock<ReadonlyPlayerState>()]);
+			expect(() => state.requireActiveCard()).toThrow();
 		});
-		const state = new ReadonlyGameState({ players: [p1], currentCardStack: ['trt1', 'trt2'] });
-		expect(state.getCurrentCard()).toBe(c2);
-	});
 
-	it('requireCurrentCard returns the top card of the stack', () => {
-		const c1 = mock<ReadonlyCardState>();
-		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt1' ? c1 : undefined) });
-		const state = new ReadonlyGameState({ players: [p1], currentCardStack: ['trt1'] });
-		expect(state.requireCurrentCard()).toBe(c1);
-	});
-});
-
-// ─── GameState active player stack ───────────────────────────────────────────
-
-describe('GameState active player stack', () => {
-	it('getActivePlayer returns undefined when the stack is empty', () => {
-		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(state.getActivePlayer()).toBeUndefined();
-	});
-
-	it('requireActivePlayer throws when the stack is empty', () => {
-		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(() => state.requireActivePlayer()).toThrow();
-	});
-
-	it('getActivePlayer returns the top player of the stack', () => {
-		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
-		const p2 = mock<ReadonlyPlayerState>({ id: 'plr2' });
-		const state = new ReadonlyGameState({
-			players: [p1, p2],
-			activePlayerStack: ['plr1', 'plr2']
+		it('getActiveCard returns the card of the top non-Reaction resolution', () => {
+			const c1 = mock<ReadonlyCardState>();
+			const c2 = mock<ReadonlyCardState>();
+			const p1 = mock<ReadonlyPlayerState>({
+				getCard: (id: string) => (id === 'trt1' ? c1 : id === 'trt2' ? c2 : undefined)
+			});
+			const r1 = makeResolution('trt1');
+			const r2 = makeResolution('trt2');
+			const state = new ReadonlyGameState({
+				players: [p1],
+				capabilityResolutionStack: [r1, r2]
+			});
+			expect(state.getActiveCard()).toBe(c2);
 		});
-		expect(state.getActivePlayer()).toBe(p2);
-	});
 
-	it('requireActivePlayer returns the top player of the stack', () => {
-		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
-		const state = new ReadonlyGameState({ players: [p1], activePlayerStack: ['plr1'] });
-		expect(state.requireActivePlayer()).toBe(p1);
-	});
-});
-
-// ─── GameState reactive card stack ───────────────────────────────────────────
-
-describe('GameState reactive card stack', () => {
-	it('getReactiveCard returns undefined when the stack is empty', () => {
-		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(state.getReactiveCard()).toBeUndefined();
-	});
-
-	it('requireReactiveCard throws when the stack is empty', () => {
-		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(() => state.requireReactiveCard()).toThrow();
-	});
-
-	it('getReactiveCard returns the top card of the stack', () => {
-		const c1 = mock<ReadonlyCardState>();
-		const c2 = mock<ReadonlyCardState>();
-		const p1 = mock<ReadonlyPlayerState>({
-			getCard: (id) => (id === 'trt1' ? c1 : id === 'trt2' ? c2 : undefined)
+		it('getActiveCard skips Reaction resolutions', () => {
+			const c1 = mock<ReadonlyCardState>();
+			const c2 = mock<ReadonlyCardState>();
+			const p1 = mock<ReadonlyPlayerState>({
+				getCard: (id: string) => (id === 'trt1' ? c1 : id === 'trt2' ? c2 : undefined)
+			});
+			const reactionRes = makeResolution('trt1', { reaction: true });
+			const actionRes = makeResolution('trt2');
+			const state = new ReadonlyGameState({
+				players: [p1],
+				capabilityResolutionStack: [actionRes, reactionRes]
+			});
+			expect(state.getActiveCard()).toBe(c2);
 		});
-		const state = new ReadonlyGameState({ players: [p1], reactiveCardStack: ['trt1', 'trt2'] });
-		expect(state.getReactiveCard()).toBe(c2);
 	});
 
-	it('requireReactiveCard returns the top card of the stack', () => {
-		const c1 = mock<ReadonlyCardState>();
-		const p1 = mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt1' ? c1 : undefined) });
-		const state = new ReadonlyGameState({ players: [p1], reactiveCardStack: ['trt1'] });
-		expect(state.requireReactiveCard()).toBe(c1);
-	});
-});
-
-// ─── GameState reactive player stack ─────────────────────────────────────────
-
-describe('GameState reactive player stack', () => {
-	it('getReactivePlayer returns undefined when the stack is empty', () => {
-		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(state.getReactivePlayer()).toBeUndefined();
-	});
-
-	it('requireReactivePlayer throws when the stack is empty', () => {
-		const state = makeGameState([mock<ReadonlyPlayerState>()]);
-		expect(() => state.requireReactivePlayer()).toThrow();
-	});
-
-	it('getReactivePlayer returns the top player of the stack', () => {
-		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
-		const p2 = mock<ReadonlyPlayerState>({ id: 'plr2' });
-		const state = new ReadonlyGameState({
-			players: [p1, p2],
-			reactivePlayerStack: ['plr1', 'plr2']
+	describe('getActivePlayer / requireActivePlayer', () => {
+		it('getActivePlayer returns undefined when the stack is empty', () => {
+			const state = makeGameState([mock<ReadonlyPlayerState>()]);
+			expect(state.getActivePlayer()).toBeUndefined();
 		});
-		expect(state.getReactivePlayer()).toBe(p2);
+
+		it('requireActivePlayer throws when the stack is empty', () => {
+			const state = makeGameState([mock<ReadonlyPlayerState>()]);
+			expect(() => state.requireActivePlayer()).toThrow();
+		});
+
+		it('getActivePlayer returns the player from subjectStack when no active card', () => {
+			const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
+			const state = new ReadonlyGameState({
+				players: [p1],
+				subjectStack: ['plr1']
+			});
+			expect(state.getActivePlayer()).toBe(p1);
+		});
 	});
 
-	it('requireReactivePlayer returns the top player of the stack', () => {
-		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
-		const state = new ReadonlyGameState({ players: [p1], reactivePlayerStack: ['plr1'] });
-		expect(state.requireReactivePlayer()).toBe(p1);
+	describe('getReactiveCard / requireReactiveCard', () => {
+		it('getReactiveCard returns undefined when the stack is empty', () => {
+			const state = makeGameState([mock<ReadonlyPlayerState>()]);
+			expect(state.getReactiveCard()).toBeUndefined();
+		});
+
+		it('requireReactiveCard throws when the stack is empty', () => {
+			const state = makeGameState([mock<ReadonlyPlayerState>()]);
+			expect(() => state.requireReactiveCard()).toThrow();
+		});
+
+		it('getReactiveCard returns the card of the top Reaction resolution', () => {
+			const c1 = mock<ReadonlyCardState>();
+			const c2 = mock<ReadonlyCardState>();
+			const p1 = mock<ReadonlyPlayerState>({
+				getCard: (id: string) => (id === 'trt1' ? c1 : id === 'trt2' ? c2 : undefined)
+			});
+			const actionRes = makeResolution('trt1');
+			const reactionRes = makeResolution('trt2', { reaction: true });
+			const state = new ReadonlyGameState({
+				players: [p1],
+				capabilityResolutionStack: [actionRes, reactionRes]
+			});
+			expect(state.getReactiveCard()).toBe(c2);
+		});
+
+		it('getReactiveCard returns undefined when only non-Reaction resolutions exist', () => {
+			const c1 = mock<ReadonlyCardState>();
+			const p1 = mock<ReadonlyPlayerState>({
+				getCard: (id: string) => (id === 'trt1' ? c1 : undefined)
+			});
+			const r = makeResolution('trt1');
+			const state = new ReadonlyGameState({
+				players: [p1],
+				capabilityResolutionStack: [r]
+			});
+			expect(state.getReactiveCard()).toBeUndefined();
+		});
+	});
+
+	describe('getReactivePlayer / requireReactivePlayer', () => {
+		it('getReactivePlayer returns undefined when the stack is empty', () => {
+			const state = makeGameState([mock<ReadonlyPlayerState>()]);
+			expect(state.getReactivePlayer()).toBeUndefined();
+		});
+
+		it('requireReactivePlayer throws when the stack is empty', () => {
+			const state = makeGameState([mock<ReadonlyPlayerState>()]);
+			expect(() => state.requireReactivePlayer()).toThrow();
+		});
+	});
+
+	describe('getCurrentCard / requireCurrentCard', () => {
+		it('getCurrentCard returns undefined when the stack is empty', () => {
+			const state = makeGameState([mock<ReadonlyPlayerState>()]);
+			expect(state.getCurrentCard()).toBeUndefined();
+		});
+
+		it('requireCurrentCard throws when the stack is empty', () => {
+			const state = makeGameState([mock<ReadonlyPlayerState>()]);
+			expect(() => state.requireCurrentCard()).toThrow();
+		});
+
+		it('getCurrentCard returns the card of the top resolution', () => {
+			const c1 = mock<ReadonlyCardState>();
+			const c2 = mock<ReadonlyCardState>();
+			const p1 = mock<ReadonlyPlayerState>({
+				getCard: (id: string) => (id === 'trt1' ? c1 : id === 'trt2' ? c2 : undefined)
+			});
+			const r1 = makeResolution('trt1');
+			const r2 = makeResolution('trt2');
+			const state = new ReadonlyGameState({
+				players: [p1],
+				capabilityResolutionStack: [r1, r2]
+			});
+			expect(state.getCurrentCard()).toBe(c2);
+		});
 	});
 });
 
@@ -711,7 +723,7 @@ describe('GameState.evaluate', () => {
 			id: 'plr1',
 			getStat: (stat) => (stat === strength ? 4 : 0)
 		});
-		const state = new ReadonlyGameState({ players: [player], activePlayerStack: ['plr1'] });
+		const state = new ReadonlyGameState({ players: [player], subjectStack: ['plr1'] });
 		expect(state.evaluate(strength)).toBe(4);
 	});
 
@@ -805,69 +817,6 @@ describe('GameState.getConcentration', () => {
 	});
 });
 
-// ─── GameState.calculateInitiative ───────────────────────────────────────────
-
-describe('GameState.calculateInitiative', () => {
-	it('returns the entity agility stat for an action with no modifiers', () => {
-		const action = new Action({ effects: [] });
-		const player = mock<ReadonlyPlayerState>({
-			id: 'plr1',
-			hand: [],
-			attachments: [],
-			getStat: () => 4
-		});
-		const state = new ReadonlyGameState({ players: [player] });
-
-		expect(state.calculateInitiative('plr1', action)).toBe(4);
-	});
-
-	it('adds modifyInitiative modifiers from Constant capabilities on the entity', () => {
-		const cap = new Constant({ effects: [modifyInitiative(2)] });
-		const entity = mock<Entity>({ capabilities: [cap], attachmentCapabilities: [] });
-		const attachedCard = mock<ReadonlyCardState>({ card: entity, attachments: [] });
-		const action = new Action({ effects: [] });
-		const player = mock<ReadonlyPlayerState>({
-			id: 'plr1',
-			hand: [],
-			attachments: [attachedCard],
-			getStat: () => 3
-		});
-		const state = new ReadonlyGameState({ players: [player] });
-
-		expect(state.calculateInitiative('plr1', action)).toBe(5);
-	});
-
-	it('adds modifyInitiative effects on the action itself', () => {
-		const action = new Action({ effects: [modifyInitiative(3)] });
-		const player = mock<ReadonlyPlayerState>({
-			id: 'plr1',
-			hand: [],
-			attachments: [],
-			getStat: () => 2
-		});
-		const state = new ReadonlyGameState({ players: [player] });
-
-		expect(state.calculateInitiative('plr1', action)).toBe(5);
-	});
-
-	it('sums all initiative modifiers together', () => {
-		const constCap = new Constant({ effects: [modifyInitiative(1)] });
-		const entity = mock<Entity>({ capabilities: [constCap], attachmentCapabilities: [] });
-		const attachedCard = mock<ReadonlyCardState>({ card: entity, attachments: [] });
-		const action = new Action({ effects: [modifyInitiative(2)] });
-		const player = mock<ReadonlyPlayerState>({
-			id: 'plr1',
-			hand: [],
-			attachments: [attachedCard],
-			getStat: () => 3
-		});
-		const state = new ReadonlyGameState({ players: [player] });
-
-		// agility(3) + constant modifier(1) + action modifier(2) = 6
-		expect(state.calculateInitiative('plr1', action)).toBe(6);
-	});
-});
-
 // ─── ReadonlyGameState.mutable / mutate ───────────────────────────────────────
 
 describe('ReadonlyGameState', () => {
@@ -883,51 +832,22 @@ describe('ReadonlyGameState', () => {
 			expect(mutable.players).toMatchObject([{ id: 'plr1' }]);
 		});
 
-		it('copies the active card stack', () => {
+		it('copies the capability resolution stack', () => {
 			const p1 = mock<ReadonlyPlayerState>();
 			p1.mutable.mockReturnValue({
 				id: 'plr1',
 				readonly: () => p1
 			} as unknown as MutablePlayerState);
-			const state = new ReadonlyGameState({ players: [p1], activeCardStack: ['trt1'] });
+			const resolution = makeResolution('trt1');
+			const state = new ReadonlyGameState({
+				players: [p1],
+				capabilityResolutionStack: [resolution]
+			});
 			const mutable = state.mutable();
-			expect(mutable.activeCardStack).toEqual(['trt1']);
+			expect(mutable.capabilityResolutionStack).toHaveLength(1);
 		});
 
-		it('copies the active player stack', () => {
-			const p1 = mock<ReadonlyPlayerState>();
-			p1.mutable.mockReturnValue({
-				id: 'plr1',
-				readonly: () => p1
-			} as unknown as MutablePlayerState);
-			const state = new ReadonlyGameState({ players: [p1], activePlayerStack: ['plr1'] });
-			const mutable = state.mutable();
-			expect(mutable.activePlayerStack).toEqual(['plr1']);
-		});
-
-		it('copies the reactive card stack', () => {
-			const p1 = mock<ReadonlyPlayerState>();
-			p1.mutable.mockReturnValue({
-				id: 'plr1',
-				readonly: () => p1
-			} as unknown as MutablePlayerState);
-			const state = new ReadonlyGameState({ players: [p1], reactiveCardStack: ['trt1'] });
-			const mutable = state.mutable();
-			expect(mutable.reactiveCardStack).toEqual(['trt1']);
-		});
-
-		it('copies the reactive player stack', () => {
-			const p1 = mock<ReadonlyPlayerState>();
-			p1.mutable.mockReturnValue({
-				id: 'plr1',
-				readonly: () => p1
-			} as unknown as MutablePlayerState);
-			const state = new ReadonlyGameState({ players: [p1], reactivePlayerStack: ['plr1'] });
-			const mutable = state.mutable();
-			expect(mutable.reactivePlayerStack).toEqual(['plr1']);
-		});
-
-		it('copies the implicit target stack', () => {
+		it('copies the subject stack', () => {
 			const p1 = mock<ReadonlyPlayerState>();
 			p1.mutable.mockReturnValue({
 				id: 'plr1',
@@ -1013,10 +933,10 @@ describe('ReadonlyGameState', () => {
 			} as unknown as MutablePlayerState);
 			const state = makeGameState([p1]);
 			const updated = state.mutate((m) => {
-				m.activePlayerStack.push('plr1');
+				m.subjectStack.push('plr1');
 			});
 			expect(updated).toBeInstanceOf(ReadonlyGameState);
-			expect(updated.activePlayerStack).toContain('plr1');
+			expect(updated.subjectStack).toContain('plr1');
 		});
 
 		it('does not mutate the original', () => {
@@ -1027,9 +947,9 @@ describe('ReadonlyGameState', () => {
 			} as unknown as MutablePlayerState);
 			const state = makeGameState([p1]);
 			state.mutate((m) => {
-				m.activePlayerStack.push('plr1');
+				m.subjectStack.push('plr1');
 			});
-			expect(state.activePlayerStack).toEqual([]);
+			expect(state.subjectStack).toEqual([]);
 		});
 	});
 });
@@ -1037,11 +957,7 @@ describe('ReadonlyGameState', () => {
 // ─── MutableGameState.pushContext / popContext ────────────────────────────────
 
 function makeMutableState(overrides?: {
-	activeCardStack?: CardId[];
-	activePlayerStack?: PlayerId[];
-	currentCardStack?: CardId[];
-	reactiveCardStack?: CardId[];
-	reactivePlayerStack?: PlayerId[];
+	capabilityResolutionStack?: Array<CapabilityResolution>;
 	subjectStack?: EntityId[];
 	targetStack?: EntityId[];
 }): ReturnType<ReadonlyGameState['mutable']> {
@@ -1051,34 +967,15 @@ function makeMutableState(overrides?: {
 }
 
 describe('MutableGameState.pushContext', () => {
-	it('pushes currentCardId onto currentCardStack', () => {
+	it('pushes capabilityResolution onto capabilityResolutionStack', () => {
 		const state = makeMutableState();
-		state.pushContext({ currentCardId: 'trt1' });
-		expect(state.currentCardStack).toEqual(['trt1']);
-	});
-
-	it('pushes activeCardId onto activeCardStack', () => {
-		const state = makeMutableState();
-		state.pushContext({ activeCardId: 'trt1' });
-		expect(state.activeCardStack).toEqual(['trt1']);
-	});
-
-	it('pushes activePlayerId onto activePlayerStack', () => {
-		const state = makeMutableState();
-		state.pushContext({ activePlayerId: 'plr1' });
-		expect(state.activePlayerStack).toEqual(['plr1']);
-	});
-
-	it('pushes reactiveCardId onto reactiveCardStack', () => {
-		const state = makeMutableState();
-		state.pushContext({ reactiveCardId: 'trt1' });
-		expect(state.reactiveCardStack).toEqual(['trt1']);
-	});
-
-	it('pushes reactivePlayerId onto reactivePlayerStack', () => {
-		const state = makeMutableState();
-		state.pushContext({ reactivePlayerId: 'plr1' });
-		expect(state.reactivePlayerStack).toEqual(['plr1']);
+		const resolution = new MutableCapabilityResolution({
+			subjectId: 'trt1',
+			cardId: 'trt1',
+			capability: new Action({ effects: [] })
+		});
+		state.pushContext({ capabilityResolution: resolution });
+		expect(state.capabilityResolutionStack).toEqual([resolution]);
 	});
 
 	it('pushes subjectId onto subjectStack', () => {
@@ -1095,150 +992,136 @@ describe('MutableGameState.pushContext', () => {
 
 	it('pushes all provided fields at once', () => {
 		const state = makeMutableState();
+		const resolution = new MutableCapabilityResolution({
+			subjectId: 'trt1',
+			cardId: 'trt1',
+			capability: new Action({ effects: [] })
+		});
 		state.pushContext({
-			currentCardId: 'trt0',
-			activeCardId: 'trt1',
-			activePlayerId: 'plr1',
-			reactiveCardId: 'trt2',
-			reactivePlayerId: 'plr2',
+			capabilityResolution: resolution,
 			subjectId: 'plr1',
 			targetId: 'trt1'
 		});
-		expect(state.currentCardStack).toEqual(['trt0']);
-		expect(state.activeCardStack).toEqual(['trt1']);
-		expect(state.activePlayerStack).toEqual(['plr1']);
-		expect(state.reactiveCardStack).toEqual(['trt2']);
-		expect(state.reactivePlayerStack).toEqual(['plr2']);
+		expect(state.capabilityResolutionStack).toEqual([resolution]);
 		expect(state.subjectStack).toEqual(['plr1']);
 		expect(state.targetStack).toEqual(['trt1']);
 	});
 
 	it('does not touch stacks for undefined fields', () => {
-		const state = makeMutableState({ activeCardStack: ['trt9'] });
-		state.pushContext({ reactiveCardId: 'trt1' });
-		expect(state.activeCardStack).toEqual(['trt9']);
-		expect(state.reactiveCardStack).toEqual(['trt1']);
+		const state = makeMutableState({ subjectStack: ['plr9'] });
+		state.pushContext({ targetId: 'trt1' });
+		expect(state.subjectStack).toEqual(['plr9']);
+		expect(state.targetStack).toEqual(['trt1']);
 	});
 
 	it('pushes onto existing stack entries', () => {
-		const state = makeMutableState({ reactiveCardStack: ['trt1'] });
-		state.pushContext({ reactiveCardId: 'trt2' });
-		expect(state.reactiveCardStack).toEqual(['trt1', 'trt2']);
+		const state = makeMutableState({ subjectStack: ['plr1'] });
+		state.pushContext({ subjectId: 'plr2' });
+		expect(state.subjectStack).toEqual(['plr1', 'plr2']);
 	});
 });
 
 describe('MutableGameState.popContext', () => {
-	it('pops currentCardId from currentCardStack', () => {
-		const state = makeMutableState({ currentCardStack: ['trt1'] });
-		state.popContext({ currentCardId: 'trt1' });
-		expect(state.currentCardStack).toEqual([]);
+	it('pops targetId from targetStack', () => {
+		const state = makeMutableState({ targetStack: ['trt1'] });
+		state.popContext({ targetId: 'trt1' });
+		expect(state.targetStack).toEqual([]);
 	});
 
-	it('pops activeCardId from activeCardStack', () => {
-		const state = makeMutableState({ activeCardStack: ['trt1'] });
-		state.popContext({ activeCardId: 'trt1' });
-		expect(state.activeCardStack).toEqual([]);
+	it('pops subjectId from subjectStack', () => {
+		const state = makeMutableState({ subjectStack: ['plr1'] });
+		state.popContext({ subjectId: 'plr1' });
+		expect(state.subjectStack).toEqual([]);
 	});
 
-	it('pops reactiveCardId from reactiveCardStack', () => {
-		const state = makeMutableState({ reactiveCardStack: ['trt1'] });
-		state.popContext({ reactiveCardId: 'trt1' });
-		expect(state.reactiveCardStack).toEqual([]);
-	});
-
-	it('pops reactivePlayerId from reactivePlayerStack', () => {
-		const state = makeMutableState({ reactivePlayerStack: ['plr1'] });
-		state.popContext({ reactivePlayerId: 'plr1' });
-		expect(state.reactivePlayerStack).toEqual([]);
+	it('pops capabilityResolution from capabilityResolutionStack', () => {
+		const resolution = new MutableCapabilityResolution({
+			subjectId: 'trt1',
+			cardId: 'trt1',
+			capability: new Action({ effects: [] })
+		});
+		const state = makeMutableState({ capabilityResolutionStack: [resolution] });
+		state.popContext({ capabilityResolution: resolution });
+		expect(state.capabilityResolutionStack).toEqual([]);
 	});
 
 	it('pops all provided fields in reverse order', () => {
+		const resolution = new MutableCapabilityResolution({
+			subjectId: 'trt1',
+			cardId: 'trt1',
+			capability: new Action({ effects: [] })
+		});
 		const state = makeMutableState({
-			currentCardStack: ['trt0'],
-			activeCardStack: ['trt1'],
-			activePlayerStack: ['plr1'],
-			reactiveCardStack: ['trt2'],
-			reactivePlayerStack: ['plr2'],
+			capabilityResolutionStack: [resolution],
 			subjectStack: ['plr1'],
 			targetStack: ['trt1']
 		});
 		state.popContext({
-			currentCardId: 'trt0',
-			activeCardId: 'trt1',
-			activePlayerId: 'plr1',
-			reactiveCardId: 'trt2',
-			reactivePlayerId: 'plr2',
+			capabilityResolution: resolution,
 			subjectId: 'plr1',
 			targetId: 'trt1'
 		});
-		expect(state.currentCardStack).toEqual([]);
-		expect(state.activeCardStack).toEqual([]);
-		expect(state.activePlayerStack).toEqual([]);
-		expect(state.reactiveCardStack).toEqual([]);
-		expect(state.reactivePlayerStack).toEqual([]);
+		expect(state.capabilityResolutionStack).toEqual([]);
 		expect(state.subjectStack).toEqual([]);
 		expect(state.targetStack).toEqual([]);
 	});
 
 	it('does not touch stacks for undefined fields', () => {
-		const state = makeMutableState({ activeCardStack: ['trt9'], reactiveCardStack: ['trt1'] });
-		state.popContext({ reactiveCardId: 'trt1' });
-		expect(state.activeCardStack).toEqual(['trt9']);
-		expect(state.reactiveCardStack).toEqual([]);
+		const state = makeMutableState({ subjectStack: ['plr9'], targetStack: ['trt1'] });
+		state.popContext({ targetId: 'trt1' });
+		expect(state.subjectStack).toEqual(['plr9']);
+		expect(state.targetStack).toEqual([]);
 	});
 
 	it('only pops the top entry, leaving preceding entries intact', () => {
-		const state = makeMutableState({ reactiveCardStack: ['trt1', 'trt2'] });
-		state.popContext({ reactiveCardId: 'trt2' });
-		expect(state.reactiveCardStack).toEqual(['trt1']);
+		const state = makeMutableState({ subjectStack: ['plr1', 'plr2'] });
+		state.popContext({ subjectId: 'plr2' });
+		expect(state.subjectStack).toEqual(['plr1']);
 	});
 });
 
 describe('MutableGameState pushContext / popContext round-trip', () => {
 	it('restores all stacks to their original state', () => {
+		const resolution = new MutableCapabilityResolution({
+			subjectId: 'trt1',
+			cardId: 'trt1',
+			capability: new Action({ effects: [] })
+		});
 		const ctx: GameContext = {
-			currentCardId: 'trt0',
-			activeCardId: 'trt1',
-			activePlayerId: 'plr1',
-			reactiveCardId: 'trt2',
-			reactivePlayerId: 'plr2',
+			capabilityResolution: resolution,
 			subjectId: 'plr1',
 			targetId: 'trt1'
 		};
 		const state = makeMutableState();
 		state.pushContext(ctx);
 		state.popContext(ctx);
-		expect(state.currentCardStack).toEqual([]);
-		expect(state.activeCardStack).toEqual([]);
-		expect(state.activePlayerStack).toEqual([]);
-		expect(state.reactiveCardStack).toEqual([]);
-		expect(state.reactivePlayerStack).toEqual([]);
+		expect(state.capabilityResolutionStack).toEqual([]);
 		expect(state.subjectStack).toEqual([]);
 		expect(state.targetStack).toEqual([]);
 	});
 
 	it('preserves pre-existing entries after a push/pop cycle', () => {
 		const state = makeMutableState({
-			reactiveCardStack: ['trt9'],
-			reactivePlayerStack: ['plr9']
+			subjectStack: ['plr9'],
+			targetStack: ['trt9']
 		});
-		const ctx: GameContext = { reactiveCardId: 'trt1', reactivePlayerId: 'plr1' };
+		const ctx: GameContext = { subjectId: 'plr1', targetId: 'trt1' };
 		state.pushContext(ctx);
 		state.popContext(ctx);
-		expect(state.reactiveCardStack).toEqual(['trt9']);
-		expect(state.reactivePlayerStack).toEqual(['plr9']);
+		expect(state.subjectStack).toEqual(['plr9']);
+		expect(state.targetStack).toEqual(['trt9']);
 	});
 });
 
-// ─── GameState.getPlayerLocation ─────────────────────────────────────────────
+// ─── GameState.getEntityLocation ─────────────────────────────────────────────
 
-describe('GameState.getPlayerLocation', () => {
+describe('GameState.getEntityLocation', () => {
 	it('returns the location containing the player when given a PlayerId', () => {
 		const loc1 = makeLocation('loc1', ['plr1']);
 		const loc2 = makeLocation('loc2');
 		const state = makeGameState([mock<ReadonlyPlayerState>({ id: 'plr1' })], [loc1, loc2]);
 
-		expect(state.getPlayerLocation('plr1')).toBe(loc1);
+		expect(state.getEntityLocation('plr1')).toBe(loc1);
 	});
 
 	it('returns the location containing the player when given a player object', () => {
@@ -1246,14 +1129,14 @@ describe('GameState.getPlayerLocation', () => {
 		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
 		const state = makeGameState([p1], [loc1]);
 
-		expect(state.getPlayerLocation(p1)).toBe(loc1);
+		expect(state.getEntityLocation(p1)).toBe(loc1);
 	});
 
 	it('returns undefined when the player is not in any location', () => {
 		const loc1 = makeLocation('loc1');
 		const state = makeGameState([mock<ReadonlyPlayerState>({ id: 'plr1' })], [loc1]);
 
-		expect(state.getPlayerLocation('plr1')).toBeUndefined();
+		expect(state.getEntityLocation('plr1')).toBeUndefined();
 	});
 });
 

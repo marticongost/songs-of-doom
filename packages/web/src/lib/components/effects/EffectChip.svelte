@@ -24,7 +24,6 @@
 		ModifyConcentrationEffect,
 		ModifyDamageEffect,
 		ModifyGatheredCluesEffect,
-		ModifyInitiativeEffect,
 		ModifyRollEffect,
 		MoveEffect,
 		NarrationEventEffect,
@@ -81,7 +80,6 @@
 	import ModifyConcentrationEffectChip from './ModifyConcentrationEffectChip.svelte';
 	import ModifyDamageEffectChip from './ModifyDamageEffectChip.svelte';
 	import ModifyGatheredCluesEffectChip from './ModifyGatheredCluesEffectChip.svelte';
-	import ModifyInitiativeEffectChip from './ModifyInitiativeEffectChip.svelte';
 	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
 	import MoveEffectChip from './MoveEffectChip.svelte';
 	import NarrationEventEffectChip from './NarrationEventEffectChip.svelte';
@@ -132,8 +130,6 @@
 		<ModifyCarryingCapacityEffectChip {effect} />
 	{:else if effect instanceof ModifyConcentrationEffect}
 		<ModifyConcentrationEffectChip {effect} />
-	{:else if effect instanceof ModifyInitiativeEffect}
-		<ModifyInitiativeEffectChip {effect} />
 	{:else if effect instanceof LooseGoldEffect}
 		<LooseGoldEffectChip {effect} />
 	{:else if effect instanceof ChangeStatsEffect}

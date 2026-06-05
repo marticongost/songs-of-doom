@@ -2,13 +2,13 @@ import { mock } from '@songsofdoom/common/test-utils';
 import { describe, expect, it } from 'vitest';
 import type { Entity } from '../entities';
 import { MutableCardState, ReadonlyCardState } from './cardstate';
-import type { LocationId, PlayerId } from './identifiers';
+import type { EntityId, LocationId } from './identifiers';
 import { MutableLocationState, ReadonlyLocationState, type LocationGraph } from './locationstate';
 
 function makeLocation(overrides?: {
 	id?: LocationId;
 	clues?: number;
-	players?: Array<PlayerId>;
+	players?: Array<EntityId>;
 	connections?: Array<LocationId>;
 	attachments?: ReadonlyArray<ReadonlyCardState>;
 }): ReadonlyLocationState {

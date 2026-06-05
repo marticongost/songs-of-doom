@@ -4,14 +4,14 @@ import {
 	type MutableCardState,
 	type ReadonlyCardState
 } from './cardstate';
-import type { CardId, LocationId, PlayerId } from './identifiers';
+import type { CardId, EntityId, LocationId } from './identifiers';
 import { mutate } from './mutate';
 
 export interface LocationStateProps extends Omit<CardStateProps, 'id'> {
 	id: LocationId;
 
 	/** The ids of the players currently at this location. */
-	players?: ReadonlyArray<PlayerId>;
+	players?: ReadonlyArray<EntityId>;
 
 	/** The ids of locations connected to this location. */
 	connections?: ReadonlyArray<LocationId>;
@@ -51,7 +51,7 @@ export class LocationState extends CardState {
 	declare readonly id: LocationId;
 
 	/** The ids of the players currently at this location. */
-	readonly players: ReadonlyArray<PlayerId>;
+	readonly players: ReadonlyArray<EntityId>;
 
 	/** The ids of locations connected to this location. */
 	readonly connections: ReadonlyArray<LocationId>;
@@ -171,8 +171,10 @@ export class ReadonlyLocationState extends LocationState {
 
 export class MutableLocationState extends LocationState {
 	declare clues: number;
+	declare exhausted: boolean;
+	declare activated: boolean;
 	declare attachments: Array<MutableCardState>;
-	declare players: Array<PlayerId>;
+	declare players: Array<EntityId>;
 	declare connections: Array<LocationId>;
 	declare physicalTrauma: number;
 	declare mentalTrauma: number;
@@ -184,6 +186,7 @@ export class MutableLocationState extends LocationState {
 			ownerId: locationState.ownerId,
 			container: locationState.container,
 			exhausted: locationState.exhausted,
+			activated: locationState.activated,
 			charges: locationState.charges,
 			clues: locationState.clues,
 			attachments: locationState.attachments.map((a) => (a as ReadonlyCardState).mutable()),

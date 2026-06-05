@@ -2,7 +2,7 @@ import type { Capability } from '../capability';
 import type { Effect } from '../effects/effect';
 import type { Event } from '../event';
 import type { ReadonlyGameState } from './gamestate';
-import type { CardId, PlayerId } from './identifiers';
+import type { CardId, EntityId } from './identifiers';
 import type { Field } from './playerinput';
 import type { ReadonlyTestResolution } from './testresolution';
 
@@ -138,12 +138,12 @@ export class EventTriggered extends GameNode {
 }
 
 export interface InputRequestedProps extends GameNodeProps {
-	playerId: PlayerId;
+	playerId: EntityId;
 	fields: Array<Field<unknown>>;
 }
 
 export class InputRequested extends GameNode {
-	readonly playerId: PlayerId;
+	readonly playerId: EntityId;
 	readonly fields: ReadonlyArray<Field<unknown>>;
 
 	constructor({ playerId, fields, ...baseProps }: InputRequestedProps) {
@@ -181,14 +181,29 @@ export class FateDrawn extends EndGroup {
 	}
 }
 
-export type ChapterPhase = 'chapter-start' | 'focus' | 'turns' | 'draw' | 'encounters' | 'cleanup';
+export interface ChapterNodeProps extends GameNodeProps {
+	chapter: number;
+}
 
-export type TurnPhase =
-	| 'turn-start'
-	| 'enemy-planning'
-	| 'player-planning'
-	| 'execution'
-	| 'turn-end';
+export class ChapterNode extends GameNode {
+	readonly chapter: number;
+
+	constructor({ chapter, ...baseProps }: ChapterNodeProps) {
+		super(baseProps);
+		this.chapter = chapter;
+	}
+}
+
+export type ChapterPhase =
+	| 'chapter-start'
+	| 'focus'
+	| 'turns'
+	| 'draw'
+	| 'encounters'
+	| 'cleanup'
+	| 'chapter-end';
+
+export type TurnPhase = 'turn-start' | 'player-actions' | 'creature-actions' | 'turn-end';
 
 export interface ChapterPhaseNodeProps extends GameNodeProps {
 	phase: ChapterPhase;
@@ -223,3 +238,19 @@ export class TurnPhaseNode extends GameNode {
 }
 
 export class PlayerFocusNode extends GameNode {}
+
+export interface PlayerEncounterNodeProps extends GameNodeProps {
+	playerId: EntityId;
+}
+
+/**
+ * Opens a group for a player's encounter phase.
+ */
+export class PlayerEncounterNode extends GameNode {
+	readonly playerId: EntityId;
+
+	constructor({ playerId, ...baseProps }: PlayerEncounterNodeProps) {
+		super(baseProps);
+		this.playerId = playerId;
+	}
+}

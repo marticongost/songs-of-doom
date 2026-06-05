@@ -6,7 +6,7 @@ import type { Entity } from '../entities';
 import { MutableCardState, ReadonlyCardState } from '../game/cardstate';
 import type { GameGraph } from '../game/gamegraph';
 import type { MutableGameState } from '../game/gamestate';
-import type { CardId, PlayerId } from '../game/identifiers';
+import type { CardId, EntityId } from '../game/identifiers';
 import { MutablePlayerState, ReadonlyPlayerState } from '../game/playerstate';
 import type { EntityType } from '../properties/entitytypes';
 import { Target } from '../target';
@@ -32,7 +32,7 @@ function makeAlly(id: CardId): MutableCardState {
 	}).mutable();
 }
 
-function makePlayer(id: PlayerId): MutablePlayerState {
+function makePlayer(id: EntityId): MutablePlayerState {
 	return new ReadonlyPlayerState({
 		id,
 		character: mock<CharacterState>(),
