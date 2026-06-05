@@ -1,3 +1,5 @@
+import { BaseCounter } from './counter';
+
 export type Constructor<T, Props> = new (props: Props) => T;
 
 // Wrap the conditional return type so the function stays readable
@@ -44,12 +46,19 @@ export const mapToRecord = <
 	OutputKey extends string | number | symbol,
 	OutputValue
 >(
-	source: Map<InputKey, InputValue> | Record<string | number | symbol, InputValue>,
+	source:
+		| Map<InputKey, InputValue>
+		| BaseCounter<InputKey>
+		| Record<string | number | symbol, InputValue>,
 	options: MapToRecordOptions<InputKey, InputValue, OutputKey, OutputValue>
 ): Record<OutputKey, OutputValue> => {
 	const record = {} as Record<OutputKey, OutputValue>;
-	const entries =
-		source instanceof Map ? source.entries() : (Object.entries(source) as [InputKey, InputValue][]);
+	const entries: Iterable<[InputKey, InputValue]> =
+		source instanceof BaseCounter
+			? (source.entries() as Iterable<[InputKey, InputValue]>)
+			: source instanceof Map
+				? source.entries()
+				: (Object.entries(source) as [InputKey, InputValue][]);
 	for (const [key, value] of entries) {
 		if (options.mapEntries) {
 			const [outputKey, outputValue] = options.mapEntries([key, value]);

@@ -41,10 +41,10 @@ export interface CharacterStateProps {
 	finalised: boolean;
 
 	/** The number of copies of each upgrade the character has acquired. */
-	upgrades: Record<string, number> | Map<Entity, number>;
+	upgrades: Record<string, number> | Counter<Entity>;
 
 	/** The number of copies of each skill in the character's deck. */
-	skillsDeck: Record<string, number> | Map<Skill, number>;
+	skillsDeck: Record<string, number> | Counter<Skill>;
 
 	/** The total amount of experience points the character has earned. */
 	totalXp: number;
@@ -60,10 +60,10 @@ export class CharacterState {
 	readonly finalised: boolean;
 
 	/** The number of copies of each upgrade the character has acquired. */
-	readonly upgrades: Map<Entity, number>;
+	readonly upgrades: Counter<Entity>;
 
 	/** The number of copies of each skill in the character's deck. */
-	readonly skillsDeck: Map<Skill, number>;
+	readonly skillsDeck: Counter<Skill>;
 
 	/** The total amount of experience points the character has earned. */
 	readonly totalXp: number;
@@ -77,7 +77,7 @@ export class CharacterState {
 	 */
 	get availableXp(): number {
 		let spent = 0;
-		for (const [entity, copies] of this.upgrades) {
+		for (const [entity, copies] of this.upgrades.entries()) {
 			spent += (entity.xpCost ?? 0) * copies;
 		}
 		return this.totalXp - spent;
@@ -259,14 +259,14 @@ export class CharacterState {
 		const acquisitionImpediment = this.getEntityAcquisitionImpediment(entity);
 		if (acquisitionImpediment) return this;
 
-		const newUpgrades = new Map(this.upgrades);
+		const newUpgrades = new Counter(this.upgrades);
 		if (entity.xpCost || entity.goldCost || entity instanceof Ally || entity instanceof Item) {
-			newUpgrades.set(entity, (newUpgrades.get(entity) ?? 0) + 1);
+			newUpgrades.add(entity);
 		}
 
-		const newSkillsDeck = new Map(this.skillsDeck);
+		const newSkillsDeck = new Counter(this.skillsDeck);
 		if (entity instanceof Skill) {
-			newSkillsDeck.set(entity, (newSkillsDeck.get(entity) ?? 0) + 1);
+			newSkillsDeck.add(entity);
 		}
 
 		return new CharacterState({
@@ -278,23 +278,23 @@ export class CharacterState {
 	}
 
 	public returnEntity(entity: Entity): CharacterState {
-		const newUpgrades = new Map(this.upgrades);
+		const newUpgrades = new Counter(this.upgrades);
 		if (entity.xpCost || entity.goldCost || entity instanceof Ally || entity instanceof Item) {
 			const currentCopies = newUpgrades.get(entity) ?? 0;
 			if (currentCopies == 1) {
 				newUpgrades.delete(entity);
 			} else if (currentCopies > 1) {
-				newUpgrades.set(entity, currentCopies - 1);
+				newUpgrades.remove(entity);
 			}
 		}
 
-		const newSkillsDeck = new Map(this.skillsDeck);
+		const newSkillsDeck = new Counter(this.skillsDeck);
 		if (entity instanceof Skill) {
 			const currentCopies = newSkillsDeck.get(entity) ?? 0;
 			if (currentCopies == 1) {
 				newSkillsDeck.delete(entity);
 			} else if (currentCopies > 1) {
-				newSkillsDeck.set(entity, currentCopies - 1);
+				newSkillsDeck.remove(entity);
 			}
 		}
 
@@ -307,14 +307,16 @@ export class CharacterState {
 	}
 
 	private static normaliseUpgrades(
-		upgrades: Record<string, number> | Map<Entity, number>
-	): Map<Entity, number> {
-		if (!(upgrades instanceof Map)) {
-			upgrades = new Map(
-				Object.entries(upgrades).map(([entityId, copies]) => [entities.require(entityId), copies])
-			);
+		upgrades: Record<string, number> | Counter<Entity>
+	): Counter<Entity> {
+		if (!(upgrades instanceof Counter)) {
+			const counter = new Counter<Entity>();
+			for (const [entityId, copies] of Object.entries(upgrades)) {
+				counter.add(entities.require(entityId), copies);
+			}
+			upgrades = counter;
 		}
-		for (const [entity, copies] of upgrades) {
+		for (const [entity, copies] of upgrades.entries()) {
 			if (copies < 1) {
 				throw new Error(`Invalid number of copies ${copies} for entity ${entity.id}`);
 			}
@@ -323,18 +325,18 @@ export class CharacterState {
 	}
 
 	private static normaliseSkillDeck(
-		skillDeck: Record<string, number> | Map<Skill, number>
-	): Map<Skill, number> {
-		if (!(skillDeck instanceof Map)) {
-			skillDeck = new Map(
-				Object.entries(skillDeck).map(([skillId, copies]) => {
-					const skill = entities.require(skillId);
-					if (!(skill instanceof Skill)) {
-						throw new Error(`Expected ${skillId} to be a skill`);
-					}
-					return [skill, copies];
-				})
-			);
+		skillDeck: Record<string, number> | Counter<Skill>
+	): Counter<Skill> {
+		if (!(skillDeck instanceof Counter)) {
+			const counter = new Counter<Skill>();
+			for (const [skillId, copies] of Object.entries(skillDeck)) {
+				const skill = entities.require(skillId);
+				if (!(skill instanceof Skill)) {
+					throw new Error(`Expected ${skillId} to be a skill`);
+				}
+				counter.add(skill, copies);
+			}
+			skillDeck = counter;
 		}
 
 		for (const [skill, copies] of skillDeck.entries()) {
@@ -352,7 +354,7 @@ export class CharacterState {
 		for (const stat of Object.values(stats)) {
 			baseStats.set(stat, stat.startingValue);
 		}
-		this.upgrades.forEach((copies, entity) => {
+		for (const [entity, copies] of this.upgrades.entries()) {
 			entity.permanentEffects().forEach((effect) => {
 				for (const [statType, stat] of Object.entries(stats) as [StatType, Stat][]) {
 					let value = baseStats.get(stat) ?? 0;
@@ -362,7 +364,7 @@ export class CharacterState {
 					baseStats.set(stat, value);
 				}
 			});
-		});
+		}
 		return baseStats;
 	}
 

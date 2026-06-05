@@ -1,6 +1,6 @@
 import { Character, CharacterRevision } from '$lib/models/characters';
 import { User } from '$lib/models/user';
-import type { Constructor } from '@songsofdoom/common';
+import { BaseCounter, type Constructor } from '@songsofdoom/common';
 import { CharacterState, Entity } from '@songsofdoom/game';
 import { mapToRecord } from '../../common/src/utils';
 
@@ -19,7 +19,7 @@ const toSerializableData = (value: unknown): unknown => {
 	if (value instanceof Date) {
 		return { $date: value.toISOString() };
 	}
-	if (value instanceof Map) {
+	if (value instanceof Map || value instanceof BaseCounter) {
 		return mapToRecord(value, { mapKeys: getSerializableMapKey, mapValues: toSerializableData });
 	}
 	if (Array.isArray(value)) {
