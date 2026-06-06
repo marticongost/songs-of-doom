@@ -1,7 +1,7 @@
 import { Action } from '../../../models/capabilities';
 import { addCharges, attach, discard, removeCharges } from '../../../models/effects';
-import { charges, distance, eq } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
+import { charges, distance, eq } from '../../../models/expressions';
 import { upgradable } from '../../../models/upgrades';
 
 export default upgradable(Skill, 2, (variants) => ({
@@ -14,6 +14,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { intelligence: variants.level },
 	capabilities: [
 		new Action({
+			id: 'attach',
 			cost: { intelligence: 2 },
 			effects: [
 				attach({ target: { type: 'enemy', condition: eq(distance, 0) } }),
@@ -24,6 +25,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	maxCharges: variants.level + 1,
 	attachmentCapabilities: [
 		new Action({
+			id: 'discardWhenFullyDischarged',
 			prioritary: true,
 			effects: [removeCharges({ amount: 1 }), eq(charges, 0).then(discard())]
 		})

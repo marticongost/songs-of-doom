@@ -1,6 +1,5 @@
 import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
-import type { GameGraph } from '../game/gamegraph';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -23,10 +22,6 @@ export class RemoveChargesEffect extends Effect {
 		super();
 		this.amount = amount;
 		this.target = finalise(Target, target);
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

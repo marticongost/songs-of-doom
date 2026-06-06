@@ -21,13 +21,22 @@ export { activated, ActivatedExpression } from './activated';
 export { copyAlreadyAttached, CopyAlreadyAttachedExpression } from './copy-already-attached';
 export { engaged, EngagedExpression } from './engaged';
 export {
+	activeCardHasType,
+	ActiveCardHasTypeExpression,
 	activeCardIsActor,
+	ActiveCardIsActorExpression,
 	activeCardIsTarget,
+	ActiveCardIsTargetExpression,
+	ActiveCardOwnerIsNotActivePlayerExpression,
 	reactiveCardIsSubject,
+	ReactiveCardIsSubjectExpression,
 	reactiveCardIsTarget,
+	ReactiveCardIsTargetExpression,
 	reactivePlayerIsNotActivePlayer,
 	reactivePlayerIsSubject,
-	reactivePlayerIsTarget
+	ReactivePlayerIsSubjectExpression,
+	reactivePlayerIsTarget,
+	ReactivePlayerIsTargetExpression
 } from './event-context';
 export { exhausted, ExhaustedExpression } from './exhausted';
 export { is, IsExpression, type IsExpressionProps } from './is';

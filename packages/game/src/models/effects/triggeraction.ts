@@ -1,6 +1,5 @@
 import { finalise } from '@songsofdoom/common';
 import { Obligation, type Reaction } from '../capabilities/reaction';
-import type { GameGraph } from '../game/gamegraph';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -74,10 +73,6 @@ export class TriggerActionEffect extends Effect {
 		this.card = finalise(Target, card);
 		this.target = finalise(Target, target);
 	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
-	}
 }
 
 const normaliseModifierToReaction = (modifier: Effect | Reaction): Reaction => {
@@ -88,7 +83,11 @@ const normaliseModifierToReaction = (modifier: Effect | Reaction): Reaction => {
 					`TriggerActionEffect because it does not have a defaultEvent.`
 			);
 		}
-		return new Obligation({ effects: [modifier], triggers: [{ event: modifier.defaultEvent }] });
+		return new Obligation({
+			id: `${modifier.defaultEvent}:${modifier.constructor.name.replace(/Effect$/, '')}`,
+			effects: [modifier],
+			triggers: [{ event: modifier.defaultEvent }]
+		});
 	}
 	return modifier;
 };

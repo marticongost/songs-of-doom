@@ -1,4 +1,3 @@
-import type { GameGraph } from '../game/gamegraph';
 import { statTypes, type StatType } from '../stats';
 import { Effect } from './effect';
 
@@ -66,10 +65,6 @@ export class ChangeStatsEffect extends Effect {
 
 	override setStat(stat: StatType, currentValue: number): number {
 		return currentValue + this.get(stat);
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

@@ -1,4 +1,3 @@
-import type { GameGraph } from '../game/gamegraph';
 import {
 	isSigil,
 	resolveResultExpression,
@@ -63,10 +62,6 @@ export class ResultsTableEffect extends Effect {
 				}))
 			);
 		}
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

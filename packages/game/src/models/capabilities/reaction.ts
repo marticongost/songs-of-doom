@@ -49,8 +49,8 @@ export abstract class Reaction extends Capability {
 	 */
 	abstract readonly mandatory: boolean;
 
-	constructor({ cost, effects, triggers }: ReactionProps) {
-		super({ cost, effects });
+	constructor({ id, cost, effects, triggers }: ReactionProps) {
+		super({ id, cost, effects });
 		if (!triggers.length) {
 			throw new Error('Reaction requires at least one trigger');
 		}

@@ -17,6 +17,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	},
 	capabilities: [
 		new Action({
+			id: 'activate',
 			cost: { will: variants.values<ScalarExpressionType>(2, X) },
 			effects: [
 				heal({

@@ -1,5 +1,4 @@
 import { finalise } from '@songsofdoom/common';
-import type { GameGraph } from '../game/gamegraph';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -29,10 +28,6 @@ export class SaveTargetToVariableEffect extends Effect {
 		super();
 		this.name = name;
 		this.value = finalise(Target, value);
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

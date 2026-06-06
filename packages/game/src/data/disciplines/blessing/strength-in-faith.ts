@@ -26,12 +26,14 @@ export default upgradable(Skill, 2, (variants) => ({
 	maxCharges: variants.values(2, 3),
 	capabilities: [
 		new Action({
+			id: 'attach',
 			cost: { will: 2 },
 			effects: [attach({}), addCharges(variants.values(2, 3))]
 		})
 	],
 	attachmentCapabilities: [
 		new Action({
+			id: 'activate',
 			cost: { will: 2, charges: 1 },
 			effects: [
 				triggerAttack({
@@ -44,6 +46,7 @@ export default upgradable(Skill, 2, (variants) => ({
 			]
 		}),
 		new Obligation({
+			id: 'discardWhenFullyDischarged',
 			triggers: [{ event: 'fullyDischarged', condition: reactiveCardIsSubject }],
 			effects: [discard()]
 		})

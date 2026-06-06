@@ -1,4 +1,3 @@
-import type { GameGraph } from '../game/gamegraph';
 import type { Property } from '../properties';
 import { Effect } from './effect';
 
@@ -38,10 +37,6 @@ export class ReplacePropertyEffect extends Effect {
 		super();
 		this.original = original;
 		this.replacement = replacement;
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

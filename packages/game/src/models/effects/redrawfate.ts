@@ -1,4 +1,3 @@
-import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
 /**
@@ -6,11 +5,7 @@ import { Effect } from './effect';
  * This is used after drawing fate tokens to determine the outcome of a test, giving the player
  * a chance to potentially get a better result.
  */
-export class RedrawFateEffect extends Effect {
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
-	}
-}
+export class RedrawFateEffect extends Effect {}
 
 /**
  * Creates an effect that allows a player to redraw fate.

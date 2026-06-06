@@ -5,8 +5,8 @@ import {
 	modifyRoll,
 	triggerAttack
 } from '../../../models/effects';
-import { engaged, not } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
+import { engaged, not } from '../../../models/expressions';
 import { upgradable } from '../../../models/upgrades';
 import { piercing, projectile } from '../../properties';
 
@@ -20,6 +20,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { agility: 1, intelligence: variants.level },
 	capabilities: [
 		new Action({
+			id: 'activate',
 			cost: { intelligence: 1, agility: 1 },
 			effects: [
 				not(engaged).then(

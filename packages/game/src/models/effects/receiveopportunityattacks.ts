@@ -1,4 +1,3 @@
-import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
 /**
@@ -28,10 +27,6 @@ export class ReceiveOpportunityAttacksEffect extends Effect {
 	constructor({ effects }: ReceiveOpportunityAttacksEffectProps = {}) {
 		super();
 		this.effects = effects ?? [];
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

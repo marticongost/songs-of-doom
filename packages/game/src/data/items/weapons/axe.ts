@@ -16,6 +16,7 @@ export default new Item({
 	capabilities: [
 		fullyRechargeOnChapterStart,
 		new Action({
+			id: 'activate',
 			cost: { strength: 1, charges: 1 },
 			effects: [
 				attack({
@@ -25,6 +26,7 @@ export default new Item({
 			]
 		}),
 		new Opportunity({
+			id: 'parry',
 			cost: { charges: 1 },
 			triggers: [{ event: 'attack', condition: reactivePlayerIsTarget }],
 			effects: [

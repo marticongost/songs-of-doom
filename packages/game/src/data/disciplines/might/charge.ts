@@ -17,6 +17,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { strength: 1, agility: variants.values(0, 1) },
 	capabilities: [
 		new Action({
+			id: 'activate',
 			cost: { strength: 2 },
 			effects: [
 				not(engaged).then(

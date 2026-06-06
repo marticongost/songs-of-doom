@@ -2,8 +2,8 @@ import { Action } from '../../../models/capabilities';
 import { repeatCapability, resultsTable, triggerAttack } from '../../../models/effects';
 import { addCharges } from '../../../models/effects/recharge';
 import type { ResultsTableEntryProps } from '../../../models/effects/resultstable';
-import { charges, plus } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
+import { charges, plus } from '../../../models/expressions';
 import { upgradable } from '../../../models/upgrades';
 
 export default upgradable(Skill, 2, (variants) => ({
@@ -16,6 +16,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { agility: variants.values(2, 3) },
 	capabilities: [
 		new Action({
+			id: 'activate',
 			cost: { agility: plus(1, charges) },
 			effects: [
 				triggerAttack({

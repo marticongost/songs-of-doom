@@ -1,5 +1,4 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
-import type { GameState } from '../../game/gamestate';
 import type { ComparisonOperator } from '../boolean/comparison';
 import { gte } from '../boolean/comparison';
 import { ScalarExpression, type ScalarExpressionType } from './scalar-expression';
@@ -11,11 +10,6 @@ export class RemainingWoundsExpression extends ScalarExpression {
 			es: 'Heridas restantes',
 			en: 'Remaining wounds'
 		};
-	}
-
-	override evaluate(_state: GameState): number {
-		// TODO
-		return 0;
 	}
 }
 
@@ -51,11 +45,6 @@ export class ReceivedWoundsExpression extends ScalarExpression {
 			};
 		}
 		return undefined;
-	}
-
-	override evaluate(_state: GameState): number {
-		// TODO
-		return 0;
 	}
 }
 

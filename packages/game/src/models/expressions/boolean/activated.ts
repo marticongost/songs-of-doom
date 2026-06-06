@@ -1,5 +1,4 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
-import type { GameState } from '../../game/gamestate';
 import { BooleanExpression } from './boolean-expression';
 
 /**
@@ -13,11 +12,6 @@ export class ActivatedExpression extends BooleanExpression {
 			es: 'Activado',
 			en: 'Activated'
 		};
-	}
-
-	override evaluate(state: GameState): boolean {
-		const subject = state.getSubject();
-		return subject?.activated ?? false;
 	}
 }
 

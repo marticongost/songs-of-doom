@@ -1,6 +1,5 @@
 import type { ScalarExpressionType } from '../expressions';
 import { ScalarExpression } from '../expressions';
-import type { GameGraph } from '../game/gamegraph';
 import type { Property } from '../properties';
 import { Effect } from './effect';
 
@@ -17,10 +16,6 @@ export class DefendEffect extends Effect {
 		super();
 		this.expression = expression;
 		this.properties = properties ?? [];
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

@@ -1,5 +1,4 @@
 import type { ScalarExpressionType } from '../expressions';
-import type { GameGraph } from '../game/gamegraph';
 import type { Property } from '../properties';
 import { parseResultString, type ResultString } from '../results';
 import { Effect } from './effect';
@@ -12,8 +11,10 @@ import { ResultsTableEffect, resultsTable } from './resultstable';
 export interface InvestigateEffectProps {
 	/** The expression establishing the proficiency level for the investigation test. */
 	expression: ScalarExpressionType;
+
 	/** Specifies the results of the test. Normalised to ResultsTableEffect. */
 	results: ResultsTableEffect | Partial<Record<ResultString, number | Array<Effect>>>;
+
 	/** An optional set of properties assigned to the skill test, offering interaction opportunities to other rules. */
 	properties?: Array<Property>;
 }
@@ -25,8 +26,10 @@ export interface InvestigateEffectProps {
 export class InvestigateEffect extends Effect {
 	/** The expression establishing the proficiency level for the investigation test. */
 	readonly expression: ScalarExpressionType;
+
 	/** Specifies the results of the test. */
 	readonly results: ResultsTableEffect;
+
 	/** An optional set of properties assigned to the skill test, offering interaction opportunities to other rules. */
 	readonly properties: Array<Property>;
 
@@ -43,10 +46,6 @@ export class InvestigateEffect extends Effect {
 						}))
 					});
 		this.properties = properties ?? [];
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

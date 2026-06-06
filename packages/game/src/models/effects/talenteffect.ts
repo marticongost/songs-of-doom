@@ -1,4 +1,3 @@
-import type { GameGraph } from '../game/gamegraph';
 import type { Talent } from '../talent';
 import { Effect } from './effect';
 
@@ -20,10 +19,6 @@ export class TalentEffect extends Effect {
 	constructor({ talents }: TalentEffectProps) {
 		super();
 		this.talents = talents;
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

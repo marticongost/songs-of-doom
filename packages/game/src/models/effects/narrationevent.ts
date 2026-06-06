@@ -1,6 +1,5 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
 
-import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
 /**
@@ -21,10 +20,6 @@ export class NarrationEventEffect extends Effect {
 	constructor({ text }: NarrationEventEffectProps) {
 		super();
 		this.text = text;
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

@@ -1,8 +1,8 @@
 import { Action } from '../../../models/capabilities';
 import { drawCards, wound } from '../../../models/effects';
+import { Skill } from '../../../models/entities/skill';
 import { and, distance, eq, lte } from '../../../models/expressions';
 import { remainingWounds } from '../../../models/expressions/scalar/wounds';
-import { Skill } from '../../../models/entities/skill';
 import { upgradable } from '../../../models/upgrades';
 import piercing from '../../properties/piercing';
 
@@ -16,6 +16,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { agility: 1 },
 	capabilities: [
 		new Action({
+			id: 'activate',
 			effects: [
 				wound({
 					target: {

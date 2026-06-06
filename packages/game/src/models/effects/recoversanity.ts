@@ -1,8 +1,6 @@
 import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
 import { ScalarExpression } from '../expressions';
-import type { GameGraph } from '../game/gamegraph';
-import type { EntityId } from '../game/identifiers';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -15,14 +13,6 @@ export interface RecoverSanityEffectProps {
 
 	/** Who benefits from the sanity recovery. Defaults to the current subject. */
 	target?: TargetSpec;
-}
-
-export interface RecoverSanityOutcome {
-	/** The amount of sanity that was restored. */
-	readonly amount: number;
-
-	/** The entity that received the sanity recovery. */
-	readonly targetId: EntityId;
 }
 
 /**
@@ -40,6 +30,7 @@ export class RecoverSanityEffect extends Effect {
 		this.target = finalise(Target, target);
 	}
 
+	/*
 	override async apply(gameGraph: GameGraph): Promise<void> {
 		const targetId = await gameGraph.requestSingleTarget(this.target, {
 			default: 'current-subject'
@@ -55,6 +46,7 @@ export class RecoverSanityEffect extends Effect {
 			});
 		}
 	}
+	*/
 }
 
 const isScalar = (v: ScalarExpressionType | RecoverSanityEffectProps): v is ScalarExpressionType =>

@@ -24,6 +24,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	},
 	capabilities: [
 		new Opportunity({
+			id: 'attach',
 			triggers: [{ event: 'damageDealt', condition: reactivePlayerIsTarget }],
 			cost: { strength: 2 },
 			effects: [
@@ -35,6 +36,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	],
 	attachmentCapabilities: [
 		new Action({
+			id: 'activate',
 			cost: { charges: 1 },
 			effects: [
 				triggerAttack({
@@ -44,6 +46,7 @@ export default upgradable(Skill, 2, (variants) => ({
 			]
 		}),
 		new Opportunity({
+			id: 'discardWhenFullyDischarged',
 			triggers: [{ event: 'fullyDischarged', condition: reactiveCardIsSubject }],
 			effects: [discard()]
 		})

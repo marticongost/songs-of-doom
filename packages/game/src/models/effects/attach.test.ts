@@ -1,17 +1,9 @@
-import { mock } from '@songsofdoom/common/test-utils';
 import { describe, expect, it } from 'vitest';
-import { Target } from '../..';
-import type { MutableCardState } from '../game/cardstate';
-import type { GameGraph } from '../game/gamegraph';
-import type { MutableGameState } from '../game/gamestate';
-import { AttachEffect, attach } from './attach';
-
-// ─── AttachEffect construction ────────────────────────────────────────────────
+import { attach } from './attach';
 
 describe('AttachEffect construction', () => {
 	it('attach() creates an AttachEffect with no target and stacking=false', () => {
 		const effect = attach();
-		expect(effect).toBeInstanceOf(AttachEffect);
 		expect(effect.target).toBeUndefined();
 		expect(effect.stacking).toBe(false);
 	});
@@ -24,27 +16,5 @@ describe('AttachEffect construction', () => {
 	it('attach({}) defaults stacking to false', () => {
 		const effect = attach({});
 		expect(effect.stacking).toBe(false);
-	});
-});
-
-// ─── AttachEffect.apply ─────────────────────────────────────────────────
-
-describe('AttachEffect.apply', () => {
-	it('attaches the card to the given target, defaulting to the active card', async () => {
-		const target = new Target({});
-		const mutableState = mock<MutableGameState>();
-		const targetCard = mock<MutableCardState>();
-		const attachmentCard = mock<MutableCardState>();
-		mutableState.requireCard.calledWith('trt2').mockReturnValue(targetCard);
-		mutableState.requireActiveCard.mockReturnValue(attachmentCard);
-		const graph = mock<GameGraph>();
-		graph.requestSingleTarget
-			.calledWith(target, expect.objectContaining({ default: 'active-card' }))
-			.mockResolvedValue('trt2');
-		graph.mutate.mockImplementation((fn) => fn(mutableState));
-
-		await attach({ target }).apply(graph);
-
-		expect(targetCard.addAttachment).toHaveBeenCalledWith(mutableState, attachmentCard);
 	});
 });

@@ -1,4 +1,3 @@
-import type { GameGraph } from '../game/gamegraph';
 import {
 	resolveProficiencySpec,
 	type ProficiencySelector,
@@ -59,10 +58,6 @@ export class ProficiencyTableEffect extends Effect {
 				}))
 			);
 		}
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

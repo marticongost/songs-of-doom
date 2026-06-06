@@ -1,6 +1,5 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
 import type { ComparisonOperator } from '../../expressions/boolean/comparison';
-import type { GameState } from '../../game/gamestate';
 import { ScalarExpression, type ScalarExpressionType } from './scalar-expression';
 
 /**
@@ -43,11 +42,6 @@ export class DistanceExpression extends ScalarExpression {
 			};
 		}
 		return undefined;
-	}
-
-	override evaluate(_state: GameState): number {
-		// TODO
-		return 0;
 	}
 }
 

@@ -1,5 +1,3 @@
-import { MutableAttackResolution } from '../game/attackresolution';
-import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
 /**
@@ -7,6 +5,7 @@ import { Effect } from './effect';
  * This effect cancels any incoming damage before it is applied.
  */
 export class NegateDamageEffect extends Effect {
+	/*
 	override async apply(gameGraph: GameGraph) {
 		gameGraph.mutate((state) => {
 			const woundRes = state.getActiveWoundResolution();
@@ -20,6 +19,7 @@ export class NegateDamageEffect extends Effect {
 			}
 		});
 	}
+	*/
 }
 
 /**

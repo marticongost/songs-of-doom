@@ -23,6 +23,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { agility: 2 },
 	capabilities: [
 		new Action({
+			id: 'activate',
 			cost: {
 				agility: variants.level
 			},
@@ -53,6 +54,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	],
 	attachmentCapabilities: [
 		new Obligation({
+			id: 'modifyAttack',
 			triggers: [{ event: 'attack', condition: reactivePlayerIsSubject }],
 			effects: [modifyRoll(-2), modifyDamage(-1)]
 		})

@@ -1,5 +1,4 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
-import type { GameState } from '../../game/gamestate';
 import { BooleanExpression } from './boolean-expression';
 
 /**
@@ -17,18 +16,6 @@ export class CopyAlreadyAttachedExpression extends BooleanExpression {
 			es: 'El jugador ya tiene una copia de la carta adjunta',
 			en: 'The player already has a copy attached'
 		};
-	}
-
-	override evaluate(_state: GameState): boolean {
-		/* TODO: In order to implement this, we need to:
-			- Option A: Track the current target in the game state so it can be referenced
-			  by expressions.
-			- Option B: Make the target explicit with a `target` property on the expression
-			- Option C: Change the way attachments work, so that attach() has an optional
-			  ifAlreadyAttached parameters with a list of effects, which would make this
-				expression unnecessary.
-		*/
-		return false;
 	}
 }
 

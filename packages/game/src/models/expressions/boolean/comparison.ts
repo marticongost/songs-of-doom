@@ -4,7 +4,6 @@ import {
 	type ScalarExpressionType
 } from '../../expressions/scalar/scalar-expression';
 import { ScalarOperation } from '../../expressions/scalar/scalar-operation';
-import type { GameState } from '../../game/gamestate';
 import { BooleanExpression } from './boolean-expression';
 
 /**
@@ -53,21 +52,6 @@ export class ComparisonExpression extends BooleanExpression {
 			return this.left.getComparisonShorthand(this.operator, this.right);
 		}
 		return undefined;
-	}
-
-	override evaluate(state: GameState): boolean {
-		const leftValue = state.evaluate(this.left);
-		const rightValue = state.evaluate(this.right);
-		switch (this.operator) {
-			case '>':
-				return leftValue > rightValue;
-			case '<':
-				return leftValue < rightValue;
-			case '=':
-				return leftValue === rightValue;
-			case '!=':
-				return leftValue !== rightValue;
-		}
 	}
 }
 

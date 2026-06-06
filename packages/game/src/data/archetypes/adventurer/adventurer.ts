@@ -1,6 +1,6 @@
-import { Archetype } from '../../../models/entities/archetype';
 import { Action } from '../../../models/capabilities';
 import { attack, equip, investigate, move } from '../../../models/effects';
+import { Archetype } from '../../../models/entities/archetype';
 import { intelligence, strength } from '../../../models/stats';
 import standard from '../../properties/standard';
 
@@ -13,12 +13,14 @@ export default new Archetype({
 	properties: [standard],
 	capabilities: [
 		new Action({
+			id: 'move',
 			cost: {
 				agility: 1
 			},
 			effects: [move()]
 		}),
 		new Action({
+			id: 'attack',
 			cost: {
 				strength: 1
 			},
@@ -30,6 +32,7 @@ export default new Archetype({
 			]
 		}),
 		new Action({
+			id: 'investigate',
 			cost: {
 				intelligence: 1
 			},
@@ -41,6 +44,7 @@ export default new Archetype({
 			]
 		}),
 		new Action({
+			id: 'equip',
 			effects: [equip()]
 		})
 	]

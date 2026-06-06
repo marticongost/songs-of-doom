@@ -1,8 +1,6 @@
 import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
 import { ScalarExpression } from '../expressions';
-import type { GameGraph } from '../game/gamegraph';
-import type { EntityId } from '../game/identifiers';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -15,14 +13,6 @@ export interface HealEffectProps {
 
 	/** Who benefits from the healing. Defaults to the current subject. */
 	target?: TargetSpec;
-}
-
-export interface HealOutcome {
-	/** The amount of damage that was healed. */
-	readonly amount: number;
-
-	/** The entity that received the healing. */
-	readonly targetId: EntityId;
 }
 
 /**
@@ -40,6 +30,7 @@ export class HealEffect extends Effect {
 		this.target = finalise(Target, target);
 	}
 
+	/*
 	override async apply(gameGraph: GameGraph): Promise<void> {
 		const targetId = await gameGraph.requestSingleTarget(this.target, {
 			default: 'current-subject'
@@ -55,6 +46,7 @@ export class HealEffect extends Effect {
 			});
 		}
 	}
+	*/
 }
 
 const isScalar = (v: ScalarExpressionType | HealEffectProps): v is ScalarExpressionType =>

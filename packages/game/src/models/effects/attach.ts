@@ -1,6 +1,4 @@
 import { finalise } from '@songsofdoom/common';
-import type { GameGraph } from '../game/gamegraph';
-import type { CardId, EntityId } from '../game/identifiers';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -13,11 +11,6 @@ export interface AttachEffectProps {
 
 	/** Whether multiple copies of the effect can be attached to the same target. */
 	stacking?: boolean;
-}
-
-export interface AttachOutcome {
-	/** The card that received the attachment. */
-	readonly targetId: EntityId;
 }
 
 /**
@@ -37,6 +30,7 @@ export class AttachEffect extends Effect {
 		this.stacking = stacking;
 	}
 
+	/*
 	override async apply(gameGraph: GameGraph) {
 		const targetId = await gameGraph.requestSingleTarget(this.target, {
 			default: 'active-card'
@@ -48,6 +42,7 @@ export class AttachEffect extends Effect {
 			return { targetId };
 		});
 	}
+	*/
 }
 
 /** Creates an effect that attaches the card to a target. */

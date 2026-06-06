@@ -1,9 +1,9 @@
 import { Action } from '../../../models/capabilities';
 import { exhaust, looseGold, test } from '../../../models/effects';
+import { Trait } from '../../../models/entities/trait';
 import { and, cash, engaged, gt, is, minus, not } from '../../../models/expressions';
 import { will } from '../../../models/stats';
 import { currentLocation } from '../../../models/target';
-import { Trait } from '../../../models/entities/trait';
 import { flaw, town } from '../../properties';
 
 export default new Trait({
@@ -12,6 +12,7 @@ export default new Trait({
 	properties: [flaw],
 	capabilities: [
 		new Action({
+			id: 'gamble',
 			prioritary: true,
 			effects: [
 				and(not(engaged), is(currentLocation, town), gt(cash, 0)).then(

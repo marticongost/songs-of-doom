@@ -27,6 +27,7 @@ export default new Ally({
 	capabilities: [
 		fullyRechargeOnChapterStart,
 		new Action({
+			id: 'attack',
 			cost: {
 				charges: 1,
 				charisma: 1
@@ -43,6 +44,7 @@ export default new Ally({
 			]
 		}),
 		new Opportunity({
+			id: 'defend',
 			triggers: [{ event: 'attack', condition: reactiveCardIsTarget }],
 			cost: {
 				charges: 1
@@ -50,9 +52,11 @@ export default new Ally({
 			effects: [defend(2)]
 		}),
 		new Constant({
+			id: 'modifyCarryingCapacity',
 			effects: [modifyCarryingCapacity(1)]
 		}),
 		new Action({
+			id: 'equip',
 			cost: { charges: 1 },
 			fast: true,
 			effects: [equip()]

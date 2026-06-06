@@ -1,5 +1,4 @@
 import { finalise } from '@songsofdoom/common';
-import type { GameGraph } from '../game/gamegraph';
 import { Target, type ObjectTargetType, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -19,10 +18,6 @@ export class EquipEffect extends Effect {
 	constructor({ target }: EquipEffectProps) {
 		super();
 		this.target = finalise(Target, target);
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

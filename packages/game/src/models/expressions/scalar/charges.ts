@@ -1,6 +1,5 @@
 import { finalise } from '@songsofdoom/common';
 import type { LocalisedText } from '@songsofdoom/common/localisation';
-import type { GameState } from '../../game/gamestate';
 import { TargetDiscriminator, type TargetDiscriminatorSpec } from '../../target';
 import { ScalarExpression } from './scalar-expression';
 
@@ -35,11 +34,6 @@ export class ChargesExpression extends ScalarExpression {
 			es: 'cargas',
 			en: 'charges'
 		};
-	}
-
-	override evaluate(_state: GameState): number {
-		// TODO
-		return 0;
 	}
 }
 

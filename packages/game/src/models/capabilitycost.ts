@@ -1,9 +1,6 @@
-import type { Counter, ReadonlyCounter } from '@songsofdoom/common';
 import type { LocalisedText } from '@songsofdoom/common/localisation';
 import type { ScalarExpressionType } from './expressions';
-import { focusTypes, type FocusToken, type FocusType } from './focus';
-import type { GameState } from './game/gamestate';
-import type { CardId } from './game/identifiers';
+import { focusTypes, type FocusType } from './focus';
 import type { IndicatorType } from './stats';
 
 export type ScalarCapabilityCostType = FocusType | IndicatorType | 'gold' | 'charges';
@@ -117,69 +114,6 @@ export abstract class BaseCapabilityCost<N extends ScalarExpressionType> {
 	}
 }
 
-export class CapabilityCost extends BaseCapabilityCost<ScalarExpressionType> {
-	evaluate(state: GameState): ActualCapabilityCost {
-		return new ActualCapabilityCost({
-			strength: state.evaluate(this.strength),
-			agility: state.evaluate(this.agility),
-			intelligence: state.evaluate(this.intelligence),
-			charisma: state.evaluate(this.charisma),
-			will: state.evaluate(this.will),
-			heroism: state.evaluate(this.heroism),
-			any: state.evaluate(this.any),
-			health: state.evaluate(this.health),
-			sanity: state.evaluate(this.sanity),
-			gold: state.evaluate(this.gold),
-			charges: state.evaluate(this.charges),
-			cardTransition: this.cardTransition
-		});
-	}
-}
+export class CapabilityCost extends BaseCapabilityCost<ScalarExpressionType> {}
 
 export class ActualCapabilityCost extends BaseCapabilityCost<number> {}
-
-/**
- * Constructor parameters for the {@link Payment} class.
- */
-export interface PaymentProps {
-	spentFocuses: Counter<FocusToken>;
-	spentCards: Set<CardId>;
-	spentCharges?: number;
-	spentHealth?: number;
-	spentSanity?: number;
-	spentGold?: number;
-	cardTransition?: CardTransition;
-}
-
-/**
- * The payment made for a capability cost.
- *
- * Indicates which focus tokens or cards were spent to satisfy a capability cost.
- */
-export class Payment {
-	readonly spentFocuses: ReadonlyCounter<FocusToken>;
-	readonly spentCards: ReadonlySet<CardId>;
-	readonly spentCharges: number;
-	readonly spentHealth: number;
-	readonly spentSanity: number;
-	readonly spentGold: number;
-	readonly cardTransition?: CardTransition;
-
-	constructor({
-		spentFocuses,
-		spentCards,
-		spentCharges,
-		spentHealth,
-		spentSanity,
-		spentGold,
-		cardTransition
-	}: PaymentProps) {
-		this.spentFocuses = spentFocuses;
-		this.spentCards = spentCards;
-		this.spentCharges = spentCharges ?? 0;
-		this.spentHealth = spentHealth ?? 0;
-		this.spentSanity = spentSanity ?? 0;
-		this.spentGold = spentGold ?? 0;
-		this.cardTransition = cardTransition;
-	}
-}

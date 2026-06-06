@@ -1,6 +1,5 @@
 import type { ScalarExpressionType } from '../expressions';
 import { ScalarExpression } from '../expressions';
-import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
 /**
@@ -21,10 +20,6 @@ export class ModifyGatheredCluesEffect extends Effect {
 	constructor({ amount }: ModifyGatheredCluesEffectProps) {
 		super();
 		this.amount = amount;
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

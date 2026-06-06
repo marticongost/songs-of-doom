@@ -3,7 +3,7 @@ export { entities, EntityCatalog, getEntryMetadata, type EntryMetadata } from '.
 
 // Core entity types
 export * from './models/entities';
-export { Event } from './models/event';
+export { Event, events, type EventType } from './models/event';
 export { Talent, type TalentProps } from './models/talent';
 
 // Slots
@@ -14,11 +14,13 @@ export * from './models/capabilities';
 export { EventTrigger } from './models/capabilities/reaction';
 export { Capability } from './models/capability';
 export {
+	ActualCapabilityCost,
 	CapabilityCost,
 	capabilityCostTypes,
 	CardTransition,
 	cardTransitions,
 	cardTransitionTypes,
+	Payment,
 	scalarCapabilityCostTypes,
 	type CapabilityCostType,
 	type CardTransitionType,
@@ -122,11 +124,3 @@ export * as propertyData from './data/properties';
 
 // Characters
 export * from './models/characters';
-
-// Game sequence
-export {
-	ChapterPhaseNode,
-	TurnPhaseNode,
-	type ChapterPhase,
-	type TurnPhase
-} from './models/game/gamenodes';

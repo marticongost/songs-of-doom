@@ -1,7 +1,7 @@
-import { Ally } from '../../models/entities/ally';
 import { Action } from '../../models/capabilities';
 import { fullyRechargeOnChapterStart } from '../../models/common';
 import { attack, wound } from '../../models/effects';
+import { Ally } from '../../models/entities/ally';
 import { will } from '../../models/stats';
 import follower from '../properties/follower';
 import magic from '../properties/magic';
@@ -27,6 +27,7 @@ export default new Ally({
 	capabilities: [
 		fullyRechargeOnChapterStart,
 		new Action({
+			id: 'attack',
 			cost: {
 				charges: 1,
 				charisma: 1

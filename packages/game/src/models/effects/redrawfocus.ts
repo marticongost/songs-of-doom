@@ -1,21 +1,9 @@
-import { Counter } from '@songsofdoom/common';
 import { ScalarExpression, type ScalarExpressionType } from '../../models/expressions/scalar';
-import type { FocusToken } from '../../models/focus';
-import type { GameGraph } from '../game/gamegraph';
-import { FocusesField } from '../game/playerinput';
 import { Effect } from './effect';
 
 export interface RedrawFocusEffectProps {
 	/** The number of focus tokens the player can mulligan (redraw). */
 	amount: ScalarExpressionType;
-}
-
-export interface RedrawFocusOutcome {
-	/** The focus tokens that were discarded (redrawn). */
-	readonly discardedTokens: Counter<FocusToken>;
-
-	/** The focus tokens that were drawn as replacements. */
-	readonly drawnTokens: Counter<FocusToken>;
 }
 
 /**
@@ -31,6 +19,7 @@ export class RedrawFocusEffect extends Effect {
 		this.amount = props.amount;
 	}
 
+	/*
 	override async apply(gameGraph: GameGraph) {
 		const [playerId] = await gameGraph.requestPlayers(undefined, {
 			default: 'active-player'
@@ -82,6 +71,7 @@ export class RedrawFocusEffect extends Effect {
 			return { discardedTokens, drawnTokens } satisfies RedrawFocusOutcome;
 		});
 	}
+	*/
 }
 
 const isRedrawFocusAmount = (v: number | RedrawFocusEffectProps): v is number =>

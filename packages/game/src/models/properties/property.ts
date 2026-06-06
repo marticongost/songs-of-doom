@@ -1,6 +1,5 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
 import { BooleanExpression } from '../expressions/boolean/boolean-expression';
-import type { GameState } from '../game/gamestate';
 
 export interface PropertyProps {
 	title: LocalisedText;
@@ -15,11 +14,6 @@ export abstract class Property extends BooleanExpression {
 		super();
 		this.title = props.title;
 		this.description = props.description;
-	}
-
-	override evaluate(_state: GameState): boolean {
-		// TODO: choose the current target
-		return false;
 	}
 
 	is(property: Property): boolean {

@@ -20,6 +20,12 @@ export {
 	type TalentProficiencyExpressionProps
 } from './talent-proficiency';
 export { variable, VariableExpression, X, type VariableExpressionProps } from './variable';
+export {
+	receivedWounds,
+	ReceivedWoundsExpression,
+	remainingWounds,
+	RemainingWoundsExpression
+} from './wounds';
 
 // Helper functions
 export { expressionPlurality } from './functions';

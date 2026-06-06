@@ -1,4 +1,3 @@
-import type { GameGraph } from '../game/gamegraph';
 import type { Result } from '../results';
 import { Effect } from './effect';
 
@@ -20,10 +19,6 @@ export class SetRollResultEffect extends Effect {
 	constructor({ result }: SetRollResultEffectProps) {
 		super();
 		this.result = result;
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

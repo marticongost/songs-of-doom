@@ -1,19 +1,13 @@
 import { mock } from '@songsofdoom/common/test-utils';
 import { describe, expect, it } from 'vitest';
-import type { BooleanExpression, BooleanExpressionType } from '../expressions';
-import type { GameGraph } from '../game/gamegraph';
-import type { GameNode } from '../game/gamenodes';
-import type { ReadonlyGameState } from '../game/gamestate';
-import { ConditionalEffect, conditional } from './conditional';
+import type { BooleanExpression } from '../expressions';
+import { conditional } from './conditional';
 import type { Effect } from './effect';
-
-// ─── ConditionalEffect construction ───────────────────────────────────────────
 
 describe('ConditionalEffect construction', () => {
 	it('conditional(cases) creates a ConditionalEffect with no default', () => {
 		const condition = mock<BooleanExpression>();
 		const effect = conditional([{ condition, effects: [] }]);
-		expect(effect).toBeInstanceOf(ConditionalEffect);
 		expect(effect.cases).toHaveLength(1);
 		expect(effect.default).toBeUndefined();
 	});
@@ -34,8 +28,6 @@ describe('ConditionalEffect construction', () => {
 	});
 });
 
-// ─── ConditionalEffect.elseIf ─────────────────────────────────────────────────
-
 describe('ConditionalEffect.elseIf', () => {
 	it('returns a new ConditionalEffect with the added case appended', () => {
 		const condition1 = mock<BooleanExpression>();
@@ -45,7 +37,6 @@ describe('ConditionalEffect.elseIf', () => {
 
 		const result = original.elseIf(condition2, effect2);
 
-		expect(result).toBeInstanceOf(ConditionalEffect);
 		expect(result).not.toBe(original);
 		expect(result.cases).toHaveLength(2);
 		expect(result.cases[1]).toEqual({ condition: condition2, effects: [effect2] });
@@ -62,8 +53,6 @@ describe('ConditionalEffect.elseIf', () => {
 	});
 });
 
-// ─── ConditionalEffect.orElse ─────────────────────────────────────────────────
-
 describe('ConditionalEffect.orElse', () => {
 	it('returns a new ConditionalEffect with the given default effects', () => {
 		const condition = mock<BooleanExpression>();
@@ -72,7 +61,6 @@ describe('ConditionalEffect.orElse', () => {
 
 		const result = original.orElse(defaultEffect);
 
-		expect(result).toBeInstanceOf(ConditionalEffect);
 		expect(result.default).toEqual([defaultEffect]);
 	});
 
@@ -85,70 +73,5 @@ describe('ConditionalEffect.orElse', () => {
 		const result = original.orElse(effect2);
 
 		expect(result.default).toEqual([effect1, effect2]);
-	});
-});
-
-// ─── ConditionalEffect.apply ─────────────────────────────────────────────────
-
-function makeGraph(evaluate: (condition: BooleanExpressionType) => boolean): GameGraph {
-	const state = mock<ReadonlyGameState>({ evaluate: evaluate as ReadonlyGameState['evaluate'] });
-	return mock<GameGraph>({ current: mock<GameNode>({ state }) });
-}
-
-describe('ConditionalEffect.apply', () => {
-	it('triggers case effects when the condition is true', async () => {
-		const condition = mock<BooleanExpression>();
-		const caseEffect = mock<Effect>();
-		const graph = makeGraph(() => true);
-
-		await conditional([{ condition, effects: [caseEffect] }]).apply(graph);
-
-		expect(graph.triggerEffect).toHaveBeenCalledWith(caseEffect);
-	});
-
-	it('does not trigger default effects when the condition is true', async () => {
-		const condition = mock<BooleanExpression>();
-		const defaultEffect = mock<Effect>();
-		const graph = makeGraph(() => true);
-
-		await conditional([{ condition, effects: [] }], [defaultEffect]).apply(graph);
-
-		expect(graph.triggerEffect).not.toHaveBeenCalledWith(defaultEffect);
-	});
-
-	it('triggers default effects when the condition is false', async () => {
-		const condition = mock<BooleanExpression>();
-		const defaultEffect = mock<Effect>();
-		const graph = makeGraph(() => false);
-
-		await conditional([{ condition, effects: [] }], [defaultEffect]).apply(graph);
-
-		expect(graph.triggerEffect).toHaveBeenCalledWith(defaultEffect);
-	});
-
-	it('does not trigger anything when the condition is false and there is no default', async () => {
-		const condition = mock<BooleanExpression>();
-		const caseEffect = mock<Effect>();
-		const graph = makeGraph(() => false);
-
-		await conditional([{ condition, effects: [caseEffect] }]).apply(graph);
-
-		expect(graph.triggerEffect).not.toHaveBeenCalled();
-	});
-
-	it('evaluates each case independently', async () => {
-		const conditionTrue = mock<BooleanExpression>();
-		const conditionFalse = mock<BooleanExpression>();
-		const trueEffect = mock<Effect>();
-		const falseEffect = mock<Effect>();
-		const graph = makeGraph((expr) => expr === conditionTrue);
-
-		await conditional([
-			{ condition: conditionTrue, effects: [trueEffect] },
-			{ condition: conditionFalse, effects: [falseEffect] }
-		]).apply(graph);
-
-		expect(graph.triggerEffect).toHaveBeenCalledWith(trueEffect);
-		expect(graph.triggerEffect).not.toHaveBeenCalledWith(falseEffect);
 	});
 });

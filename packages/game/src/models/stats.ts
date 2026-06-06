@@ -1,6 +1,5 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
 
-import type { GameState } from './game/gamestate';
 import { ScalarExpression } from './expressions/scalar/scalar-expression';
 
 export type AttributeType = 'strength' | 'agility' | 'intelligence' | 'charisma' | 'will';
@@ -21,10 +20,6 @@ export abstract class Stat extends ScalarExpression {
 		this.type = type;
 		this.name = name;
 		this.startingValue = startingValue;
-	}
-
-	evaluate(state: GameState): number {
-		return state.requireActivePlayer().getStat(this);
 	}
 }
 

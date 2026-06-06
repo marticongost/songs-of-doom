@@ -13,6 +13,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	xpCost: variants.values(0, 1),
 	capabilities: [
 		new Action({
+			id: 'activate',
 			effects: [
 				triggerAction({
 					modifiers: [modifyCapabilityCost({ any: 1 }), modifyRoll(-1)]

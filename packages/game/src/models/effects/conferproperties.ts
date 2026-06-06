@@ -1,6 +1,3 @@
-import type { MutableEntityState } from '../game/entitystate';
-import type { GameGraph } from '../game/gamegraph';
-import type { EntityId } from '../game/identifiers';
 import type { Property } from '../properties';
 import { Effect } from './effect';
 
@@ -32,6 +29,7 @@ export class ConferPropertiesEffect extends Effect {
 		this.properties = properties;
 	}
 
+	/*
 	override async apply(gameGraph: GameGraph) {
 		gameGraph.mutate((state) => {
 			const target = state.requireTarget();
@@ -50,6 +48,7 @@ export class ConferPropertiesEffect extends Effect {
 			target.properties[position] = existingProperty.merge(property);
 		}
 	}
+	*/
 }
 
 /** Creates a confer properties effect. */

@@ -15,6 +15,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	},
 	capabilities: [
 		new Action({
+			id: 'activate',
 			cost: {
 				intelligence: 2
 			},

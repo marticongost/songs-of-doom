@@ -1,5 +1,4 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
-import type { GameState } from '../../game/gamestate';
 import { ScalarExpression } from './scalar-expression';
 
 /**
@@ -20,11 +19,6 @@ export class EffectiveDefenseExpression extends ScalarExpression {
 			es: 'Defensa efectiva',
 			en: 'Effective defense'
 		};
-	}
-
-	override evaluate(_state: GameState): number {
-		// TODO
-		return 0;
 	}
 }
 

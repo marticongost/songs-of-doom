@@ -14,6 +14,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { agility: variants.level },
 	capabilities: [
 		new Action({
+			id: 'activate',
 			cost: { intelligence: 1 },
 			effects: [
 				equip({ type: 'object', variable: 'X', condition: smallWeapon }),

@@ -1,17 +1,7 @@
 import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../..';
-import invulnerable, { type InvulnerableParams } from '../../data/properties/invulnerable';
-import piercing from '../../data/properties/piercing';
-import toughness from '../../data/properties/toughness';
 import { isScalarExpression } from '../expressions/scalar/scalar-expression';
-import { AttackResolution } from '../game/attackresolution';
-import type { EntityState } from '../game/entitystate';
-import type { GameGraph } from '../game/gamegraph';
-import type { ReadonlyGameState } from '../game/gamestate';
-import { isLocationId, type EntityId } from '../game/identifiers';
-import { MutableWoundResolution } from '../game/woundresolution';
 import type { Property } from '../properties';
-import { ParametricRuleInstance, type ScalarRuleParams } from '../properties/parametricrule';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -36,6 +26,7 @@ export class WoundEffect extends Effect {
 		this.causedByAttack = causedByAttack ?? false;
 	}
 
+	/*
 	override async apply(gameGraph: GameGraph) {
 		const targetIds = await gameGraph.requestTargets(this.target, { default: 'current-target' });
 		for (const targetId of targetIds) {
@@ -140,6 +131,7 @@ export class WoundEffect extends Effect {
 			await gameGraph.defeat(targetId);
 		}
 	}
+	*/
 }
 
 /** Creates an effect that inflicts a wound. */

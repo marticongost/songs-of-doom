@@ -8,8 +8,8 @@ import {
 	resultsTable,
 	triggerAttack
 } from '../../../models/effects';
-import { charges, eq } from '../../../models/expressions';
 import { Skill } from '../../../models/entities/skill';
+import { charges, eq } from '../../../models/expressions';
 import { upgradable } from '../../../models/upgrades';
 import { immobilized } from '../../properties';
 
@@ -23,6 +23,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { agility: variants.level },
 	capabilities: [
 		new Action({
+			id: 'activate',
 			cost: { agility: 2 },
 			effects: [
 				triggerAttack({
@@ -36,8 +37,9 @@ export default upgradable(Skill, 2, (variants) => ({
 		})
 	],
 	attachmentCapabilities: [
-		new Constant({ effects: [conferProperties([immobilized])] }),
+		new Constant({ id: 'immobilize', effects: [conferProperties([immobilized])] }),
 		new Obligation({
+			id: 'discardWhenFullyDischarged',
 			triggers: ['turnEnd'],
 			effects: [removeCharges({ amount: 1 }), eq(charges, 0).then(discard())]
 		})

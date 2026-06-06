@@ -20,6 +20,7 @@ export default new Encounter({
 	title: { ca: 'Trampa rovellada', es: 'Trampa oxidada', en: 'Rusty poacher trap' },
 	capabilities: [
 		new Obligation({
+			id: 'attach',
 			triggers: [{ event: 'encounterRevealed', condition: reactiveCardIsSubject }],
 			effects: [
 				copyAlreadyAttached.then(replaceEncounter()).orElse(
@@ -34,7 +35,7 @@ export default new Encounter({
 		})
 	],
 	attachmentCapabilities: [
-		new Constant({ effects: [conferProperties([immobilized])] }),
-		new Action({ cost: { strength: 2 }, effects: [discard()] })
+		new Constant({ id: 'immobilize', effects: [conferProperties([immobilized])] }),
+		new Action({ id: 'discard', cost: { strength: 2 }, effects: [discard()] })
 	]
 });

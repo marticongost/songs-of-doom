@@ -16,6 +16,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	},
 	capabilities: [
 		new Action({
+			id: 'activate',
 			cost: { will: 2 },
 			effects: [gatherClues({ amount: variants.values(1, 2) })]
 		})

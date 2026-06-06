@@ -1,9 +1,8 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
 import { describe, expect, it } from 'vitest';
+import { Event } from './event';
 import { AndExpression } from './expressions/boolean';
 import { BooleanExpression } from './expressions/boolean/boolean-expression';
-import type { GameState } from './game/gamestate';
-import { Event } from './event';
 
 class TestExpression extends BooleanExpression {
 	constructor(private readonly text: string) {
@@ -12,10 +11,6 @@ class TestExpression extends BooleanExpression {
 
 	override translate(): LocalisedText {
 		return { en: this.text };
-	}
-
-	override evaluate(_state: GameState): boolean {
-		return false;
 	}
 }
 

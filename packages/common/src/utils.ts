@@ -1,6 +1,6 @@
 import { BaseCounter } from './counter';
 
-export type Constructor<T, Props> = new (props: Props) => T;
+export type Constructor<T, Props = any> = new (props: Props) => T;
 
 // Wrap the conditional return type so the function stays readable
 type Finalised<P, T> = P extends undefined ? undefined : T;

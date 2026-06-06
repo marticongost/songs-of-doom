@@ -1,6 +1,7 @@
 import { Action, Constant } from '../../../models/capabilities';
 import { attach, conferProperties } from '../../../models/effects';
 import { Skill } from '../../../models/entities';
+import { distance, eq } from '../../../models/expressions';
 import { upgradable } from '../../../models/upgrades';
 import { holy, vulnerable } from '../../properties';
 
@@ -16,13 +17,15 @@ export default upgradable(Skill, 2, (variants) => ({
 	},
 	capabilities: [
 		new Action({
+			id: 'attach',
 			cost: { will: 2 },
 			fast: true,
-			effects: [attach()]
+			effects: [attach({ target: { type: 'enemy', condition: eq(distance, 0) } })]
 		})
 	],
 	attachmentCapabilities: [
 		new Constant({
+			id: 'passive',
 			effects: [conferProperties([vulnerable.with({ attackType: holy, value: 1 })])]
 		})
 	]

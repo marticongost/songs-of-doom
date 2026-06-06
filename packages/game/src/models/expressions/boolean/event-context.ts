@@ -1,9 +1,8 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
-import type { GameState } from '../../game/gamestate';
 import { entityTypes, type EntityType, type EntityTypeId } from '../../properties/entitytypes';
 import { BooleanExpression } from './boolean-expression';
 
-class ActiveCardIsTargetExpression extends BooleanExpression {
+export class ActiveCardIsTargetExpression extends BooleanExpression {
 	translate(): LocalisedText {
 		return {
 			ca: "la carta activa es el destinatari de l'esdeveniment",
@@ -11,15 +10,9 @@ class ActiveCardIsTargetExpression extends BooleanExpression {
 			en: 'active card is the event target'
 		};
 	}
-
-	override evaluate(state: GameState): boolean {
-		const activeCard = state.getActiveCard();
-		const target = state.getTarget();
-		return activeCard !== undefined && target !== undefined && activeCard.id === target.id;
-	}
 }
 
-class ActiveCardIsActorExpression extends BooleanExpression {
+export class ActiveCardIsActorExpression extends BooleanExpression {
 	translate(): LocalisedText {
 		return {
 			ca: "la carta activa es l'actor de l'esdeveniment",
@@ -27,15 +20,9 @@ class ActiveCardIsActorExpression extends BooleanExpression {
 			en: 'active card is the event actor'
 		};
 	}
-
-	override evaluate(state: GameState): boolean {
-		const activeCard = state.getActiveCard();
-		const subject = state.getSubject();
-		return activeCard !== undefined && subject !== undefined && activeCard.id === subject.id;
-	}
 }
 
-class ActiveCardOwnerIsNotActivePlayerExpression extends BooleanExpression {
+export class ActiveCardOwnerIsNotActivePlayerExpression extends BooleanExpression {
 	translate(): LocalisedText {
 		return {
 			ca: 'el propietari de la carta activa no es el jugador actiu',
@@ -43,19 +30,9 @@ class ActiveCardOwnerIsNotActivePlayerExpression extends BooleanExpression {
 			en: 'active card owner is not the active player'
 		};
 	}
-
-	override evaluate(state: GameState): boolean {
-		const reactivePlayer = state.getReactivePlayer();
-		const activePlayer = state.getActivePlayer();
-		return (
-			reactivePlayer !== undefined &&
-			activePlayer !== undefined &&
-			reactivePlayer.id !== activePlayer.id
-		);
-	}
 }
 
-class ReactivePlayerIsTargetExpression extends BooleanExpression {
+export class ReactivePlayerIsTargetExpression extends BooleanExpression {
 	translate(): LocalisedText {
 		return {
 			ca: "el jugador reactiu és el destinatari de l'esdeveniment",
@@ -63,15 +40,9 @@ class ReactivePlayerIsTargetExpression extends BooleanExpression {
 			en: 'reactive player is the event target'
 		};
 	}
-
-	override evaluate(state: GameState): boolean {
-		const reactivePlayer = state.getReactivePlayer();
-		const target = state.getTarget();
-		return reactivePlayer !== undefined && target !== undefined && reactivePlayer.id === target.id;
-	}
 }
 
-class ReactivePlayerIsSubjectExpression extends BooleanExpression {
+export class ReactivePlayerIsSubjectExpression extends BooleanExpression {
 	translate(): LocalisedText {
 		return {
 			ca: "el jugador reactiu és el subjecte de l'esdeveniment",
@@ -79,17 +50,9 @@ class ReactivePlayerIsSubjectExpression extends BooleanExpression {
 			en: 'reactive player is the event subject'
 		};
 	}
-
-	override evaluate(state: GameState): boolean {
-		const reactivePlayer = state.getReactivePlayer();
-		const subject = state.getSubject();
-		return (
-			reactivePlayer !== undefined && subject !== undefined && reactivePlayer.id === subject.id
-		);
-	}
 }
 
-class ReactiveCardIsSubjectExpression extends BooleanExpression {
+export class ReactiveCardIsSubjectExpression extends BooleanExpression {
 	translate(): LocalisedText {
 		return {
 			ca: "la carta reactiva és el subjecte de l'esdeveniment",
@@ -97,15 +60,9 @@ class ReactiveCardIsSubjectExpression extends BooleanExpression {
 			en: 'reactive card is the event subject'
 		};
 	}
-
-	override evaluate(state: GameState): boolean {
-		const reactiveCard = state.getReactiveCard();
-		const subject = state.getSubject();
-		return reactiveCard !== undefined && subject !== undefined && reactiveCard.id === subject.id;
-	}
 }
 
-class ReactiveCardIsTargetExpression extends BooleanExpression {
+export class ReactiveCardIsTargetExpression extends BooleanExpression {
 	translate(): LocalisedText {
 		return {
 			ca: "la carta reactiva és el destinatari de l'esdeveniment",
@@ -113,15 +70,9 @@ class ReactiveCardIsTargetExpression extends BooleanExpression {
 			en: 'reactive card is the event target'
 		};
 	}
-
-	override evaluate(state: GameState): boolean {
-		const reactiveCard = state.getReactiveCard();
-		const target = state.getTarget();
-		return reactiveCard !== undefined && target !== undefined && reactiveCard.id === target.id;
-	}
 }
 
-class ActiveCardHasTypeExpression extends BooleanExpression {
+export class ActiveCardHasTypeExpression extends BooleanExpression {
 	readonly type: EntityType;
 
 	constructor(type: EntityTypeId | EntityType) {
@@ -135,11 +86,6 @@ class ActiveCardHasTypeExpression extends BooleanExpression {
 			es: `la carta activa es de tipo ${this.type.title.es}`,
 			en: `active card is of type ${this.type.title.en}`
 		};
-	}
-
-	override evaluate(state: GameState): boolean {
-		const activeCard = state.getActiveCard();
-		return activeCard !== undefined && activeCard.card.type.id === this.type.id;
 	}
 }
 

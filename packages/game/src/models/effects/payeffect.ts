@@ -1,6 +1,5 @@
 import { finalise } from '@songsofdoom/common';
 import { CapabilityCost, type CapabilityCostProps } from '../capabilitycost';
-import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
 /**
@@ -21,10 +20,6 @@ export class PayEffect extends Effect {
 	constructor({ cost }: PayEffectProps) {
 		super();
 		this.cost = finalise(CapabilityCost, cost);
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

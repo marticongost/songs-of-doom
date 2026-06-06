@@ -1,9 +1,6 @@
-import { Counter, finalise } from '@songsofdoom/common';
+import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
 import { ScalarExpression } from '../expressions';
-import type { GameGraph } from '../game/gamegraph';
-import type { CardId } from '../game/identifiers';
-import type { MutableLocationState } from '../game/locationstate';
 import { currentLocation, Target, type LocationTargetType, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -16,11 +13,6 @@ export interface GatherCluesEffectProps {
 
 	/** The location to gather the clues from. Defaults to the current location. */
 	target?: TargetSpec<LocationTargetType>;
-}
-
-export interface GatherCluesOutcome {
-	/** The clues that were gathered at each location. */
-	readonly gatheredClues: Counter<CardId>;
 }
 
 /**
@@ -39,6 +31,7 @@ export class GatherCluesEffect extends Effect {
 		this.target = (finalise(Target, target) ?? currentLocation) as Target<LocationTargetType>;
 	}
 
+	/*
 	override async apply(gameGraph: GameGraph) {
 		const targetIds = (await gameGraph.requestTargets(this.target, {
 			default: 'current-target'
@@ -57,6 +50,7 @@ export class GatherCluesEffect extends Effect {
 			return { gatheredClues };
 		});
 	}
+	*/
 }
 
 const isScalar = (v: ScalarExpressionType | GatherCluesEffectProps): v is ScalarExpressionType =>

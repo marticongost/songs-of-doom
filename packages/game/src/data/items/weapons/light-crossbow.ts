@@ -1,8 +1,8 @@
 import { Action } from '../../../models/capabilities';
 import { fullyRechargeOnChapterStart, shootBeforeEngaged } from '../../../models/common';
 import { attack } from '../../../models/effects';
-import { plus } from '../../../models/expressions';
 import { Item } from '../../../models/entities/item';
+import { plus } from '../../../models/expressions';
 import { agility } from '../../../models/stats';
 import piercing from '../../properties/piercing';
 import projectile from '../../properties/projectile';
@@ -22,6 +22,7 @@ export default new Item({
 		fullyRechargeOnChapterStart,
 		shootBeforeEngaged,
 		new Action({
+			id: 'activate',
 			cost: { agility: 1, strength: 1, charges: 1 },
 			effects: [
 				attack({

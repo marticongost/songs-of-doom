@@ -1,4 +1,3 @@
-import type { GameState } from '../../game/gamestate';
 import { ScalarExpression, type ScalarExpressionType } from './scalar-expression';
 
 /**
@@ -30,21 +29,6 @@ export class ScalarOperation extends ScalarExpression {
 		this.operator = operator;
 		this.left = left;
 		this.right = right;
-	}
-
-	override evaluate(state: GameState): number {
-		const leftValue = state.evaluate(this.left);
-		const rightValue = state.evaluate(this.right);
-		switch (this.operator) {
-			case '+':
-				return leftValue + rightValue;
-			case '-':
-				return leftValue - rightValue;
-			case '*':
-				return leftValue * rightValue;
-			case '/':
-				return leftValue / rightValue;
-		}
 	}
 }
 

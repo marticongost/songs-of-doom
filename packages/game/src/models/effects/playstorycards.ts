@@ -1,5 +1,4 @@
 import { Story } from '../entities/story';
-import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
 /**
@@ -20,10 +19,6 @@ export class PlayStoryCardsEffect extends Effect {
 	constructor({ cards }: PlayStoryCardsEffectProps) {
 		super();
 		this.cards = cards;
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

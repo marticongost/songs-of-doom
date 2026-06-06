@@ -1,7 +1,5 @@
 import type { ScalarExpressionType } from '../expressions';
 import { ScalarExpression } from '../expressions';
-import { MutableAttackResolution } from '../game/attackresolution';
-import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
 /**
@@ -26,6 +24,7 @@ export class ModifyDamageEffect extends Effect {
 		this.amount = amount;
 	}
 
+	/*
 	override async apply(gameGraph: GameGraph) {
 		gameGraph.mutate((state) => {
 			const woundRes = state.getActiveWoundResolution();
@@ -39,6 +38,7 @@ export class ModifyDamageEffect extends Effect {
 			}
 		});
 	}
+	*/
 }
 
 const isScalar = (v: ScalarExpressionType | ModifyDamageEffectProps): v is ScalarExpressionType =>

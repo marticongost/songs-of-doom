@@ -16,6 +16,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	},
 	capabilities: [
 		new Action({
+			id: 'invoke',
 			cost: { agility: 1 },
 			effects: [
 				triggerAttack({

@@ -1,8 +1,6 @@
 import { finalise } from '@songsofdoom/common';
 import type { ScalarExpressionType } from '../expressions';
 import { isScalarExpression } from '../expressions/scalar/scalar-expression';
-import { MutableAttackResolution } from '../game/attackresolution';
-import type { GameGraph } from '../game/gamegraph';
 import type { Property } from '../properties';
 import { parseResultString, type ResultString } from '../results';
 import { Target, type CombatantTargetType, type TargetSpec } from '../target';
@@ -41,7 +39,7 @@ export class AttackEffect extends Effect {
 		this.properties = properties ?? [];
 	}
 
-	override async apply(gameGraph: GameGraph, additionalEffects: Array<Effect> = []): Promise<void> {
+	/*override async apply(gameGraph: GameGraph, additionalEffects: Array<Effect> = []): Promise<void> {
 		const attackerId = gameGraph.current.state.requireSubject().id;
 		const defenderIds = await gameGraph.requestTargets(this.target);
 		for (const defenderId of defenderIds) {
@@ -57,7 +55,7 @@ export class AttackEffect extends Effect {
 				}
 			});
 		}
-	}
+	}*/
 }
 
 /** Creates an attack effect. */

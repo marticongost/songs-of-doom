@@ -1,14 +1,7 @@
-import type { GameGraph } from '../game/gamegraph';
-import type { CardId } from '../game/identifiers';
 import { Effect } from './effect';
 
 export interface DrawCardsEffectProps {
 	amount: number;
-}
-
-export interface DrawCardsOutcome {
-	/** The cards that were drawn. */
-	readonly cards: CardId[];
 }
 
 export class DrawCardsEffect extends Effect {
@@ -19,6 +12,7 @@ export class DrawCardsEffect extends Effect {
 		this.amount = amount;
 	}
 
+	/*
 	override async apply(gameGraph: GameGraph) {
 		await gameGraph.mutate((state) => {
 			const player = state.requireActivePlayer();
@@ -26,6 +20,7 @@ export class DrawCardsEffect extends Effect {
 			return { cards: (Array.isArray(drawnCards) ? drawnCards : []).map((card) => card.id) };
 		});
 	}
+	*/
 }
 
 /** Creates an effect that draws cards. */

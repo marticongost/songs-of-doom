@@ -1,6 +1,4 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
-import { CardState } from '../../game/cardstate';
-import type { GameState } from '../../game/gamestate';
 import { BooleanExpression } from './boolean-expression';
 
 /**
@@ -13,11 +11,6 @@ export class ExhaustedExpression extends BooleanExpression {
 			es: 'Exhausto',
 			en: 'Exhausted'
 		};
-	}
-
-	override evaluate(state: GameState): boolean {
-		const subject = state.getSubject();
-		return subject !== undefined && subject instanceof CardState && subject.exhausted;
 	}
 }
 

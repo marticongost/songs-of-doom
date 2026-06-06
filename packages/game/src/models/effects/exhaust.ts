@@ -1,7 +1,4 @@
 import { finalise } from '@songsofdoom/common';
-import { type GameGraph } from '../game/gamegraph';
-import type { CardId } from '../game/identifiers';
-import { rollbackEffect } from '../game/rollback';
 import { Target, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
@@ -11,11 +8,6 @@ import { Effect } from './effect';
 export interface ExhaustEffectProps {
 	/** The target to exhaust. Defaults to the card's default target if not specified. */
 	target?: TargetSpec;
-}
-
-export interface ExhaustOutcome {
-	/** The card that was exhausted. */
-	card?: CardId;
 }
 
 /**
@@ -30,6 +22,7 @@ export class ExhaustEffect extends Effect {
 		this.target = finalise(Target, target);
 	}
 
+	/*
 	override async apply(gameGraph: GameGraph) {
 		const cardId = (await gameGraph.requestSingleTarget(this.target, {
 			default: 'active-card'
@@ -42,7 +35,7 @@ export class ExhaustEffect extends Effect {
 			card.exhausted = true;
 			return { card: cardId };
 		});
-	}
+	}*/
 }
 
 /** Creates an effect that exhausts a target. */

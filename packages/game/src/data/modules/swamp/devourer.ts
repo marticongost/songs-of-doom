@@ -27,10 +27,12 @@ export default new Creature({
 	capabilities: [
 		fullyRechargeOnChapterStart,
 		new Action({
+			id: 'chase',
 			cost: { charges: 1 },
 			effects: [chase()]
 		}),
 		new Action({
+			id: 'attack',
 			cost: { charges: 1 },
 			effects: [
 				attack({
@@ -45,6 +47,7 @@ export default new Creature({
 			]
 		}),
 		new Obligation({
+			id: 'defend',
 			triggers: [{ event: 'attack', condition: reactiveCardIsTarget }],
 			effects: [
 				defend({

@@ -27,6 +27,7 @@ export default new Ally({
 	capabilities: [
 		fullyRechargeOnChapterStart,
 		new Action({
+			id: 'attack',
 			cost: {
 				charges: 1,
 				gold: 1
@@ -43,6 +44,7 @@ export default new Ally({
 			]
 		}),
 		new Opportunity({
+			id: 'defend',
 			triggers: [{ event: 'attack', condition: reactiveCardIsTarget }],
 			cost: {
 				charges: 1

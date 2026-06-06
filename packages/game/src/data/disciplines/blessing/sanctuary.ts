@@ -27,20 +27,24 @@ export default upgradable(Skill, 2, (variants) => ({
 	},
 	capabilities: [
 		new Action({
+			id: 'attach',
 			cost: { will: 2 },
 			effects: [attach({}), addCharges(variants.values(2, 3))]
 		})
 	],
 	attachmentCapabilities: [
 		new Constant({
+			id: 'immobilize',
 			effects: [conferProperties([immobilized])]
 		}),
 		new Obligation({
+			id: 'negateDamage',
 			triggers: [{ event: 'damageDealt', condition: reactivePlayerIsTarget }],
 			cost: { charges: 1 },
 			effects: [negateDamage()]
 		}),
 		new Opportunity({
+			id: 'discharge',
 			triggers: ['chapterStart'],
 			cost: { will: 1 },
 			effects: [
@@ -50,6 +54,7 @@ export default upgradable(Skill, 2, (variants) => ({
 			]
 		}),
 		new Obligation({
+			id: 'discardWhenFullyDischarged',
 			triggers: [{ event: 'fullyDischarged', condition: reactiveCardIsSubject }],
 			effects: [discard()]
 		})

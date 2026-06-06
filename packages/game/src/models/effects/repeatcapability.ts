@@ -1,16 +1,11 @@
-import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
 /**
- * An effect that allows repeating a capability.
+ * An effect that allows repeating the current capability.
  */
-export class RepeatCapabilityEffect extends Effect {
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
-	}
-}
+export class RepeatCapabilityEffect extends Effect {}
 
 /**
- * Creates an effect that allows repeating a capability.
+ * Creates an effect that allows repeating the current capability.
  */
 export const repeatCapability = (): RepeatCapabilityEffect => new RepeatCapabilityEffect();

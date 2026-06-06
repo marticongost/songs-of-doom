@@ -12,6 +12,7 @@ export default new Encounter({
 	capabilities: [attachOrReplaceWithNewEncounterWhenRevealed],
 	attachmentCapabilities: [
 		new Constant({
+			id: 'penalty',
 			effects: [
 				changeStats({
 					strength: -1,
@@ -20,6 +21,7 @@ export default new Encounter({
 			]
 		}),
 		new Action({
+			id: 'discard',
 			cost: { agility: 1 },
 			effects: [discard()]
 		})

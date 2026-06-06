@@ -1,19 +1,11 @@
-import { immobilized } from '../../data/properties';
-import type { GameGraph } from '../game/gamegraph';
-import { isPlayerId, type EntityId, type LocationId } from '../game/identifiers';
-import { Target, type LocationTargetType } from '../target';
 import { Effect } from './effect';
-
-export interface MoveOutcome {
-	readonly playerId: EntityId;
-	readonly locationId: LocationId;
-}
 
 /**
  * An effect that allows a character to execute a move action, changing their
  * location to an adjacent, accessible location.
  */
 export class MoveEffect extends Effect {
+	/*
 	override async apply(gameGraph: GameGraph) {
 		const subjectId = gameGraph.current.state.requireSubject().id;
 		if (!isPlayerId(subjectId)) return;
@@ -34,11 +26,12 @@ export class MoveEffect extends Effect {
 		await gameGraph.triggerEvent('leavingLocation', { targetId: currentLocation.id });
 		await gameGraph.triggerEvent('movement', { targetId: destinationId });
 		gameGraph.mutate((state) => {
-			state.setPlayerLocation(subjectId, destinationId);
+			state.setActorLocation(subjectId, destinationId);
 			return { playerId: subjectId, locationId: destinationId } as MoveOutcome;
 		});
 		await gameGraph.triggerEvent('locationEntered', { targetId: destinationId });
 	}
+	*/
 }
 
 /**

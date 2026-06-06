@@ -33,6 +33,7 @@ export default defineConfig(
 				}
 			],
 			'@typescript-eslint/no-this-alias': 'off',
+			'@typescript-eslint/no-empty-object-type': 'off',
 			'svelte/no-useless-mustaches': 'off'
 		}
 	},

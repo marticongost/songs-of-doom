@@ -1,5 +1,4 @@
 import type { LocalisedText } from '@songsofdoom/common/localisation';
-import type { GameState } from '../../game/gamestate';
 import { Expression } from '../expression';
 import { BooleanExpression, type BooleanExpressionType } from './boolean-expression';
 
@@ -17,10 +16,6 @@ export class AndExpression extends BooleanExpression {
 		super();
 		this.operands = operands;
 	}
-
-	override evaluate(state: GameState): boolean {
-		return this.operands.every((operand) => state.evaluate(operand));
-	}
 }
 
 /**
@@ -36,10 +31,6 @@ export class OrExpression extends BooleanExpression {
 	constructor(...operands: Array<BooleanExpressionType>) {
 		super();
 		this.operands = operands;
-	}
-
-	override evaluate(state: GameState): boolean {
-		return this.operands.some((operand) => state.evaluate(operand));
 	}
 }
 
@@ -72,10 +63,6 @@ export class NotExpression extends BooleanExpression {
 			return negatedText;
 		}
 		return undefined;
-	}
-
-	override evaluate(state: GameState): boolean {
-		return !state.evaluate(this.operand);
 	}
 }
 

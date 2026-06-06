@@ -1,5 +1,4 @@
 import type { Focus, FocusType } from '../focus';
-import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
 /**
@@ -43,10 +42,6 @@ export class TransformFocusEffect extends Effect {
 		super();
 		this.source = source ?? 'any';
 		this.target = target;
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

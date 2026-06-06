@@ -1,6 +1,5 @@
 import type { ScalarExpressionType } from '../expressions';
 import { ScalarExpression } from '../expressions';
-import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
 /**
@@ -22,10 +21,6 @@ export class ModifyCarryingCapacityEffect extends Effect {
 	constructor({ modifier }: ModifyCarryingCapacityEffectProps) {
 		super();
 		this.modifier = modifier;
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

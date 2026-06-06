@@ -26,6 +26,7 @@ export default new Encounter({
 	},
 	capabilities: [
 		new Obligation({
+			id: 'attach',
 			triggers: [{ event: 'encounterRevealed', condition: reactiveCardIsSubject }],
 			effects: [
 				copyAlreadyAttached.then(replaceEncounter()).orElse(
@@ -41,6 +42,7 @@ export default new Encounter({
 	],
 	attachmentCapabilities: [
 		new Action({
+			id: 'struggle',
 			prioritary: true,
 			cost: { strength: 1 },
 			effects: [

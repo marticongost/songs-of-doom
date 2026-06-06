@@ -137,6 +137,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	xpCost: variants.values(0, 2),
 	capabilities: [
 		new Action({
+			id: 'wound',
 			cost: { agility: 1 },
 			effects: [wound(variants.values(1, 2))]
 		})
@@ -161,6 +162,7 @@ export default new Item({
 	goldCost: 4,
 	capabilities: [
 		new Action({
+			id: 'wound',
 			cost: { agility: 1 },
 			effects: [wound(2)]
 		})

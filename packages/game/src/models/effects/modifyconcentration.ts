@@ -1,4 +1,3 @@
-import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
 export interface ModifyConcentrationEffectProps {
@@ -19,10 +18,6 @@ export class ModifyConcentrationEffect extends Effect {
 
 	override setConcentration(currentValue: number): number {
 		return currentValue + this.modifier;
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// Passive — read at C1 by getConcentration(), not applied through the effect pipeline.
 	}
 }
 

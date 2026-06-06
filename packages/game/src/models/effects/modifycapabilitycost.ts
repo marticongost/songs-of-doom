@@ -5,7 +5,6 @@ import {
 	type CapabilityCostProps,
 	type ScalarCapabilityCostType
 } from '../capabilitycost';
-import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
 export interface ModifyCapabilityCostEffectProps {
@@ -47,10 +46,6 @@ export class ModifyCapabilityCostEffect extends Effect {
 			}
 		}
 		return groups;
-	}
-
-	override async apply(_gameGraph: GameGraph) {
-		// TODO
 	}
 }
 

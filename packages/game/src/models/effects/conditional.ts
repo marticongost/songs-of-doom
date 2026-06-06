@@ -1,5 +1,4 @@
 import type { BooleanExpressionType } from '../expressions';
-import type { GameGraph } from '../game/gamegraph';
 import { Effect } from './effect';
 
 export interface ConditionalEffectProps {
@@ -36,7 +35,7 @@ export class ConditionalEffect extends Effect {
 		});
 	}
 
-	override async apply(gameGraph: GameGraph) {
+	/*override async apply(gameGraph: GameGraph) {
 		for (const { condition, effects } of this.cases) {
 			if (gameGraph.current.state.evaluate(condition)) {
 				for (const effect of effects) {
@@ -48,7 +47,7 @@ export class ConditionalEffect extends Effect {
 				}
 			}
 		}
-	}
+	}*/
 }
 
 /** Creates a conditional effect. */

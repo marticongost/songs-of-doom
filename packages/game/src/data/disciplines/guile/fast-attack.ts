@@ -13,6 +13,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { agility: variants.level },
 	capabilities: [
 		new Action({
+			id: 'activate',
 			fast: true,
 			effects: [
 				triggerAttack({
