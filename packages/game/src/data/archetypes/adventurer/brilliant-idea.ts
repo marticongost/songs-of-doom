@@ -14,6 +14,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { intelligence: variants.values(1, 2) },
 	capabilities: [
 		new Opportunity({
+			id: 'activate',
 			triggers: [{ event: 'investigation', condition: reactivePlayerIsSubject }],
 			cost: { intelligence: 1 },
 			effects: [

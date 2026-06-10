@@ -19,6 +19,6 @@ describe('HealEffect construction', () => {
 		const target = new Target({ type: 'player' });
 		const effect = heal({ amount: 2, target });
 		expect(effect.amount).toBe(2);
-		expect(effect.target).toBe(Target);
+		expect(effect.target).toBe(target);
 	});
 });

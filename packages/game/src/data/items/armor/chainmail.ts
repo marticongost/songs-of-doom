@@ -17,6 +17,7 @@ export default new Item({
 	requiredTalent: mediumArmour,
 	capabilities: [
 		new Constant({
+			id: 'passive',
 			effects: [conferProperties({ properties: [toughness.with({ value: 2 })] })]
 		})
 	]

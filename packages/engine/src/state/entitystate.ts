@@ -1,9 +1,8 @@
-import { Action } from '../capabilities';
-import type { Property } from '../properties/property';
+import { Action, Property } from '@songsofdoom/game';
+import type { CardContainer, CardOptions } from './cardcontainer';
 import type { CapabilityRef, CardState, MutableCardState } from './cardstate';
 import type { GameState, MutableGameState } from './gamestate';
-import type { CardId, EntityId } from './identifiers';
-import type { CardContainer, CardOptions } from './sequence/cardcontainer';
+import type { CardId, EntityId, PlayerId } from './identifiers';
 
 export interface EntityStateProps<Id extends EntityId> {
 	id: Id;

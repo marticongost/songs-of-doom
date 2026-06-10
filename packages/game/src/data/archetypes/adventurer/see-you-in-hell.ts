@@ -17,6 +17,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	xpCost: variants.values(0, 1),
 	capabilities: [
 		new Opportunity({
+			id: 'activate',
 			triggers: ['beforeDrawingFate'],
 			cost: { will: 2 },
 			effects: [lte(remainingWounds, 3).then(modifyRoll(variants.values(2, 3)))]

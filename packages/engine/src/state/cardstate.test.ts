@@ -358,10 +358,12 @@ describe('CardState', () => {
 
 	describe('getReactionsToEvent', () => {
 		const reaction = new Obligation({
+			id: 'test1',
 			effects: [],
 			triggers: [{ event: 'attack', condition: reactivePlayerIsSubject }]
 		});
 		const attachmentReaction = new Obligation({
+			id: 'test2',
 			effects: [],
 			triggers: [{ event: 'attack', condition: reactiveCardIsTarget }]
 		});
@@ -461,6 +463,7 @@ describe('CardState', () => {
 
 		it('filters attack reactions by target when context is provided', () => {
 			const receivingAttackReaction = new Obligation({
+				id: 'test1',
 				effects: [],
 				triggers: [{ event: 'attack', condition: reactiveCardIsTarget }]
 			});
@@ -497,14 +500,17 @@ describe('CardState', () => {
 
 		it('supports explicit trigger.when expressions without participation', () => {
 			const attackingReaction = new Obligation({
+				id: 'test1',
 				effects: [],
 				triggers: [{ event: 'attack', condition: reactivePlayerIsSubject }]
 			});
 			const receivingAttackReaction = new Obligation({
+				id: 'test2',
 				effects: [],
 				triggers: [{ event: 'attack', condition: reactiveCardIsTarget }]
 			});
 			const otherPlayerReaction = new Obligation({
+				id: 'test3',
 				effects: [],
 				triggers: [
 					{
@@ -561,6 +567,7 @@ describe('CardState', () => {
 
 		it('supports owner-targeted attack reactions via reactivePlayerIsTarget', () => {
 			const ownerTargetReaction = new Obligation({
+				id: 'test1',
 				effects: [],
 				triggers: [{ event: 'attack', condition: reactivePlayerIsTarget }]
 			});
@@ -597,6 +604,7 @@ describe('CardState', () => {
 
 		it('supports card-targeted attack reactions via reactiveCardIsTarget', () => {
 			const cardTargetReaction = new Obligation({
+				id: 'test1',
 				effects: [],
 				triggers: [{ event: 'attack', condition: reactiveCardIsTarget }]
 			});

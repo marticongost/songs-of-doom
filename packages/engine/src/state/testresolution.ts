@@ -1,5 +1,4 @@
-import type { Property, Result, ScalarExpressionType } from '@songsofdoom/game';
-import type { Reaction } from '../capabilities/reaction';
+import type { Property, Reaction, Result, ScalarExpressionType } from '@songsofdoom/game';
 import type { CapabilityRef } from './cardstate';
 import type { EntityId } from './identifiers';
 

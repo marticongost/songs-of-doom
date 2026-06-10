@@ -12,6 +12,7 @@ export default new Trait({
 	xpCost: 3,
 	capabilities: [
 		new Constant({
+			id: 'passive',
 			effects: [
 				changeStats({
 					agility: 1
@@ -19,6 +20,7 @@ export default new Trait({
 			]
 		}),
 		new Opportunity({
+			id: 'activate',
 			triggers: [{ event: 'attack', condition: reactivePlayerIsTarget }],
 			cost: { agility: 1 },
 			effects: [

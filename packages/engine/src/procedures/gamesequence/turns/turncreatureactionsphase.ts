@@ -1,12 +1,12 @@
 import type { Capability } from '@songsofdoom/game';
 import { Action } from '@songsofdoom/game';
-import { triggerCapability } from '../../..';
 import { EntityField } from '../../../core/input';
 import { instructions } from '../../../core/instructions';
 import { ProcedureId, type ProcedureState } from '../../../core/procedure';
 import type { CapabilityRef, ReadonlyCardState } from '../../../state/cardstate';
 import type { ReadonlyGameState } from '../../../state/gamestate';
 import type { CreatureId } from '../../../state/identifiers';
+import { triggerCapability } from '../../core/triggercapability';
 
 export interface TurnCreatureActionsPhaseState extends ProcedureState {
 	/** The ID of the creature currently taking its action. */

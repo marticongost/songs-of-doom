@@ -12,6 +12,7 @@ export default new Encounter({
 	},
 	capabilities: [
 		new Obligation({
+			id: 'activate',
 			triggers: [{ event: 'encounterRevealed', condition: reactiveCardIsSubject }],
 			effects: [
 				test({

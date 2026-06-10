@@ -1,6 +1,6 @@
 import { mock } from '@songsofdoom/common/test-utils';
+import type { Entity } from '@songsofdoom/game';
 import { describe, expect, it } from 'vitest';
-import type { Entity } from '../entities';
 import { MutableCardState, ReadonlyCardState } from './cardstate';
 import type { EntityId, LocationId } from './identifiers';
 import { MutableLocationState, ReadonlyLocationState, type LocationGraph } from './locationstate';

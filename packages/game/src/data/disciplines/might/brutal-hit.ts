@@ -16,6 +16,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	},
 	capabilities: [
 		new Opportunity({
+			id: 'activate',
 			triggers: [{ event: 'attack', condition: reactivePlayerIsSubject }],
 			cost: { strength: 1 },
 			effects: [

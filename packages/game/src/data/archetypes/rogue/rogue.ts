@@ -14,9 +14,11 @@ export default new Archetype({
 	disciplines: ['dexterity', 'guile', 'security'],
 	capabilities: [
 		new Constant({
+			id: 'passive',
 			effects: [talent([lightArmour])]
 		}),
 		new Opportunity({
+			id: 'activate',
 			triggers: [{ event: 'payingCapability', condition: reactivePlayerIsSubject }],
 			cost: { cardTransition: 'exhaust' },
 			effects: [

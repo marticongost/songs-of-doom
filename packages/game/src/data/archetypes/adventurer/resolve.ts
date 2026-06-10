@@ -13,6 +13,7 @@ export default new Skill({
 	},
 	capabilities: [
 		new Opportunity({
+			id: 'activate',
 			triggers: ['chapterStart'],
 			effects: [drawCards(1)]
 		})

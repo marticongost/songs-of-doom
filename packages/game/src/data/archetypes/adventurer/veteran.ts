@@ -9,6 +9,7 @@ export default new Trait({
 	properties: [flaw, permanent],
 	capabilities: [
 		new Constant({
+			id: 'passive',
 			effects: [changeStats({ health: -1, sanity: -1 })]
 		})
 	]

@@ -16,6 +16,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	xpCost: variants.values(0, 1),
 	capabilities: [
 		new Opportunity({
+			id: 'activate',
 			triggers: [{ event: 'fateTokenRevealed', condition: reactivePlayerIsSubject }],
 			cost: { any: 1 },
 			effects: variants.values(

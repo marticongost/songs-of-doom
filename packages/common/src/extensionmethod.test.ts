@@ -10,8 +10,8 @@ describe('extensionMethod', () => {
 				constructor(public name: string) {}
 			}
 
-			greet.implementFor(Person, function (this: Person, greeting: string) {
-				return `${greeting}, ${this.name}!`;
+			greet.implementFor(Person, (person: Person, greeting: string) => {
+				return `${greeting}, ${person.name}!`;
 			});
 
 			const person = new Person('Alice');
@@ -24,10 +24,10 @@ describe('extensionMethod', () => {
 			class Cat {}
 			class Dog {}
 
-			describe.implementFor(Cat, function () {
+			describe.implementFor(Cat, () => {
 				return 'This is a cat';
 			});
-			describe.implementFor(Dog, function () {
+			describe.implementFor(Dog, () => {
 				return 'This is a dog';
 			});
 
@@ -42,8 +42,8 @@ describe('extensionMethod', () => {
 				constructor(public n: number) {}
 			}
 
-			multiply.implementFor(Value, function (this: Value, factor: number) {
-				return this.n * factor;
+			multiply.implementFor(Value, (value: Value, factor: number) => {
+				return value.n * factor;
 			});
 
 			expect(multiply(new Value(7), 3)).toBe(21);
@@ -56,8 +56,8 @@ describe('extensionMethod', () => {
 				constructor(public id: number) {}
 			}
 
-			tag.implementFor(Widget, function (this: Widget) {
-				return `widget-${this.id}`;
+			tag.implementFor(Widget, (widget: Widget) => {
+				return `widget-${widget.id}`;
 			});
 
 			expect(tag(new Widget(42), undefined as void)).toBe('widget-42');
@@ -75,8 +75,8 @@ describe('extensionMethod', () => {
 				constructor(public value: string) {}
 			}
 
-			format.implementFor(Entry, function (this: Entry, opts: Options) {
-				return `${opts.prefix}${this.value}${opts.suffix}`;
+			format.implementFor(Entry, (entry: Entry, opts: Options) => {
+				return `${opts.prefix}${entry.value}${opts.suffix}`;
 			});
 
 			expect(format(new Entry('test'), { prefix: '[', suffix: ']' })).toBe('[test]');
@@ -90,7 +90,7 @@ describe('extensionMethod', () => {
 			class Animal {}
 			class Dog extends Animal {}
 
-			describe.implementFor(Animal, function () {
+			describe.implementFor(Animal, () => {
 				return 'animal';
 			});
 
@@ -104,10 +104,10 @@ describe('extensionMethod', () => {
 			class Animal {}
 			class Dog extends Animal {}
 
-			describe.implementFor(Animal, function () {
+			describe.implementFor(Animal, () => {
 				return 'animal';
 			});
-			describe.implementFor(Dog, function () {
+			describe.implementFor(Dog, () => {
 				return 'dog';
 			});
 
@@ -122,7 +122,7 @@ describe('extensionMethod', () => {
 			class Animal extends LivingBeing {}
 			class Dog extends Animal {}
 
-			describe.implementFor(LivingBeing, function () {
+			describe.implementFor(LivingBeing, () => {
 				return 'living being';
 			});
 
@@ -134,10 +134,9 @@ describe('extensionMethod', () => {
 
 			class LivingBeing {}
 			class Animal extends LivingBeing {}
-			class Dog extends Animal {}
 
 			// Only the root has an implementation
-			describe.implementFor(LivingBeing, function () {
+			describe.implementFor(LivingBeing, () => {
 				return 'living being';
 			});
 
@@ -238,8 +237,8 @@ describe('extensionMethod', () => {
 				}
 			}
 
-			fn.implementFor(Example, function (this: Example) {
-				return { name: this.name, self: this };
+			fn.implementFor(Example, (ex: Example) => {
+				return { name: ex.name, self: ex };
 			});
 
 			const ex = new Example();
@@ -247,6 +246,34 @@ describe('extensionMethod', () => {
 
 			expect(result.name).toBe('example');
 			expect(result.self).toBe(ex);
+		});
+
+		it('preserves `this` context through parent class implementations', () => {
+			const fn = extensionMethod<void, { name: string; self: unknown }>();
+
+			class Base {
+				constructor(public name: string) {}
+			}
+			class Child extends Base {
+				constructor(
+					name: string,
+					public extra: string
+				) {
+					super(name);
+				}
+			}
+
+			// Register implementation on parent
+			fn.implementFor(Base, (obj: Base) => {
+				return { name: obj.name, self: obj };
+			});
+
+			// Child instance should still have correct `this` context
+			const child = new Child('test', 'extra');
+			const result = fn(child, undefined as void);
+
+			expect(result.name).toBe('test');
+			expect(result.self).toBe(child);
 		});
 	});
 });

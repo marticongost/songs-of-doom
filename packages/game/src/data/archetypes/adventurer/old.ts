@@ -10,10 +10,12 @@ export default new Trait({
 	properties: [flaw, permanent],
 	capabilities: [
 		new Obligation({
+			id: 'penalty',
 			triggers: [{ event: 'movement', condition: reactivePlayerIsSubject }],
 			effects: [modifyCapabilityCost({ cost: { any: charges } }), addCharges(1)]
 		}),
 		new Obligation({
+			id: 'discharge',
 			triggers: ['chapterStart'],
 			effects: [removeCharges({})]
 		})

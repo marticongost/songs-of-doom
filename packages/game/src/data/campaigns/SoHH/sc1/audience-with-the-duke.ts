@@ -11,6 +11,7 @@ export default new Story({
 	},
 	capabilities: [
 		new Obligation({
+			id: 'activate',
 			triggers: ['played'],
 			effects: [
 				narrationEvent({

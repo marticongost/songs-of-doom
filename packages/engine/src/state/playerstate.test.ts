@@ -1,14 +1,12 @@
 import { Counter } from '@songsofdoom/common';
 import { mock } from '@songsofdoom/common/test-utils';
+import { CharacterState, type Entity, health, strength } from '@songsofdoom/game';
 import { describe, expect, it } from 'vitest';
-import { CharacterState } from '../characters';
-import type { Entity } from '../entities';
-import { health, strength } from '../stats';
+import type { CardOptions } from './cardcontainer';
 import { MutableCardState, ReadonlyCardState } from './cardstate';
 import type { MutableGameState } from './gamestate';
 import type { CardId, PlayerId } from './identifiers';
 import { ReadonlyPlayerState } from './playerstate';
-import type { CardOptions } from './sequence/cardcontainer';
 
 function makePlayer(
 	id: PlayerId,

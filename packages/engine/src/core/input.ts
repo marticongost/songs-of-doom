@@ -3,12 +3,12 @@ import type {
 	ActualCapabilityCost,
 	Capability,
 	FocusToken,
-	Payment,
 	Result,
 	Target
 } from '@songsofdoom/game';
 import type { CapabilityRef } from '../state/cardstate';
 import type { EntityId } from '../state/identifiers';
+import type { Payment } from '../state/payment';
 
 export interface FieldProps<N extends string = string, R extends boolean = true> {
 	name: N;

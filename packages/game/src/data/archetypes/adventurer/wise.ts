@@ -11,6 +11,7 @@ export default new Trait({
 	xpCost: 4,
 	capabilities: [
 		new Constant({
+			id: 'passive',
 			effects: [changeStats({ intelligence: 1 })]
 		})
 	]

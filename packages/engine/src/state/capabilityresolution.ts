@@ -1,6 +1,4 @@
-import type { Reaction } from '../capabilities';
-import type { Capability } from '../capability';
-import type { CapabilityCost } from '../capabilitycost';
+import type { Capability, CapabilityCost, Reaction } from '@songsofdoom/game';
 import type { CapabilityRef } from './cardstate';
 import type { CardId, EntityId } from './identifiers';
 

@@ -9,6 +9,7 @@ export default new Trait({
 	properties: [flaw],
 	capabilities: [
 		new Constant({
+			id: 'passive',
 			effects: [modifyCarryingCapacity(-1)]
 		})
 	]

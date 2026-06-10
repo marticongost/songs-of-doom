@@ -14,9 +14,11 @@ export default new Archetype({
 	xpCost: 5,
 	capabilities: [
 		new Constant({
+			id: 'passive',
 			effects: [talent([lightArmour, mediumArmour])]
 		}),
 		new Opportunity({
+			id: 'activate',
 			triggers: [{ event: 'payingCapability', condition: reactivePlayerIsSubject }],
 			cost: { cardTransition: 'exhaust' },
 			effects: [

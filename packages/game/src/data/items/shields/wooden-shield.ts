@@ -14,6 +14,7 @@ export default new Item({
 	capabilities: [
 		fullyRechargeOnChapterStart,
 		new Opportunity({
+			id: 'activate',
 			triggers: [{ event: 'attack', condition: reactivePlayerIsTarget }],
 			cost: { charges: 1, agility: 1 },
 			effects: [

@@ -12,6 +12,7 @@ export default new Trait({
 	xpCost: 3,
 	capabilities: [
 		new Opportunity({
+			id: 'activate',
 			triggers: [{ event: 'payingCapability', condition: reactivePlayerIsSubject }],
 			cost: {
 				cardTransition: 'exhaust'

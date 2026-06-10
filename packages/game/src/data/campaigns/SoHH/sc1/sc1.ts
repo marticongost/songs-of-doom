@@ -47,6 +47,7 @@ export default new Scenario({
 	},
 	capabilities: [
 		new Obligation({
+			id: 'activate',
 			triggers: ['scenarioStart'],
 			effects: [playStoryCards([audienceWithTheDuke])]
 		})

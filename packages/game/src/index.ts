@@ -20,7 +20,6 @@ export {
 	CardTransition,
 	cardTransitions,
 	cardTransitionTypes,
-	Payment,
 	scalarCapabilityCostTypes,
 	type CapabilityCostType,
 	type CardTransitionType,

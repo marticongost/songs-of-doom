@@ -1,16 +1,14 @@
-import { Reaction } from '@songsofdoom/game';
-import type { Capability } from '@songsofdoom/game';
+import type { Capability, Property, Stat, StatType } from '@songsofdoom/game';
 import {
 	type CreatureStatType,
 	type Entity,
+	Event,
 	isAlly,
 	isCreature,
 	isEncounter,
-	isSkill
+	isSkill,
+	Reaction
 } from '@songsofdoom/game';
-import { Event } from '@songsofdoom/game';
-import type { Property } from '@songsofdoom/game';
-import type { Stat, StatType } from '@songsofdoom/game';
 import { MutableCapabilityResolution } from './capabilityresolution';
 import type { CardOptions } from './cardcontainer';
 import { EntityState, type MutableEntityState } from './entitystate';
@@ -204,7 +202,7 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 		);
 	}
 
-	getPlayerId(): EntityId | undefined {
+	getPlayerId(): PlayerId | undefined {
 		return 'playerId' in this.container ? this.container.playerId : undefined;
 	}
 }
@@ -289,7 +287,7 @@ export class MutableCardState
 			this.container = { type: 'encounter-discard' };
 			gameState.encounterDiscardPile.unshift(this);
 		} else {
-			playerId = playerId ?? this.playerId;
+			playerId = playerId ?? this.getPlayerId();
 			if (!playerId) {
 				throw new Error("Can't move a card without specifying its player id");
 			}
@@ -312,7 +310,7 @@ export class MutableCardState
 			this.container = { type: 'encounter-discard' };
 			gameState.encounterDiscardPile.push(this);
 		} else {
-			playerId = playerId ?? this.playerId;
+			playerId = playerId ?? this.getPlayerId();
 			if (!playerId) {
 				throw new Error("Can't move a card without specifying its player id");
 			}
@@ -346,7 +344,7 @@ export class MutableCardState
 			this.container = { type: 'encounter-deck' };
 			gameState.encounterDeck.unshift(this);
 		} else {
-			playerId = playerId ?? this.playerId;
+			playerId = playerId ?? this.getPlayerId();
 			if (!playerId) {
 				throw new Error("Can't move a card without specifying its player id");
 			}
@@ -366,7 +364,7 @@ export class MutableCardState
 			this.container = { type: 'encounter-deck' };
 			gameState.encounterDeck.push(this);
 		} else {
-			playerId = playerId ?? this.playerId;
+			playerId = playerId ?? this.getPlayerId();
 			if (!playerId) {
 				throw new Error("Can't move a card without specifying its player id");
 			}
@@ -385,7 +383,7 @@ export class MutableCardState
 	}
 
 	banish(gameState: MutableGameState, playerId: PlayerId | undefined = undefined) {
-		playerId = playerId ?? this.playerId;
+		playerId = playerId ?? this.getPlayerId();
 		if (!playerId) {
 			throw new Error("Can't banish a card without specifying its player id");
 		}

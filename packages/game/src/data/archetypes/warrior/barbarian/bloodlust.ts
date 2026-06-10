@@ -12,6 +12,7 @@ export default new Trait({
 	xpCost: 2,
 	capabilities: [
 		new Opportunity({
+			id: 'activate',
 			triggers: [{ event: 'enemyDefeated', condition: reactivePlayerIsSubject }],
 			cost: {
 				cardTransition: 'exhaust'

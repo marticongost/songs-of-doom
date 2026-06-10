@@ -12,6 +12,7 @@ export default new Archetype({
 	xpCost: 5,
 	capabilities: [
 		new Obligation({
+			id: 'passive',
 			triggers: [{ event: 'attack', condition: reactivePlayerIsSubject }],
 			effects: [
 				modifyRoll({
@@ -20,6 +21,7 @@ export default new Archetype({
 			]
 		}),
 		new Obligation({
+			id: 'activate',
 			triggers: [{ event: 'attack', condition: reactivePlayerIsTarget }],
 			effects: [
 				modifyRoll({

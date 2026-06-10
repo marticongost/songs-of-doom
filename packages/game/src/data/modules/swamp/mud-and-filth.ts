@@ -12,6 +12,7 @@ export default new Encounter({
 	capabilities: [attachOrReplaceWithNewEncounterWhenRevealed],
 	attachmentCapabilities: [
 		new Obligation({
+			id: 'activate',
 			triggers: ['movement'],
 			effects: [modifyCapabilityCost({ cost: { strength: 2 } }), discard()]
 		})

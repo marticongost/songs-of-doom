@@ -15,6 +15,7 @@ export default upgradable(Skill, 2, (variants) => ({
 	discardReward: { agility: 2 },
 	capabilities: [
 		new Opportunity({
+			id: 'activate',
 			triggers: [{ event: 'attack', condition: reactivePlayerIsSubject }],
 			cost: { agility: variants.values(2, 3) },
 			effects: [
