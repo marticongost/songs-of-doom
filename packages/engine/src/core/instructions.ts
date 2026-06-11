@@ -1,6 +1,9 @@
-import type { Effect, EventType } from '@songsofdoom/game';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { finalise } from '@songsofdoom/common';
+import { Effect, EventType, Target, TargetType, type TargetSpec } from '@songsofdoom/game';
 import type { Field, InputStepProps } from '..';
 import { type EmitEventState, type EventContext } from '../procedures/core/emitevent';
+import type { ResolveTargetState } from '../procedures/core/resolvetarget';
 import { triggerEffect, type TriggerEffectProps } from '../procedures/core/triggereffect';
 import type { MutableGameState } from '../state/gamestate';
 import {
@@ -22,9 +25,6 @@ import {
 export interface EffectProcedureState<E extends Effect = Effect> extends ProcedureState {
 	effect: E;
 }
-
-const getEffectProcedureId = (effect: Effect): ProcedureId =>
-	effect.constructor.name.replace(/Effect$/, '') as ProcedureId;
 
 /**
  * Discriminates the object form `{ procedure, parameters?, then? }` from a
@@ -216,6 +216,34 @@ export function instructions<S extends ProcedureState>() {
 				const modified = state.game.mutate((game) => mutation(state, game));
 				return { ...state, game: modified };
 			};
+		},
+		/**
+		 * Defines a step that resolves a target and requires exactly one result, saving the
+		 * result ID to the given field in the state.
+		 * @param target The target to resolve.
+		 * @param fieldName The name of the field in the state to save the resolved target
+		 *  ID to. Must be a key of `S` and the field must be of type `T`.
+		 * @returns A step that resolves the target and saves the result to the state.
+		 */
+		requireSingleTarget: <T extends TargetType = TargetType>(
+			target: Target<T> | TargetSpec<T> | ((state: S) => Target<T> | TargetSpec<T>),
+			fieldName: string & keyof S
+		): CallStep<S, ResolveTargetState> => {
+			return new CallStep<S, ResolveTargetState>({
+				procedureId: ProcedureId.ResolveTarget,
+				parameters: (state) => ({
+					target: finalise(Target, typeof target === 'function' ? target(state) : target)
+				}),
+				then: (state, childResult) => {
+					const resolvedIds = childResult.resolvedTargetIds;
+					if (!resolvedIds || resolvedIds.length !== 1) {
+						throw new Error(
+							`Expected exactly one target to be resolved, but got ${resolvedIds?.length ?? 0}`
+						);
+					}
+					return { ...state, [fieldName]: resolvedIds[0] };
+				}
+			});
 		}
 	};
 }
