@@ -27,5 +27,6 @@ export enum ProcedureId {
 
 	// Effects
 	AttachEffect = 'AttachEffect',
+	ConditionalEffect = 'ConditionalEffect',
 	DrawFocusEffect = 'DrawFocusEffect'
 }

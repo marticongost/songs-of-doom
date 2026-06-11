@@ -34,20 +34,6 @@ export class ConditionalEffect extends Effect {
 			default: [...(this.default ?? []), ...effects]
 		});
 	}
-
-	/*override async apply(gameGraph: GameGraph) {
-		for (const { condition, effects } of this.cases) {
-			if (gameGraph.current.state.evaluate(condition)) {
-				for (const effect of effects) {
-					await gameGraph.triggerEffect(effect);
-				}
-			} else if (this.default) {
-				for (const effect of this.default) {
-					await gameGraph.triggerEffect(effect);
-				}
-			}
-		}
-	}*/
 }
 
 /** Creates a conditional effect. */
