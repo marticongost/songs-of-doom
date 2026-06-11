@@ -4,7 +4,7 @@ export type PlayerId = `plr${number}`;
 // Cards
 export type LocationId = `loc${number}`;
 export type CreatureId = `crt${number}`;
-export type AllyId = `crt${number}`;
+export type AllyId = `aly${number}`;
 export type ObjectId = `obj${number}`;
 export type SkillId = `skl${number}`;
 export type TraitId = `trt${number}`;

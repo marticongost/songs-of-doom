@@ -9,6 +9,7 @@ import { discardFromHandEffectProc } from '../procedures/effects/discardfromhand
 import { discardEffectProc } from '../procedures/effects/discardproc';
 import { drawCardsEffectProc } from '../procedures/effects/drawcardsproc';
 import { drawFocusEffectProc } from '../procedures/effects/drawfocusproc';
+import { engageEffectProc } from '../procedures/effects/engageproc';
 import { chapter } from '../procedures/gamesequence/chapters/chapter';
 import { chapterEndPhase } from '../procedures/gamesequence/chapters/chapterendphase';
 import { chapterStartPhase } from '../procedures/gamesequence/chapters/chapterstartphase';
@@ -57,5 +58,6 @@ export const procedureDefinitions: Record<ProcedureId, ProcedureDefinition<any>>
 	[ProcedureId.DiscardEffect]: discardEffectProc,
 	[ProcedureId.DiscardFromHandEffect]: discardFromHandEffectProc,
 	[ProcedureId.DrawCardsEffect]: drawCardsEffectProc,
-	[ProcedureId.DrawFocusEffect]: drawFocusEffectProc
+	[ProcedureId.DrawFocusEffect]: drawFocusEffectProc,
+	[ProcedureId.EngageEffect]: engageEffectProc
 };
