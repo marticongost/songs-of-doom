@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { emitEvent } from '../procedures/core/emitevent';
 import { resolveTarget } from '../procedures/core/resolvetarget';
 import { triggerCapability } from '../procedures/core/triggercapability';
+import { attachProc } from '../procedures/effects/attachproc';
 import { drawFocusProc } from '../procedures/effects/drawfocusproc';
 import { chapter } from '../procedures/gamesequence/chapters/chapter';
 import { chapterEndPhase } from '../procedures/gamesequence/chapters/chapterendphase';
@@ -43,5 +45,6 @@ export const procedureDefinitions: Record<ProcedureId, ProcedureDefinition<any>>
 	[ProcedureId.TurnEndPhase]: turnEndPhase,
 
 	// Effects
+	[ProcedureId.Attach]: attachProc,
 	[ProcedureId.DrawFocus]: drawFocusProc
 };

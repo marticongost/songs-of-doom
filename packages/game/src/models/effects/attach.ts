@@ -29,20 +29,6 @@ export class AttachEffect extends Effect {
 		this.target = finalise(Target, target);
 		this.stacking = stacking;
 	}
-
-	/*
-	override async apply(gameGraph: GameGraph) {
-		const targetId = await gameGraph.requestSingleTarget(this.target, {
-			default: 'active-card'
-		});
-		await gameGraph.mutate((state) => {
-			const target = state.requireCard(targetId as CardId);
-			const attachment = state.requireActiveCard();
-			target.addAttachment(state, attachment);
-			return { targetId };
-		});
-	}
-	*/
 }
 
 /** Creates an effect that attaches the card to a target. */

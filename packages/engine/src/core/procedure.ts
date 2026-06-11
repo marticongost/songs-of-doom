@@ -1,31 +1,33 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { mapToRecord } from '@songsofdoom/common';
 import type { ReadonlyGameState } from '../state/gamestate';
 import { type Step, CallStep, ComputeStep, isProcedureDefinition } from './steps';
 
 export enum ProcedureId {
-	Unimplemented = 'unimplemented',
+	Unimplemented = 'Unimplemented',
 
 	// Core
-	TriggerCapability = 'triggerCapability',
-	EmitEvent = 'emitEvent',
-	ResolveTarget = 'resolveTarget',
+	TriggerCapability = 'TriggerCapability',
+	EmitEvent = 'EmitEvent',
+	ResolveTarget = 'ResolveTarget',
 
 	// Game sequence
-	Chapter = 'chapter',
-	ChapterStartPhase = 'chapterStartPhase',
-	FocusPhase = 'focusPhase',
-	TurnsPhase = 'turnsPhase',
-	DrawPhase = 'drawPhase',
-	EncounterPhase = 'encounterPhase',
-	ChapterEndPhase = 'chapterEndPhase',
-	Turn = 'turn',
-	TurnStartPhase = 'turnStartPhase',
-	TurnPlayerActionsPhase = 'turnPlayerActionsPhase',
-	TurnCreatureActionsPhase = 'turnCreatureActionsPhase',
-	TurnEndPhase = 'turnEndPhase',
+	Chapter = 'Chapter',
+	ChapterStartPhase = 'ChapterStartPhase',
+	FocusPhase = 'FocusPhase',
+	TurnsPhase = 'TurnsPhase',
+	DrawPhase = 'DrawPhase',
+	EncounterPhase = 'EncounterPhase',
+	ChapterEndPhase = 'ChapterEndPhase',
+	Turn = 'Turn',
+	TurnStartPhase = 'TurnStartPhase',
+	TurnPlayerActionsPhase = 'TurnPlayerActionsPhase',
+	TurnCreatureActionsPhase = 'TurnCreatureActionsPhase',
+	TurnEndPhase = 'TurnEndPhase',
 
 	// Effects
-	DrawFocus = 'drawFocus'
+	Attach = 'Attach',
+	DrawFocus = 'DrawFocus'
 }
 
 /** Terminal status of a procedure execution. */
