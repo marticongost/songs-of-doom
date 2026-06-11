@@ -26,7 +26,7 @@ export class RedrawFocusEffect extends Effect {
 		});
 
 		const currentState = gameGraph.current.state;
-		const amount = currentState.evaluate(this.amount);
+		const amount = currentState.evaluateScalar(this.amount);
 
 		if (amount <= 0) return;
 

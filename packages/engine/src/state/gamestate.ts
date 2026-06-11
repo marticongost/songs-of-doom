@@ -1,14 +1,13 @@
 import { shuffle } from '@songsofdoom/common';
 import type {
-	ActualCapabilityCost,
 	BooleanExpressionType,
 	Capability,
 	CapabilityCost,
 	ScalarExpressionType,
 	Target
 } from '@songsofdoom/game';
-import { Action, focuses, Reaction, type FocusType } from '@songsofdoom/game';
-import { evaluate } from '../expressions';
+import { Action, ActualCapabilityCost, focuses, Reaction, type FocusType } from '@songsofdoom/game';
+import { evaluateBoolean, evaluateScalar } from '../expressions';
 import type { CapabilityResolution, MutableCapabilityResolution } from './capabilityresolution';
 import type { CardOptions } from './cardcontainer';
 import type { CardState, MutableCardState, ReadonlyCardState } from './cardstate';
@@ -389,15 +388,31 @@ export abstract class GameState<
 		return resolution;
 	}
 
-	evaluate(expr: BooleanExpressionType): boolean;
-	evaluate(expr: ScalarExpressionType): number;
-	evaluate(expr: CapabilityCost): ActualCapabilityCost;
-	evaluate(
-		expr: BooleanExpressionType | ScalarExpressionType | CapabilityCost
-	): boolean | number | ActualCapabilityCost {
+	evaluateBoolean(expr: BooleanExpressionType): boolean {
 		if (typeof expr === 'boolean') return expr;
+		return evaluateBoolean(expr, this);
+	}
+
+	evaluateScalar(expr: ScalarExpressionType): number {
 		if (typeof expr === 'number') return expr;
-		return evaluate(expr, this);
+		return evaluateScalar(expr, this);
+	}
+
+	evaluateCapabilityCost(expr: CapabilityCost): ActualCapabilityCost {
+		return new ActualCapabilityCost({
+			strength: this.evaluateScalar(expr.strength),
+			agility: this.evaluateScalar(expr.agility),
+			intelligence: this.evaluateScalar(expr.intelligence),
+			charisma: this.evaluateScalar(expr.charisma),
+			will: this.evaluateScalar(expr.will),
+			heroism: this.evaluateScalar(expr.heroism),
+			any: this.evaluateScalar(expr.any),
+			health: this.evaluateScalar(expr.health),
+			sanity: this.evaluateScalar(expr.sanity),
+			gold: this.evaluateScalar(expr.gold),
+			charges: this.evaluateScalar(expr.charges),
+			cardTransition: expr.cardTransition
+		});
 	}
 
 	/**
@@ -433,7 +448,7 @@ export abstract class GameState<
 
 			// Charges
 			if (capability.cost.charges) {
-				if (card.charges < this.evaluate(capability.cost.charges)) {
+				if (card.charges < this.evaluateScalar(capability.cost.charges)) {
 					return 'insufficient-charges';
 				}
 			}
@@ -451,14 +466,17 @@ export abstract class GameState<
 			}
 
 			// Gold
-			if (capability.cost.gold && !(player && player.gold >= this.evaluate(capability.cost.gold))) {
+			if (
+				capability.cost.gold &&
+				!(player && player.gold >= this.evaluateScalar(capability.cost.gold))
+			) {
 				return 'insufficient-gold';
 			}
 
 			// Focuses
 			for (const focus of Object.keys(focuses) as Array<FocusType>) {
 				const focusCostExpr = capability.cost.getCostForType(focus);
-				const focusCost = focusCostExpr && this.evaluate(focusCostExpr);
+				const focusCost = focusCostExpr && this.evaluateScalar(focusCostExpr);
 				if (focusCost && !(player && player.hasEnoughFocusOfType(focus, focusCost))) {
 					return 'insufficient-focus';
 				}
@@ -530,14 +548,14 @@ export abstract class GameState<
 			// TODO: order possibleTargetIds by distance to current subject, then reverse if 'furthest'
 		}
 
-		const max = this.evaluate(target.cardinality.max);
+		const max = this.evaluateScalar(target.cardinality.max);
 
 		if (target.condition) {
 			resolvedTargetIds = [];
 			for (const targetId of possibleTargetIds) {
 				const stateWithEntityAsTarget = this.mutableClone();
 				stateWithEntityAsTarget.subjectStack.push(targetId);
-				if (stateWithEntityAsTarget.evaluate(target.condition)) {
+				if (stateWithEntityAsTarget.evaluateBoolean(target.condition)) {
 					if (resolvedTargetIds.length < max) {
 						resolvedTargetIds.push(targetId);
 					}

@@ -29,11 +29,11 @@ export class ModifyDamageEffect extends Effect {
 		gameGraph.mutate((state) => {
 			const woundRes = state.getActiveWoundResolution();
 			if (woundRes) {
-				woundRes.damageModifier += state.evaluate(this.amount);
+				woundRes.damageModifier += state.evaluateScalar(this.amount);
 			} else {
 				const attackRes = state.getActiveTestResolution();
 				if (attackRes instanceof MutableAttackResolution) {
-					attackRes.damageModifier += state.evaluate(this.amount);
+					attackRes.damageModifier += state.evaluateScalar(this.amount);
 				}
 			}
 		});

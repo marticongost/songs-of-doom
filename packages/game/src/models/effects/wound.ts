@@ -49,7 +49,7 @@ export class WoundEffect extends Effect {
 		const state = gameGraph.current.state;
 		const target = state.requireEntityState(targetId);
 
-		let rawDamage = state.evaluate(this.damage);
+		let rawDamage = state.evaluateScalar(this.damage);
 		const effectiveProperties: Array<Property> = [...this.properties];
 
 		if (this.causedByAttack) {
@@ -89,11 +89,11 @@ export class WoundEffect extends Effect {
 		const piercingInstance = effectiveProperties.find((p) => p.is(piercing));
 		const toughnessValue =
 			toughnessInstance instanceof ParametricRuleInstance
-				? state.evaluate((toughnessInstance.params as ScalarRuleParams).value)
+				? state.evaluateScalar((toughnessInstance.params as ScalarRuleParams).value)
 				: 0;
 		const piercingValue =
 			piercingInstance instanceof ParametricRuleInstance
-				? state.evaluate((piercingInstance.params as ScalarRuleParams).value)
+				? state.evaluateScalar((piercingInstance.params as ScalarRuleParams).value)
 				: 0;
 		return Math.max(0, rawDamage - Math.max(0, toughnessValue - piercingValue));
 	}
@@ -108,7 +108,7 @@ export class WoundEffect extends Effect {
 			if (prop instanceof ParametricRuleInstance && prop.rule === invulnerable) {
 				const { attackType, value } = prop.params as InvulnerableParams;
 				if (!attackType || effectiveProperties.some((p) => p === attackType)) {
-					damage -= value !== undefined ? state.evaluate(value) : 0;
+					damage -= value !== undefined ? state.evaluateScalar(value) : 0;
 				}
 			}
 		}

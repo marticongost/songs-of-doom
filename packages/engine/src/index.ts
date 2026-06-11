@@ -82,4 +82,4 @@ export {
 } from './state/woundresolution';
 
 // Expressions
-export { evaluate } from './expressions';
+export { evaluateBoolean, evaluateScalar } from './expressions';

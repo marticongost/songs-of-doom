@@ -38,7 +38,7 @@ export class HealEffect extends Effect {
 
 		if (targetId) {
 			gameGraph.mutate((state) => {
-				const amount = state.evaluate(this.amount);
+				const amount = state.evaluateScalar(this.amount);
 				const target = state.requireEntityState(targetId) as { physicalTrauma: number };
 				const actualAmount = Math.min(amount, target.physicalTrauma);
 				target.physicalTrauma -= actualAmount;

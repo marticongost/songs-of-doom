@@ -18,34 +18,40 @@ import type { CardState } from '../state/cardstate';
 import type { GameState } from '../state/gamestate';
 import type { LocationState } from '../state/locationstate';
 import type { PlayerState } from '../state/playerstate';
-import { evaluate } from './evaluate';
+import { evaluateScalar } from './evaluate';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type State = GameState<CardState<any>, PlayerState<CardState<any>>, LocationState>;
 
 // ---- Concrete scalar expressions ----
 
-evaluate.implementFor(CashExpression, (_expr: CashExpression, _state: State): number => {
+evaluateScalar.implementFor(CashExpression, (_expr: CashExpression, _state: State): number => {
 	// TODO
 	return 0;
 });
 
-evaluate.implementFor(ChargesExpression, (_expr: ChargesExpression, _state: State): number => {
+evaluateScalar.implementFor(
+	ChargesExpression,
+	(_expr: ChargesExpression, _state: State): number => {
+		// TODO
+		return 0;
+	}
+);
+
+evaluateScalar.implementFor(CountExpression, (_expr: CountExpression, _state: State): number => {
 	// TODO
 	return 0;
 });
 
-evaluate.implementFor(CountExpression, (_expr: CountExpression, _state: State): number => {
-	// TODO
-	return 0;
-});
+evaluateScalar.implementFor(
+	DistanceExpression,
+	(_expr: DistanceExpression, _state: State): number => {
+		// TODO
+		return 0;
+	}
+);
 
-evaluate.implementFor(DistanceExpression, (_expr: DistanceExpression, _state: State): number => {
-	// TODO
-	return 0;
-});
-
-evaluate.implementFor(
+evaluateScalar.implementFor(
 	EffectiveDefenseExpression,
 	(_expr: EffectiveDefenseExpression, _state: State): number => {
 		// TODO
@@ -53,11 +59,14 @@ evaluate.implementFor(
 	}
 );
 
-evaluate.implementFor(HandSizeExpression, (_expr: HandSizeExpression, state: State): number => {
-	return state.requireActivePlayer().hand.length;
-});
+evaluateScalar.implementFor(
+	HandSizeExpression,
+	(_expr: HandSizeExpression, state: State): number => {
+		return state.requireActivePlayer().hand.length;
+	}
+);
 
-evaluate.implementFor(
+evaluateScalar.implementFor(
 	ProficiencyExpression,
 	(_expr: ProficiencyExpression, _state: State): number => {
 		// TODO
@@ -65,7 +74,7 @@ evaluate.implementFor(
 	}
 );
 
-evaluate.implementFor(
+evaluateScalar.implementFor(
 	RemainingWoundsExpression,
 	(_expr: RemainingWoundsExpression, _state: State): number => {
 		// TODO
@@ -73,7 +82,7 @@ evaluate.implementFor(
 	}
 );
 
-evaluate.implementFor(
+evaluateScalar.implementFor(
 	ReceivedWoundsExpression,
 	(_expr: ReceivedWoundsExpression, _state: State): number => {
 		// TODO
@@ -81,14 +90,14 @@ evaluate.implementFor(
 	}
 );
 
-evaluate.implementFor(ResultExpression, (_expr: ResultExpression, _state: State): number => {
+evaluateScalar.implementFor(ResultExpression, (_expr: ResultExpression, _state: State): number => {
 	// TODO
 	return 0;
 });
 
-evaluate.implementFor(ScalarOperation, (expr: ScalarOperation, state: State): number => {
-	const leftValue = state.evaluate(expr.left);
-	const rightValue = state.evaluate(expr.right);
+evaluateScalar.implementFor(ScalarOperation, (expr: ScalarOperation, state: State): number => {
+	const leftValue = state.evaluateScalar(expr.left);
+	const rightValue = state.evaluateScalar(expr.right);
 	switch (expr.operator) {
 		case '+':
 			return leftValue + rightValue;
@@ -101,7 +110,7 @@ evaluate.implementFor(ScalarOperation, (expr: ScalarOperation, state: State): nu
 	}
 });
 
-evaluate.implementFor(
+evaluateScalar.implementFor(
 	TalentProficiencyExpression,
 	(_expr: TalentProficiencyExpression, _state: State): number => {
 		// TODO
@@ -109,13 +118,16 @@ evaluate.implementFor(
 	}
 );
 
-evaluate.implementFor(VariableExpression, (_expr: VariableExpression, _state: State): number => {
-	// TODO
-	return 0;
-});
+evaluateScalar.implementFor(
+	VariableExpression,
+	(_expr: VariableExpression, _state: State): number => {
+		// TODO
+		return 0;
+	}
+);
 
 // ---- Stat ----
 
-evaluate.implementFor(Stat, (stat: Stat, state: State): number => {
+evaluateScalar.implementFor(Stat, (stat: Stat, state: State): number => {
 	return state.requireActivePlayer().getStat(stat);
 });

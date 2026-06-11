@@ -38,7 +38,7 @@ export class RecoverSanityEffect extends Effect {
 
 		if (targetId) {
 			gameGraph.mutate((state) => {
-				const amount = state.evaluate(this.amount);
+				const amount = state.evaluateScalar(this.amount);
 				const target = state.requireEntityState(targetId) as { mentalTrauma: number };
 				const actualAmount = Math.min(amount, target.mentalTrauma);
 				target.mentalTrauma -= actualAmount;

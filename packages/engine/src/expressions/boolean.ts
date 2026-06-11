@@ -24,54 +24,66 @@ import { CardState } from '../state/cardstate';
 import type { GameState } from '../state/gamestate';
 import type { LocationState } from '../state/locationstate';
 import type { PlayerState } from '../state/playerstate';
-import { evaluate } from './evaluate';
+import { evaluateBoolean } from './evaluate';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type State = GameState<CardState<any>, PlayerState<CardState<any>>, LocationState>;
 
 // ---- Concrete boolean expressions ----
 
-evaluate.implementFor(ActivatedExpression, (_expr: ActivatedExpression, state: State): boolean => {
-	const subject = state.getSubject();
-	return subject?.activated ?? false;
-});
-
-evaluate.implementFor(ComparisonExpression, (expr: ComparisonExpression, state: State): boolean => {
-	const leftValue = state.evaluate(expr.left);
-	const rightValue = state.evaluate(expr.right);
-	switch (expr.operator) {
-		case '>':
-			return leftValue > rightValue;
-		case '<':
-			return leftValue < rightValue;
-		case '=':
-			return leftValue === rightValue;
-		case '!=':
-			return leftValue !== rightValue;
+evaluateBoolean.implementFor(
+	ActivatedExpression,
+	(_expr: ActivatedExpression, state: State): boolean => {
+		const subject = state.getSubject();
+		return subject?.activated ?? false;
 	}
-});
+);
 
-evaluate.implementFor(EngagedExpression, (_expr: EngagedExpression, _state: State): boolean => {
+evaluateBoolean.implementFor(
+	ComparisonExpression,
+	(expr: ComparisonExpression, state: State): boolean => {
+		const leftValue = state.evaluateScalar(expr.left);
+		const rightValue = state.evaluateScalar(expr.right);
+		switch (expr.operator) {
+			case '>':
+				return leftValue > rightValue;
+			case '<':
+				return leftValue < rightValue;
+			case '=':
+				return leftValue === rightValue;
+			case '!=':
+				return leftValue !== rightValue;
+		}
+	}
+);
+
+evaluateBoolean.implementFor(
+	EngagedExpression,
+	(_expr: EngagedExpression, _state: State): boolean => {
+		// TODO
+		return false;
+	}
+);
+
+evaluateBoolean.implementFor(
+	ExhaustedExpression,
+	(_expr: ExhaustedExpression, state: State): boolean => {
+		const subject = state.getSubject();
+		return subject !== undefined && subject instanceof CardState && subject.exhausted;
+	}
+);
+
+evaluateBoolean.implementFor(IsExpression, (_expr: IsExpression, _state: State): boolean => {
 	// TODO
 	return false;
 });
 
-evaluate.implementFor(ExhaustedExpression, (_expr: ExhaustedExpression, state: State): boolean => {
-	const subject = state.getSubject();
-	return subject !== undefined && subject instanceof CardState && subject.exhausted;
-});
-
-evaluate.implementFor(IsExpression, (_expr: IsExpression, _state: State): boolean => {
+evaluateBoolean.implementFor(OwnedExpression, (_expr: OwnedExpression, _state: State): boolean => {
 	// TODO
 	return false;
 });
 
-evaluate.implementFor(OwnedExpression, (_expr: OwnedExpression, _state: State): boolean => {
-	// TODO
-	return false;
-});
-
-evaluate.implementFor(
+evaluateBoolean.implementFor(
 	CopyAlreadyAttachedExpression,
 	(_expr: CopyAlreadyAttachedExpression, _state: State): boolean => {
 		// TODO
@@ -81,26 +93,26 @@ evaluate.implementFor(
 
 // ---- Logical operators ----
 
-function evaluateBoolean(state: State, operand: BooleanExpressionType): boolean {
+function evaluateBooleanHelper(state: State, operand: BooleanExpressionType): boolean {
 	if (typeof operand === 'boolean') return operand;
-	return evaluate(operand, state) as boolean;
+	return evaluateBoolean(operand, state);
 }
 
-evaluate.implementFor(AndExpression, (expr: AndExpression, state: State): boolean => {
-	return expr.operands.every((operand) => evaluateBoolean(state, operand));
+evaluateBoolean.implementFor(AndExpression, (expr: AndExpression, state: State): boolean => {
+	return expr.operands.every((operand) => evaluateBooleanHelper(state, operand));
 });
 
-evaluate.implementFor(OrExpression, (expr: OrExpression, state: State): boolean => {
-	return expr.operands.some((operand) => evaluateBoolean(state, operand));
+evaluateBoolean.implementFor(OrExpression, (expr: OrExpression, state: State): boolean => {
+	return expr.operands.some((operand) => evaluateBooleanHelper(state, operand));
 });
 
-evaluate.implementFor(NotExpression, (expr: NotExpression, state: State): boolean => {
-	return !evaluateBoolean(state, expr.operand);
+evaluateBoolean.implementFor(NotExpression, (expr: NotExpression, state: State): boolean => {
+	return !evaluateBooleanHelper(state, expr.operand);
 });
 
 // ---- Event context expressions ----
 
-evaluate.implementFor(
+evaluateBoolean.implementFor(
 	ActiveCardIsTargetExpression,
 	(_expr: ActiveCardIsTargetExpression, state: State): boolean => {
 		const activeCard = state.getActiveCard();
@@ -109,7 +121,7 @@ evaluate.implementFor(
 	}
 );
 
-evaluate.implementFor(
+evaluateBoolean.implementFor(
 	ActiveCardIsActorExpression,
 	(_expr: ActiveCardIsActorExpression, state: State): boolean => {
 		const activeCard = state.getActiveCard();
@@ -118,7 +130,7 @@ evaluate.implementFor(
 	}
 );
 
-evaluate.implementFor(
+evaluateBoolean.implementFor(
 	ActiveCardOwnerIsNotActivePlayerExpression,
 	(_expr: ActiveCardOwnerIsNotActivePlayerExpression, state: State): boolean => {
 		const reactivePlayer = state.getReactivePlayer();
@@ -131,7 +143,7 @@ evaluate.implementFor(
 	}
 );
 
-evaluate.implementFor(
+evaluateBoolean.implementFor(
 	ReactivePlayerIsTargetExpression,
 	(_expr: ReactivePlayerIsTargetExpression, state: State): boolean => {
 		const reactivePlayer = state.getReactivePlayer();
@@ -140,7 +152,7 @@ evaluate.implementFor(
 	}
 );
 
-evaluate.implementFor(
+evaluateBoolean.implementFor(
 	ReactivePlayerIsSubjectExpression,
 	(_expr: ReactivePlayerIsSubjectExpression, state: State): boolean => {
 		const reactivePlayer = state.getReactivePlayer();
@@ -151,7 +163,7 @@ evaluate.implementFor(
 	}
 );
 
-evaluate.implementFor(
+evaluateBoolean.implementFor(
 	ReactiveCardIsSubjectExpression,
 	(_expr: ReactiveCardIsSubjectExpression, state: State): boolean => {
 		const reactiveCard = state.getReactiveCard();
@@ -160,7 +172,7 @@ evaluate.implementFor(
 	}
 );
 
-evaluate.implementFor(
+evaluateBoolean.implementFor(
 	ReactiveCardIsTargetExpression,
 	(_expr: ReactiveCardIsTargetExpression, state: State): boolean => {
 		const reactiveCard = state.getReactiveCard();
@@ -169,7 +181,7 @@ evaluate.implementFor(
 	}
 );
 
-evaluate.implementFor(
+evaluateBoolean.implementFor(
 	ActiveCardHasTypeExpression,
 	(expr: ActiveCardHasTypeExpression, state: State): boolean => {
 		const activeCard = state.getActiveCard();
@@ -179,7 +191,7 @@ evaluate.implementFor(
 
 // ---- Property ----
 
-evaluate.implementFor(Property, (_expr: Property, _state: State): boolean => {
+evaluateBoolean.implementFor(Property, (_expr: Property, _state: State): boolean => {
 	// TODO: choose the current target
 	return false;
 });

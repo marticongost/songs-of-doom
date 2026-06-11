@@ -42,7 +42,7 @@ export class GatherCluesEffect extends Effect {
 			const gatheredClues = new Counter<CardId>();
 			for (const targetId of targetIds) {
 				const location = state.requireCard(targetId) as unknown as MutableLocationState;
-				const cluesGathered = Math.min(state.evaluate(this.amount), location.clues);
+				const cluesGathered = Math.min(state.evaluateScalar(this.amount), location.clues);
 				location.clues -= cluesGathered;
 				subject.clues += cluesGathered;
 				gatheredClues.add(targetId, cluesGathered);

@@ -183,7 +183,7 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 				if (spec.event !== event) {
 					return false;
 				}
-				if (spec.condition !== undefined && !scopedGameState.evaluate(spec.condition)) {
+				if (spec.condition !== undefined && !scopedGameState.evaluateBoolean(spec.condition)) {
 					return false;
 				}
 				return true;

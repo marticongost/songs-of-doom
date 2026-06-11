@@ -706,18 +706,26 @@ describe('MutableGameState test resolution stack', () => {
 	});
 });
 
-// ─── GameState.evaluate ───────────────────────────────────────────────────────
+// ─── GameState.evaluateBoolean / evaluateScalar ──────────────────────────────
 
-describe('GameState.evaluate', () => {
+describe('GameState.evaluateBoolean', () => {
 	it('returns a boolean literal unchanged', () => {
 		const state = new ReadonlyGameState({ players: [] });
-		expect(state.evaluate(true)).toBe(true);
-		expect(state.evaluate(false)).toBe(false);
+		expect(state.evaluateBoolean(true)).toBe(true);
+		expect(state.evaluateBoolean(false)).toBe(false);
 	});
 
+	it('delegates to a BooleanExpression via extension method', () => {
+		const state = new ReadonlyGameState({ players: [] });
+		expect(state.evaluateBoolean(not(true))).toBe(false);
+		expect(state.evaluateBoolean(not(false))).toBe(true);
+	});
+});
+
+describe('GameState.evaluateScalar', () => {
 	it('returns a number literal unchanged', () => {
 		const state = new ReadonlyGameState({ players: [] });
-		expect(state.evaluate(7)).toBe(7);
+		expect(state.evaluateScalar(7)).toBe(7);
 	});
 
 	it('returns the active player stat value for a Stat', () => {
@@ -726,18 +734,12 @@ describe('GameState.evaluate', () => {
 			getStat: (stat) => (stat === strength ? 4 : 0)
 		});
 		const state = new ReadonlyGameState({ players: [player], subjectStack: ['plr1'] });
-		expect(state.evaluate(strength)).toBe(4);
-	});
-
-	it('delegates to a BooleanExpression via extension method', () => {
-		const state = new ReadonlyGameState({ players: [] });
-		expect(state.evaluate(not(true))).toBe(false);
-		expect(state.evaluate(not(false))).toBe(true);
+		expect(state.evaluateScalar(strength)).toBe(4);
 	});
 
 	it('delegates to a ScalarExpression via extension method', () => {
 		const state = new ReadonlyGameState({ players: [] });
-		expect(state.evaluate(plus(3, 4))).toBe(7);
+		expect(state.evaluateScalar(plus(3, 4))).toBe(7);
 	});
 });
 
