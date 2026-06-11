@@ -1,4 +1,5 @@
 import { Counter } from '@songsofdoom/common';
+import { mock } from '@songsofdoom/common/test-utils';
 import {
 	CharacterState,
 	creature,
@@ -12,6 +13,7 @@ import { describe, expect, it } from 'vitest';
 import { ReadonlyCardState, type CardParent } from './cardstate';
 import {
 	addAttachmentToCard,
+	addPropertyToEntity,
 	banishCard,
 	moveCardToBottomOfDeck,
 	moveCardToBottomOfDiscardPile,
@@ -606,5 +608,60 @@ describe('encounter-deck / encounter-discard round-trips', () => {
 
 		expect(gameState.encounterDiscardPile).not.toContain(mutableCard);
 		expect(gameState.encounterDeck).toContain(mutableCard);
+	});
+});
+
+// ─── addPropertyToEntity ────────────────────────────────────────────────────
+
+describe('addPropertyToEntity', () => {
+	it('appends a property when no matching property exists', () => {
+		const property = mock<Property>();
+		const target = mock<{
+			properties: Array<Property>;
+			getProperty(property: Property): Property | undefined;
+		}>({
+			properties: []
+		});
+		target.getProperty.mockReturnValue(undefined);
+
+		addPropertyToEntity(target, property);
+
+		expect(target.properties).toContain(property);
+	});
+
+	it('merges when a matching property exists, replacing it in-place', () => {
+		const existingProperty = mock<Property>();
+		const mergedProperty = mock<Property>();
+		const newProperty = mock<Property>();
+		existingProperty.merge.mockReturnValue(mergedProperty);
+
+		const target = mock<{
+			properties: Array<Property>;
+			getProperty(property: Property): Property | undefined;
+		}>({
+			properties: [existingProperty]
+		});
+		target.getProperty.mockReturnValue(existingProperty);
+
+		addPropertyToEntity(target, newProperty);
+
+		expect(existingProperty.merge).toHaveBeenCalledWith(newProperty);
+		expect(target.properties[0]).toBe(mergedProperty);
+	});
+
+	it('does nothing when there are no properties to add', () => {
+		const property = mock<Property>();
+		const target = mock<{
+			properties: Array<Property>;
+			getProperty(property: Property): Property | undefined;
+		}>({
+			properties: [property]
+		});
+		target.getProperty.mockReturnValue(property);
+		property.merge.mockReturnValue(property);
+
+		addPropertyToEntity(target, property);
+
+		expect(target.properties.length).toBe(1);
 	});
 });

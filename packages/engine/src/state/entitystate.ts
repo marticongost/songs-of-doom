@@ -1,4 +1,4 @@
-import { Action, Property } from '@songsofdoom/game';
+import { Action, type Property } from '@songsofdoom/game';
 import type { CardContainer, CardOptions } from './cardcontainer';
 import type { CapabilityRef, CardState, MutableCardState } from './cardstate';
 import type { GameState, MutableGameState } from './gamestate';
@@ -95,4 +95,9 @@ export interface MutableEntityState<Id extends EntityId> extends EntityState<Id,
 	activated: boolean;
 
 	addAttachment(gameState: MutableGameState, attachment: MutableCardState): void;
+
+	/**
+	 * Adds or merges a property onto this entity.
+	 */
+	addProperty(property: Property): void;
 }

@@ -1283,3 +1283,48 @@ describe('CardState.getPlayerId', () => {
 		expect(card.getPlayerId()).toBeUndefined();
 	});
 });
+
+// ─── MutableCardState.addProperty ───────────────────────────────────────────
+
+describe('MutableCardState.addProperty', () => {
+	it('adds a property to the entity when none of the same type exists', () => {
+		const card = makeReadonlyCard(
+			'trt1',
+			'plr1',
+			{ type: 'hand', playerId: 'plr1' },
+			{ entity: makeEntity({ type: trait }) }
+		);
+		const player = makeReadonlyPlayer('plr1', { hand: [card] });
+		const gameState = makeReadonlyGameState([player]).mutable();
+
+		const mutableCard = gameState.requireCard('trt1');
+
+		// trait entity initially has [trait] as its properties
+		// skill is a different property type so it should be appended
+		mutableCard.addProperty(skill);
+
+		expect(mutableCard.hasProperty(skill)).toBe(true);
+		expect(mutableCard.properties).toContain(skill);
+	});
+
+	it('merges when a property of the same type already exists', () => {
+		const card = makeReadonlyCard(
+			'trt1',
+			'plr1',
+			{ type: 'hand', playerId: 'plr1' },
+			{ entity: makeEntity({ type: trait }) }
+		);
+		const player = makeReadonlyPlayer('plr1', { hand: [card] });
+		const gameState = makeReadonlyGameState([player]).mutable();
+
+		const mutableCard = gameState.requireCard('trt1');
+		const initialCount = mutableCard.properties.length;
+
+		// trait already exists — merge is a no-op for Keyword, replaces in-place
+		mutableCard.addProperty(trait);
+
+		// count stays the same (merge, not append)
+		expect(mutableCard.properties.length).toBe(initialCount);
+		expect(mutableCard.hasProperty(trait)).toBe(true);
+	});
+});

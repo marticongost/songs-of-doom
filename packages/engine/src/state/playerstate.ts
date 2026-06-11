@@ -9,7 +9,7 @@ import {
 import type { CardOptions } from './cardcontainer';
 import type { CardParent, CardState, MutableCardState, ReadonlyCardState } from './cardstate';
 import { EntityState, type MutableEntityState } from './entitystate';
-import { moveCardToPlayer, mutate } from './entitystatemutation';
+import { addPropertyToEntity, moveCardToPlayer, mutate } from './entitystatemutation';
 import type { MutableGameState } from './gamestate';
 import type { CardId, PlayerId } from './identifiers';
 
@@ -230,6 +230,10 @@ export class MutablePlayerState
 
 	addAttachment(gameState: MutableGameState, attachment: MutableCardState): void {
 		moveCardToPlayer(attachment, gameState, this.id);
+	}
+
+	addProperty(property: Property): void {
+		addPropertyToEntity(this, property);
 	}
 
 	drawFromDeck(gameState: MutableGameState, amount: number = 1): Array<MutableCardState> {

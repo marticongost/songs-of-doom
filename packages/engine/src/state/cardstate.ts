@@ -13,6 +13,7 @@ import type { CardOptions } from './cardcontainer';
 import { EntityState, type MutableEntityState } from './entitystate';
 import {
 	addAttachmentToCard,
+	addPropertyToEntity,
 	banishCard,
 	moveCardToBottomOfDeck,
 	moveCardToBottomOfDiscardPile,
@@ -278,6 +279,10 @@ export class MutableCardState
 
 	addAttachment(gameState: MutableGameState, attachment: MutableCardState): void {
 		addAttachmentToCard(this, gameState, attachment);
+	}
+
+	addProperty(property: Property): void {
+		addPropertyToEntity(this, property);
 	}
 
 	moveToPlayer(gameState: MutableGameState, playerId: PlayerId): void {

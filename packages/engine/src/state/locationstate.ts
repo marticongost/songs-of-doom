@@ -7,6 +7,7 @@ import {
 } from './cardstate';
 import {
 	addAttachmentToCard,
+	addPropertyToEntity,
 	banishCard,
 	moveCardToBottomOfDeck,
 	moveCardToBottomOfDiscardPile,
@@ -223,6 +224,10 @@ export class MutableLocationState extends LocationState {
 
 	addAttachment(gameState: MutableGameState, attachment: MutableCardState): void {
 		addAttachmentToCard(this, gameState, attachment);
+	}
+
+	addProperty(property: Property): void {
+		addPropertyToEntity(this, property);
 	}
 
 	moveToPlayer(gameState: MutableGameState, playerId: PlayerId): void {

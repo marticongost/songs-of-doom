@@ -4,6 +4,7 @@ import { resolveTarget } from '../procedures/core/resolvetarget';
 import { triggerCapability } from '../procedures/core/triggercapability';
 import { attachEffectProc } from '../procedures/effects/attachproc';
 import { conditionalEffectProc } from '../procedures/effects/conditionalproc';
+import { conferPropertiesEffectProc } from '../procedures/effects/conferpropertiesproc';
 import { drawFocusEffectProc } from '../procedures/effects/drawfocusproc';
 import { chapter } from '../procedures/gamesequence/chapters/chapter';
 import { chapterEndPhase } from '../procedures/gamesequence/chapters/chapterendphase';
@@ -48,6 +49,7 @@ export const procedureDefinitions: Record<ProcedureId, ProcedureDefinition<any>>
 
 	// Effects
 	[ProcedureId.AttachEffect]: attachEffectProc,
+	[ProcedureId.ConferPropertiesEffect]: conferPropertiesEffectProc,
 	[ProcedureId.ConditionalEffect]: conditionalEffectProc,
 	[ProcedureId.DrawFocusEffect]: drawFocusEffectProc
 };

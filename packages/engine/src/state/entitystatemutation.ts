@@ -1,4 +1,4 @@
-import { isCreature, isEncounter, type Entity } from '@songsofdoom/game';
+import { isCreature, isEncounter, type Entity, type Property } from '@songsofdoom/game';
 import type { CardParent, MutableCardState } from './cardstate';
 import type { MutableGameState } from './gamestate';
 import type { CardId, LocationId, PlayerId } from './identifiers';
@@ -272,4 +272,30 @@ export function banishCard(
 	card.container = { type: 'banish', playerId };
 	const playerState = gameState.requirePlayer(playerId);
 	playerState.banishedCards.push(card as MutableCardState);
+}
+
+/**
+ * Minimal structural interface for any mutable entity that has properties.
+ * Both {@link MutableCardState}, {@link MutablePlayerState}, and
+ * {@link MutableLocationState} satisfy this structurally.
+ */
+export interface HasProperties {
+	properties: Array<Property>;
+	getProperty(property: Property): Property | undefined;
+}
+
+/**
+ * Adds or merges a property onto a mutable entity. If the entity already possesses
+ * a property of the same type, the new property is merged into the existing one
+ * (e.g. increasing Piercing (2) to Piercing (3)). Otherwise the property is appended.
+ */
+export function addPropertyToEntity(target: HasProperties, property: Property): void {
+	const existingProperty = target.getProperty(property);
+	if (!existingProperty) {
+		target.properties.push(property);
+	} else {
+		const position = target.properties.indexOf(existingProperty);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		target.properties[position] = existingProperty.merge(property as any);
+	}
 }
