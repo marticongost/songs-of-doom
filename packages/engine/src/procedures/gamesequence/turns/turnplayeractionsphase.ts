@@ -1,7 +1,8 @@
 import type { Action } from '@songsofdoom/game';
 import { CapabilityChoiceField, EntityField } from '../../../core/input';
 import { instructions } from '../../../core/instructions';
-import { type ProcedureState, ProcedureId } from '../../../core/procedure';
+import { type ProcedureState } from '../../../core/procedure';
+import { ProcedureId } from '../../../core/procedureid';
 import type { CapabilityRef } from '../../../state/cardstate';
 import type { AllyId, EntityId, PlayerId } from '../../../state/identifiers';
 import { triggerCapability } from '../../core/triggercapability';

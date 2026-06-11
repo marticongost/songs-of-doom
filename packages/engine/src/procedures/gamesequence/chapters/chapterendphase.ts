@@ -1,6 +1,7 @@
 import { events } from '@songsofdoom/game';
 import { instructions } from '../../../core/instructions';
-import { type ProcedureState, ProcedureId } from '../../../core/procedure';
+import { type ProcedureState } from '../../../core/procedure';
+import { ProcedureId } from '../../../core/procedureid';
 import { emitEvent } from '../../core/emitevent';
 
 export type ChapterEndStepId = 'emitChapterEndEvent' | 'readyCards';

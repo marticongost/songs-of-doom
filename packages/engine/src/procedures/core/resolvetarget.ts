@@ -1,7 +1,8 @@
 import type { Target } from '@songsofdoom/game';
 import { TargetField } from '../../core/input';
 import { instructions } from '../../core/instructions';
-import { ProcedureId, type ProcedureState } from '../../core/procedure';
+import { type ProcedureState } from '../../core/procedure';
+import { ProcedureId } from '../../core/procedureid';
 import type { EntityId } from '../../state/identifiers';
 
 export interface ResolveTargetState extends ProcedureState {

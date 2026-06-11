@@ -1,6 +1,7 @@
 import type { Capability, Effect, Reaction } from '@songsofdoom/game';
 import { instructions } from '../../core/instructions';
-import { type ProcedureState, ProcedureId } from '../../core/procedure';
+import { type ProcedureState } from '../../core/procedure';
+import { ProcedureId } from '../../core/procedureid';
 import { MutableCapabilityResolution } from '../../state/capabilityresolution';
 import type { ActorId, CardId } from '../../state/identifiers';
 

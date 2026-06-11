@@ -1,5 +1,6 @@
 import type { Effect } from '@songsofdoom/game';
-import type { ProcedureId, ProcedureState } from '../../core/procedure';
+import type { ProcedureState } from '../../core/procedure';
+import type { ProcedureId } from '../../core/procedureid';
 import { CallStep } from '../../core/steps';
 
 export interface EffectProcedureState<E extends Effect = Effect> extends ProcedureState {
@@ -64,5 +65,5 @@ export function triggerEffect<
  * Determines the procedure ID for a given effect based on its class name.
  */
 export const getEffectProcedureId = (effect: Effect): ProcedureId => {
-	return effect.constructor.name.replace(/Effect$/, '') as ProcedureId;
+	return effect.constructor.name as ProcedureId;
 };

@@ -2,7 +2,8 @@
 import { describe, expect, it } from 'vitest';
 import { Engine } from './engine';
 import { instructions } from './instructions';
-import { ProcedureDefinition, ProcedureId, type ProcedureState } from './procedure';
+import { ProcedureDefinition, type ProcedureState } from './procedure';
+import { ProcedureId } from './procedureid';
 import { ComputeStep, InputStep } from './steps';
 
 // ---------------------------------------------------------------------------

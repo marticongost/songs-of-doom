@@ -1,5 +1,6 @@
 import { instructions } from '../../../core/instructions';
-import { type ProcedureState, ProcedureId } from '../../../core/procedure';
+import { type ProcedureState } from '../../../core/procedure';
+import { ProcedureId } from '../../../core/procedureid';
 import { turn } from '../turns/turn';
 
 export type TurnsPhaseStepId = 'executeTurn' | 'checkLoop';

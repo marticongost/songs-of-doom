@@ -1,5 +1,6 @@
 import { instructions } from '../../../core/instructions';
-import { ProcedureId, type ProcedureState } from '../../../core/procedure';
+import { type ProcedureState } from '../../../core/procedure';
+import { ProcedureId } from '../../../core/procedureid';
 
 export interface TurnEndPhaseState extends ProcedureState {}
 

@@ -1,6 +1,6 @@
 import type { AttachEffect } from '@songsofdoom/game';
 import { instructions } from '../../core/instructions';
-import { ProcedureId } from '../../core/procedure';
+import { ProcedureId } from '../../core/procedureid';
 import type { CardId, EntityId } from '../../state/identifiers';
 import type { EffectProcedureState } from '../core/triggereffect';
 
@@ -18,8 +18,8 @@ export interface AttachEffectProcedureState extends EffectProcedureState<AttachE
 
 const { define, requireSingleTarget } = instructions<AttachEffectProcedureState>();
 
-export const attachProc = define({
-	id: ProcedureId.Attach,
+export const attachEffectProc = define({
+	id: ProcedureId.AttachEffect,
 	steps: {
 		selectTarget: requireSingleTarget(({ effect }) => effect.target || 'active-player', 'targetId'),
 		mutate(state) {

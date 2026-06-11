@@ -1,34 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { mapToRecord } from '@songsofdoom/common';
 import type { ReadonlyGameState } from '../state/gamestate';
+import type { ProcedureId } from './procedureid';
 import { type Step, CallStep, ComputeStep, isProcedureDefinition } from './steps';
-
-export enum ProcedureId {
-	Unimplemented = 'Unimplemented',
-
-	// Core
-	TriggerCapability = 'TriggerCapability',
-	EmitEvent = 'EmitEvent',
-	ResolveTarget = 'ResolveTarget',
-
-	// Game sequence
-	Chapter = 'Chapter',
-	ChapterStartPhase = 'ChapterStartPhase',
-	FocusPhase = 'FocusPhase',
-	TurnsPhase = 'TurnsPhase',
-	DrawPhase = 'DrawPhase',
-	EncounterPhase = 'EncounterPhase',
-	ChapterEndPhase = 'ChapterEndPhase',
-	Turn = 'Turn',
-	TurnStartPhase = 'TurnStartPhase',
-	TurnPlayerActionsPhase = 'TurnPlayerActionsPhase',
-	TurnCreatureActionsPhase = 'TurnCreatureActionsPhase',
-	TurnEndPhase = 'TurnEndPhase',
-
-	// Effects
-	Attach = 'Attach',
-	DrawFocus = 'DrawFocus'
-}
 
 /** Terminal status of a procedure execution. */
 export type ProcedureStatus = 'ongoing' | 'complete' | 'cancelled';

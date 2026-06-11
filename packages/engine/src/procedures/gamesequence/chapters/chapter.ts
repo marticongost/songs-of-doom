@@ -1,5 +1,6 @@
 import { instructions } from '../../../core/instructions';
-import { type ProcedureState, ProcedureId } from '../../../core/procedure';
+import { type ProcedureState } from '../../../core/procedure';
+import { ProcedureId } from '../../../core/procedureid';
 import { chapterEndPhase } from './chapterendphase';
 import { chapterStartPhase } from './chapterstartphase';
 import { drawPhase } from './drawphase';

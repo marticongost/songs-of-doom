@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { JournalEntry } from './journal';
-import type { ProcedureDefinition, ProcedureId, ProcedureState } from './procedure';
+import type { ProcedureDefinition, ProcedureState } from './procedure';
+import type { ProcedureId } from './procedureid';
 import { CallStep, ComputeStep, DispatchStep, ForEachStep, InputStep, type Step } from './steps';
 
 type ProcedureRegistry = Partial<Record<ProcedureId, ProcedureDefinition<any>>>;

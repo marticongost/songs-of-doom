@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { ProcedureId, ProcedureState } from './procedure';
+import type { ProcedureState } from './procedure';
+import type { ProcedureId } from './procedureid';
 
 /**
  * A single entry in the append-only execution journal.

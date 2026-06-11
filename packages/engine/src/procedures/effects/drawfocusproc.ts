@@ -2,7 +2,7 @@ import type { DrawFocusEffect } from '@songsofdoom/game';
 import { Counter } from '../../../../common/src/counter';
 import type { FocusToken } from '../../../../game/src/models/focus';
 import { instructions, type EffectProcedureState } from '../../core/instructions';
-import { ProcedureId } from '../../core/procedure';
+import { ProcedureId } from '../../core/procedureid';
 import type { EntityId, PlayerId } from '../../state/identifiers';
 import { resolveTarget } from '../core/resolvetarget';
 
@@ -16,8 +16,8 @@ export interface DrawFocusState extends EffectProcedureState<DrawFocusEffect> {
 
 const { define, call } = instructions<DrawFocusState>();
 
-export const drawFocusProc = define({
-	id: ProcedureId.DrawFocus,
+export const drawFocusEffectProc = define({
+	id: ProcedureId.DrawFocusEffect,
 	steps: {
 		selectPlayers: call({
 			procedure: resolveTarget,

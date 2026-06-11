@@ -2,8 +2,8 @@
 import { emitEvent } from '../procedures/core/emitevent';
 import { resolveTarget } from '../procedures/core/resolvetarget';
 import { triggerCapability } from '../procedures/core/triggercapability';
-import { attachProc } from '../procedures/effects/attachproc';
-import { drawFocusProc } from '../procedures/effects/drawfocusproc';
+import { attachEffectProc } from '../procedures/effects/attachproc';
+import { drawFocusEffectProc } from '../procedures/effects/drawfocusproc';
 import { chapter } from '../procedures/gamesequence/chapters/chapter';
 import { chapterEndPhase } from '../procedures/gamesequence/chapters/chapterendphase';
 import { chapterStartPhase } from '../procedures/gamesequence/chapters/chapterstartphase';
@@ -16,7 +16,8 @@ import { turnCreatureActionsPhase } from '../procedures/gamesequence/turns/turnc
 import { turnEndPhase } from '../procedures/gamesequence/turns/turnendphase';
 import { turnPlayerActionsPhase } from '../procedures/gamesequence/turns/turnplayeractionsphase';
 import { turnStartPhase } from '../procedures/gamesequence/turns/turnstartphase';
-import { ProcedureDefinition, ProcedureId } from './procedure';
+import { ProcedureDefinition } from './procedure';
+import { ProcedureId } from './procedureid';
 
 export const procedureDefinitions: Record<ProcedureId, ProcedureDefinition<any>> = {
 	// Stub for unimplemented procedures
@@ -45,6 +46,6 @@ export const procedureDefinitions: Record<ProcedureId, ProcedureDefinition<any>>
 	[ProcedureId.TurnEndPhase]: turnEndPhase,
 
 	// Effects
-	[ProcedureId.Attach]: attachProc,
-	[ProcedureId.DrawFocus]: drawFocusProc
+	[ProcedureId.AttachEffect]: attachEffectProc,
+	[ProcedureId.DrawFocusEffect]: drawFocusEffectProc
 };

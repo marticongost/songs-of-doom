@@ -1,7 +1,8 @@
 import { shuffle } from '@songsofdoom/common';
 import { events } from '@songsofdoom/game';
 import { instructions } from '../../../core/instructions';
-import { type ProcedureState, ProcedureId } from '../../../core/procedure';
+import { type ProcedureState } from '../../../core/procedure';
+import { ProcedureId } from '../../../core/procedureid';
 import type { CardId } from '../../../state/identifiers';
 import type { ReadonlyPlayerState } from '../../../state/playerstate';
 import { emitEvent } from '../../core/emitevent';

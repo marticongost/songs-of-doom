@@ -8,10 +8,10 @@ import { triggerEffect, type TriggerEffectProps } from '../procedures/core/trigg
 import type { MutableGameState } from '../state/gamestate';
 import {
 	ProcedureDefinition,
-	ProcedureId,
 	type ProcedureDefinitionProps,
 	type ProcedureState
 } from './procedure';
+import { ProcedureId } from './procedureid';
 import {
 	CallStep,
 	DispatchStep,

@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { PlayerId } from '../state/identifiers';
 import type { Field } from './input';
-import { type ProcedureId, type ProcedureState, ProcedureDefinition } from './procedure';
+import { type ProcedureState, ProcedureDefinition } from './procedure';
+import { type ProcedureId } from './procedureid';
 
 /** Each of the discrete steps in a {@link ProcedureDefinition procedure}. */
 export abstract class Step<S extends ProcedureState> {}

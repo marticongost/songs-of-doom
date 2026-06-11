@@ -2,7 +2,8 @@ import type { ReadonlyCounter } from '@songsofdoom/common';
 import { type FocusToken, drawFocus } from '@songsofdoom/game';
 import { FocusesField } from '../../../core/input';
 import { instructions } from '../../../core/instructions';
-import { type ProcedureState, ProcedureId } from '../../../core/procedure';
+import { type ProcedureState } from '../../../core/procedure';
+import { ProcedureId } from '../../../core/procedureid';
 import type { ReadonlyPlayerState } from '../../../state/playerstate';
 
 export type FocusPhaseStepId = 'everyPlayer';
