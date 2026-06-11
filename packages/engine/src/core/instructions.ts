@@ -249,6 +249,32 @@ export function instructions<S extends ProcedureState>() {
 					return { ...state, [fieldName]: resolvedIds[0] };
 				}
 			});
+		},
+		/**
+		 * Defines a step that resolves a target and returns 1+ results, saving the obtained
+		 * result IDs to the given field in the state.
+		 * @param target The target to resolve.
+		 * @param fieldName The name of the field in the state to save the resolved target
+		 *  IDs to. Must be a key of `S` and the field must be of type `T[]`.
+		 * @param playerId The player to ask for input, if the target requires player
+		 *  choice. Defaults to the active player.
+		 * @returns A step that resolves the target and saves the results to the state.
+		 */
+		resolveTargetList: <T extends TargetType = TargetType>(
+			target: Target<T> | TargetSpec<T> | ((state: S) => Target<T> | TargetSpec<T>),
+			fieldName: string & keyof S,
+			playerId?: PlayerId
+		): CallStep<S, ResolveTargetState> => {
+			return new CallStep<S, ResolveTargetState>({
+				procedureId: ProcedureId.ResolveTarget,
+				parameters: (state) => ({
+					target: finalise(Target, typeof target === 'function' ? target(state) : target),
+					playerId
+				}),
+				then: (state, childResult) => {
+					return { ...state, [fieldName]: childResult.resolvedTargetIds ?? [] };
+				}
+			});
 		}
 	};
 }
