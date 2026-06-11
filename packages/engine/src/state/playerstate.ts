@@ -1,19 +1,17 @@
 import { Counter, shuffle, weightedChoice } from '@songsofdoom/common';
-import type { CharacterState } from '@songsofdoom/game';
+import type { CharacterState, Property, Stat, StatType } from '@songsofdoom/game';
 import {
 	type FocusToken,
 	type FocusType,
 	getFocusTokenType,
 	getFocusTokenValue
 } from '@songsofdoom/game';
-import type { Property } from '@songsofdoom/game';
-import type { Stat, StatType } from '@songsofdoom/game';
 import type { CardOptions } from './cardcontainer';
 import type { CardParent, CardState, MutableCardState, ReadonlyCardState } from './cardstate';
 import { EntityState, type MutableEntityState } from './entitystate';
+import { moveCardToPlayer, mutate } from './entitystatemutation';
 import type { MutableGameState } from './gamestate';
 import type { CardId, PlayerId } from './identifiers';
-import { mutate } from './mutate';
 
 export interface PlayerStateProps {
 	id: PlayerId;
@@ -230,8 +228,8 @@ export class MutablePlayerState
 		});
 	}
 
-	addAttachment(gameState: MutableGameState, attachment: MutableCardState) {
-		attachment.moveToPlayer(gameState, this.id);
+	addAttachment(gameState: MutableGameState, attachment: MutableCardState): void {
+		moveCardToPlayer(attachment, gameState, this.id);
 	}
 
 	drawFromDeck(gameState: MutableGameState, amount: number = 1): Array<MutableCardState> {

@@ -13,6 +13,7 @@ import type { CapabilityResolution, MutableCapabilityResolution } from './capabi
 import type { CardOptions } from './cardcontainer';
 import type { CardState, MutableCardState, ReadonlyCardState } from './cardstate';
 import type { EntityState } from './entitystate';
+import { mutate } from './entitystatemutation';
 import {
 	isCardId,
 	isLocationId,
@@ -23,7 +24,6 @@ import {
 	type PlayerId
 } from './identifiers';
 import type { LocationState, MutableLocationState, ReadonlyLocationState } from './locationstate';
-import { mutate } from './mutate';
 import { MutablePlayerState, PlayerState, ReadonlyPlayerState } from './playerstate';
 import { MutableTestResolution, ReadonlyTestResolution, TestResolution } from './testresolution';
 import {
@@ -521,7 +521,7 @@ export abstract class GameState<
 		}
 
 		// TODO: Select by stored variable
-		let possibleTargetIds: EntityId[] = [...targetIds];
+		const possibleTargetIds: EntityId[] = [...targetIds];
 		let resolvedTargetIds: EntityId[];
 
 		if (target.selection === 'random') {

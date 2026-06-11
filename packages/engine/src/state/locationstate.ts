@@ -1,11 +1,25 @@
+import type { Property } from '@songsofdoom/game';
 import {
 	CardState,
 	type CardStateProps,
 	type MutableCardState,
 	type ReadonlyCardState
 } from './cardstate';
-import type { CardId, EntityId, LocationId } from './identifiers';
-import { mutate } from './mutate';
+import {
+	addAttachmentToCard,
+	banishCard,
+	moveCardToBottomOfDeck,
+	moveCardToBottomOfDiscardPile,
+	moveCardToHand,
+	moveCardToLocation,
+	moveCardToPlayer,
+	moveCardToStage,
+	moveCardToTopOfDeck,
+	moveCardToTopOfDiscardPile,
+	mutate
+} from './entitystatemutation';
+import type { MutableGameState } from './gamestate';
+import type { CardId, EntityId, LocationId, PlayerId } from './identifiers';
 
 export interface LocationStateProps extends Omit<CardStateProps, 'id'> {
 	id: LocationId;
@@ -174,6 +188,7 @@ export class MutableLocationState extends LocationState {
 	declare exhausted: boolean;
 	declare activated: boolean;
 	declare attachments: Array<MutableCardState>;
+	declare properties: Array<Property>;
 	declare players: Array<EntityId>;
 	declare connections: Array<LocationId>;
 	declare physicalTrauma: number;
@@ -204,6 +219,46 @@ export class MutableLocationState extends LocationState {
 
 	requireCard(id: CardId): MutableCardState {
 		return super.requireCard(id) as MutableCardState;
+	}
+
+	addAttachment(gameState: MutableGameState, attachment: MutableCardState): void {
+		addAttachmentToCard(this, gameState, attachment);
+	}
+
+	moveToPlayer(gameState: MutableGameState, playerId: PlayerId): void {
+		moveCardToPlayer(this, gameState, playerId);
+	}
+
+	moveToTopOfDiscardPile(gameState: MutableGameState, playerId?: PlayerId): void {
+		moveCardToTopOfDiscardPile(this, gameState, playerId);
+	}
+
+	moveToBottomOfDiscardPile(gameState: MutableGameState, playerId?: PlayerId): void {
+		moveCardToBottomOfDiscardPile(this, gameState, playerId);
+	}
+
+	moveToHand(gameState: MutableGameState, playerId: PlayerId): void {
+		moveCardToHand(this, gameState, playerId);
+	}
+
+	moveToStage(gameState: MutableGameState, playerId: PlayerId): void {
+		moveCardToStage(this, gameState, playerId);
+	}
+
+	moveToTopOfDeck(gameState: MutableGameState, playerId?: PlayerId): void {
+		moveCardToTopOfDeck(this, gameState, playerId);
+	}
+
+	moveToBottomOfDeck(gameState: MutableGameState, playerId?: PlayerId): void {
+		moveCardToBottomOfDeck(this, gameState, playerId);
+	}
+
+	moveToLocation(gameState: MutableGameState, locationId: LocationId): void {
+		moveCardToLocation(this, gameState, locationId);
+	}
+
+	banish(gameState: MutableGameState, playerId?: PlayerId): void {
+		banishCard(this, gameState, playerId);
 	}
 
 	readonly(): ReadonlyLocationState {

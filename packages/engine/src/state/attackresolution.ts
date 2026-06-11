@@ -1,9 +1,7 @@
-import type { Reaction } from '@songsofdoom/game';
-import type { Property } from '@songsofdoom/game';
-import type { Result } from '@songsofdoom/game';
+import type { Property, Reaction, Result } from '@songsofdoom/game';
 import type { CapabilityRef } from './cardstate';
+import { mutate } from './entitystatemutation';
 import type { EntityId } from './identifiers';
-import { mutate } from './mutate';
 import {
 	TestResolution,
 	type MutableTestResolution,

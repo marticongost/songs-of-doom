@@ -1,5 +1,5 @@
+import { mutate } from './entitystatemutation';
 import type { EntityId } from './identifiers';
-import { mutate } from './mutate';
 
 export interface WoundResolutionProps {
 	/** Id of the entity receiving the wound. */

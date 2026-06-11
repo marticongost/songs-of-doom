@@ -35,6 +35,7 @@ export {
 	type CardParent
 } from './state/cardstate';
 export { EntityState, MutableEntityState } from './state/entitystate';
+export { mutate } from './state/entitystatemutation';
 export {
 	GameState,
 	MutableGameState,
@@ -68,7 +69,6 @@ export {
 	ReadonlyLocationState,
 	type LocationGraph
 } from './state/locationstate';
-export { mutate } from './state/mutate';
 export { MutablePlayerState, PlayerState, ReadonlyPlayerState } from './state/playerstate';
 export {
 	MutableTestResolution,
