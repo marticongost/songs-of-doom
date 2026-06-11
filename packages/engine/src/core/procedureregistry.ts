@@ -5,6 +5,7 @@ import { triggerCapability } from '../procedures/core/triggercapability';
 import { attachEffectProc } from '../procedures/effects/attachproc';
 import { conditionalEffectProc } from '../procedures/effects/conditionalproc';
 import { conferPropertiesEffectProc } from '../procedures/effects/conferpropertiesproc';
+import { discardFromHandEffectProc } from '../procedures/effects/discardfromhandproc';
 import { discardEffectProc } from '../procedures/effects/discardproc';
 import { drawFocusEffectProc } from '../procedures/effects/drawfocusproc';
 import { chapter } from '../procedures/gamesequence/chapters/chapter';
@@ -53,5 +54,6 @@ export const procedureDefinitions: Record<ProcedureId, ProcedureDefinition<any>>
 	[ProcedureId.ConferPropertiesEffect]: conferPropertiesEffectProc,
 	[ProcedureId.ConditionalEffect]: conditionalEffectProc,
 	[ProcedureId.DiscardEffect]: discardEffectProc,
+	[ProcedureId.DiscardFromHandEffect]: discardFromHandEffectProc,
 	[ProcedureId.DrawFocusEffect]: drawFocusEffectProc
 };

@@ -30,29 +30,6 @@ export class DiscardFromHandEffect extends Effect {
 		this.cards = finalise(Target, cards);
 		this.players = finalise(Target, players);
 	}
-
-	/*
-	override async apply(gameGraph: GameGraph) {
-		const playerIds = await gameGraph.requestPlayers(this.players, {
-			default: 'active-player'
-		});
-		const playerDiscards = new Map<EntityId, CardId[]>();
-		for (const playerId of playerIds) {
-			const cardIds = (await gameGraph.requestInput(this.cards)).target as CardId[];
-			playerDiscards.set(playerId, cardIds);
-		}
-		gameGraph.mutate((state) => {
-			for (const [playerId, cardIds] of playerDiscards) {
-				const playerState = state.requirePlayer(playerId);
-				for (const cardId of cardIds) {
-					const card = playerState.requireCard(cardId);
-					card.moveToTopOfDiscardPile(state);
-				}
-			}
-			return { playerDiscards };
-		});
-	}
-	*/
 }
 
 /** Creates an effect that discards cards from hand. */
