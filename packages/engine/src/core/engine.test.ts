@@ -50,11 +50,11 @@ describe('Engine with ForEachStep', () => {
 			steps: {
 				loop: loop({
 					name: 'currentNumber',
-					items: (state) => state.numbers,
+					items: (state: TestState) => state.numbers,
 					steps: {
 						process: () => undefined
 					},
-					then: (state) => ({ ...state, step: 'done' })
+					then: (state: TestState) => ({ ...state, step: 'done' })
 				}),
 				done: (state) => ({ ...state, status: 'complete' })
 			}
@@ -91,16 +91,16 @@ describe('Engine with ForEachStep', () => {
 			steps: {
 				loop: loop({
 					name: 'currentNumber',
-					items: (state) => state.numbers,
+					items: (state: TestState) => state.numbers,
 					steps: {
-						process: (state: any) => ({
+						process: (state: TestState) => ({
 							...state,
-							processed: [...(state as TestState).processed, (state as TestState).currentNumber]
+							processed: [...state.processed, state.currentNumber]
 						})
 					},
-					then: (state) => ({ ...state, step: 'done' })
+					then: (state: TestState) => ({ ...state, step: 'done' })
 				}),
-				done: (state) => ({ ...state, status: 'complete' })
+				done: (state: TestState) => ({ ...state, status: 'complete' })
 			}
 		});
 
@@ -128,23 +128,23 @@ describe('Engine with ForEachStep', () => {
 
 		const { forEach: loop } = instructions<TestState>();
 
-		const proc = new ProcedureDefinition({
+		const proc = new ProcedureDefinition<TestState>({
 			id: ProcedureId.Unimplemented,
 			defaults: { processed: [] } as any,
 			steps: {
 				loop: loop({
 					name: 'currentNumber',
-					items: (state) => state.numbers,
-					where: (_state, n) => n > 10,
+					items: (state: TestState) => state.numbers,
+					where: (_state: TestState, n: number) => n > 10,
 					steps: {
-						process: (state: any) => ({
+						process: (state: TestState) => ({
 							...state,
-							processed: [...(state as TestState).processed, (state as TestState).currentNumber]
+							processed: [...state.processed, state.currentNumber]
 						})
 					},
-					then: (state) => ({ ...state, step: 'done' })
+					then: (state: TestState) => ({ ...state, step: 'done' })
 				}),
-				done: (state) => ({ ...state, status: 'complete' })
+				done: (state: TestState) => ({ ...state, status: 'complete' })
 			}
 		});
 
@@ -178,19 +178,19 @@ describe('Engine with ForEachStep', () => {
 			steps: {
 				loop: loop({
 					name: 'currentNumber',
-					items: (state) => state.numbers,
+					items: (state: TestState) => state.numbers,
 					steps: {
 						ask: askInput({
 							fields: [] as const,
-							then: (state: any, _inputs) => ({
+							then: (state: TestState, _inputs) => ({
 								...state,
-								collected: [...(state as TestState).collected, (state as TestState).currentNumber]
+								collected: [...state.collected, state.currentNumber]
 							})
 						})
 					},
-					then: (state) => ({ ...state, step: 'done' })
+					then: (state: TestState) => ({ ...state, step: 'done' })
 				}),
-				done: (state) => ({ ...state, status: 'complete' })
+				done: (state: TestState) => ({ ...state, status: 'complete' })
 			}
 		});
 
@@ -236,28 +236,29 @@ describe('Engine with ForEachStep', () => {
 			steps: {
 				outer: outer({
 					name: 'outerItem',
-					items: (state) => Object.keys(state.groups),
+					items: (state: TestState) => Object.keys(state.groups),
 					steps: {
 						inner: (inner as any)({
 							name: 'innerItem',
-							items: (state: any) =>
-								(state as TestState).groups[(state as TestState).outerItem] ?? [],
+							items: (state: TestState) => state.groups[state.outerItem] ?? [],
 							steps: {
-								collect: (state: any) => {
-									const s = state as TestState;
+								collect: (state: TestState) => {
 									return {
 										...state,
-										collected: [...s.collected, { outer: s.outerItem, inner: s.innerItem }],
+										collected: [
+											...state.collected,
+											{ outer: state.outerItem, inner: state.innerItem }
+										],
 										step: undefined
 									};
 								}
 							},
-							then: (state: any) => state
+							then: (state: TestState) => state
 						})
 					},
-					then: (state) => ({ ...state, step: 'done' })
+					then: (state: TestState) => ({ ...state, step: 'done' })
 				}),
-				done: (state) => ({ ...state, status: 'complete' })
+				done: (state: TestState) => ({ ...state, status: 'complete' })
 			}
 		});
 

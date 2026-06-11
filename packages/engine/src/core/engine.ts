@@ -10,8 +10,8 @@ type ProcedureRegistry = Partial<Record<ProcedureId, ProcedureDefinition<any>>>;
  * Drives procedure execution against an append-only journal.
  *
  * Loop bodies: {@link ForEachStep} body steps are stored in the same journal
- * as top-level entries, distinguished by {@link JournalEntry._loopParentStepId}
- * and {@link JournalEntry._loopQueue} — no separate stack needed.
+ * as top-level entries, distinguished by {@link JournalEntry#_loopParentStepId}
+ * and {@link JournalEntry#_loopQueue} — no separate stack needed.
  */
 export class Engine {
 	private _journal: JournalEntry[];
@@ -62,8 +62,8 @@ export class Engine {
 			}
 
 			// --- Resolve step source ---
-			let step: Step<any>;
-			let stepMap: Record<string, Step<any>>;
+			let step: Step;
+			let stepMap: Record<string, Step>;
 			let onComplete: (s: ProcedureState) => void;
 
 			if (this._isLoopBodyStep(entry)) {
@@ -117,7 +117,7 @@ export class Engine {
 	 * The factory on each `DispatchStep` receives the current procedure state
 	 * and must be deterministic — see {@link DispatchStepProps.factory}.
 	 */
-	private _resolveStep(step: Step<any>, state: ProcedureState): Step<any> {
+	private _resolveStep(step: Step, state: ProcedureState): Step {
 		while (step instanceof DispatchStep) {
 			step = step.factory(state);
 		}
@@ -138,7 +138,7 @@ export class Engine {
 		procedureId: ProcedureId,
 		state: ProcedureState,
 		result: ProcedureState | undefined,
-		stepMap: Record<string, Step<any>>,
+		stepMap: Record<string, Step>,
 		onComplete: (s: ProcedureState) => void
 	): void {
 		if (result === undefined || result.step === undefined) {
@@ -176,7 +176,7 @@ export class Engine {
 		return entry.state.step! in forEachStep.steps;
 	}
 
-	private _resolveForEachStep(entry: JournalEntry): ForEachStep<any, any, any> {
+	private _resolveForEachStep(entry: JournalEntry): ForEachStep<any, any> {
 		const parentStepId = entry._loopParentStepId!;
 
 		// Try top-level procedure steps first.
@@ -199,7 +199,7 @@ export class Engine {
 		throw new Error(`Engine invariant: _loopParentStepId "${parentStepId}" is not a ForEachStep.`);
 	}
 
-	private _enterForEachStep(step: ForEachStep<any, any, any>, state: ProcedureState): void {
+	private _enterForEachStep(step: ForEachStep<any, any>, state: ProcedureState): void {
 		const parentStepId = state.step;
 		const allItems = step.items(state);
 		const queue: unknown[] = step.where
@@ -231,7 +231,7 @@ export class Engine {
 		});
 	}
 
-	private _advanceLoopIteration(step: ForEachStep<any, any, any>, bodyState: ProcedureState): void {
+	private _advanceLoopIteration(step: ForEachStep<any, any>, bodyState: ProcedureState): void {
 		const entry = this.currentEntry!;
 		const queue = (entry._loopQueue ?? []) as unknown[];
 		const where = step.where;
@@ -316,7 +316,7 @@ export class Engine {
 		const parentEntry = this._journal[parentIndex];
 		const parentStepId = parentEntry.state.step;
 
-		let parentStep: Step<any>;
+		let parentStep: Step;
 		if (parentEntry._loopParentStepId) {
 			parentStep = this._resolveForEachStep(parentEntry).steps[parentStepId!];
 		} else {
@@ -342,8 +342,8 @@ export class Engine {
 		const { procedureId, state } = last;
 
 		// --- Resolve step source ---
-		let step: Step<any>;
-		let stepMap: Record<string, Step<any>>;
+		let step: Step;
+		let stepMap: Record<string, Step>;
 		let onComplete: (s: ProcedureState) => void;
 
 		if (this._isLoopBodyStep(last)) {

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ProcedureState } from './procedure';
 import type { ProcedureId } from './procedureid';
 

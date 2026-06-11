@@ -5,7 +5,7 @@ import { type ProcedureState, ProcedureDefinition } from './procedure';
 import { type ProcedureId } from './procedureid';
 
 /** Each of the discrete steps in a {@link ProcedureDefinition procedure}. */
-export abstract class Step<S extends ProcedureState> {}
+export abstract class Step {}
 
 // === Compute step ===
 
@@ -22,7 +22,7 @@ export interface ComputeStepProps<S extends ProcedureState> {
 	logic: (state: S) => S | undefined;
 }
 
-export class ComputeStep<S extends ProcedureState> extends Step<S> {
+export class ComputeStep<S extends ProcedureState> extends Step {
 	logic: (state: S) => S | undefined;
 	constructor({ logic }: ComputeStepProps<S>) {
 		super();
@@ -142,7 +142,7 @@ export class InputStep<
 	const Fields extends ReadonlyArray<Field<any, string, boolean>> = ReadonlyArray<
 		Field<any, string, boolean>
 	>
-> extends Step<S> {
+> extends Step {
 	/** Produces the field definitions, potentially using runtime state. */
 	private readonly _fieldsFactory: (state: S) => Fields;
 
@@ -195,7 +195,7 @@ export interface CallStepProps<S extends ProcedureState, C extends ProcedureStat
 	then?: (state: S, childResult: C) => S;
 }
 
-export class CallStep<S extends ProcedureState, C extends ProcedureState> extends Step<S> {
+export class CallStep<S extends ProcedureState, C extends ProcedureState> extends Step {
 	readonly procedureId: ProcedureId | ((state: S) => ProcedureId);
 	readonly parameters: (state: S) => Partial<C>;
 	readonly then: (state: S, childResult: C) => S;
@@ -233,7 +233,7 @@ export interface DispatchStepProps<S extends ProcedureState> {
 	 * composition, or a {@link CallStep} (via {@link dynamicCall}) to delegate
 	 * to a child procedure.
 	 */
-	factory: (state: S) => Step<S>;
+	factory: (state: S) => Step;
 }
 
 /**
@@ -258,8 +258,8 @@ export interface DispatchStepProps<S extends ProcedureState> {
  * )
  * ```
  */
-export class DispatchStep<S extends ProcedureState> extends Step<S> {
-	readonly factory: (state: S) => Step<S>;
+export class DispatchStep<S extends ProcedureState> extends Step {
+	readonly factory: (state: S) => Step;
 
 	constructor({ factory }: DispatchStepProps<S>) {
 		super();
@@ -301,11 +301,7 @@ export type ForEachBodyState<S extends ProcedureState, BodyStepId extends string
  * });
  * ```
  */
-export interface ForEachStepProps<
-	S extends ProcedureState,
-	N extends keyof S & string,
-	BodyStepId extends string
-> {
+export interface ForEachStepProps<S extends ProcedureState, N extends keyof S & string> {
 	/**
 	 * Name of the state attribute to set with the current item each iteration.
 	 * Must be a declared field on `S`. The engine sets `state[name]` to the
@@ -334,7 +330,7 @@ export interface ForEachStepProps<
 	 * (automatically wrapped in a {@link CallStep}).
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	steps: Record<BodyStepId, Step<ForEachBodyState<S, BodyStepId>> | ProcedureDefinition<any>>;
+	steps: Record<string, Step | ProcedureDefinition<any>>;
 
 	/**
 	 * Called when all items have been processed.
@@ -354,48 +350,44 @@ export interface ForEachStepProps<
  * Use the `forEach` helper from {@link instructions} to create instances with
  * pre-bound state type and automatic inference of `N` from `name`.
  */
-export class ForEachStep<
-	S extends ProcedureState,
-	N extends keyof S & string,
-	BodyStepId extends string
-> extends Step<S> {
+export class ForEachStep<S extends ProcedureState, N extends keyof S & string> extends Step {
 	readonly name: N;
 	readonly items: (state: S) => readonly S[N][];
 	readonly where?: (state: S, item: S[N]) => boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	readonly steps: Record<BodyStepId, Step<any>>;
+	readonly steps: Record<string, Step>;
 	readonly then?: (state: S) => S;
 
-	constructor({ name, items, where, steps, then }: ForEachStepProps<S, N, BodyStepId>) {
+	constructor({ name, items, where, steps, then }: ForEachStepProps<S, N>) {
 		super();
 		this.name = name;
 		this.items = items;
 		this.where = where;
 		// Wrap plain functions in ComputeStep and ProcedureDefinition in CallStep,
 		// matching ProcedureDefinition behaviour.
-		const wrapped: Record<string, Step<any>> = {};
+		const wrapped: Record<string, Step> = {};
 		for (const [key, step] of Object.entries(steps)) {
 			wrapped[key] = isProcedureDefinition(step)
 				? new CallStep({ procedureId: step.id })
 				: typeof step === 'function'
 					? new ComputeStep({ logic: step as (state: any) => any })
-					: (step as Step<any>);
+					: (step as Step);
 		}
-		this.steps = wrapped as Record<BodyStepId, Step<any>>;
+		this.steps = wrapped as Record<string, Step>;
 		this.then = then;
 	}
 
 	/** The first body step in insertion order. */
-	get firstBodyStep(): BodyStepId {
-		return Object.keys(this.steps)[0] as BodyStepId;
+	get firstBodyStep(): string {
+		return Object.keys(this.steps)[0];
 	}
 
 	/**
 	 * Returns the next body step after `current` in insertion order,
 	 * or `undefined` if `current` is the last step.
 	 */
-	nextBodyStep(current: BodyStepId): BodyStepId | undefined {
-		const keys = Object.keys(this.steps) as BodyStepId[];
+	nextBodyStep(current: string): string | undefined {
+		const keys = Object.keys(this.steps);
 		const idx = keys.indexOf(current);
 		return idx >= 0 && idx < keys.length - 1 ? keys[idx + 1] : undefined;
 	}

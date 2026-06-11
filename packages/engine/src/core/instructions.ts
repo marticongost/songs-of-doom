@@ -79,9 +79,8 @@ export function instructions<S extends ProcedureState>() {
 		/**
 		 * Defines a procedure step that iterates over a list of items.
 		 */
-		forEach: <const N extends keyof S & string, BodyStepId extends string = string>(
-			props: ForEachStepProps<S, N, BodyStepId>
-		): ForEachStep<S, N, BodyStepId> => new ForEachStep(props),
+		forEach: <const N extends keyof S & string>(props: ForEachStepProps<S, N>): ForEachStep<S, N> =>
+			new ForEachStep(props),
 
 		/**
 		 * Defines a step that requests input from the players.
@@ -171,7 +170,7 @@ export function instructions<S extends ProcedureState>() {
 		 * The `factory` function receives the current state and should return the step to
 		 * dispatch to.
 		 */
-		dispatch: (factory: (state: S) => Step<S>): DispatchStep<S> => new DispatchStep({ factory }),
+		dispatch: (factory: (state: S) => Step): DispatchStep<S> => new DispatchStep({ factory }),
 
 		/**
 		 * Triggers the child procedure for the given effect.

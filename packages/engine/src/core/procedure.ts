@@ -50,7 +50,7 @@ export interface ProcedureDefinitionProps<S extends ProcedureState> {
 	 * (automatically wrapped in a {@link ComputeStep}), or a
 	 * {@link ProcedureDefinition} (automatically wrapped in a {@link CallStep}).
 	 */
-	steps: Record<string, Step<S> | ((state: S) => S | undefined) | ProcedureDefinition<any>>;
+	steps: Record<string, Step | ((state: S) => S | undefined) | ProcedureDefinition<any>>;
 
 	/**
 	 * Default initial state for the procedure. Can be overriden by caller-provided
@@ -87,7 +87,7 @@ export class ProcedureDefinition<S extends ProcedureState> {
 	/**
 	 * The discrete steps that the procedure is composed of.
 	 */
-	readonly steps: Record<string, Step<S>>;
+	readonly steps: Record<string, Step>;
 
 	/**
 	 * Default initial state for the procedure. Can be overriden by caller-provided
@@ -107,7 +107,7 @@ export class ProcedureDefinition<S extends ProcedureState> {
 					: typeof step === 'function'
 						? new ComputeStep({ logic: step as unknown as (state: S) => S | undefined })
 						: step
-		}) as Record<string, Step<S>>;
+		}) as Record<string, Step>;
 
 		const stepKeys = Object.keys(this.steps);
 		if (stepKeys.length === 0) {
