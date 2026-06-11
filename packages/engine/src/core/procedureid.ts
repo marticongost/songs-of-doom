@@ -33,5 +33,6 @@ export enum ProcedureId {
 	DiscardFromHandEffect = 'DiscardFromHandEffect',
 	DrawCardsEffect = 'DrawCardsEffect',
 	DrawFocusEffect = 'DrawFocusEffect',
-	EngageEffect = 'EngageEffect'
+	EngageEffect = 'EngageEffect',
+	ExhaustEffect = 'ExhaustEffect'
 }

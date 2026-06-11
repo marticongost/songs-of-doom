@@ -1,5 +1,5 @@
 import { finalise } from '@songsofdoom/common';
-import { Target, type TargetSpec } from '../target';
+import { Target, type CardTargetType, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
 /**
@@ -7,7 +7,7 @@ import { Effect } from './effect';
  */
 export interface ExhaustEffectProps {
 	/** The target to exhaust. Defaults to the card's default target if not specified. */
-	target?: TargetSpec;
+	target?: TargetSpec<CardTargetType>;
 }
 
 /**
@@ -15,27 +15,12 @@ export interface ExhaustEffectProps {
  */
 export class ExhaustEffect extends Effect {
 	/** The target to exhaust. */
-	readonly target?: Target;
+	readonly target?: Target<CardTargetType>;
 
 	constructor({ target }: ExhaustEffectProps) {
 		super();
 		this.target = finalise(Target, target);
 	}
-
-	/*
-	override async apply(gameGraph: GameGraph) {
-		const cardId = (await gameGraph.requestSingleTarget(this.target, {
-			default: 'active-card'
-		})) as CardId;
-		gameGraph.mutate((state) => {
-			const card = state.requireCard(cardId);
-			if (card.exhausted) {
-				rollbackEffect();
-			}
-			card.exhausted = true;
-			return { card: cardId };
-		});
-	}*/
 }
 
 /** Creates an effect that exhausts a target. */

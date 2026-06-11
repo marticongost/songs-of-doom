@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Target } from '../target';
+import { Target, type CardTargetType } from '../target';
 import { exhaust } from './exhaust';
 
 // ─── ExhaustEffect construction ───────────────────────────────────────────────
@@ -11,7 +11,7 @@ describe('ExhaustEffect construction', () => {
 	});
 
 	it('exhaust({ target }) creates an ExhaustEffect with the given target', () => {
-		const target = new Target({});
+		const target = new Target<CardTargetType>({});
 		const effect = exhaust({ target });
 		expect(effect.target).toBe(target);
 	});
