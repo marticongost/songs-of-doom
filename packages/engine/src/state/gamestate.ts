@@ -3,8 +3,10 @@ import type {
 	BooleanExpressionType,
 	Capability,
 	CapabilityCost,
+	EntityTypeId,
 	ScalarExpressionType,
-	Target
+	Target,
+	TargetType
 } from '@songsofdoom/game';
 import { Action, ActualCapabilityCost, focuses, Reaction, type FocusType } from '@songsofdoom/game';
 import { evaluateBoolean, evaluateScalar } from '../expressions';
@@ -494,48 +496,54 @@ export abstract class GameState<
 		}
 		const targetIds = new Set<EntityId>();
 
-		if (target.selection === 'this') {
-			// TODO: Should by filter by type as well?
+		if (target.matchesType('current-card')) {
 			targetIds.add(this.requireCurrentCard().id);
-		} else {
-			if (target.matchesType('player')) {
+		}
+
+		for (const type of [
+			'skill',
+			'trait',
+			'archetype',
+			'item',
+			'ally',
+			'creature',
+			'location',
+			'encounter',
+			'story'
+		] as Array<EntityTypeId & TargetType>) {
+			if (target.matchesType(type)) {
+				this.cards({ type }).forEach((card) => targetIds.add(card.id));
+			}
+		}
+
+		if (target.matchesType('player')) {
+			this.players.forEach((player) => targetIds.add(player.id));
+		}
+		if (target.matchesType('owner')) {
+			targetIds.add(this.requireCurrentCard().ownerId);
+		}
+		if (target.matchesType('active-player')) {
+			// TODO: Should this be a condition?
+			const activePlayer = this.requireActivePlayer();
+			targetIds.add(activePlayer.id);
+		}
+		if (target.matchesType('enemy')) {
+			if (this.requireSubject().hostile) {
+				this.cards({ type: 'ally' }).forEach((card) => targetIds.add(card.id));
 				this.players.forEach((player) => targetIds.add(player.id));
-			}
-			if (target.matchesType('owner')) {
-				targetIds.add(this.requireCurrentCard().ownerId);
-			}
-			if (target.matchesType('active-player')) {
-				// TODO: Should this be a condition?
-				const activePlayer = this.requireActivePlayer();
-				targetIds.add(activePlayer.id);
-			}
-			if (target.matchesType('enemy')) {
-				// TODO: inconsistent naming between ("object" VS "item" - should stick with "creature")
+			} else {
 				this.creatures.forEach((creature) => {
 					targetIds.add(creature.id);
 				});
 			}
-			if (target.matchesType('ally')) {
-				this.cards({ type: 'ally' }).forEach((ally) => targetIds.add(ally.id));
-			}
-			if (target.matchesType('attacker')) {
-				// TODO: mismatch between "attacker" and "subject"
-				targetIds.add(this.requireSubject().id);
-			}
-			if (target.matchesType('defender')) {
-				// TODO: mismatch between "defender" and "target"
-				targetIds.add(this.requireTarget().id);
-			}
-			if (target.matchesType('object')) {
-				// TODO: inconsistent naming between ("object" VS "item" - should stick with "item")
-				this.cards({ type: 'item' }).forEach((item) => targetIds.add(item.id));
-			}
-			if (target.matchesType('location')) {
-				this.cards({ type: 'location' }).forEach((location) => targetIds.add(location.id));
-			}
-			if (target.matchesType('skill')) {
-				this.cards({ type: 'skill' }).forEach((skill) => targetIds.add(skill.id));
-			}
+		}
+		if (target.matchesType('attacker')) {
+			// TODO: mismatch between "attacker" and "subject"
+			targetIds.add(this.requireSubject().id);
+		}
+		if (target.matchesType('defender')) {
+			// TODO: mismatch between "defender" and "target"
+			targetIds.add(this.requireTarget().id);
 		}
 
 		// TODO: Select by stored variable

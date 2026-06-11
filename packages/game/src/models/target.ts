@@ -1,4 +1,5 @@
 import { finalise } from '@songsofdoom/common';
+import { and } from './expressions';
 import { type BooleanExpressionType } from './expressions/boolean/boolean-expression';
 import {
 	ScalarExpression,
@@ -21,8 +22,8 @@ export type EnemyTargetType = 'enemy';
 /** A subset of {@link TargetType} that can be used to designate character allies. */
 export type AllyTargetType = 'ally';
 
-/** A subset of {@link TargetType} that can be used to designate objects. */
-export type ObjectTargetType = 'object';
+/** A subset of {@link TargetType} that can be used to designate items. */
+export type ItemTargetType = 'item';
 
 /** A subset of {@link TargetType} that can be used to designate locations. */
 export type LocationTargetType = 'location';
@@ -30,15 +31,29 @@ export type LocationTargetType = 'location';
 /** A subset of {@link TargetType} that can be used to designate skills. */
 export type SkillTargetType = 'skill';
 
+/** A subset of {@link TargetType} that can be used to designate cards. */
+export type CardTargetType =
+	| 'skill'
+	| 'trait'
+	| 'archetype'
+	| 'item'
+	| 'ally'
+	| 'creature'
+	| 'location'
+	| 'encounter'
+	| 'story'
+	| 'current-card';
+
 /** A type of target for a game effect. */
 export type TargetType =
 	| PlayerTargetType
 	| ActorTargetType
 	| EnemyTargetType
 	| AllyTargetType
-	| ObjectTargetType
+	| ItemTargetType
 	| LocationTargetType
-	| SkillTargetType;
+	| SkillTargetType
+	| CardTargetType;
 
 /** A specification for a number of targets to select, supporting a variety of formats. */
 export type TargetCardinalitySpec =
@@ -106,7 +121,6 @@ export const normaliseTargetCardinality = (spec: TargetCardinalitySpec): TargetC
 /** A selection method for a target. Used by {@link Target} if more than one target
  * would match a {@link TargetDiscriminator}. */
 export type TargetSelection =
-	| 'this'
 	| 'player-chosen'
 	| 'random'
 	| 'closest'
@@ -211,6 +225,13 @@ export class Target<T extends TargetType = TargetType> extends TargetDiscriminat
 			this.selection = p.selection ?? 'player-chosen';
 			this.variable = p.variable;
 		}
+	}
+
+	satisfying(condition: BooleanExpressionType): Target<T> {
+		return new Target({
+			...this,
+			condition: this.condition ? and(this.condition, condition) : condition
+		});
 	}
 }
 

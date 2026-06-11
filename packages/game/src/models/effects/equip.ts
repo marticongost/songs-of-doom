@@ -1,11 +1,11 @@
 import { finalise } from '@songsofdoom/common';
-import { Target, type ObjectTargetType, type TargetSpec } from '../target';
+import { Target, type ItemTargetType, type TargetSpec } from '../target';
 import { Effect } from './effect';
 
 /** Constructor parameters for the {@link EquipEffect} class. */
 export interface EquipEffectProps {
 	/** The object(s) to equip. */
-	target: TargetSpec<ObjectTargetType>;
+	target: TargetSpec<ItemTargetType>;
 }
 
 /**
@@ -13,7 +13,7 @@ export interface EquipEffectProps {
  * This lets the player swap their currently equipped items during play.
  */
 export class EquipEffect extends Effect {
-	readonly target: Target<ObjectTargetType>;
+	readonly target: Target<ItemTargetType>;
 
 	constructor({ target }: EquipEffectProps) {
 		super();
@@ -25,5 +25,5 @@ export class EquipEffect extends Effect {
  * Creates an effect that changes active equipment.
  */
 export const equip = (
-	target: TargetSpec<ObjectTargetType> = { type: 'object', cardinality: '1+' }
+	target: TargetSpec<ItemTargetType> = { type: 'item', cardinality: '1+' }
 ): EquipEffect => new EquipEffect({ target });

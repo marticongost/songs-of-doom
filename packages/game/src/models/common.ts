@@ -20,7 +20,7 @@ export const fullyRechargeOnChapterStart = new Obligation({
 export const shootBeforeEngaged = new Opportunity({
 	id: 'shootBeforeEngaged',
 	triggers: [{ event: 'engage', condition: reactivePlayerIsTarget }],
-	effects: [triggerAttack({ card: { selection: 'this' } })]
+	effects: [triggerAttack({ card: 'current-card' })]
 });
 
 export const attachOrReplaceWithNewEncounterWhenRevealed = new Obligation({

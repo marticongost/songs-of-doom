@@ -16,8 +16,8 @@ export interface ChargesExpressionProps {
  * This is a scalar value that can be used in comparisons or arithmetic operations.
  *
  * Examples:
- * - `gt(new ChargesExpression({ target: new TargetDiscriminator('object') }), 0)` - object has at least 1 charge
- * - `gte(new ChargesExpression({ target: { type: 'object', condition: owned } }), 3)` - owned object has at least 3 charges
+ * - `gt(new ChargesExpression({ target: new TargetDiscriminator('item') }), 0)` - object has at least 1 charge
+ * - `gte(new ChargesExpression({ target: { type: 'item', condition: owned } }), 3)` - owned object has at least 3 charges
  */
 export class ChargesExpression extends ScalarExpression {
 	/** The target card whose charges are to be counted. */

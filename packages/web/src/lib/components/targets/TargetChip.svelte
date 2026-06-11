@@ -153,26 +153,48 @@
 				en: 'allies'
 			}
 		},
-		object: {
+		creature: {
+			plain: {
+				ca: 'criatura',
+				es: 'criatura',
+				en: 'creature'
+			},
+			determinate: {
+				ca: 'la criatura',
+				es: 'la criatura',
+				en: 'the creature'
+			},
+			indeterminate: {
+				ca: 'una criatura',
+				es: 'una criatura',
+				en: 'a creature'
+			},
+			plural: {
+				ca: 'criatures',
+				es: 'criaturas',
+				en: 'creatures'
+			}
+		},
+		item: {
 			plain: {
 				ca: 'objecte',
 				es: 'objeto',
-				en: 'object'
+				en: 'item'
 			},
 			determinate: {
 				ca: "l'objecte",
 				es: 'el objeto',
-				en: 'the object'
+				en: 'the item'
 			},
 			indeterminate: {
 				ca: 'un objecte',
 				es: 'un objeto',
-				en: 'an object'
+				en: 'an item'
 			},
 			plural: {
 				ca: 'objectes',
 				es: 'objetos',
-				en: 'objects'
+				en: 'items'
 			}
 		},
 		location: {
@@ -217,6 +239,106 @@
 				ca: 'cartes de la ma',
 				es: 'cartas de la mano',
 				en: 'cards in hand'
+			}
+		},
+		trait: {
+			plain: {
+				ca: 'tret',
+				es: 'rasgo',
+				en: 'trait'
+			},
+			determinate: {
+				ca: 'el tret',
+				es: 'el rasgo',
+				en: 'the trait'
+			},
+			indeterminate: {
+				ca: 'un tret',
+				es: 'un rasgo',
+				en: 'a trait'
+			},
+			plural: {
+				ca: 'trets',
+				es: 'rasgos',
+				en: 'traits'
+			}
+		},
+		archetype: {
+			plain: {
+				ca: 'arquetip',
+				es: 'arquetipo',
+				en: 'archetype'
+			},
+			determinate: {
+				ca: "l'arquetip",
+				es: 'el arquetipo',
+				en: 'the archetype'
+			},
+			indeterminate: {
+				ca: 'un arquetip',
+				es: 'un arquetipo',
+				en: 'an archetype'
+			},
+			plural: {
+				ca: 'arquetips',
+				es: 'arquetipos',
+				en: 'archetypes'
+			}
+		},
+		encounter: {
+			plain: {
+				ca: 'encontre',
+				es: 'encuentro',
+				en: 'encounter'
+			},
+			determinate: {
+				ca: "l'encontre",
+				es: 'el encuentro',
+				en: 'the encounter'
+			},
+			indeterminate: {
+				ca: 'un encontre',
+				es: 'un encuentro',
+				en: 'an encounter'
+			},
+			plural: {
+				ca: 'encontres',
+				es: 'encuentros',
+				en: 'encounters'
+			}
+		},
+		story: {
+			plain: {
+				ca: 'història',
+				es: 'historia',
+				en: 'story'
+			},
+			determinate: {
+				ca: "l'història",
+				es: 'la historia',
+				en: 'the story'
+			},
+			indeterminate: {
+				ca: 'una història',
+				es: 'una historia',
+				en: 'a story'
+			},
+			plural: {
+				ca: 'històries',
+				es: 'historias',
+				en: 'stories'
+			}
+		},
+		'current-card': {
+			plain: {
+				ca: 'aquesta carta',
+				es: 'esta carta',
+				en: 'this card'
+			},
+			determinate: {
+				ca: 'aquesta carta',
+				es: 'esta carta',
+				en: 'this card'
 			}
 		}
 	};
@@ -342,8 +464,6 @@
 					es={gender === 'feminine' ? 'aleatoria' : 'aleatorio'}
 					en="random"
 				/>
-			{:else if target.selection === 'this'}
-				<Text ca="d'aquesta carta" es="de esta carta" en="of this card" />
 			{:else if target.selection === 'closest'}
 				{#if target.type?.has('location')}
 					<Text ca="actual" es="actual" en="current" />

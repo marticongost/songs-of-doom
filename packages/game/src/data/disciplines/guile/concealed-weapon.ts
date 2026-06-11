@@ -17,7 +17,7 @@ export default upgradable(Skill, 2, (variants) => ({
 			id: 'activate',
 			cost: { intelligence: 1 },
 			effects: [
-				equip({ type: 'object', variable: 'X', condition: smallWeapon }),
+				equip({ type: 'item', variable: 'X', condition: smallWeapon }),
 				triggerAttack({
 					card: { variable: 'X' },
 					modifiers: [modifyCapabilityCost({ cost: { any: -2 } }), modifyRoll(1)]

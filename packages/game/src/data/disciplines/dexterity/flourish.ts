@@ -28,7 +28,7 @@ export default upgradable(Skill, 2, (variants) => ({
 								addCharges({
 									amount: 1,
 									target: {
-										type: 'object',
+										type: 'item',
 										condition: and(owned, weapon)
 									}
 								}),
