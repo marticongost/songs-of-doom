@@ -85,6 +85,9 @@ export abstract class EntityState<
 	hasProperty(property: Property): boolean {
 		return this.getProperty(property) !== undefined;
 	}
+
+	/** Indicates if the entity is hostile (an enemy creature). */
+	abstract get hostile(): boolean;
 }
 
 export interface MutableEntityState<Id extends EntityId> extends EntityState<Id, MutableCardState> {

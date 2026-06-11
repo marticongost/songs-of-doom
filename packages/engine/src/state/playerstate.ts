@@ -100,6 +100,8 @@ export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extend
 		return this.id;
 	}
 
+	override hostile = false;
+
 	cards(options?: CardOptions): Array<TCard> {
 		const ready = options?.ready ?? false;
 		const includeAttachments = options?.includeAttachments ?? true;

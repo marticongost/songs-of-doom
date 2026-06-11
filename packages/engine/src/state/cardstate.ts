@@ -108,6 +108,10 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 		return this.container.type === 'player' ? this.container.playerId : undefined;
 	}
 
+	override get hostile(): boolean {
+		return this.card.type.id === 'creature';
+	}
+
 	get capabilities(): Array<Capability> {
 		if (this.container.type === 'card') {
 			return this.card.attachmentCapabilities;
