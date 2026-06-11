@@ -3,11 +3,17 @@ import { TargetField } from '../../core/input';
 import { instructions } from '../../core/instructions';
 import { type ProcedureState } from '../../core/procedure';
 import { ProcedureId } from '../../core/procedureid';
-import type { EntityId } from '../../state/identifiers';
+import type { EntityId, PlayerId } from '../../state/identifiers';
 
 export interface ResolveTargetState extends ProcedureState {
 	/** The target being resolved. */
 	target: Target;
+
+	/**
+	 * The player to ask for input, if the target requires player choice. Defaults to the
+	 * active player.
+	 */
+	playerId?: PlayerId;
 
 	/** The resolved target(s). */
 	resolvedTargetIds?: EntityId[];
@@ -21,6 +27,7 @@ export const resolveTarget = define({
 		resolve: dispatch((state) =>
 			state.target.selection === 'player-chosen'
 				? input({
+						playerId: state.playerId,
 						fields: [
 							new TargetField({
 								name: 'resolvedTargetIds',
@@ -28,7 +35,7 @@ export const resolveTarget = define({
 							})
 						]
 					})
-				: state.game.resolveTarget(state.target)
+				: () => state.game.resolveTarget(state.target)
 		)
 	}
 });

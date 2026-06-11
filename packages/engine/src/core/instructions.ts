@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { finalise } from '@songsofdoom/common';
 import { Effect, EventType, Target, TargetType, type TargetSpec } from '@songsofdoom/game';
-import type { Field, InputStepProps } from '..';
 import { type EmitEventState, type EventContext } from '../procedures/core/emitevent';
 import type { ResolveTargetState } from '../procedures/core/resolvetarget';
 import { triggerEffect, type TriggerEffectProps } from '../procedures/core/triggereffect';
 import type { MutableGameState } from '../state/gamestate';
+import type { PlayerId } from '../state/identifiers';
+import type { Field } from './input';
 import {
 	ProcedureDefinition,
 	type ProcedureDefinitionProps,
@@ -18,7 +19,8 @@ import {
 	ForEachStep,
 	InputStep,
 	Step,
-	type ForEachStepProps
+	type ForEachStepProps,
+	type InputStepProps
 } from './steps';
 
 /** Base state for effect-specific procedures. */
@@ -222,16 +224,20 @@ export function instructions<S extends ProcedureState>() {
 		 * @param target The target to resolve.
 		 * @param fieldName The name of the field in the state to save the resolved target
 		 *  ID to. Must be a key of `S` and the field must be of type `T`.
+		 * @param playerId The player to ask for input, if the target requires player
+		 *  choice. Defaults to the active player.
 		 * @returns A step that resolves the target and saves the result to the state.
 		 */
 		requireSingleTarget: <T extends TargetType = TargetType>(
 			target: Target<T> | TargetSpec<T> | ((state: S) => Target<T> | TargetSpec<T>),
-			fieldName: string & keyof S
+			fieldName: string & keyof S,
+			playerId?: PlayerId
 		): CallStep<S, ResolveTargetState> => {
 			return new CallStep<S, ResolveTargetState>({
 				procedureId: ProcedureId.ResolveTarget,
 				parameters: (state) => ({
-					target: finalise(Target, typeof target === 'function' ? target(state) : target)
+					target: finalise(Target, typeof target === 'function' ? target(state) : target),
+					playerId
 				}),
 				then: (state, childResult) => {
 					const resolvedIds = childResult.resolvedTargetIds;
