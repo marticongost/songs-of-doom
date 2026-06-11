@@ -1,30 +1,33 @@
+import type { ScalarExpressionType } from '../expressions';
+import { ScalarExpression } from '../expressions';
 import { Effect } from './effect';
 
+/**
+ * Props for configuring a DrawCardsEffect.
+ */
 export interface DrawCardsEffectProps {
-	amount: number;
+	/** Number of cards to draw. */
+	amount: ScalarExpressionType;
 }
 
+/**
+ * An effect that makes the active player draw cards from their deck.
+ */
 export class DrawCardsEffect extends Effect {
-	readonly amount: number;
+	/** Number of cards to draw. */
+	readonly amount: ScalarExpressionType;
 
 	constructor({ amount }: DrawCardsEffectProps) {
 		super();
 		this.amount = amount;
 	}
-
-	/*
-	override async apply(gameGraph: GameGraph) {
-		await gameGraph.mutate((state) => {
-			const player = state.requireActivePlayer();
-			const drawnCards = player.drawFromDeck(state, this.amount);
-			return { cards: (Array.isArray(drawnCards) ? drawnCards : []).map((card) => card.id) };
-		});
-	}
-	*/
 }
 
+const isScalar = (v: ScalarExpressionType | DrawCardsEffectProps): v is ScalarExpressionType =>
+	typeof v === 'number' || typeof v === 'string' || v instanceof ScalarExpression;
+
 /** Creates an effect that draws cards. */
-export const drawCards = (amountOrProps: number | DrawCardsEffectProps): DrawCardsEffect =>
-	new DrawCardsEffect(
-		typeof amountOrProps === 'number' ? { amount: amountOrProps } : amountOrProps
-	);
+export const drawCards = (
+	amountOrProps: ScalarExpressionType | DrawCardsEffectProps
+): DrawCardsEffect =>
+	new DrawCardsEffect(isScalar(amountOrProps) ? { amount: amountOrProps } : amountOrProps);

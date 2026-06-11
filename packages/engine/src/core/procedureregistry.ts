@@ -7,6 +7,7 @@ import { conditionalEffectProc } from '../procedures/effects/conditionalproc';
 import { conferPropertiesEffectProc } from '../procedures/effects/conferpropertiesproc';
 import { discardFromHandEffectProc } from '../procedures/effects/discardfromhandproc';
 import { discardEffectProc } from '../procedures/effects/discardproc';
+import { drawCardsEffectProc } from '../procedures/effects/drawcardsproc';
 import { drawFocusEffectProc } from '../procedures/effects/drawfocusproc';
 import { chapter } from '../procedures/gamesequence/chapters/chapter';
 import { chapterEndPhase } from '../procedures/gamesequence/chapters/chapterendphase';
@@ -55,5 +56,6 @@ export const procedureDefinitions: Record<ProcedureId, ProcedureDefinition<any>>
 	[ProcedureId.ConditionalEffect]: conditionalEffectProc,
 	[ProcedureId.DiscardEffect]: discardEffectProc,
 	[ProcedureId.DiscardFromHandEffect]: discardFromHandEffectProc,
+	[ProcedureId.DrawCardsEffect]: drawCardsEffectProc,
 	[ProcedureId.DrawFocusEffect]: drawFocusEffectProc
 };
