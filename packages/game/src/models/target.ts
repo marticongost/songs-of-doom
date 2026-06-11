@@ -15,7 +15,7 @@ export type CombatantTargetType = PlayerTargetType | 'enemy' | 'ally';
 /** A subset of {@link TargetType} that can be used to designate both characters or creatures. */
 export type ActorTargetType = CombatantTargetType | 'attacker' | 'defender';
 
-/** A subset of {@link TargetType} that can be used to designate enemy creatures. */
+/** A subset of {@link TargetType} that can be used to designate opponents. */
 export type EnemyTargetType = 'enemy';
 
 /** A subset of {@link TargetType} that can be used to designate character allies. */
