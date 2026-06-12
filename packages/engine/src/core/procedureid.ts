@@ -35,5 +35,6 @@ export enum ProcedureId {
 	DrawFocusEffect = 'DrawFocusEffect',
 	EngageEffect = 'EngageEffect',
 	ExhaustEffect = 'ExhaustEffect',
-	GatherCluesEffect = 'GatherCluesEffect'
+	GatherCluesEffect = 'GatherCluesEffect',
+	HealEffect = 'HealEffect'
 }
