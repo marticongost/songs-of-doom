@@ -340,6 +340,18 @@
 				es: 'esta carta',
 				en: 'this card'
 			}
+		},
+		'current-subject': {
+			plain: {
+				ca: 'el subjecte actual',
+				es: 'el sujeto actual',
+				en: 'the current subject'
+			},
+			determinate: {
+				ca: 'el subjecte actual',
+				es: 'el sujeto actual',
+				en: 'the current subject'
+			}
 		}
 	};
 

@@ -516,6 +516,9 @@ export abstract class GameState<
 			}
 		}
 
+		if (target.matchesType('current-subject')) {
+			targetIds.add(this.requireSubject().id);
+		}
 		if (target.matchesType('player')) {
 			this.players.forEach((player) => targetIds.add(player.id));
 		}

@@ -8,7 +8,7 @@ import {
 import { Stat } from './stats';
 
 /** A subset of {@link TargetType} that can be used to designate players. */
-export type PlayerTargetType = 'player' | 'owner' | 'active-player';
+export type PlayerTargetType = 'player' | 'owner' | 'active-player' | 'current-subject';
 
 /** A subset of {@link TargetType} that can be used to designate combatants. */
 export type CombatantTargetType = PlayerTargetType | 'enemy' | 'ally';
@@ -16,23 +16,21 @@ export type CombatantTargetType = PlayerTargetType | 'enemy' | 'ally';
 /** A subset of {@link TargetType} that can be used to designate both characters or creatures. */
 export type ActorTargetType = CombatantTargetType | 'attacker' | 'defender';
 
-/** A subset of {@link TargetType} that can be used to designate opponents. */
-export type EnemyTargetType = 'enemy';
-
 /** A subset of {@link TargetType} that can be used to designate character allies. */
-export type AllyTargetType = 'ally';
+export type AllyTargetType = 'current-subject' | 'ally';
 
 /** A subset of {@link TargetType} that can be used to designate items. */
-export type ItemTargetType = 'item';
+export type ItemTargetType = 'current-subject' | 'item';
 
 /** A subset of {@link TargetType} that can be used to designate locations. */
-export type LocationTargetType = 'location';
+export type LocationTargetType = 'current-subject' | 'location';
 
 /** A subset of {@link TargetType} that can be used to designate skills. */
-export type SkillTargetType = 'skill';
+export type SkillTargetType = 'current-subject' | 'skill';
 
 /** A subset of {@link TargetType} that can be used to designate cards. */
 export type CardTargetType =
+	| 'current-subject'
 	| 'skill'
 	| 'trait'
 	| 'archetype'
@@ -48,7 +46,6 @@ export type CardTargetType =
 export type TargetType =
 	| PlayerTargetType
 	| ActorTargetType
-	| EnemyTargetType
 	| AllyTargetType
 	| ItemTargetType
 	| LocationTargetType
