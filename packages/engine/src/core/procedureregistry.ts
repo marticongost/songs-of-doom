@@ -11,6 +11,7 @@ import { drawCardsEffectProc } from '../procedures/effects/drawcardsproc';
 import { drawFocusEffectProc } from '../procedures/effects/drawfocusproc';
 import { engageEffectProc } from '../procedures/effects/engageproc';
 import { exhaustEffectProc } from '../procedures/effects/exhaustproc';
+import { gatherCluesEffectProc } from '../procedures/effects/gathercluesproc';
 import { chapter } from '../procedures/gamesequence/chapters/chapter';
 import { chapterEndPhase } from '../procedures/gamesequence/chapters/chapterendphase';
 import { chapterStartPhase } from '../procedures/gamesequence/chapters/chapterstartphase';
@@ -61,5 +62,6 @@ export const procedureDefinitions: Record<ProcedureId, ProcedureDefinition<any>>
 	[ProcedureId.DrawCardsEffect]: drawCardsEffectProc,
 	[ProcedureId.DrawFocusEffect]: drawFocusEffectProc,
 	[ProcedureId.EngageEffect]: engageEffectProc,
-	[ProcedureId.ExhaustEffect]: exhaustEffectProc
+	[ProcedureId.ExhaustEffect]: exhaustEffectProc,
+	[ProcedureId.GatherCluesEffect]: gatherCluesEffectProc
 };

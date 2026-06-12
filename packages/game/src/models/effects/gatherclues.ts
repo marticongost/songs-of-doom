@@ -30,27 +30,6 @@ export class GatherCluesEffect extends Effect {
 		this.amount = amount;
 		this.target = (finalise(Target, target) ?? currentLocation) as Target<LocationTargetType>;
 	}
-
-	/*
-	override async apply(gameGraph: GameGraph) {
-		const targetIds = (await gameGraph.requestTargets(this.target, {
-			default: 'current-target'
-		})) as Array<CardId>;
-
-		gameGraph.mutate((state) => {
-			const subject = state.requireSubject();
-			const gatheredClues = new Counter<CardId>();
-			for (const targetId of targetIds) {
-				const location = state.requireCard(targetId) as unknown as MutableLocationState;
-				const cluesGathered = Math.min(state.evaluateScalar(this.amount), location.clues);
-				location.clues -= cluesGathered;
-				subject.clues += cluesGathered;
-				gatheredClues.add(targetId, cluesGathered);
-			}
-			return { gatheredClues };
-		});
-	}
-	*/
 }
 
 const isScalar = (v: ScalarExpressionType | GatherCluesEffectProps): v is ScalarExpressionType =>
