@@ -36,5 +36,6 @@ export enum ProcedureId {
 	EngageEffect = 'EngageEffect',
 	ExhaustEffect = 'ExhaustEffect',
 	GatherCluesEffect = 'GatherCluesEffect',
-	HealEffect = 'HealEffect'
+	HealEffect = 'HealEffect',
+	MoveEffect = 'MoveEffect'
 }
