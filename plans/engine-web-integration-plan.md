@@ -46,7 +46,7 @@ Rationale: Eliminates the downtime window. The server bridges formats in memory;
 ### 1.4 Version Negotiation
 
 - Server embeds git SHA at build time.
-- Client sends `X-Client-Version` header on every REST request and SSE connection.
+- Client sends `Game-Client-Version` header on every REST request and SSE connection.
 - On mismatch: server returns `409 Conflict` with `{ requiredVersion }`. Client reloads.
 - On SSE: server closes the stream with a `version-mismatch` event, client reloads.
 
@@ -232,7 +232,7 @@ Returns the current game state view for the authenticated player.
 {
 	"gameId": "abc123",
 	"status": "awaiting_input",
-	"serverVersion": "def456",
+	"gameVersion": "def456",
 	"currentEntry": {
 		/* latest JournalEntry, serialised */
 	},
@@ -309,7 +309,7 @@ Returns an SSE stream of **live** journal updates. Not intended for historical d
 
 **Query params:** `?since={journalIndex}` — pre-flush entries after this index before streaming live (for reconnection catch-up). Must be provided on initial connection to avoid re-sending the entire journal.
 
-**Headers:** `X-Client-Version: {gitSha}`
+**Headers:** `Game-Client-Version: {gitSha}`
 
 **Events:**
 
@@ -337,11 +337,11 @@ A SvelteKit hook or shared helper that runs before every game API route:
 
 ```typescript
 function checkVersion(request: Request): Response | null {
-	const clientVersion = request.headers.get('X-Client-Version');
-	const serverVersion = SERVER_VERSION; // from build-time env
+	const clientVersion = request.headers.get('Game-Client-Version');
+	const gameVersion = GAME_VERSION; // from build-time env
 
-	if (clientVersion && clientVersion !== serverVersion) {
-		return Response.json({ requiredVersion: serverVersion }, { status: 409 });
+	if (clientVersion && clientVersion !== gameVersion) {
+		return Response.json({ requiredVersion: gameVersion }, { status: 409 });
 	}
 	return null; // proceed
 }
@@ -529,8 +529,8 @@ migrateJournals().catch(console.error);
 - [x] **2.3** Implement `GameManager.createGame()`, `GameManager.getEngine()`, `GameManager.persistJournal()`.
 - [x] **2.4** Implement `GameManager.subscribe(gameId, controller)` / `unsubscribe()` for SSE broadcast.
 - [ ] **2.5** _(Deferred — horizontal scaling)_ PostgreSQL `LISTEN`/`NOTIFY` relay for cross-instance SSE fan-out. See §1.6.
-- [ ] **2.6** Add `SERVER_VERSION` build-time constant (git SHA via `vite.define`).
-- [ ] **2.7** Create version check middleware/helper in `$lib/server/version-check.ts`.
+- [X] **2.6** Add `GAME_VERSION` build-time constant (git SHA via `vite.define`).
+- [X] **2.7** Create version check middleware/helper in `$lib/server/version-check.ts`.
 
 ### Phase 3: REST API
 
@@ -555,7 +555,7 @@ migrateJournals().catch(console.error);
 - [ ] **5.3** Implement `GameStore.supplyInput(input)` — `POST /input`, process response (updates journal, status, input fields). No separate `advance()` — the server runs the engine after supplying input.
 - [ ] **5.4** Implement `GameStore.fetchJournal(since?)` — incremental or full journal fetch for game log rendering.
 - [ ] **5.5** Implement `handleVersionMismatch()` — show reload banner on `409` or SSE `version-mismatch` event.
-- [ ] **5.6** Embed `X-Client-Version` in all fetch/EventSource requests.
+- [ ] **5.6** Embed `Game-Client-Version` in all fetch/EventSource requests.
 
 ### Phase 6: Input Components
 
