@@ -33,7 +33,9 @@ export const procedureDefinitions: Record<ProcedureId, ProcedureDefinition<any>>
 	// Stub for unimplemented procedures
 	[ProcedureId.Unimplemented]: new ProcedureDefinition({
 		id: ProcedureId.Unimplemented,
-		steps: {}
+		steps: {
+			noop: () => undefined
+		}
 	}),
 
 	// Core

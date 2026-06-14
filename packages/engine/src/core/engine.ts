@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { engineSerialisation, type EngineSerialisationContext } from '../serialisation';
 import type { JournalEntry } from './journal';
 import type { ProcedureDefinition, ProcedureState } from './procedure';
 import type { ProcedureId } from './procedureid';
@@ -18,6 +17,9 @@ export class Engine {
 	private _journal: JournalEntry[];
 	readonly procedureRegistry: ProcedureRegistry;
 
+	/**
+	 * Rebuilds an engine from a previously persisted journal.
+	 */
 	private constructor(procedureRegistry: ProcedureRegistry, journal: JournalEntry[]) {
 		this.procedureRegistry = procedureRegistry;
 		this._journal = journal;
@@ -42,15 +44,14 @@ export class Engine {
 		return new Engine(procedureRegistry, [{ procedureId, state: initialState }]);
 	}
 
-	static fromJSON(
-		procedureRegistry: ProcedureRegistry,
-		json: string,
-		context: EngineSerialisationContext
-	): Engine {
-		return new Engine(
-			procedureRegistry,
-			engineSerialisation.deserialise<JournalEntry[]>(json, context)
-		);
+	/**
+	 * Restores an engine from a previously persisted journal.
+	 */
+	static restore(procedureRegistry: ProcedureRegistry, journal: JournalEntry[]): Engine {
+		if (journal.length === 0) {
+			throw new Error('Cannot restore engine: journal is empty.');
+		}
+		return new Engine(procedureRegistry, journal);
 	}
 
 	run(): boolean {
@@ -378,9 +379,5 @@ export class Engine {
 		if (!(step instanceof InputStep)) throw new Error(`Step "${state.step}" is not an InputStep.`);
 		const result = step.then({ ...state, step: undefined }, input as any);
 		this._processStepResult(procedureId, state, result, stepMap, onComplete);
-	}
-
-	toJSON(context: EngineSerialisationContext): string {
-		return engineSerialisation.serialise(this._journal, context);
 	}
 }

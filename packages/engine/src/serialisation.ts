@@ -8,6 +8,7 @@ import {
 	type Type
 } from '@songsofdoom/common';
 import * as Game from '@songsofdoom/game';
+import type { JournalEntry } from './core/journal';
 import { ReadonlyAttackResolution } from './state/attackresolution';
 import { ReadonlyCapabilityResolution } from './state/capabilityresolution';
 import { ReadonlyCardState } from './state/cardstate';
@@ -22,8 +23,8 @@ import { ReadonlyWoundResolution } from './state/woundresolution';
 // ---------------------------------------------------------------------------
 
 /**
- * Context passed to {@link engineSerialisation.serialise} and
- * {@link engineSerialisation.deserialise} to resolve external references
+ * Context passed to {@link journalSerialisation.serialise} and
+ * {@link journalSerialisation.deserialise} to resolve external references
  * for Entity, Property, Talent, Stat, Event, Focus, and Slot objects.
  */
 export interface EngineSerialisationContext {
@@ -70,7 +71,7 @@ export interface EngineSerialisationContext {
  * object identity — only a reference key is stored; the caller provides a
  * {@link EngineSerialisationContext} with lookup functions.
  */
-export const engineSerialisation = new Serialisation<EngineSerialisationContext>({
+export const journalSerialisation = new Serialisation<EngineSerialisationContext>({
 	types: [
 		// --- Engine state types (manual — not exported by @songsofdoom/game) ---
 		ReadonlyGameState,
@@ -181,13 +182,10 @@ export const engineSerialisation = new Serialisation<EngineSerialisationContext>
  * Creates an {@link EngineSerialisationContext} backed by the game's catalog
  * and property data.
  *
- * @param talents - A record of all known Talent instances keyed by ID.
- *   Talent data is not re-exported from `@songsofdoom/game`, so callers must
- *   provide it explicitly.
+ * All external reference resolution (entities, properties, talents, stats,
+ * events, focuses, slots) is handled internally — no parameters needed.
  */
-export function createEngineSerialisationContext(
-	talents: Record<string, Game.Talent>
-): EngineSerialisationContext {
+export function createEngineSerialisationContext(): EngineSerialisationContext {
 	// Build property registry from singleton entity-types and property data exports.
 	const propertiesByName = new Map<string, Game.Property>();
 	const propertyNames = new Map<Game.Property, string>();
@@ -206,6 +204,19 @@ export function createEngineSerialisationContext(
 		}
 	}
 
+	// Build talent registry from talent data exports.
+	const talents: Record<string, Game.Talent> = {};
+	for (const value of Object.values(Game.talentData)) {
+		if (
+			value &&
+			typeof value === 'object' &&
+			'id' in value &&
+			typeof (value as { id: unknown }).id === 'string'
+		) {
+			talents[(value as { id: string }).id] = value as Game.Talent;
+		}
+	}
+
 	return {
 		getPropertyKey: (property: Game.Property) => propertyNames.get(property),
 		resolveEntity: (id) => Game.entities.get(id),
@@ -216,4 +227,30 @@ export function createEngineSerialisationContext(
 		resolveFocus: (type) => Game.focuses[type as Game.FocusType] as Game.Focus | undefined,
 		resolveSlot: (type) => Game.slots[type as Game.SlotType] as Game.Slot | undefined
 	};
+}
+
+// ---------------------------------------------------------------------------
+// Per-entry serialisation
+// ---------------------------------------------------------------------------
+
+/**
+ * Serialises a single {@link JournalEntry} to a JSON-compatible object
+ * suitable for database storage.
+ */
+export function serialiseJournalEntry(
+	entry: JournalEntry,
+	context: EngineSerialisationContext
+): object {
+	return JSON.parse(journalSerialisation.serialise(entry, context));
+}
+
+/**
+ * Deserialises a single {@link JournalEntry} from a JSON-compatible object
+ * previously produced by {@link serialiseJournalEntry}.
+ */
+export function deserialiseJournalEntry(
+	json: object,
+	context: EngineSerialisationContext
+): JournalEntry {
+	return journalSerialisation.deserialise<JournalEntry>(JSON.stringify(json), context);
 }

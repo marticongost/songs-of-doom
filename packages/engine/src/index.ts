@@ -1,30 +1,31 @@
 // Engine core
 export { Engine } from './core/engine';
-export { CapabilityChoiceField, Field, type FieldProps } from './core/input';
+export { CapabilityChoiceField, Field } from './core/input';
+export type { FieldProps } from './core/input';
 export { instructions } from './core/instructions';
-export { JournalEntry } from './core/journal';
+export type { JournalEntry } from './core/journal';
 
 // Serialisation
-export { ProcedureDefinition, type ProcedureState, type ProcedureStatus } from './core/procedure';
+export { ProcedureDefinition } from './core/procedure';
+export type { ProcedureState, ProcedureStatus } from './core/procedure';
+export { ProcedureId } from './core/procedureid';
 export { procedureDefinitions } from './core/procedureregistry';
-export {
-	CallStep,
-	ComputeStep,
-	DispatchStep,
-	ForEachStep,
-	InputStep,
-	type CallStepProps,
-	type ComputeStepProps,
-	type DispatchStepProps,
-	type ForEachBodyState,
-	type ForEachStepProps,
-	type InputStepProps
+export { CallStep, ComputeStep, DispatchStep, ForEachStep, InputStep } from './core/steps';
+export type {
+	CallStepProps,
+	ComputeStepProps,
+	DispatchStepProps,
+	ForEachBodyState,
+	ForEachStepProps,
+	InputStepProps
 } from './core/steps';
 export {
 	createEngineSerialisationContext,
-	engineSerialisation,
-	type EngineSerialisationContext
+	deserialiseJournalEntry,
+	journalSerialisation,
+	serialiseJournalEntry
 } from './serialisation';
+export type { EngineSerialisationContext } from './serialisation';
 
 // State
 export {
@@ -32,24 +33,18 @@ export {
 	MutableAttackResolution,
 	ReadonlyAttackResolution
 } from './state/attackresolution';
-export { CapabilityResolution, MutableCapabilityResolution } from './state/capabilityresolution';
-export { CardContainer, CardOptions } from './state/cardcontainer';
-export {
-	CardState,
-	MutableCardState,
-	ReadonlyCardState,
-	type CapabilityRef,
-	type CardParent
-} from './state/cardstate';
-export { EntityState, MutableEntityState } from './state/entitystate';
+export type {
+	CapabilityResolution,
+	MutableCapabilityResolution
+} from './state/capabilityresolution';
+export type { CardContainer, CardOptions } from './state/cardcontainer';
+export { CardState, MutableCardState, ReadonlyCardState } from './state/cardstate';
+export type { CapabilityRef, CardParent } from './state/cardstate';
+export { EntityState } from './state/entitystate';
+export type { MutableEntityState } from './state/entitystate';
 export { mutate } from './state/entitystatemutation';
-export {
-	GameState,
-	MutableGameState,
-	ReadonlyGameState,
-	type GameContext,
-	type GameStateProps
-} from './state/gamestate';
+export { GameState, MutableGameState, ReadonlyGameState } from './state/gamestate';
+export type { GameContext, GameStateProps } from './state/gamestate';
 export {
 	isAllyId,
 	isCardId,
@@ -58,24 +53,22 @@ export {
 	isObjectId,
 	isPlayerId,
 	isSkillId,
-	isTraitId,
-	type ActorId,
-	type AllyId,
-	type CardId,
-	type CreatureId,
-	type EntityId,
-	type LocationId,
-	type ObjectId,
-	type PlayerId,
-	type SkillId,
-	type TraitId
+	isTraitId
 } from './state/identifiers';
-export {
-	LocationState,
-	MutableLocationState,
-	ReadonlyLocationState,
-	type LocationGraph
-} from './state/locationstate';
+export type {
+	ActorId,
+	AllyId,
+	CardId,
+	CreatureId,
+	EntityId,
+	LocationId,
+	ObjectId,
+	PlayerId,
+	SkillId,
+	TraitId
+} from './state/identifiers';
+export { LocationState, MutableLocationState, ReadonlyLocationState } from './state/locationstate';
+export type { LocationGraph } from './state/locationstate';
 export { MutablePlayerState, PlayerState, ReadonlyPlayerState } from './state/playerstate';
 export {
 	MutableTestResolution,

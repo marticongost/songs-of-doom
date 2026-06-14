@@ -121,5 +121,8 @@ export { upgradable, VariantMatcher, type LevelExpr } from './models/upgrades';
 // Property data (instances of Rule, ScalarRule, etc.)
 export * as propertyData from './data/properties';
 
+// Talent data
+export * as talentData from './data/talents';
+
 // Characters
 export * from './models/characters';

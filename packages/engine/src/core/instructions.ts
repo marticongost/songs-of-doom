@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { finalise } from '@songsofdoom/common';
-import { Effect, EventType, Target, TargetType, type TargetSpec } from '@songsofdoom/game';
+import {
+	Effect,
+	Target,
+	type EventType,
+	type TargetSpec,
+	type TargetType
+} from '@songsofdoom/game';
 import { type EmitEventState, type EventContext } from '../procedures/core/emitevent';
 import type { ResolveTargetState } from '../procedures/core/resolvetarget';
 import { triggerEffect, type TriggerEffectProps } from '../procedures/core/triggereffect';

@@ -404,3 +404,93 @@ describe('Engine with DispatchStep', () => {
 		expect(finished).toBe(true);
 	});
 });
+
+// ---------------------------------------------------------------------------
+// Engine.restore
+// ---------------------------------------------------------------------------
+
+describe('Engine.restore', () => {
+	it('restores an engine with the given journal', () => {
+		expect.assertions(1);
+
+		const proc = new ProcedureDefinition({
+			id: ProcedureId.Unimplemented,
+			steps: { dummy: () => undefined }
+		});
+
+		const journal = [
+			{
+				procedureId: ProcedureId.Unimplemented,
+				state: { step: 'dummy', status: 'complete' as const, game: testGame() }
+			}
+		];
+
+		const restored = Engine.restore(registryWith(proc), journal);
+
+		expect([...restored.journal]).toEqual(journal);
+	});
+
+	it('throws when the journal is empty', () => {
+		expect.assertions(1);
+
+		const proc = new ProcedureDefinition({
+			id: ProcedureId.Unimplemented,
+			steps: { dummy: () => undefined }
+		});
+
+		expect(() => Engine.restore(registryWith(proc), [])).toThrow(
+			'Cannot restore engine: journal is empty.'
+		);
+	});
+
+	it('can resume execution from a restored engine paused at an InputStep', () => {
+		expect.assertions(3);
+
+		interface TestState extends ProcedureState {
+			collected: string[];
+		}
+
+		const { input: askInput } = instructions<TestState>();
+
+		const proc = new ProcedureDefinition({
+			id: ProcedureId.Unimplemented,
+			defaults: { collected: [] } as any,
+			steps: {
+				ask: askInput({
+					fields: [] as const,
+					then: (state: TestState, _inputs) => ({
+						...state,
+						collected: [...state.collected, 'got-input']
+					})
+				}),
+				done: (state: TestState) => ({ ...state, status: 'complete' })
+			}
+		});
+
+		// Hand-craft a journal paused at the InputStep
+		const journal = [
+			{
+				procedureId: ProcedureId.Unimplemented,
+				state: {
+					step: 'ask',
+					status: 'ongoing' as const,
+					game: testGame(),
+					collected: []
+				}
+			}
+		];
+
+		const restored = Engine.restore(registryWith(proc), journal);
+
+		// Should not be complete yet — it's paused
+		expect(restored.currentEntry!.state.status).toBe('ongoing');
+
+		// Resume
+		restored.supplyInput({});
+		const finished = restored.run();
+
+		expect(finished).toBe(true);
+		const doneEntry = restored.journal.at(-1)!;
+		expect((doneEntry.state as any).collected).toEqual(['got-input']);
+	});
+});

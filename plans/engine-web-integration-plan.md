@@ -523,11 +523,11 @@ migrateJournals().catch(console.error);
 
 ### Phase 2: Server Infrastructure
 
-- [ ] **2.0** Add `@songsofdoom/engine` to `packages/web/package.json` dependencies.
-- [ ] **2.1** Create `packages/web/src/lib/server/game-manager.ts` — manages `Map<gameId, Engine>`, persistence, and SSE subscribers.
-- [ ] **2.2** Create Prisma schema for `Game`, `GameParticipant` (user ↔ character pairing), and `JournalEntry` models.
-- [ ] **2.3** Implement `GameManager.createGame()`, `GameManager.getEngine()`, `GameManager.persistJournal()`.
-- [ ] **2.4** Implement `GameManager.subscribe(gameId, controller)` / `unsubscribe()` for SSE broadcast.
+- [x] **2.0** Add `@songsofdoom/engine` to `packages/web/package.json` dependencies.
+- [x] **2.1** Create `packages/web/src/lib/server/game-manager.ts` — manages `Map<gameId, Engine>`, persistence, and SSE subscribers.
+- [x] **2.2** Create Prisma schema for `Game`, `GameParticipant` (user ↔ character pairing), and `JournalEntry` models.
+- [x] **2.3** Implement `GameManager.createGame()`, `GameManager.getEngine()`, `GameManager.persistJournal()`.
+- [x] **2.4** Implement `GameManager.subscribe(gameId, controller)` / `unsubscribe()` for SSE broadcast.
 - [ ] **2.5** _(Deferred — horizontal scaling)_ PostgreSQL `LISTEN`/`NOTIFY` relay for cross-instance SSE fan-out. See §1.6.
 - [ ] **2.6** Add `SERVER_VERSION` build-time constant (git SHA via `vite.define`).
 - [ ] **2.7** Create version check middleware/helper in `$lib/server/version-check.ts`.

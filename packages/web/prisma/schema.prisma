@@ -8,12 +8,13 @@ datasource db {
 }
 
 model User {
-  id         String      @id
-  createdAt  DateTime    @default(now())
-  username   String      @unique
-  password   String
-  sessions   Session[]
-  characters Character[]
+  id              String            @id
+  createdAt       DateTime          @default(now())
+  username        String            @unique
+  password        String
+  sessions        Session[]
+  characters      Character[]
+  gameParticipant GameParticipant[]
 }
 
 model Session {
@@ -26,11 +27,12 @@ model Session {
 }
 
 model Character {
-  id        Int                 @id @default(autoincrement())
-  ownerId   String
-  owner     User                @relation(references: [id], fields: [ownerId], onDelete: Cascade)
-  name      String
-  revisions CharacterRevision[]
+  id              Int                 @id @default(autoincrement())
+  ownerId         String
+  owner           User                @relation(references: [id], fields: [ownerId], onDelete: Cascade)
+  name            String
+  revisions       CharacterRevision[]
+  gameParticipant GameParticipant[]
 }
 
 model CharacterRevision {
@@ -43,4 +45,46 @@ model CharacterRevision {
   finalised   Boolean
 
   @@id([characterId, number])
+}
+
+enum GameStatus {
+  CREATING
+  AWAITING_INPUT
+  COMPLETE
+  ABANDONED
+}
+
+model Game {
+  id        String     @id @default(uuid())
+  status    GameStatus @default(CREATING)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  participants GameParticipant[]
+  journal      JournalEntry[]
+}
+
+model GameParticipant {
+  gameId      String
+  userId      String
+  characterId Int
+
+  game      Game      @relation(references: [id], fields: [gameId], onDelete: Cascade)
+  user      User      @relation(references: [id], fields: [userId], onDelete: Cascade)
+  character Character @relation(references: [id], fields: [characterId], onDelete: Cascade)
+
+  @@id([gameId, userId])
+  @@unique([gameId, characterId])
+  @@index([userId])
+}
+
+model JournalEntry {
+  id     String @id @default(uuid())
+  gameId String
+  index  Int
+  data   Json
+  game   Game   @relation(references: [id], fields: [gameId], onDelete: Cascade)
+
+  @@unique([gameId, index])
+  @@index([gameId])
 }
