@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { engineSerialisation, type EngineSerialisationContext } from '../serialisation';
 import type { JournalEntry } from './journal';
 import type { ProcedureDefinition, ProcedureState } from './procedure';
 import type { ProcedureId } from './procedureid';
@@ -41,8 +42,15 @@ export class Engine {
 		return new Engine(procedureRegistry, [{ procedureId, state: initialState }]);
 	}
 
-	static fromJSON(procedureRegistry: ProcedureRegistry, json: EngineSnapshot): Engine {
-		return new Engine(procedureRegistry, [...json.journal]);
+	static fromJSON(
+		procedureRegistry: ProcedureRegistry,
+		json: string,
+		context: EngineSerialisationContext
+	): Engine {
+		return new Engine(
+			procedureRegistry,
+			engineSerialisation.deserialise<JournalEntry[]>(json, context)
+		);
 	}
 
 	run(): boolean {
@@ -372,11 +380,7 @@ export class Engine {
 		this._processStepResult(procedureId, state, result, stepMap, onComplete);
 	}
 
-	toJSON(): EngineSnapshot {
-		return { journal: [...this._journal] };
+	toJSON(context: EngineSerialisationContext): string {
+		return engineSerialisation.serialise(this._journal, context);
 	}
-}
-
-export interface EngineSnapshot {
-	readonly journal: ReadonlyArray<JournalEntry>;
 }

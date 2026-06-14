@@ -1,6 +1,44 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import { BaseCounter } from './counter';
 
-export type Constructor<T, Props = any> = new (props: Props) => T;
+export type Type<T = any, A extends any[] = any[]> = new (...args: A) => T;
+
+export type Constructor<T, Props = any> = Type<T, [Props]>;
+
+/**
+ * Checks whether `value` is a concrete class constructor whose prototype chain
+ * includes `parent`.  Returns `false` for `value === parent` (the abstract base).
+ */
+export const isConcreteSubclassOf = (
+	value: unknown,
+	parent: Function | Function[]
+): value is Type => {
+	if (typeof value !== 'function') return false;
+	if (Array.isArray(parent)) {
+		return parent.some((p) => isConcreteSubclassOf(value, p));
+	}
+	if (value === parent) return false;
+	try {
+		return value.prototype instanceof parent;
+	} catch {
+		return false;
+	}
+};
+
+export const findConstructors = (
+	pkgExports: Record<string, unknown>,
+	predicate?: (type: Function) => boolean
+): Type[] => {
+	const types: Type[] = [];
+
+	for (const value of Object.values(pkgExports)) {
+		if (typeof value !== 'function') continue;
+		if (!predicate || predicate(value as Function)) types.push(value as Type);
+	}
+
+	return types;
+};
 
 // Wrap the conditional return type so the function stays readable
 type Finalised<P, T> = P extends undefined ? undefined : T;

@@ -516,10 +516,10 @@ migrateJournals().catch(console.error);
 
 ### Phase 1: Foundation
 
-- [ ] **1.1** Create `packages/engine/src/serialisation.ts` — configure `Serialisation` instance with all domain types. No identity rules or custom mappers yet.
-- [ ] **1.2** Update `Engine.toJSON()` to use `engineSerialisation.serialise(this._journal)`.
-- [ ] **1.3** Update `Engine.fromJSON()` to use `engineSerialisation.deserialise(json)`.
-- [ ] **1.4** Export `engineSerialisation` from `packages/engine/src/index.ts`.
+- [x] **1.1** Create `packages/engine/src/serialisation.ts` — configure `Serialisation` instance with all domain types and identity rules for the entity catalog and other well known objects.
+- [x] **1.2** Update `Engine.toJSON()` to use `engineSerialisation.serialise(this._journal)`.
+- [x] **1.3** Update `Engine.fromJSON()` to use `engineSerialisation.deserialise(json)`.
+- [x] **1.4** Export `engineSerialisation` from `packages/engine/src/index.ts`.
 
 ### Phase 2: Server Infrastructure
 

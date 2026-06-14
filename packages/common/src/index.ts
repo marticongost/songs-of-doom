@@ -13,4 +13,13 @@ export {
 	type RecomposeContext,
 	type TypeBranding
 } from './serialisation';
-export { finalise, groupBy, mapToRecord, type Constructor, type MapToRecordOptions } from './utils';
+export {
+	finalise,
+	findConstructors,
+	groupBy,
+	isConcreteSubclassOf,
+	mapToRecord,
+	type Constructor,
+	type MapToRecordOptions,
+	type Type
+} from './utils';

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { mapToRecord } from './utils';
+import { mapToRecord, type Type } from './utils';
 
 const METADATA_PREFIX = '@';
 const TYPE_BRAND_FIELD = `${METADATA_PREFIX}type`;
@@ -54,8 +54,6 @@ export interface SerialisationProps<ContextData> {
 	objectIdentity?: Map<Type, ObjectIdentity<any, ContextData>>;
 }
 
-type Type = new (...args: any[]) => any;
-
 export type TypeBranding = (type: Type) => string;
 
 export type JSONLiteral = string | number | boolean | null;
@@ -101,11 +99,10 @@ export type ObjectIdentity<T = unknown, ContextData = undefined> = {
 	 *
 	 * @param obj The object for which to obtain a key.
 	 * @param contextData Additional context data that may be used to generate the key.
-	 * @returns A key that uniquely identifies the given object.
-	 *
-	 * @throws If a key cannot be generated for the given object.
+	 * @returns A key that uniquely identifies the given object, or `undefined` to fall
+	 *  back to inline serialisation.
 	 */
-	getObjectId(obj: T, contextData: ContextData): string;
+	getObjectId(obj: T, contextData: ContextData): string | undefined;
 
 	/**
 	 * Indicates whether the objects of this type are external references that should not

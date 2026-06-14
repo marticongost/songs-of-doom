@@ -1,8 +1,10 @@
 // Engine core
-export { Engine, type EngineSnapshot } from './core/engine';
+export { Engine } from './core/engine';
 export { CapabilityChoiceField, Field, type FieldProps } from './core/input';
 export { instructions } from './core/instructions';
 export { JournalEntry } from './core/journal';
+
+// Serialisation
 export { ProcedureDefinition, type ProcedureState, type ProcedureStatus } from './core/procedure';
 export { procedureDefinitions } from './core/procedureregistry';
 export {
@@ -18,6 +20,11 @@ export {
 	type ForEachStepProps,
 	type InputStepProps
 } from './core/steps';
+export {
+	createEngineSerialisationContext,
+	engineSerialisation,
+	type EngineSerialisationContext
+} from './serialisation';
 
 // State
 export {
