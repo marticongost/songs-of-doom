@@ -10,7 +10,7 @@ const { define, mutateGameState } = instructions<DiscardEffectState>();
 export const discardEffectProc = define({
 	id: ProcedureId.DiscardEffect,
 	steps: {
-		discard: mutateGameState((state, game) => {
+		discard: mutateGameState((_state, game) => {
 			const card = game.requireActiveCard();
 			card.moveToTopOfDiscardPile(game);
 		})

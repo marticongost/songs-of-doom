@@ -13,7 +13,7 @@ const { define, call, mutateGameState } = instructions<ChapterStartState>();
 export const chapterStartPhase = define({
 	id: ProcedureId.ChapterStartPhase,
 	steps: {
-		incrementChapter: mutateGameState((state, game) => {
+		incrementChapter: mutateGameState((_state, game) => {
 			game.chapter++;
 		}),
 		emitChapterStartEvent: call(emitEvent, { eventType: events.chapterStart.type }, (state) => ({

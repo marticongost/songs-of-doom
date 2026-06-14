@@ -10,7 +10,7 @@ const { define, mutateGameState, emitEvent } = instructions<TurnStartPhaseState>
 export const turnStartPhase = define({
 	id: ProcedureId.TurnStartPhase,
 	steps: {
-		init: mutateGameState((state, game) => {
+		init: mutateGameState((_state, game) => {
 			game.turn++;
 			for (const player of game.players) {
 				player.activated = false;

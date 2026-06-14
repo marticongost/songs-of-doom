@@ -17,7 +17,7 @@ export const chapterEndPhase = define({
 			...state,
 			step: 'readyCards'
 		})),
-		readyCards: mutateGameState((state, game) => {
+		readyCards: mutateGameState((_state, game) => {
 			for (const card of game.cards()) {
 				card.exhausted = false;
 			}
