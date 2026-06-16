@@ -13,9 +13,8 @@ const mockPrisma = vi.hoisted(() => ({
 	}
 }));
 
-const { mockGetGameManager, mockCheckVersion, mockError, mockJson } = vi.hoisted(() => ({
+const { mockGetGameManager, mockError, mockJson } = vi.hoisted(() => ({
 	mockGetGameManager: vi.fn(),
-	mockCheckVersion: vi.fn().mockReturnValue({ type: 'match' as const }),
 	mockError: vi.fn((status: number, body: string) => {
 		const err = new Error(body) as Error & { status: number; body: string };
 		err.status = status;
@@ -31,10 +30,6 @@ vi.mock('$lib/server/db', () => ({
 
 vi.mock('$lib/server/game-manager', () => ({
 	getGameManager: mockGetGameManager
-}));
-
-vi.mock('$lib/server/version-check', () => ({
-	checkVersion: mockCheckVersion
 }));
 
 vi.mock('@sveltejs/kit', async (importOriginal) => {
@@ -53,12 +48,11 @@ import { POST } from './+server';
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makeRequest(body: unknown, opts?: { version?: string }): Request {
+function makeRequest(body: unknown): Request {
 	return new Request('http://localhost/api/game/game-1/input', {
 		method: 'POST',
 		headers: {
-			'content-type': 'application/json',
-			...(opts?.version ? { 'Game-Client-Version': opts.version } : {})
+			'content-type': 'application/json'
 		},
 		body: JSON.stringify(body)
 	});
@@ -82,8 +76,6 @@ function authenticatedLocals(): App.Locals {
 describe('POST /api/game/[gameId]/input', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		// Restore the default version-match behaviour (clearAllMocks resets it).
-		mockCheckVersion.mockReturnValue({ type: 'match' as const });
 	});
 
 	// ─── Authentication ──────────────────────────────────────────────────
@@ -99,25 +91,6 @@ describe('POST /api/game/[gameId]/input', () => {
 			status: 401,
 			message: 'Authentication required'
 		});
-	});
-
-	// ─── Version check ───────────────────────────────────────────────────
-
-	it('returns 409 with version mismatch response', async () => {
-		const mismatchResponse = new Response(JSON.stringify({ requiredVersion: 'abc123' }), {
-			status: 409
-		});
-		mockCheckVersion.mockReturnValue({ type: 'mismatch', response: mismatchResponse });
-
-		const args: HandlerArgs = {
-			params: { gameId: 'game-1' },
-			locals: authenticatedLocals(),
-			request: makeRequest({})
-		};
-
-		const response = await POST(args as any);
-		expect(response.status).toBe(409);
-		expect(await response.json()).toEqual({ requiredVersion: 'abc123' });
 	});
 
 	// ─── Body validation ─────────────────────────────────────────────────

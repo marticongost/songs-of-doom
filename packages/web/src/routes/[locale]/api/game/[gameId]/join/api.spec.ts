@@ -41,7 +41,9 @@ import { POST } from './+server';
 function makeRequest(body: unknown): Request {
 	return new Request('http://localhost/api/game/game-1/join', {
 		method: 'POST',
-		headers: { 'content-type': 'application/json' },
+		headers: {
+			'content-type': 'application/json'
+		},
 		body: JSON.stringify(body)
 	});
 }

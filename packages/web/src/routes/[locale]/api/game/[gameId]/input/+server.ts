@@ -1,7 +1,6 @@
 import { prisma } from '$lib/server/db';
 import { ConflictError, NotFoundError } from '$lib/server/errors';
 import { getGameManager } from '$lib/server/game-manager';
-import { checkVersion } from '$lib/server/version-check';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -24,12 +23,6 @@ export const POST: RequestHandler = async ({ params, locals, request }) => {
 	// --- Authentication ---
 	if (!locals.user) {
 		error(401, 'Authentication required');
-	}
-
-	// --- Version check ---
-	const versionResult = checkVersion(request);
-	if (versionResult.type === 'mismatch') {
-		return versionResult.response;
 	}
 
 	const gameId = params.gameId;
