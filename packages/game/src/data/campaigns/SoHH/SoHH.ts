@@ -5,5 +5,6 @@ export default new Campaign({
 		ca: 'Les ombres de la Casa Halendak',
 		es: 'Las sombras de la Casa Halendak',
 		en: 'The Shadows of House Halendak'
-	}
+	},
+	initialScenarioId: 'sc1'
 });
