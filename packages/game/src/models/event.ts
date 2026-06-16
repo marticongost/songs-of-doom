@@ -107,9 +107,6 @@ const eventData = {
 			}
 		]
 	},
-	played: {
-		name: { ca: 'En entrar en joc', es: 'Al entrar en juego', en: 'When played' }
-	},
 	investigation: {
 		name: {
 			ca: 'Durant una investigació',
@@ -332,6 +329,23 @@ const eventData = {
 					ca: 'Quan sigui revelat',
 					es: 'Cuando sea revelado',
 					en: 'When revealed'
+				}
+			}
+		]
+	},
+	storyPlayed: {
+		name: {
+			ca: 'Quan es posi en joc una història',
+			es: 'Cuando se ponga en juego una historia',
+			en: 'When a story is played'
+		},
+		shortForms: [
+			{
+				match: conditionIsExactly(reactiveCardIsSubject),
+				description: {
+					ca: 'En entrar en joc',
+					es: 'Al entrar en juego',
+					en: 'When played'
 				}
 			}
 		]

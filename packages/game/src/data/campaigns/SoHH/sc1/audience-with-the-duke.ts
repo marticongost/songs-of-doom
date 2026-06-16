@@ -2,6 +2,7 @@ import multiline from 'multiline-ts';
 import { Obligation } from '../../../../models/capabilities';
 import { narrationEvent } from '../../../../models/effects';
 import { Story } from '../../../../models/entities/story';
+import { reactiveCardIsSubject } from '../../../../models/expressions';
 
 export default new Story({
 	title: {
@@ -12,7 +13,7 @@ export default new Story({
 	capabilities: [
 		new Obligation({
 			id: 'activate',
-			triggers: ['played'],
+			triggers: [{ event: 'storyPlayed', condition: reactiveCardIsSubject }],
 			effects: [
 				narrationEvent({
 					text: {

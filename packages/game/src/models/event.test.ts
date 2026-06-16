@@ -19,7 +19,7 @@ const shortDescription = { en: 'Short description' };
 
 describe('Event.getTriggerDescription', () => {
 	it('returns the event name when no condition is provided', () => {
-		const event = new Event({ type: 'played', name });
+		const event = new Event({ type: 'movement', name });
 
 		expect(event.getTriggerDescription()).toEqual({
 			description: name,
@@ -30,7 +30,7 @@ describe('Event.getTriggerDescription', () => {
 	it('returns the matching short form and clears the condition for an exact match', () => {
 		const matchingCondition = new TestExpression('matching');
 		const event = new Event({
-			type: 'played',
+			type: 'movement',
 			name,
 			shortForms: [
 				{
@@ -51,7 +51,7 @@ describe('Event.getTriggerDescription', () => {
 		const firstDescription = { en: 'First description' };
 		const secondDescription = { en: 'Second description' };
 		const event = new Event({
-			type: 'played',
+			type: 'movement',
 			name,
 			shortForms: [
 				{
@@ -75,7 +75,7 @@ describe('Event.getTriggerDescription', () => {
 		const matchingCondition = new TestExpression('matching');
 		const remainingCondition = new TestExpression('remaining');
 		const event = new Event({
-			type: 'played',
+			type: 'movement',
 			name,
 			shortForms: [
 				{
@@ -98,7 +98,7 @@ describe('Event.getTriggerDescription', () => {
 		const remainingCondition1 = new TestExpression('remaining-1');
 		const remainingCondition2 = new TestExpression('remaining-2');
 		const event = new Event({
-			type: 'played',
+			type: 'movement',
 			name,
 			shortForms: [
 				{
@@ -123,7 +123,7 @@ describe('Event.getTriggerDescription', () => {
 	it('returns the event name and preserves the original condition when no short form matches', () => {
 		const condition = new TestExpression('unmatched');
 		const event = new Event({
-			type: 'played',
+			type: 'movement',
 			name,
 			shortForms: [
 				{
