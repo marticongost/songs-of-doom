@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ProcedureId, type JournalEntry, type ReadonlyGameState } from '@songsofdoom/engine';
+import {
+	ProcedureId,
+	type Engine,
+	type JournalEntry,
+	type ReadonlyGameState
+} from '@songsofdoom/engine';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
@@ -15,6 +20,9 @@ const mockPrisma = vi.hoisted(() => ({
 	journalEntry: {
 		createMany: vi.fn(),
 		findMany: vi.fn()
+	},
+	character: {
+		findUnique: vi.fn()
 	}
 }));
 
@@ -43,6 +51,26 @@ vi.mock('@songsofdoom/engine', async (importOriginal) => {
 			run = vi.fn();
 			supplyInput = vi.fn();
 		}
+	};
+});
+
+// ---------------------------------------------------------------------------
+// Mock @songsofdoom/game
+// ---------------------------------------------------------------------------
+
+const mockEntities = vi.hoisted(() => ({
+	get: vi.fn(),
+	require: vi.fn()
+}));
+
+const mockIsCampaign = vi.hoisted(() => vi.fn());
+
+vi.mock('@songsofdoom/game', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@songsofdoom/game')>();
+	return {
+		...actual,
+		entities: mockEntities,
+		isCampaign: mockIsCampaign
 	};
 });
 
@@ -114,54 +142,32 @@ describe('GameManager', () => {
 	// -------------------------------------------------------------------
 
 	describe('createGame', () => {
-		it('creates a DB record, runs the engine, persists journal, and returns the id', async () => {
-			expect.assertions(4);
-
-			const fakeEngine = makeFakeEngine({ runReturn: true });
-			mockEngineCreate.mockReturnValue(fakeEngine);
+		it('creates a DB record with campaignId, ownerId and first participant', async () => {
+			mockEntities.get.mockReturnValue({ type: { id: 'campaign' } });
+			mockIsCampaign.mockReturnValue(true);
+			mockPrisma.character.findUnique.mockResolvedValue({ id: 1 });
 			mockPrisma.game.create.mockResolvedValue({ id: 'game-1' });
-			mockPrisma.game.update.mockResolvedValue({});
-			mockPrisma.journalEntry.createMany.mockResolvedValue({});
 
-			const gameId = await manager.createGame(ProcedureId.Unimplemented, {
-				step: 'start',
-				status: 'ongoing',
-				game: { players: [] }
-			} as any);
+			const gameId = await manager.createGame('user-1', 'SoHH', 1);
 
 			expect(gameId).toBe('game-1');
 			expect(mockPrisma.game.create).toHaveBeenCalledWith({
-				data: { status: 'CREATING' }
+				data: {
+					campaignId: 'SoHH',
+					ownerId: 'user-1',
+					participants: {
+						create: { userId: 'user-1', characterId: 1 }
+					}
+				}
 			});
-			expect(mockPrisma.game.update).toHaveBeenCalledWith({
-				where: { id: 'game-1' },
-				data: { status: 'COMPLETE' }
-			});
-			expect(manager['engines'].has('game-1')).toBe(true);
 		});
 
-		it('sets status to AWAITING_INPUT when engine pauses', async () => {
-			expect.assertions(1);
+		it('throws when the campaign does not exist', async () => {
+			mockEntities.get.mockReturnValue(undefined);
 
-			const fakeEngine = makeFakeEngine({
-				runReturn: false,
-				currentEntry: makeEntry(ProcedureId.Unimplemented, 'start', 'ongoing')
-			});
-			mockEngineCreate.mockReturnValue(fakeEngine);
-			mockPrisma.game.create.mockResolvedValue({ id: 'game-2' });
-			mockPrisma.game.update.mockResolvedValue({});
-			mockPrisma.journalEntry.createMany.mockResolvedValue({});
-
-			await manager.createGame(ProcedureId.Unimplemented, {
-				step: 'start',
-				status: 'ongoing',
-				game: { players: [] }
-			} as any);
-
-			expect(mockPrisma.game.update).toHaveBeenCalledWith({
-				where: { id: 'game-2' },
-				data: { status: 'AWAITING_INPUT' }
-			});
+			await expect(manager.createGame('user-1', 'nonexistent', 1)).rejects.toThrow(
+				'Campaign "nonexistent" not found'
+			);
 		});
 	});
 
@@ -171,19 +177,8 @@ describe('GameManager', () => {
 
 	describe('getEngine', () => {
 		it('returns the in-memory engine if already loaded', async () => {
-			expect.assertions(2);
-
 			const fakeEngine = makeFakeEngine({ runReturn: true });
-			mockEngineCreate.mockReturnValue(fakeEngine);
-			mockPrisma.game.create.mockResolvedValue({ id: 'game-1' });
-			mockPrisma.game.update.mockResolvedValue({});
-			mockPrisma.journalEntry.createMany.mockResolvedValue({});
-
-			await manager.createGame(ProcedureId.Unimplemented, {
-				step: 'start',
-				status: 'ongoing',
-				game: { players: [] }
-			} as any);
+			manager['engines'].set('game-1', fakeEngine as unknown as Engine);
 
 			const engine = await manager.getEngine('game-1');
 			expect(engine).toBe(fakeEngine);
@@ -191,8 +186,6 @@ describe('GameManager', () => {
 		});
 
 		it('loads from DB if not in memory', async () => {
-			expect.assertions(2);
-
 			const fakeEngine = makeFakeEngine();
 			mockEngineRestore.mockReturnValue(fakeEngine);
 			mockPrisma.journalEntry.findMany.mockResolvedValue([
@@ -208,8 +201,6 @@ describe('GameManager', () => {
 		});
 
 		it('returns undefined when no journal exists in DB', async () => {
-			expect.assertions(1);
-
 			mockPrisma.journalEntry.findMany.mockResolvedValue([]);
 
 			const engine = await manager.getEngine('nonexistent');
@@ -223,8 +214,6 @@ describe('GameManager', () => {
 
 	describe('supplyInput', () => {
 		it('supplies input, runs engine, persists, and broadcasts state', async () => {
-			expect.assertions(5);
-
 			const initialEntry = makeEntry();
 			const newEntry = makeEntry(ProcedureId.Unimplemented, 'done', 'complete');
 
@@ -268,8 +257,6 @@ describe('GameManager', () => {
 		});
 
 		it('throws when the game does not exist', async () => {
-			expect.assertions(1);
-
 			mockPrisma.journalEntry.findMany.mockResolvedValue([]);
 
 			await expect(manager.supplyInput('nonexistent', {})).rejects.toThrow(
@@ -278,8 +265,6 @@ describe('GameManager', () => {
 		});
 
 		it('broadcasts input-required when engine pauses at an InputStep', async () => {
-			expect.assertions(1);
-
 			const pausedEntry = mock<JournalEntry>({
 				procedureId: ProcedureId.Unimplemented,
 				state: { step: 'ask', status: 'ongoing' as const, game: mock<ReadonlyGameState>() }
@@ -311,8 +296,6 @@ describe('GameManager', () => {
 		});
 
 		it('updates status to COMPLETE when engine finishes', async () => {
-			expect.assertions(1);
-
 			const fakeEngine = makeFakeEngine({
 				journal: [makeEntry()],
 				runReturn: true
@@ -338,8 +321,6 @@ describe('GameManager', () => {
 
 	describe('subscribe / unsubscribe', () => {
 		it('adds and removes subscribers', () => {
-			expect.assertions(2);
-
 			const sub: SSESubscriber = {
 				sendState: vi.fn(),
 				sendInputRequired: vi.fn(),
@@ -354,8 +335,6 @@ describe('GameManager', () => {
 		});
 
 		it('cleans up the game entry when last subscriber is removed', () => {
-			expect.assertions(2);
-
 			const sub1: SSESubscriber = {
 				sendState: vi.fn(),
 				sendInputRequired: vi.fn(),
@@ -382,8 +361,6 @@ describe('GameManager', () => {
 
 	describe('broadcast', () => {
 		it('sends state events to all subscribers', () => {
-			expect.assertions(2);
-
 			const entry = makeEntry();
 			const sub1: SSESubscriber = {
 				sendState: vi.fn(),
@@ -406,8 +383,6 @@ describe('GameManager', () => {
 		});
 
 		it('sends input-required events to all subscribers', () => {
-			expect.assertions(1);
-
 			const sub: SSESubscriber = {
 				sendState: vi.fn(),
 				sendInputRequired: vi.fn(),
@@ -426,8 +401,6 @@ describe('GameManager', () => {
 		});
 
 		it('is a no-op when there are no subscribers', () => {
-			expect.assertions(1);
-
 			expect(() =>
 				manager.broadcast('game-1', {
 					type: 'state',
@@ -437,7 +410,7 @@ describe('GameManager', () => {
 		});
 
 		it('isolates errors — one failing subscriber does not affect others', () => {
-			expect.assertions(2);
+			vi.spyOn(console, 'error').mockImplementation(() => {});
 
 			const failingSub: SSESubscriber = {
 				sendState: vi.fn(() => {
@@ -468,8 +441,6 @@ describe('GameManager', () => {
 
 	describe('removeEngine', () => {
 		it('removes the engine from memory', () => {
-			expect.assertions(2);
-
 			const fakeEngine = makeFakeEngine();
 			manager['engines'].set('game-1', fakeEngine);
 			expect(manager['engines'].has('game-1')).toBe(true);
@@ -486,8 +457,6 @@ describe('GameManager', () => {
 
 describe('getGameManager', () => {
 	it('returns the same instance on repeated calls', () => {
-		expect.assertions(1);
-
 		(GameManager as any)._instance = null;
 		const a = getGameManager();
 		const b = getGameManager();

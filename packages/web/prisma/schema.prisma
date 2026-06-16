@@ -15,6 +15,7 @@ model User {
   sessions        Session[]
   characters      Character[]
   gameParticipant GameParticipant[]
+  ownedGames      Game[]
 }
 
 model Session {
@@ -48,17 +49,20 @@ model CharacterRevision {
 }
 
 enum GameStatus {
-  CREATING
-  AWAITING_INPUT
+  PREPARATION
+  ACTIVE
   COMPLETE
   ABANDONED
 }
 
 model Game {
-  id        String     @id @default(uuid())
-  status    GameStatus @default(CREATING)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id         String     @id @default(uuid())
+  status     GameStatus @default(PREPARATION)
+  campaignId String?
+  ownerId    String?
+  owner      User?      @relation(references: [id], fields: [ownerId], onDelete: SetNull)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   participants GameParticipant[]
   journal      JournalEntry[]

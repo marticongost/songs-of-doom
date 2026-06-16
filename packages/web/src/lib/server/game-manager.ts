@@ -1,4 +1,4 @@
-import type { ProcedureId, ProcedureState } from '@songsofdoom/engine';
+import type { ReadonlyGameState as ReadonlyGameStateType } from '@songsofdoom/engine';
 import {
 	createEngineSerialisationContext,
 	deserialiseJournalEntry,
@@ -7,10 +7,16 @@ import {
 	Field,
 	InputStep,
 	type JournalEntry,
+	journalSerialisation,
 	procedureDefinitions,
+	ProcedureId,
+	type ProcedureState,
+	ReadonlyGameState,
 	serialiseJournalEntry
 } from '@songsofdoom/engine';
+import { type CharacterState, entities, isCampaign } from '@songsofdoom/game';
 import { prisma } from './db';
+import { ConflictError, NotFoundError } from './errors';
 
 // ---------------------------------------------------------------------------
 // SSE subscriber interface
@@ -50,6 +56,25 @@ export interface GameInputRequiredEvent {
 }
 
 export type GameEvent = GameStateEvent | GameInputRequiredEvent;
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+/** Maximum number of participants per game. */
+export const MAX_PARTICIPANTS = 4;
+
+/**
+ * A journal entry without the full game state snapshot, suitable for log rendering.
+ *
+ * `T` is the state type (defaults to {@link ProcedureState}); `game` is
+ * stripped so the response stays lightweight while preserving the
+ * original entry structure including {@link JournalEntry#procedureId procedureId},
+ * {@link JournalEntry#parentIndex parentIndex}, and all other metadata.
+ */
+export type LogEntry<T extends ProcedureState = ProcedureState> = Omit<JournalEntry, 'state'> & {
+	state: Omit<T, 'game'>;
+};
 
 // ---------------------------------------------------------------------------
 // GameManager
@@ -97,40 +122,148 @@ export class GameManager {
 	}
 
 	// -------------------------------------------------------------------
-	// Engine management
+	// Game lifecycle (new PREPARATION → ACTIVE flow)
 	// -------------------------------------------------------------------
 
 	/**
-	 * Creates a new game, starts the engine at the given procedure, and runs
-	 * until the first {@link InputStep} or completion.
-	 *
-	 * @returns The new game's ID.
+	 * Creates a new game record in PREPARATION state with the chosen campaign,
+	 * and adds the creator as the first participant.
 	 */
-	async createGame(procedureId: ProcedureId, initialState: ProcedureState): Promise<string> {
-		const engine = Engine.create(procedureDefinitions, procedureId, initialState);
+	async createGame(userId: string, campaignId: string, characterId: number): Promise<string> {
+		const campaign = entities.get(campaignId);
+		if (!campaign || !isCampaign(campaign)) {
+			throw new NotFoundError(`Campaign "${campaignId}" not found`);
+		}
 
-		// Create the database record
+		const character = await prisma.character.findUnique({ where: { id: characterId } });
+		if (!character) {
+			throw new NotFoundError(`Character "${characterId}" not found`);
+		}
+
 		const game = await prisma.game.create({
-			data: { status: 'CREATING' }
-		});
-
-		// Run the engine to the first InputStep (or completion)
-		const completed = engine.run();
-
-		// Persist all journal entries produced so far
-		await this.persistJournal(game.id, engine);
-
-		// Update game status
-		await prisma.game.update({
-			where: { id: game.id },
 			data: {
-				status: completed ? 'COMPLETE' : 'AWAITING_INPUT'
+				campaignId,
+				ownerId: userId,
+				participants: {
+					create: { userId, characterId }
+				}
 			}
 		});
-
-		this.engines.set(game.id, engine);
 		return game.id;
 	}
+
+	/**
+	 * Adds a participant (user + character) to a game in PREPARATION state.
+	 */
+	async joinGame(gameId: string, userId: string, characterId: number): Promise<void> {
+		const game = await prisma.game.findUnique({
+			where: { id: gameId },
+			include: { participants: true }
+		});
+
+		if (!game) {
+			throw new NotFoundError(`Game "${gameId}" not found`);
+		}
+
+		if (game.status !== 'PREPARATION') {
+			throw new ConflictError(`Game "${gameId}" is not in PREPARATION state`);
+		}
+
+		if (game.participants.length >= MAX_PARTICIPANTS) {
+			throw new ConflictError(`Game "${gameId}" already has the maximum number of participants`);
+		}
+
+		const userAlreadyInGame = game.participants.some((p) => p.userId === userId);
+		if (userAlreadyInGame) {
+			throw new ConflictError(`User "${userId}" is already a participant in game "${gameId}"`);
+		}
+
+		const characterAlreadyInGame = game.participants.some((p) => p.characterId === characterId);
+		if (characterAlreadyInGame) {
+			throw new ConflictError(`Character "${characterId}" is already in game "${gameId}"`);
+		}
+
+		const character = await prisma.character.findUnique({ where: { id: characterId } });
+		if (!character) {
+			throw new NotFoundError(`Character "${characterId}" not found`);
+		}
+
+		await prisma.gameParticipant.create({
+			data: {
+				gameId,
+				userId,
+				characterId
+			}
+		});
+	}
+
+	/**
+	 * Starts a game: validates prerequisites, creates the engine from the
+	 * campaign chosen at creation time, runs it, and persists initial journal entries.
+	 */
+	async startGame(gameId: string): Promise<void> {
+		const game = await prisma.game.findUnique({
+			where: { id: gameId },
+			include: { participants: { include: { character: { include: { revisions: true } } } } }
+		});
+
+		if (!game) {
+			throw new NotFoundError(`Game "${gameId}" not found`);
+		}
+
+		if (game.participants.length === 0) {
+			throw new ConflictError(`Game "${gameId}" has no participants`);
+		}
+
+		if (game.status !== 'PREPARATION') {
+			throw new ConflictError(`Game "${gameId}" is not in PREPARATION state`);
+		}
+
+		if (!game.campaignId) {
+			throw new ConflictError(`Game "${gameId}" has no campaign selected`);
+		}
+
+		const campaign = entities.get(game.campaignId);
+		if (!campaign || !isCampaign(campaign)) {
+			throw new NotFoundError(`Campaign "${game.campaignId}" not found`);
+		}
+
+		// Build character states for the Setup procedure.
+		const characters = game.participants.map((p) => {
+			const latestRevision = p.character.revisions[0];
+			return (latestRevision?.state ?? {}) as unknown as CharacterState;
+		});
+
+		// Minimal placeholder game state — the Setup procedure replaces it.
+		const placeholderGame = new ReadonlyGameState({ players: [] });
+
+		// Create and run the engine starting with the Setup procedure.
+		const engine = Engine.create(procedureDefinitions, ProcedureId.RunCampaign, {
+			step: undefined,
+			status: 'ongoing',
+			game: placeholderGame,
+			campaignId: game.campaignId,
+			characters
+		} as unknown as ProcedureState);
+
+		engine.run();
+
+		// Persist initial journal entries.
+		await this.persistJournal(gameId, engine);
+
+		// Update game status based on whether the engine is waiting for input.
+		const newStatus = engine.currentEntry?.state.step !== undefined ? 'ACTIVE' : 'COMPLETE';
+		await prisma.game.update({
+			where: { id: gameId },
+			data: { status: newStatus }
+		});
+
+		this.engines.set(gameId, engine);
+	}
+
+	// -------------------------------------------------------------------
+	// Engine access
+	// -------------------------------------------------------------------
 
 	/**
 	 * Returns the engine for the given game, loading it from the persisted
@@ -158,7 +291,7 @@ export class GameManager {
 	): Promise<{ completed: boolean; newEntries: JournalEntry[] }> {
 		const engine = await this.getEngine(gameId);
 		if (!engine) {
-			throw new Error(`Game "${gameId}" not found.`);
+			throw new NotFoundError(`Game "${gameId}" not found.`);
 		}
 
 		const previousLength = engine.journal.length;
@@ -175,7 +308,7 @@ export class GameManager {
 		await prisma.game.update({
 			where: { id: gameId },
 			data: {
-				status: completed ? 'COMPLETE' : 'AWAITING_INPUT'
+				status: completed ? 'COMPLETE' : 'ACTIVE'
 			}
 		});
 
@@ -349,6 +482,72 @@ export class GameManager {
 		}
 
 		return { awaitingPlayerId: null, fields: null };
+	}
+
+	// -------------------------------------------------------------------
+	// Game state retrieval
+	// -------------------------------------------------------------------
+
+	/**
+	 * Returns the serialised current game state for a game.
+	 */
+	async getGameState(gameId: string): Promise<object | null> {
+		const entries = await this._getJournalEntries(gameId);
+		if (entries.length === 0) return null;
+		return this._serialiseGameState(entries[entries.length - 1].state.game);
+	}
+
+	/**
+	 * Returns the game state at a specific journal index.
+	 * Supports negative indices (count from the back).
+	 */
+	async getGameStateAtIndex(gameId: string, index: number): Promise<object | null> {
+		const entries = await this._getJournalEntries(gameId);
+		if (entries.length === 0) return null;
+
+		const resolvedIndex = index < 0 ? entries.length + index : index;
+		if (resolvedIndex < 0 || resolvedIndex >= entries.length) {
+			throw new Error(
+				`Journal index ${index} out of bounds (journal has ${entries.length} entries)`
+			);
+		}
+
+		return this._serialiseGameState(entries[resolvedIndex].state.game);
+	}
+
+	/**
+	 * Returns the full journal log without full game state for each entry.
+	 */
+	async getGameLog(gameId: string): Promise<LogEntry[]> {
+		const entries = await this._getJournalEntries(gameId);
+		return entries.map(({ state: { game: _game, ...state }, ...rest }) => ({
+			...rest,
+			state
+		}));
+	}
+
+	/**
+	 * Returns journal entries, preferring the in-memory engine if available.
+	 */
+	private async _getJournalEntries(gameId: string): Promise<JournalEntry[]> {
+		const engine = this.engines.get(gameId);
+		if (engine) {
+			return [...engine.journal];
+		}
+		const rows = await prisma.journalEntry.findMany({
+			where: { gameId },
+			orderBy: { index: 'asc' }
+		});
+		return rows.map((row) =>
+			journalSerialisation.deserialise<JournalEntry>(
+				JSON.stringify(row.data as object),
+				this.serialisationContext
+			)
+		);
+	}
+
+	private _serialiseGameState(game: ReadonlyGameStateType): object {
+		return JSON.parse(journalSerialisation.serialise(game, this.serialisationContext)) as object;
 	}
 }
 

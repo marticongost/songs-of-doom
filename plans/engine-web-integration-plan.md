@@ -220,40 +220,92 @@ The `EngineSnapshot` interface is replaced by a plain `string` (the serialised J
 
 ### 4.1 REST Endpoints
 
-All under `/[locale]/api/game/{gameId}/`.
+All under `/[locale]/api/game/`.
 
-#### `GET /[locale]/api/game/{gameId}`
+#### `POST /[locale]/api/game`
 
-Returns the current game state view for the authenticated player.
+Creates a new game in `PREPARATION` status with the chosen campaign. The creator is automatically added as the first participant.
 
-**Response 200:**
+**Body:**
 
 ```json
 {
-	"gameId": "abc123",
-	"status": "awaiting_input",
-	"gameVersion": "def456",
-	"currentEntry": {
-		/* latest JournalEntry, serialised */
-	},
-	"journalLength": 42
+	"campaignId": "core-set",
+	"characterId": 1
 }
 ```
 
-#### `GET /[locale]/api/game/{gameId}/journal`
+**Response 201:**
 
-Returns the **full journal** for the game. Used by the client to render the game log and to initialise state on first load.
+```json
+{ "gameId": "abc123" }
+```
 
-**Query params:** `?since={index}` — only return entries from this index onward (for incremental fetch).
+#### `POST /[locale]/api/game/{gameId}/join`
+
+Adds the authenticated user as a participant with a chosen character.
+
+**Body:**
+
+```json
+{ "characterId": 2 }
+```
+
+**Response 200:** `{ "success": true }`
+**Response 409:** Already joined, game not in PREPARATION, or game full.
+
+#### `POST /[locale]/api/game/{gameId}/start`
+
+Starts the game: creates the engine from the campaign, runs until the first `InputStep` or completion.
+
+**Response 200:** `{ "success": true }`
+**Response 409:** Game not in PREPARATION status.
+
+#### `GET /[locale]/api/game/{gameId}`
+
+Returns the current game state snapshot with metadata.
 
 **Response 200:**
 
 ```json
 {
-	"entries": [
-		/* JournalEntry[], serialised */
-	],
-	"journalLength": 42
+	"id": "abc123",
+	"status": "awaiting_input",
+	"participants": [{ "userId": "user1", "characterId": 1 }],
+	"state": {
+		/* current game state, serialised */
+	}
+}
+```
+
+#### `GET /[locale]/api/game/{gameId}/state/{index}`
+
+Returns the game state at a specific journal entry index. Supports negative indices (count from the back) for undo/redo.
+
+**Response 200:**
+
+```json
+{
+	"index": 5,
+	"state": {
+		/* game state at that journal entry, serialised */
+	}
+}
+```
+
+#### `GET /[locale]/api/game/{gameId}/log`
+
+Returns the **full journal log** without game state snapshots (lightweight, for log rendering). Each entry includes `procedureId`, `step`, `status`, `parentIndex`, and other metadata but omits the `game` snapshot.
+
+**Future:** `?since={index}` query param for incremental fetch.
+
+**Response 200:**
+
+```json
+{
+	"log": [
+		/* LogEntry[] — JournalEntry without state.game */
+	]
 }
 ```
 
@@ -305,7 +357,7 @@ Note: the client also calls `POST /input` with an empty body `{}` when a field h
 
 #### `GET /[locale]/api/game/{gameId}/events`
 
-Returns an SSE stream of **live** journal updates. Not intended for historical data — use `GET /journal` for the full game log.
+Returns an SSE stream of **live** journal updates. Not intended for historical data — use `GET /log` for the full game log.
 
 **Query params:** `?since={journalIndex}` — pre-flush entries after this index before streaming live (for reconnection catch-up). Must be provided on initial connection to avoid re-sending the entire journal.
 
@@ -320,16 +372,13 @@ data: {"newEntries": [{...}, {...}]}
 event: input-required
 data: {"awaitingPlayerId": "plr1", "fields": [{...}]}
 
-event: error
-data: {"message": "Invalid target", "code": "INVALID_INPUT"}
-
 event: version-mismatch
 data: {"requiredVersion": "def456"}
 ```
 
 The client opens this connection once per game session for live updates. `EventSource` handles reconnection automatically. On reconnect, the client sends `?since={lastKnownIndex}` to catch up on missed entries.
 
-For the **game log** (full historical journal), the client calls `GET /journal` on initial page load and re-fetches incrementally if needed.
+For the **game log** (full historical journal), the client calls `GET /[locale]/api/game/[gameId]/log` on initial page load and re-fetches incrementally if needed.
 
 ### 4.3 Version Check Middleware
 
@@ -418,15 +467,15 @@ A `FieldRenderer` component dispatches to the appropriate sub-component based on
 
 ## 6. Fault Tolerance
 
-| Scenario                         | Handling                                                                                                                                      |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Server restart                   | Engine rebuilt from persisted journal in DB via `Engine.fromJSON()`.                                                                          |
-| Client disconnect                | `EventSource` auto-reconnects; sends `?since={lastIndex}` to catch up on missed SSE events. Full journal always fetchable via `GET /journal`. |
-| Invalid input                    | Server rejects with `400`; client re-renders input form (no state corrupted)                                                                  |
-| Double-submit input              | Engine is no longer at InputStep → server rejects with `400` (idempotent)                                                                     |
-| Stale client (missed SSE events) | On reconnect, `?since=` catches up missed entries. Full journal fetch as fallback.                                                            |
-| Version mismatch                 | `409` → client reloads → re-fetches state (migration already upgraded DB)                                                                     |
-| Corrupt journal entry            | `deserialise` throws during migration/recovery → entry flagged, manual fix                                                                    |
+| Scenario                         | Handling                                                                                                                                  |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Server restart                   | Engine rebuilt from persisted journal in DB via `Engine.fromJSON()`.                                                                      |
+| Client disconnect                | `EventSource` auto-reconnects; sends `?since={lastIndex}` to catch up on missed SSE events. Full journal always fetchable via `GET /log`. |
+| Invalid input                    | Server rejects with `400`; client re-renders input form (no state corrupted)                                                              |
+| Double-submit input              | Engine is no longer at InputStep → server rejects with `400` (idempotent)                                                                 |
+| Stale client (missed SSE events) | On reconnect, `?since=` catches up missed entries. Full journal fetch as fallback.                                                        |
+| Version mismatch                 | `409` → client reloads → re-fetches state (migration already upgraded DB)                                                                 |
+| Corrupt journal entry            | `deserialise` throws during migration/recovery → entry flagged, manual fix                                                                |
 
 ---
 
@@ -526,20 +575,26 @@ migrateJournals().catch(console.error);
 - [x] **2.0** Add `@songsofdoom/engine` to `packages/web/package.json` dependencies.
 - [x] **2.1** Create `packages/web/src/lib/server/game-manager.ts` — manages `Map<gameId, Engine>`, persistence, and SSE subscribers.
 - [x] **2.2** Create Prisma schema for `Game`, `GameParticipant` (user ↔ character pairing), and `JournalEntry` models.
-- [x] **2.3** Implement `GameManager.createGame()`, `GameManager.getEngine()`, `GameManager.persistJournal()`.
+- [x] **2.3** Implement `GameManager.createGame()`, `joinGame()`, `startGame()`, `getGameState()`, `getGameStateAtIndex()`, `getGameLog()`, and `persistJournal()`.
 - [x] **2.4** Implement `GameManager.subscribe(gameId, controller)` / `unsubscribe()` for SSE broadcast.
 - [ ] **2.5** _(Deferred — horizontal scaling)_ PostgreSQL `LISTEN`/`NOTIFY` relay for cross-instance SSE fan-out. See §1.6.
-- [X] **2.6** Add `GAME_VERSION` build-time constant (git SHA via `vite.define`).
-- [X] **2.7** Create version check middleware/helper in `$lib/server/version-check.ts`.
+- [x] **2.6** Add `GAME_VERSION` build-time constant (git SHA via `vite.define`).
+- [x] **2.7** Create version check middleware/helper in `$lib/server/version-check.ts`.
 
 ### Phase 3: REST API
 
-- [ ] **3.1** Create `src/routes/[locale]/api/game/[gameId]/+server.ts` — `GET` handler returning current state snapshot.
-- [ ] **3.2** Create `src/routes/[locale]/api/game/[gameId]/journal/+server.ts` — `GET` handler returning the full journal (with optional `?since=`). Used for game log rendering and initial state load.
-- [ ] **3.3** Create `src/routes/[locale]/api/game/[gameId]/input/+server.ts` — `POST` handler: `supplyInput()` then `engine.run()` until next `InputStep` or completion. The only client write endpoint.
-- [ ] **3.4** Add authentication checks — verify the requesting user is a participant in the game.
+- [x] **3.0a** Create `src/routes/[locale]/api/game/+server.ts` — `POST` to create a new game (PREPARATION status) with campaign + creator's character. Returns `{ gameId }`.
+- [x] **3.0b** Create `src/routes/[locale]/api/game/[gameId]/join/+server.ts` — `POST` to add current user as a participant with a chosen character.
+- [x] **3.0c** Create `src/routes/[locale]/api/game/[gameId]/start/+server.ts` — `POST` to start the game: creates engine from campaign, runs until first `InputStep` or completion.
+- [x] **3.1** Create `src/routes/[locale]/api/game/[gameId]/+server.ts` — `GET` handler returning current game state snapshot + metadata (id, status, participants).
+- [x] **3.1b** Create `src/routes/[locale]/api/game/[gameId]/state/[index]/+server.ts` — `GET` handler returning the game state at a specific journal entry index (supports negative indices for undo/redo).
+- [x] **3.2** Create `src/routes/[locale]/api/game/[gameId]/log/+server.ts` — `GET` handler returning the full journal log without game state snapshots (lightweight, for log rendering).
+- [x] **3.4** Add authentication checks — `POST` endpoints (create, join, start) verify `locals.user`; errors via `NotFoundError` / `ConflictError` from `$lib/server/errors.ts`.
+- [ ] **3.3** Create `src/routes/[locale]/api/game/[gameId]/input/+server.ts` — `POST` handler: `supplyInput()` then `engine.run()` until next `InputStep` or completion. The only client write endpoint during gameplay.
 - [ ] **3.5** Add input validation — verify the requesting player matches `awaitingPlayerId`, and that the engine is currently paused for input.
-- [ ] **3.6** Add version check to all game API routes.
+- [ ] **3.6** Add version check (`Game-Client-Version` header) to all game API routes.
+- [ ] **3.7** Add `?since=` query param to `GET /log` for incremental fetch (currently returns full log).
+- [ ] **3.8** Add participation checks to `GET` endpoints (state, log, state/[index]) — verify the requesting user is a game participant.
 
 ### Phase 4: SSE
 
@@ -551,7 +606,7 @@ migrateJournals().catch(console.error);
 ### Phase 5: Client State Management
 
 - [ ] **5.1** Create `packages/web/src/lib/game/GameStore.svelte.ts` — Svelte 5 runes module.
-- [ ] **5.2** Implement `GameStore.connect(gameId)` — fetches full journal via `GET /journal`, then opens SSE for live updates.
+- [ ] **5.2** Implement `GameStore.connect(gameId)` — fetches full journal via `GET /log`, then opens SSE for live updates.
 - [ ] **5.3** Implement `GameStore.supplyInput(input)` — `POST /input`, process response (updates journal, status, input fields). No separate `advance()` — the server runs the engine after supplying input.
 - [ ] **5.4** Implement `GameStore.fetchJournal(since?)` — incremental or full journal fetch for game log rendering.
 - [ ] **5.5** Implement `handleVersionMismatch()` — show reload banner on `409` or SSE `version-mismatch` event.
@@ -597,17 +652,25 @@ migrateJournals().catch(console.error);
 
 ## 9. Key Files Reference
 
-| File                                                     | Purpose                                             |
-| -------------------------------------------------------- | --------------------------------------------------- |
-| `packages/engine/src/serialisation.ts`                   | Serialisation instance configuration                |
-| `packages/engine/src/core/engine.ts`                     | `toJSON()` / `fromJSON()` using serialisation       |
-| `packages/web/src/lib/server/game-manager.ts`            | Game lifecycle, persistence, SSE broadcast          |
-| `packages/web/src/lib/game/GameStore.svelte.ts`          | Client-side reactive game state                     |
-| `packages/web/src/routes/[locale]/api/game/[gameId]/...` | REST + SSE endpoints (`input`, `events`, `journal`) |
-| `packages/web/src/routes/[locale]/game/[gameId]/...`     | Game UI pages                                       |
-| `packages/web/src/lib/components/game/`                  | Game-specific Svelte components                     |
-| `packages/web/scripts/migrate-journals.ts`               | Journal format migration script                     |
-| `packages/web/prisma/schema.prisma`                      | `Game`, `GameParticipant`, `JournalEntry` models    |
+| File                                                                   | Purpose                                             |
+| ---------------------------------------------------------------------- | --------------------------------------------------- |
+| `packages/engine/src/serialisation.ts`                                 | Serialisation instance configuration                |
+| `packages/engine/src/core/engine.ts`                                   | `toJSON()` / `fromJSON()` using serialisation       |
+| `packages/web/src/lib/server/game-manager.ts`                          | Game lifecycle, persistence, SSE broadcast          |
+| `packages/web/src/lib/server/errors.ts`                                | `NotFoundError` / `ConflictError` for API routes    |
+| `packages/web/src/lib/game/GameStore.svelte.ts`                        | Client-side reactive game state                     |
+| `packages/web/src/routes/[locale]/api/game/+server.ts`                 | `POST` create game                                  |
+| `packages/web/src/routes/[locale]/api/game/[gameId]/+server.ts`        | `GET` game state snapshot + metadata                |
+| `packages/web/src/routes/[locale]/api/game/[gameId]/join/+server.ts`   | `POST` join game                                    |
+| `packages/web/src/routes/[locale]/api/game/[gameId]/start/+server.ts`  | `POST` start game (engine creation + initial run)   |
+| `packages/web/src/routes/[locale]/api/game/[gameId]/log/+server.ts`    | `GET` journal log (lightweight, no game state)      |
+| `packages/web/src/routes/[locale]/api/game/[gameId]/state/[index]/...` | `GET` game state at specific journal index          |
+| `packages/web/src/routes/[locale]/api/game/[gameId]/input/+server.ts`  | `POST` player input + engine advance (not yet done) |
+| `packages/web/src/routes/[locale]/api/game/[gameId]/events/+server.ts` | `GET` SSE stream (not yet done)                     |
+| `packages/web/src/routes/[locale]/game/[gameId]/...`                   | Game UI pages                                       |
+| `packages/web/src/lib/components/game/`                                | Game-specific Svelte components                     |
+| `packages/web/scripts/migrate-journals.ts`                             | Journal format migration script                     |
+| `packages/web/prisma/schema.prisma`                                    | `Game`, `GameParticipant`, `JournalEntry` models    |
 
 ---
 
