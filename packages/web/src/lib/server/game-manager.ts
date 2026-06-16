@@ -533,10 +533,14 @@ export class GameManager {
 	}
 
 	/**
-	 * Returns the full journal log without full game state for each entry.
+	 * Returns journal log entries without full game state for each entry.
+	 *
+	 * @param gameId - The game to fetch the log for.
+	 * @param since - Optional. When provided, only entries with `index > since`
+	 *   are returned, enabling incremental log fetch.
 	 */
-	async getGameLog(gameId: string): Promise<LogEntry[]> {
-		const entries = await this._getJournalEntries(gameId);
+	async getGameLog(gameId: string, since?: number): Promise<LogEntry[]> {
+		const entries = await this._getJournalEntries(gameId, since);
 		return entries.map(({ state: { game: _game, ...state }, ...rest }) => ({
 			...rest,
 			state
@@ -545,14 +549,24 @@ export class GameManager {
 
 	/**
 	 * Returns journal entries, preferring the in-memory engine if available.
+	 *
+	 * @param since - Optional. When provided, only entries with `index > since`
+	 *   are returned.
 	 */
-	private async _getJournalEntries(gameId: string): Promise<JournalEntry[]> {
+	private async _getJournalEntries(gameId: string, since?: number): Promise<JournalEntry[]> {
 		const engine = this.engines.get(gameId);
 		if (engine) {
-			return [...engine.journal];
+			const all = [...engine.journal];
+			if (since !== undefined) {
+				return all.filter((_, i) => i > since);
+			}
+			return all;
 		}
 		const rows = await prisma.journalEntry.findMany({
-			where: { gameId },
+			where: {
+				gameId,
+				...(since !== undefined ? { index: { gt: since } } : {})
+			},
 			orderBy: { index: 'asc' }
 		});
 		return rows.map((row) =>

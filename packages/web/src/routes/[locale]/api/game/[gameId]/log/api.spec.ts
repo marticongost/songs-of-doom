@@ -34,6 +34,7 @@ import { GET } from './+server';
 
 interface HandlerArgs {
 	params: { gameId: string };
+	url?: URL;
 }
 
 // ---------------------------------------------------------------------------
@@ -66,7 +67,7 @@ describe('GET /api/game/[gameId]/log', () => {
 		const response = await GET(args as any);
 		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual({ log });
-		expect(mockManager.getGameLog).toHaveBeenCalledWith('game-1');
+		expect(mockManager.getGameLog).toHaveBeenCalledWith('game-1', undefined);
 	});
 
 	it('returns an empty log for a game with no entries', async () => {
@@ -80,5 +81,50 @@ describe('GET /api/game/[gameId]/log', () => {
 		const response = await GET(args as any);
 		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual({ log: [] });
+		expect(mockManager.getGameLog).toHaveBeenCalledWith('game-1', undefined);
+	});
+
+	// ─── Incremental fetch with ?since= ──────────────────────────────────
+
+	it('returns only entries after the since index when ?since= is provided', async () => {
+		const log: LogEntry[] = [
+			{
+				procedureId: ProcedureId.RunCampaign,
+				parentIndex: undefined,
+				state: { step: 'chapter2', status: 'ongoing' as const }
+			}
+		];
+
+		const mockManager = mock<GameManager>({
+			getGameLog: vi.fn().mockResolvedValue(log)
+		});
+		mockGetGameManager.mockReturnValue(mockManager);
+
+		const args: HandlerArgs = {
+			params: { gameId: 'game-1' },
+			url: new URL('http://localhost/api/game/game-1/log?since=5')
+		};
+
+		const response = await GET(args as any);
+		expect(response.status).toBe(200);
+		expect(await response.json()).toEqual({ log });
+		expect(mockManager.getGameLog).toHaveBeenCalledWith('game-1', 5);
+	});
+
+	it('returns empty log when since is beyond the last entry', async () => {
+		const mockManager = mock<GameManager>({
+			getGameLog: vi.fn().mockResolvedValue([])
+		});
+		mockGetGameManager.mockReturnValue(mockManager);
+
+		const args: HandlerArgs = {
+			params: { gameId: 'game-1' },
+			url: new URL('http://localhost/api/game/game-1/log?since=999')
+		};
+
+		const response = await GET(args as any);
+		expect(response.status).toBe(200);
+		expect(await response.json()).toEqual({ log: [] });
+		expect(mockManager.getGameLog).toHaveBeenCalledWith('game-1', 999);
 	});
 });

@@ -373,8 +373,78 @@ describe('GameManager', () => {
 	});
 
 	// -------------------------------------------------------------------
-	// SSE subscribers
+	// getGameLog
 	// -------------------------------------------------------------------
+
+	describe('getGameLog', () => {
+		it('returns all entries as LogEntry (stripping game from state) when no since is given', async () => {
+			const entry = makeEntry(ProcedureId.Unimplemented, 'start', 'ongoing');
+			const fakeEngine = makeFakeEngine({
+				journal: [entry]
+			});
+			manager['engines'].set('game-1', fakeEngine);
+
+			const log = await manager.getGameLog('game-1');
+
+			expect(log).toHaveLength(1);
+			expect(log[0].procedureId).toBe(ProcedureId.Unimplemented);
+			expect(log[0].state.step).toBe('start');
+			expect(log[0].state.status).toBe('ongoing');
+			expect((log[0].state as any).game).toBeUndefined();
+		});
+
+		it('returns only entries after the since index (in-memory engine)', async () => {
+			const entry0 = makeEntry(ProcedureId.Unimplemented, 'first', 'ongoing');
+			const entry1 = makeEntry(ProcedureId.Unimplemented, 'second', 'ongoing');
+			const entry2 = makeEntry(ProcedureId.Unimplemented, 'third', 'complete');
+			const fakeEngine = makeFakeEngine({
+				journal: [entry0, entry1, entry2]
+			});
+			manager['engines'].set('game-1', fakeEngine);
+
+			const log = await manager.getGameLog('game-1', 0);
+
+			expect(log).toHaveLength(2);
+			expect(log[0].state.step).toBe('second');
+			expect(log[1].state.step).toBe('third');
+		});
+
+		it('returns empty array when since is beyond the last entry (in-memory engine)', async () => {
+			const entry = makeEntry();
+			const fakeEngine = makeFakeEngine({
+				journal: [entry]
+			});
+			manager['engines'].set('game-1', fakeEngine);
+
+			const log = await manager.getGameLog('game-1', 5);
+
+			expect(log).toHaveLength(0);
+		});
+
+		it('falls back to DB with since filter when engine is not in memory', async () => {
+			mockPrisma.journalEntry.findMany.mockResolvedValue([]);
+
+			const log = await manager.getGameLog('game-none', 3);
+
+			expect(log).toHaveLength(0);
+			expect(mockPrisma.journalEntry.findMany).toHaveBeenCalledWith({
+				where: { gameId: 'game-none', index: { gt: 3 } },
+				orderBy: { index: 'asc' }
+			});
+		});
+
+		it('falls back to DB without since filter when engine is not in memory', async () => {
+			mockPrisma.journalEntry.findMany.mockResolvedValue([]);
+
+			const log = await manager.getGameLog('game-none');
+
+			expect(log).toHaveLength(0);
+			expect(mockPrisma.journalEntry.findMany).toHaveBeenCalledWith({
+				where: { gameId: 'game-none' },
+				orderBy: { index: 'asc' }
+			});
+		});
+	});
 
 	describe('subscribe / unsubscribe', () => {
 		it('adds and removes subscribers', () => {

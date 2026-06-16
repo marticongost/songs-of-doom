@@ -593,7 +593,7 @@ migrateJournals().catch(console.error);
 - [x] **3.3** Create `src/routes/[locale]/api/game/[gameId]/input/+server.ts` — `POST` handler: `supplyInput()` then `engine.run()` until next `InputStep` or completion. The only client write endpoint during gameplay.
 - [x] **3.5** Add input validation — verify the requesting player matches `awaitingPlayerId`, and that the engine is currently paused for input.
 - [x] **3.6** Add version check (`Game-Client-Version` header) to all game API routes.
-- [ ] **3.7** Add `?since=` query param to `GET /log` for incremental fetch (currently returns full log).
+- [x] **3.7** Add `?since=` query param to `GET /log` for incremental fetch (currently returns full log).
 - [ ] **3.8** Add participation checks to `GET` endpoints (state, log, state/[index]) — verify the requesting user is a game participant.
 
 ### Phase 4: SSE
