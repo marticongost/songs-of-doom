@@ -357,9 +357,11 @@ Note: the client also calls `POST /input` with an empty body `{}` when a field h
 
 #### `GET /[locale]/api/game/{gameId}/events`
 
-Returns an SSE stream of **live** journal updates. Not intended for historical data — use `GET /log` for the full game log.
+Returns an SSE stream of **live** journal updates. Not intended for historical data — use `GET /log` for the game log panel.
 
 **Query params:** `?since={journalIndex}` — pre-flush entries after this index before streaming live (for reconnection catch-up). Must be provided on initial connection to avoid re-sending the entire journal.
+
+**Initial bootstrap:** On first connect, the client calls `GET /game/{id}` for the current state snapshot (to render the board), then opens this SSE stream with `?since=0` (or the index of the entry returned by the state endpoint) for live updates. The `GET /log` endpoint is only called on-demand when the user opens the game log / history panel.
 
 **Headers:** `Game-Client-Version: {gitSha}`
 
@@ -378,7 +380,7 @@ data: {"requiredVersion": "def456"}
 
 The client opens this connection once per game session for live updates. `EventSource` handles reconnection automatically. On reconnect, the client sends `?since={lastKnownIndex}` to catch up on missed entries.
 
-For the **game log** (full historical journal), the client calls `GET /[locale]/api/game/[gameId]/log` on initial page load and re-fetches incrementally if needed.
+For the **game log** (full historical journal), the client calls `GET /[locale]/api/game/[gameId]/log` on-demand when the user opens the game log panel, and re-fetches incrementally if needed.
 
 ### 4.3 Version Check Middleware
 
@@ -418,9 +420,9 @@ class GameStore {
 	journalLength = $derived(this.journal.length);
 
 	// Methods
-	async connect(gameId: string): Promise<void>;
+	async connect(gameId: string): Promise<void>; // GET /game/[id] for state, then SSE for live updates
 	async supplyInput(input: Record<string, unknown>): Promise<void>;
-	async fetchJournal(since?: number): Promise<void>; // for game log / initial load
+	async fetchJournal(since?: number): Promise<void>; // on-demand: GET /log for the game log panel
 	private subscribeSSE(): void;
 	private handleVersionMismatch(requiredVersion: string): void;
 }
@@ -605,8 +607,8 @@ migrateJournals().catch(console.error);
 
 ### Phase 5: Client State Management
 
-- [ ] **5.1** Create `packages/web/src/lib/game/GameStore.svelte.ts` — Svelte 5 runes module.
-- [ ] **5.2** Implement `GameStore.connect(gameId)` — fetches full journal via `GET /log`, then opens SSE for live updates.
+- [x] **5.1** Create `packages/web/src/lib/game/GameStore.svelte.ts` — Svelte 5 runes module.
+- [x] **5.2** Implement `GameStore.connect(gameId)` — fetches current state via `GET /game/[gameId]`, seeds the journal with the last entry, then opens SSE with `?since={index}` for live updates. The `/log` endpoint is only called on-demand when the user opens the game log panel.
 - [ ] **5.3** Implement `GameStore.supplyInput(input)` — `POST /input`, process response (updates journal, status, input fields). No separate `advance()` — the server runs the engine after supplying input.
 - [ ] **5.4** Implement `GameStore.fetchJournal(since?)` — incremental or full journal fetch for game log rendering.
 - [ ] **5.5** Implement `handleVersionMismatch()` — show reload banner on `409` or SSE `version-mismatch` event.
