@@ -322,34 +322,13 @@ Supplies player input and runs the engine until the next `InputStep` (or complet
 }
 ```
 
-**Response 200 (paused for input):**
+**Response 204 No Content** — input accepted. State updates and the next `input-required` event are delivered via SSE to all connected clients. The client does **not** read game state from this response.
 
-```json
-{
-    "status": "awaiting_input",
-    "awaitingPlayerId": "plr1",
-    "fields": [
-        { "@type": "TargetField", "name": "destinationId", "target": { ... } },
-        { "@type": "BooleanField", "name": "confirm", "required": false }
-    ],
-    "newEntries": [ /* JournalEntry[] appended during this run */ ]
-}
-```
+**Response 409:** Engine not awaiting input, not the requesting player's turn, or version mismatch.
 
-**Response 200 (complete — game or phase finished):**
+**Response 400:** Invalid input (invalid JSON, wrong shape, invalid field values).
 
-```json
-{
-	"status": "complete",
-	"newEntries": [
-		/* ... */
-	]
-}
-```
-
-**Response 409:** Version mismatch — client must reload.
-
-**Response 400:** Invalid input (wrong player, invalid field values, engine not awaiting input).
+**Response 403:** Authenticated user is not a participant in this game.
 
 Note: the client also calls `POST /input` with an empty body `{}` when a field has `required: false` and the player chooses to "pass" — the engine handles `undefined`/`null` field values.
 
@@ -428,7 +407,7 @@ class GameStore {
 }
 ```
 
-Note: there is no `advance()` method. `supplyInput()` internally calls `POST /input`, which runs the engine until the next `InputStep`. The client never explicitly "advances" — it only supplies input in response to an `input-required` event.
+Note: there is no `advance()` method. `supplyInput()` sends a `POST /input` (fire-and-forget — returns `204 No Content`). The server runs the engine and broadcasts state updates and new input requests via SSE. The client never explicitly "advances" — it only supplies input in response to an `input-required` SSE event.
 
 ### 5.2 Component Patterns
 
@@ -474,7 +453,7 @@ A `FieldRenderer` component dispatches to the appropriate sub-component based on
 | Server restart                   | Engine rebuilt from persisted journal in DB via `Engine.fromJSON()`.                                                                      |
 | Client disconnect                | `EventSource` auto-reconnects; sends `?since={lastIndex}` to catch up on missed SSE events. Full journal always fetchable via `GET /log`. |
 | Invalid input                    | Server rejects with `400`; client re-renders input form (no state corrupted)                                                              |
-| Double-submit input              | Engine is no longer at InputStep → server rejects with `400` (idempotent)                                                                 |
+| Double-submit input              | Engine is no longer at InputStep → server rejects with `409` (idempotent)                                                                 |
 | Stale client (missed SSE events) | On reconnect, `?since=` catches up missed entries. Full journal fetch as fallback.                                                        |
 | Version mismatch                 | `409` → client reloads → re-fetches state (migration already upgraded DB)                                                                 |
 | Corrupt journal entry            | `deserialise` throws during migration/recovery → entry flagged, manual fix                                                                |
@@ -609,10 +588,10 @@ migrateJournals().catch(console.error);
 
 - [x] **5.1** Create `packages/web/src/lib/game/GameStore.svelte.ts` — Svelte 5 runes module.
 - [x] **5.2** Implement `GameStore.connect(gameId)` — fetches current state via `GET /game/[gameId]`, seeds the journal with the last entry, then opens SSE with `?since={index}` for live updates. The `/log` endpoint is only called on-demand when the user opens the game log panel.
-- [ ] **5.3** Implement `GameStore.supplyInput(input)` — `POST /input`, process response (updates journal, status, input fields). No separate `advance()` — the server runs the engine after supplying input.
-- [ ] **5.4** Implement `GameStore.fetchJournal(since?)` — incremental or full journal fetch for game log rendering.
-- [ ] **5.5** Implement `handleVersionMismatch()` — show reload banner on `409` or SSE `version-mismatch` event.
-- [ ] **5.6** Embed `Game-Client-Version` in all fetch/EventSource requests.
+- [x] **5.3** Implement `GameStore.supplyInput(input)` — `POST /input` (fire-and-forget, returns `204 No Content`). SSE handles advancing the journal and relaying new input requests.
+- [x] **5.4** Implement `GameStore.fetchJournal(since?)` — incremental or full journal fetch for game log rendering.
+- [x] **5.5** Implement `handleVersionMismatch()` — show reload banner on `409`.
+- [x] **5.6** Embed `Game-Client-Version` in all fetch/EventSource requests.
 
 ### Phase 6: Input Components
 
@@ -654,25 +633,25 @@ migrateJournals().catch(console.error);
 
 ## 9. Key Files Reference
 
-| File                                                                   | Purpose                                             |
-| ---------------------------------------------------------------------- | --------------------------------------------------- |
-| `packages/engine/src/serialisation.ts`                                 | Serialisation instance configuration                |
-| `packages/engine/src/core/engine.ts`                                   | `toJSON()` / `fromJSON()` using serialisation       |
-| `packages/web/src/lib/server/game-manager.ts`                          | Game lifecycle, persistence, SSE broadcast          |
-| `packages/web/src/lib/server/errors.ts`                                | `NotFoundError` / `ConflictError` for API routes    |
-| `packages/web/src/lib/game/GameStore.svelte.ts`                        | Client-side reactive game state                     |
-| `packages/web/src/routes/[locale]/api/game/+server.ts`                 | `POST` create game                                  |
-| `packages/web/src/routes/[locale]/api/game/[gameId]/+server.ts`        | `GET` game state snapshot + metadata                |
-| `packages/web/src/routes/[locale]/api/game/[gameId]/join/+server.ts`   | `POST` join game                                    |
-| `packages/web/src/routes/[locale]/api/game/[gameId]/start/+server.ts`  | `POST` start game (engine creation + initial run)   |
-| `packages/web/src/routes/[locale]/api/game/[gameId]/log/+server.ts`    | `GET` journal log (lightweight, no game state)      |
-| `packages/web/src/routes/[locale]/api/game/[gameId]/state/[index]/...` | `GET` game state at specific journal index          |
-| `packages/web/src/routes/[locale]/api/game/[gameId]/input/+server.ts`  | `POST` player input + engine advance (not yet done) |
-| `packages/web/src/routes/[locale]/api/game/[gameId]/events/+server.ts` | `GET` SSE stream (not yet done)                     |
-| `packages/web/src/routes/[locale]/game/[gameId]/...`                   | Game UI pages                                       |
-| `packages/web/src/lib/components/game/`                                | Game-specific Svelte components                     |
-| `packages/web/scripts/migrate-journals.ts`                             | Journal format migration script                     |
-| `packages/web/prisma/schema.prisma`                                    | `Game`, `GameParticipant`, `JournalEntry` models    |
+| File                                                                   | Purpose                                                                  |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `packages/engine/src/serialisation.ts`                                 | Serialisation instance configuration                                     |
+| `packages/engine/src/core/engine.ts`                                   | `toJSON()` / `fromJSON()` using serialisation                            |
+| `packages/web/src/lib/server/game-manager.ts`                          | Game lifecycle, persistence, SSE broadcast                               |
+| `packages/web/src/lib/server/errors.ts`                                | `NotFoundError` / `ConflictError` for API routes                         |
+| `packages/web/src/lib/game/GameStore.svelte.ts`                        | Client-side reactive game state                                          |
+| `packages/web/src/routes/[locale]/api/game/+server.ts`                 | `POST` create game                                                       |
+| `packages/web/src/routes/[locale]/api/game/[gameId]/+server.ts`        | `GET` game state snapshot + metadata                                     |
+| `packages/web/src/routes/[locale]/api/game/[gameId]/join/+server.ts`   | `POST` join game                                                         |
+| `packages/web/src/routes/[locale]/api/game/[gameId]/start/+server.ts`  | `POST` start game (engine creation + initial run)                        |
+| `packages/web/src/routes/[locale]/api/game/[gameId]/log/+server.ts`    | `GET` journal log (lightweight, no game state)                           |
+| `packages/web/src/routes/[locale]/api/game/[gameId]/state/[index]/...` | `GET` game state at specific journal index                               |
+| `packages/web/src/routes/[locale]/api/game/[gameId]/input/+server.ts`  | `POST` player input — fire-and-forget, returns `204`; SSE relays results |
+| `packages/web/src/routes/[locale]/api/game/[gameId]/events/+server.ts` | `GET` SSE stream for live journal updates & input-required events        |
+| `packages/web/src/routes/[locale]/game/[gameId]/...`                   | Game UI pages                                                            |
+| `packages/web/src/lib/components/game/`                                | Game-specific Svelte components                                          |
+| `packages/web/scripts/migrate-journals.ts`                             | Journal format migration script                                          |
+| `packages/web/prisma/schema.prisma`                                    | `Game`, `GameParticipant`, `JournalEntry` models                         |
 
 ---
 
