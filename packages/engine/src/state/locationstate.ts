@@ -30,6 +30,9 @@ export interface LocationStateProps extends Omit<CardStateProps, 'id'> {
 
 	/** The ids of locations connected to this location. */
 	connections?: ReadonlyArray<LocationId>;
+
+	/** The coordinates of this location on the map. */
+	coordinates: MapCoordinates;
 }
 
 export type Path = Array<LocationId>;
@@ -42,6 +45,9 @@ export type PathScorer = (path: Path) => number;
 export interface LocationGraph {
 	getCard(id: LocationId): LocationState | undefined;
 }
+
+/** The physical position of the location in the game map. */
+export type MapCoordinates = { x: number; y: number };
 
 export interface PathfindingOptions {
 	/** Used to break ties in case of multiple paths of the same length. Paths with a higher score will be preferred. If no scorer is provided, ties will be broken arbitrarily. */
@@ -71,10 +77,14 @@ export class LocationState extends CardState {
 	/** The ids of locations connected to this location. */
 	readonly connections: ReadonlyArray<LocationId>;
 
-	constructor({ players = [], connections = [], ...rest }: LocationStateProps) {
+	/** The coordinates of this location on the map. */
+	readonly coordinates: MapCoordinates;
+
+	constructor({ players = [], connections = [], coordinates, ...rest }: LocationStateProps) {
 		super(rest);
 		this.players = players;
 		this.connections = connections;
+		this.coordinates = coordinates;
 	}
 
 	/**
@@ -192,6 +202,7 @@ export class MutableLocationState extends LocationState {
 	declare properties: Array<Property>;
 	declare players: Array<EntityId>;
 	declare connections: Array<LocationId>;
+	declare coordinates: MapCoordinates;
 	declare physicalTrauma: number;
 	declare mentalTrauma: number;
 
@@ -210,7 +221,8 @@ export class MutableLocationState extends LocationState {
 			physicalTrauma: locationState.physicalTrauma,
 			mentalTrauma: locationState.mentalTrauma,
 			players: [...locationState.players],
-			connections: [...locationState.connections]
+			connections: [...locationState.connections],
+			coordinates: locationState.coordinates
 		});
 	}
 
@@ -280,7 +292,8 @@ export class MutableLocationState extends LocationState {
 			physicalTrauma: this.physicalTrauma,
 			mentalTrauma: this.mentalTrauma,
 			players: [...this.players],
-			connections: [...this.connections]
+			connections: [...this.connections],
+			coordinates: this.coordinates
 		});
 	}
 }

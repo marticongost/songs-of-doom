@@ -92,7 +92,8 @@ function makeReadonlyLocation(
 		container: { type: 'location', locationId: id },
 		attachments: overrides?.attachments,
 		clues: overrides?.clues,
-		players: overrides?.players
+		players: overrides?.players,
+		coordinates: { x: 0, y: 0 }
 	});
 }
 

@@ -3,7 +3,12 @@ import type { Entity } from '@songsofdoom/game';
 import { describe, expect, it } from 'vitest';
 import { MutableCardState, ReadonlyCardState } from './cardstate';
 import type { EntityId, LocationId } from './identifiers';
-import { MutableLocationState, ReadonlyLocationState, type LocationGraph } from './locationstate';
+import {
+	MutableLocationState,
+	ReadonlyLocationState,
+	type LocationGraph,
+	type MapCoordinates
+} from './locationstate';
 
 function makeLocation(overrides?: {
 	id?: LocationId;
@@ -11,6 +16,7 @@ function makeLocation(overrides?: {
 	players?: Array<EntityId>;
 	connections?: Array<LocationId>;
 	attachments?: ReadonlyArray<ReadonlyCardState>;
+	coordinates?: MapCoordinates;
 }): ReadonlyLocationState {
 	return new ReadonlyLocationState({
 		id: overrides?.id ?? 'loc1',
@@ -21,7 +27,8 @@ function makeLocation(overrides?: {
 		clues: overrides?.clues,
 		players: overrides?.players,
 		connections: overrides?.connections,
-		properties: []
+		properties: [],
+		coordinates: overrides?.coordinates ?? { x: 0, y: 0 }
 	});
 }
 
@@ -29,12 +36,13 @@ function makeLocation(overrides?: {
 
 describe('LocationState', () => {
 	describe('constructor defaults', () => {
-		it('defaults clues to 0, players and connections to empty arrays', () => {
+		it('defaults clues to 0, players and connections to empty arrays, and stores coordinates', () => {
 			const location = makeLocation();
 
 			expect(location.clues).toBe(0);
 			expect(location.players).toEqual([]);
 			expect(location.connections).toEqual([]);
+			expect(location.coordinates).toEqual({ x: 0, y: 0 });
 		});
 	});
 });
@@ -43,7 +51,7 @@ describe('LocationState', () => {
 
 describe('ReadonlyLocationState', () => {
 	describe('mutable', () => {
-		it('creates a mutable copy preserving clues, players, connections, and attachments', () => {
+		it('creates a mutable copy preserving clues, players, connections, attachments, and coordinates', () => {
 			const attachment = new ReadonlyCardState({
 				id: 'trt2',
 				card: mock<Entity>(),
@@ -55,7 +63,8 @@ describe('ReadonlyLocationState', () => {
 				clues: 2,
 				players: ['plr1'],
 				connections: ['loc2'],
-				attachments: [attachment]
+				attachments: [attachment],
+				coordinates: { x: 3, y: 5 }
 			});
 			const mutable = location.mutable();
 
@@ -64,24 +73,32 @@ describe('ReadonlyLocationState', () => {
 			expect(mutable.players).toEqual(['plr1']);
 			expect(mutable.connections).toEqual(['loc2']);
 			expect(mutable.attachments[0]).toBeInstanceOf(MutableCardState);
+			expect(mutable.coordinates).toEqual({ x: 3, y: 5 });
 		});
 	});
 
 	describe('mutate', () => {
 		it('applies the change without mutating the original', () => {
-			const location = makeLocation({ clues: 1, connections: ['loc2'] });
+			const location = makeLocation({
+				clues: 1,
+				connections: ['loc2'],
+				coordinates: { x: 1, y: 2 }
+			});
 			const updated = location.mutate((mutable) => {
 				mutable.clues = 3;
 				mutable.players.push('plr2');
 				mutable.connections.push('loc3');
+				mutable.coordinates = { x: 10, y: 20 };
 			});
 
 			expect(updated.clues).toBe(3);
 			expect(updated.players).toEqual(['plr2']);
 			expect(updated.connections).toEqual(['loc2', 'loc3']);
+			expect(updated.coordinates).toEqual({ x: 10, y: 20 });
 			expect(location.clues).toBe(1);
 			expect(location.players).toEqual([]);
 			expect(location.connections).toEqual(['loc2']);
+			expect(location.coordinates).toEqual({ x: 1, y: 2 });
 		});
 	});
 });
