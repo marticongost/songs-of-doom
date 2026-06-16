@@ -375,6 +375,142 @@ describe('Serialisation', () => {
 		});
 	});
 
+	// === Set serialisation ===
+
+	describe('Set serialisation', () => {
+		it('round-trips a Set of primitives', () => {
+			const s = serialisationFor(Set);
+			const set = new Set([1, 2, 3]);
+
+			const result = s.deserialise<Set<number>>(s.serialise(set));
+
+			expect(result).toBeInstanceOf(Set);
+			expect(result.size).toBe(3);
+			expect(result.has(1)).toBe(true);
+			expect(result.has(2)).toBe(true);
+			expect(result.has(3)).toBe(true);
+		});
+
+		it('round-trips an empty Set', () => {
+			const s = serialisationFor(Set);
+			const set = new Set<string>();
+
+			const result = s.deserialise<Set<string>>(s.serialise(set));
+
+			expect(result).toBeInstanceOf(Set);
+			expect(result.size).toBe(0);
+		});
+
+		it('round-trips a Set with duplicate values (deduplication)', () => {
+			const s = serialisationFor(Set);
+			const set = new Set([1, 2, 2, 3, 3, 3]);
+
+			const result = s.deserialise<Set<number>>(s.serialise(set));
+
+			expect(result.size).toBe(3);
+		});
+
+		it('round-trips a Set of strings', () => {
+			const s = serialisationFor(Set);
+			const set = new Set(['a', 'b', 'c']);
+
+			const result = s.deserialise<Set<string>>(s.serialise(set));
+
+			expect(result.size).toBe(3);
+			expect(result.has('a')).toBe(true);
+			expect(result.has('b')).toBe(true);
+			expect(result.has('c')).toBe(true);
+		});
+
+		it('round-trips a Set of class instances', () => {
+			const s = serialisationFor(Person, Set);
+			const alice = new Person('Alice', 30);
+			const bob = new Person('Bob', 25);
+			const set = new Set([alice, bob]);
+
+			const result = s.deserialise<Set<Person>>(s.serialise(set));
+
+			expect(result.size).toBe(2);
+			const names = [...result].map((p) => p.name);
+			expect(names).toContain('Alice');
+			expect(names).toContain('Bob');
+		});
+
+		it('serialises a Set with @type and values fields', () => {
+			const s = serialisationFor();
+			const set = new Set([10, 20]);
+
+			const json = s.serialise(set);
+			const parsed = JSON.parse(json);
+
+			expect(parsed['@type']).toBe('Set');
+			expect(parsed['values']).toEqual([10, 20]);
+		});
+
+		it('throws RecomposeError when values field is missing', () => {
+			const s = serialisationFor();
+			const badJson = JSON.stringify({ '@type': 'Set' });
+
+			expect(() => s.deserialise(badJson)).toThrow(RecomposeError);
+		});
+
+		it('throws RecomposeError when values field is not an array', () => {
+			const s = serialisationFor();
+			const badJson = JSON.stringify({ '@type': 'Set', values: 'not_an_array' });
+
+			expect(() => s.deserialise(badJson)).toThrow(RecomposeError);
+		});
+
+		it('round-trips nested Sets', () => {
+			const s = serialisationFor(Person, Set);
+			const alice = new Person('Alice', 30);
+			const inner = new Set([alice]);
+			const outer = new Set([inner]);
+
+			const result = s.deserialise<Set<Set<Person>>>(s.serialise(outer));
+
+			expect(result.size).toBe(1);
+			const innerResult = [...result][0];
+			expect(innerResult).toBeInstanceOf(Set);
+			expect(innerResult.size).toBe(1);
+			expect([...innerResult][0].name).toBe('Alice');
+		});
+
+		it('round-trips a Set inside a plain object', () => {
+			const s = serialisationFor(Person, Set);
+			const alice = new Person('Alice', 30);
+			const container = { people: new Set([alice]) };
+
+			const result = s.deserialise<typeof container>(s.serialise(container));
+
+			expect(result.people).toBeInstanceOf(Set);
+			expect(result.people.size).toBe(1);
+			expect([...result.people][0].name).toBe('Alice');
+		});
+
+		it('round-trips a Set inside a Map value', () => {
+			const personIdentity: ObjectIdentity<Person> = {
+				external: false,
+				getObjectId: (p) => p.name
+			};
+
+			const s = new Serialisation({
+				types: [Person, Set, Map],
+				objectIdentity: new Map([[Person, personIdentity]])
+			});
+
+			const alice = new Person('Alice', 30);
+			const map = new Map<Person, Set<number>>([[alice, new Set([1, 2, 3])]]);
+
+			const result = s.deserialise<Map<Person, Set<number>>>(s.serialise(map));
+
+			expect(result.size).toBe(1);
+			const aliceKey = [...result.keys()].find((k) => k.name === 'Alice')!;
+			expect(result.get(aliceKey)).toBeInstanceOf(Set);
+			expect(result.get(aliceKey)!.size).toBe(3);
+		});
+	});
+
 	// === registerDefaultObjectMapper ===
 
 	describe('registerDefaultObjectMapper', () => {

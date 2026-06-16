@@ -6,7 +6,10 @@ const METADATA_PREFIX = '@';
 const TYPE_BRAND_FIELD = `${METADATA_PREFIX}type`;
 const OBJECT_POOL_FIELD = `${METADATA_PREFIX}objects`;
 const KEYS_FIELD = `${METADATA_PREFIX}keys`;
+const VALUES_FIELD = 'values';
 const REF_FIELD = `${METADATA_PREFIX}ref`;
+
+const STANDARD_LIBRARY_TYPES = [Set, Map];
 
 /**
  * Defines the properties for configuring the {@link Serialisation} class.
@@ -307,6 +310,10 @@ export class Serialisation<ContextData = undefined> {
 		this.objectMappersByType = mappers ?? new Map();
 		this.typesByBrand = {};
 		types?.forEach((type) => (this.typesByBrand[this.typeBranding(type)] = type));
+		// Register standard library types with default mappers.
+		for (const type of STANDARD_LIBRARY_TYPES) {
+			this.typesByBrand[this.typeBranding(type)] ??= type;
+		}
 		this.objectIdentityByType = new Map(objectIdentity ?? new Map());
 		this.defaultObjectMapper = this.createDefaultObjectMapper();
 	}
@@ -722,6 +729,31 @@ export const recomposeMap = <K, V>(
 registerDefaultObjectMapper(Map<any, any>, {
 	decompose: decomposeMap,
 	recompose: recomposeMap
+});
+
+// --- Set ---
+
+export const decomposeSet = <T>(obj: Set<T>, context: DecomposeContext): JSONObject => ({
+	values: [...obj].map((value, index) => context.decomposeChild(index.toString(), value))
+});
+
+export const recomposeSet = <T>(
+	data: JSONObject,
+	context: RecomposeContext,
+	_target?: Set<T>
+): Set<T> => {
+	const rawValues = data['values'];
+	if (!Array.isArray(rawValues)) {
+		context.fail(`Invalid or missing ${VALUES_FIELD} field in Set data`);
+	}
+	return new Set(
+		rawValues.map((value, index) => context.recomposeChild(index.toString(), value) as T)
+	);
+};
+
+registerDefaultObjectMapper(Set<any>, {
+	decompose: decomposeSet,
+	recompose: recomposeSet
 });
 
 export abstract class SerialisationError extends Error {
