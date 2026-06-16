@@ -12,6 +12,8 @@ export enum ProcedureId {
 	ResolveTarget = 'ResolveTarget',
 
 	// Game sequence
+	RunCampaign = 'RunCampaign',
+	RunScenario = 'RunScenario',
 	Chapter = 'Chapter',
 	ChapterStartPhase = 'ChapterStartPhase',
 	FocusPhase = 'FocusPhase',

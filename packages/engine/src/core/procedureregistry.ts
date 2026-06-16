@@ -14,6 +14,7 @@ import { exhaustEffectProc } from '../procedures/effects/exhaustproc';
 import { gatherCluesEffectProc } from '../procedures/effects/gathercluesproc';
 import { healEffectProc } from '../procedures/effects/healproc';
 import { moveEffectProc } from '../procedures/effects/moveproc';
+import { runCampaign } from '../procedures/gamesequence/campaign/runcampaign';
 import { chapter } from '../procedures/gamesequence/chapters/chapter';
 import { chapterEndPhase } from '../procedures/gamesequence/chapters/chapterendphase';
 import { chapterStartPhase } from '../procedures/gamesequence/chapters/chapterstartphase';
@@ -21,6 +22,7 @@ import { drawPhase } from '../procedures/gamesequence/chapters/drawphase';
 import { encounterPhase } from '../procedures/gamesequence/chapters/encounterphase';
 import { focusPhase } from '../procedures/gamesequence/chapters/focusphase';
 import { turnsPhase } from '../procedures/gamesequence/chapters/turnsphase';
+import { runScenario } from '../procedures/gamesequence/scenarios/runscenario';
 import { turn } from '../procedures/gamesequence/turns/turn';
 import { turnCreatureActionsPhase } from '../procedures/gamesequence/turns/turncreatureactionsphase';
 import { turnEndPhase } from '../procedures/gamesequence/turns/turnendphase';
@@ -44,6 +46,8 @@ export const procedureDefinitions: Record<ProcedureId, ProcedureDefinition<any>>
 	[ProcedureId.ResolveTarget]: resolveTarget,
 
 	// Game sequence
+	[ProcedureId.RunCampaign]: runCampaign,
+	[ProcedureId.RunScenario]: runScenario,
 	[ProcedureId.Chapter]: chapter,
 	[ProcedureId.ChapterStartPhase]: chapterStartPhase,
 	[ProcedureId.FocusPhase]: focusPhase,
