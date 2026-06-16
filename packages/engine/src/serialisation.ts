@@ -8,6 +8,15 @@ import {
 	type Type
 } from '@songsofdoom/common';
 import * as Game from '@songsofdoom/game';
+import {
+	BooleanField,
+	CapabilityChoiceField,
+	EntityField,
+	FocusesField,
+	PaymentField,
+	ResultField,
+	TargetField
+} from './core/input';
 import type { JournalEntry } from './core/journal';
 import { ReadonlyAttackResolution } from './state/attackresolution';
 import { ReadonlyCapabilityResolution } from './state/capabilityresolution';
@@ -23,8 +32,8 @@ import { ReadonlyWoundResolution } from './state/woundresolution';
 // ---------------------------------------------------------------------------
 
 /**
- * Context passed to {@link journalSerialisation.serialise} and
- * {@link journalSerialisation.deserialise} to resolve external references
+ * Context passed to {@link engineSerialisation.serialise} and
+ * {@link engineSerialisation.deserialise} to resolve external references
  * for Entity, Property, Talent, Stat, Event, Focus, and Slot objects.
  */
 export interface EngineSerialisationContext {
@@ -59,7 +68,7 @@ export interface EngineSerialisationContext {
 
 /**
  * Serialisation instance for the engine package, configured with all domain types
- * that can appear in a {@link JournalEntry}.
+ * that can appear in a {@link JournalEntry} or an input field definition.
  *
  * Game types are auto-detected by scanning `@songsofdoom/game` exports for
  * subclasses of root abstract types ({@link Game.Entity}, {@link Game.Capability},
@@ -71,7 +80,7 @@ export interface EngineSerialisationContext {
  * object identity — only a reference key is stored; the caller provides a
  * {@link EngineSerialisationContext} with lookup functions.
  */
-export const journalSerialisation = new Serialisation<EngineSerialisationContext>({
+export const engineSerialisation = new Serialisation<EngineSerialisationContext>({
 	types: [
 		// --- Engine state types (manual — not exported by @songsofdoom/game) ---
 		ReadonlyGameState,
@@ -82,6 +91,15 @@ export const journalSerialisation = new Serialisation<EngineSerialisationContext
 		ReadonlyCapabilityResolution,
 		ReadonlyTestResolution,
 		ReadonlyWoundResolution,
+
+		// --- Input field types ---
+		TargetField,
+		FocusesField,
+		BooleanField,
+		CapabilityChoiceField,
+		ResultField,
+		PaymentField,
+		EntityField,
 
 		// --- Common types ---
 		Counter,
@@ -241,7 +259,7 @@ export function serialiseJournalEntry(
 	entry: JournalEntry,
 	context: EngineSerialisationContext
 ): object {
-	return JSON.parse(journalSerialisation.serialise(entry, context));
+	return JSON.parse(engineSerialisation.serialise(entry, context));
 }
 
 /**
@@ -252,5 +270,5 @@ export function deserialiseJournalEntry(
 	json: object,
 	context: EngineSerialisationContext
 ): JournalEntry {
-	return journalSerialisation.deserialise<JournalEntry>(JSON.stringify(json), context);
+	return engineSerialisation.deserialise<JournalEntry>(JSON.stringify(json), context);
 }

@@ -3,11 +3,11 @@ import {
 	createEngineSerialisationContext,
 	deserialiseJournalEntry,
 	Engine,
+	engineSerialisation,
 	type EngineSerialisationContext,
 	Field,
 	InputStep,
 	type JournalEntry,
-	journalSerialisation,
 	procedureDefinitions,
 	ProcedureId,
 	type ProcedureState,
@@ -115,7 +115,7 @@ export class GameManager {
 	private subscribers = new Map<string, Set<SSESubscriber>>();
 
 	/** Shared serialisation context for all games. */
-	private serialisationContext: EngineSerialisationContext;
+	readonly serialisationContext: EngineSerialisationContext;
 
 	constructor() {
 		this.serialisationContext = createEngineSerialisationContext();
@@ -331,6 +331,23 @@ export class GameManager {
 		return { completed, newEntries };
 	}
 
+	/**
+	 * Returns the current input state for a game, or `undefined` if the engine
+	 * is not currently awaiting input.
+	 */
+	getInputState(
+		gameId: string
+	): { awaitingPlayerId: string; fields: Field<unknown>[] } | undefined {
+		const engine = this.engines.get(gameId);
+		if (!engine) return undefined;
+		if (!this.isAwaitingInput(engine)) return undefined;
+
+		const { awaitingPlayerId, fields } = this.extractInputFields(engine);
+		if (!awaitingPlayerId || !fields) return undefined;
+
+		return { awaitingPlayerId, fields };
+	}
+
 	// -------------------------------------------------------------------
 	// Persistence
 	// -------------------------------------------------------------------
@@ -539,7 +556,7 @@ export class GameManager {
 			orderBy: { index: 'asc' }
 		});
 		return rows.map((row) =>
-			journalSerialisation.deserialise<JournalEntry>(
+			engineSerialisation.deserialise<JournalEntry>(
 				JSON.stringify(row.data as object),
 				this.serialisationContext
 			)
@@ -547,7 +564,7 @@ export class GameManager {
 	}
 
 	private _serialiseGameState(game: ReadonlyGameStateType): object {
-		return JSON.parse(journalSerialisation.serialise(game, this.serialisationContext)) as object;
+		return JSON.parse(engineSerialisation.serialise(game, this.serialisationContext)) as object;
 	}
 }
 

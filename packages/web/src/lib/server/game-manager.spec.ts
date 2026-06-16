@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+	BooleanField,
+	InputStep,
 	ProcedureId,
+	procedureDefinitions,
 	type Engine,
 	type JournalEntry,
 	type ReadonlyGameState
@@ -312,6 +315,60 @@ describe('GameManager', () => {
 				where: { id: 'game-1' },
 				data: { status: 'COMPLETE' }
 			});
+		});
+	});
+
+	// -------------------------------------------------------------------
+	// getInputState
+	// -------------------------------------------------------------------
+
+	describe('getInputState', () => {
+		it('returns undefined when no engine exists for the game', () => {
+			expect.assertions(1);
+			expect(manager.getInputState('unknown')).toBeUndefined();
+		});
+
+		it('returns undefined when the engine is not awaiting input (completed entry)', () => {
+			expect.assertions(1);
+			const entry = makeEntry(ProcedureId.Unimplemented, 'start', 'complete');
+			const fakeEngine = makeFakeEngine({ journal: [entry], currentEntry: entry });
+			manager['engines'].set('game-1', fakeEngine);
+
+			expect(manager.getInputState('game-1')).toBeUndefined();
+		});
+
+		it('returns undefined when the engine is not awaiting input (ongoing, non-InputStep)', () => {
+			expect.assertions(1);
+			const entry = makeEntry(ProcedureId.Unimplemented, 'noop', 'ongoing');
+			const fakeEngine = makeFakeEngine({ journal: [entry], currentEntry: entry });
+			manager['engines'].set('game-1', fakeEngine);
+
+			expect(manager.getInputState('game-1')).toBeUndefined();
+		});
+
+		it('returns the input state when the engine is awaiting input', () => {
+			expect.assertions(4);
+
+			// Register a mock InputStep on the Unimplemented procedure.
+			const proc = procedureDefinitions[ProcedureId.Unimplemented];
+			const mockStep = new InputStep({
+				fields: [new BooleanField({ name: 'confirm' })],
+				playerId: 'plr1'
+			});
+			(proc.steps as Record<string, unknown>)['ask'] = mockStep;
+
+			const entry = makeEntry(ProcedureId.Unimplemented, 'ask', 'ongoing');
+			const fakeEngine = makeFakeEngine({ journal: [entry], currentEntry: entry });
+			manager['engines'].set('game-1', fakeEngine);
+
+			const result = manager.getInputState('game-1');
+			expect(result).toBeDefined();
+			expect(result!.awaitingPlayerId).toBe('plr1');
+			expect(result!.fields).toHaveLength(1);
+			expect(result!.fields[0]).toBeInstanceOf(BooleanField);
+
+			// Clean up — remove the mock step so other tests aren't affected.
+			delete (proc.steps as Record<string, unknown>)['ask'];
 		});
 	});
 

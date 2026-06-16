@@ -1,6 +1,15 @@
 // Engine core
 export { Engine } from './core/engine';
-export { CapabilityChoiceField, Field } from './core/input';
+export {
+	BooleanField,
+	CapabilityChoiceField,
+	EntityField,
+	Field,
+	FocusesField,
+	PaymentField,
+	ResultField,
+	TargetField
+} from './core/input';
 export type { FieldProps } from './core/input';
 export { instructions } from './core/instructions';
 export type { JournalEntry } from './core/journal';
@@ -22,7 +31,7 @@ export type {
 export {
 	createEngineSerialisationContext,
 	deserialiseJournalEntry,
-	journalSerialisation,
+	engineSerialisation,
 	serialiseJournalEntry
 } from './serialisation';
 export type { EngineSerialisationContext } from './serialisation';
