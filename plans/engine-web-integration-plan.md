@@ -598,10 +598,10 @@ migrateJournals().catch(console.error);
 
 ### Phase 4: SSE
 
-- [ ] **4.1** Create `src/routes/[locale]/api/game/[gameId]/events/+server.ts` — `GET` handler returning SSE stream.
-- [ ] **4.2** Implement `?since=` catch-up: pre-flush entries after the given index before streaming live.
-- [ ] **4.3** Implement `version-mismatch` event on version check failure.
-- [ ] **4.4** Handle client disconnect: remove subscriber from GameManager.
+- [x] **4.1** Create `src/routes/[locale]/api/game/[gameId]/events/+server.ts` — `GET` handler returning SSE stream.
+- [x] **4.2** Implement `?since=` catch-up: pre-flush entries after the given index before streaming live.
+- [x] **4.3** Version mismatch is handled by the global `versionCheckHandle` hook (`hooks.server.ts`) which returns 409 for all `/api/**` routes — including SSE — before the handler runs. No special `version-mismatch` SSE event needed.
+- [x] **4.4** Handle client disconnect: remove subscriber from GameManager.
 
 ### Phase 5: Client State Management
 
