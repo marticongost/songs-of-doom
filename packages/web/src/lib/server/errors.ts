@@ -23,3 +23,14 @@ export class ConflictError extends Error {
 		this.name = 'ConflictError';
 	}
 }
+
+/**
+ * The request was valid but the server refuses to fulfill it because the
+ * user does not have permission (e.g. not a game participant). → HTTP 403
+ */
+export class ForbiddenError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'ForbiddenError';
+	}
+}

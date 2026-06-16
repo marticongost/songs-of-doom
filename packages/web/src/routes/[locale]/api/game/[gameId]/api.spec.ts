@@ -49,6 +49,12 @@ import { GET } from './+server';
 
 interface HandlerArgs {
 	params: { gameId: string };
+	locals: App.Locals;
+}
+
+/** Minimal authenticated locals helper. */
+function authenticatedLocals(): App.Locals {
+	return { user: { id: 'user-1', username: 'test' }, session: null };
 }
 
 // ---------------------------------------------------------------------------
@@ -60,12 +66,68 @@ describe('GET /api/game/[gameId]', () => {
 		vi.clearAllMocks();
 	});
 
+	// ─── Authentication ──────────────────────────────────────────────────
+
+	it('returns 401 when user is not authenticated', async () => {
+		const args: HandlerArgs = {
+			params: { gameId: 'game-1' },
+			locals: { user: null, session: null }
+		};
+
+		await expect(GET(args as any)).rejects.toMatchObject({
+			status: 401,
+			message: 'Authentication required'
+		});
+	});
+
+	// ─── Authorization ───────────────────────────────────────────────────
+
+	it('returns 403 when the user is not a participant', async () => {
+		const mockManager = mock<GameManager>({
+			verifyParticipant: vi
+				.fn()
+				.mockRejectedValue(new Error('You are not a participant in this game'))
+		});
+		mockGetGameManager.mockReturnValue(mockManager);
+
+		const args: HandlerArgs = {
+			params: { gameId: 'game-1' },
+			locals: authenticatedLocals()
+		};
+
+		// The handler catches the error but re-throws it because it's not a known type.
+		// verifyParticipant throws a plain Error, not ForbiddenError, in this test.
+		await expect(GET(args as any)).rejects.toThrow('You are not a participant in this game');
+	});
+
+	it('returns 404 when game is not found during participation check', async () => {
+		const { NotFoundError } = await import('$lib/server/errors');
+		const mockManager = mock<GameManager>({
+			verifyParticipant: vi.fn().mockRejectedValue(new NotFoundError('Game "game-1" not found'))
+		});
+		mockGetGameManager.mockReturnValue(mockManager);
+
+		const args: HandlerArgs = {
+			params: { gameId: 'game-1' },
+			locals: authenticatedLocals()
+		};
+
+		await expect(GET(args as any)).rejects.toMatchObject({
+			status: 404,
+			message: 'Game "game-1" not found'
+		});
+	});
+
 	// ─── Not found ───────────────────────────────────────────────────────
 
 	it('returns 404 when game is not found in the database', async () => {
+		const mockManager = mock<GameManager>({
+			verifyParticipant: vi.fn().mockResolvedValue(undefined)
+		});
+		mockGetGameManager.mockReturnValue(mockManager);
 		mockPrisma.game.findUnique.mockResolvedValue(null);
 
-		const args: HandlerArgs = { params: { gameId: 'nonexistent' } };
+		const args: HandlerArgs = { params: { gameId: 'nonexistent' }, locals: authenticatedLocals() };
 
 		await expect(GET(args as any)).rejects.toMatchObject({
 			status: 404,
@@ -86,11 +148,12 @@ describe('GET /api/game/[gameId]', () => {
 		});
 
 		const mockManager = mock<GameManager>({
+			verifyParticipant: vi.fn().mockResolvedValue(undefined),
 			getGameState: vi.fn().mockResolvedValue({ players: [] })
 		});
 		mockGetGameManager.mockReturnValue(mockManager);
 
-		const args: HandlerArgs = { params: { gameId: 'game-1' } };
+		const args: HandlerArgs = { params: { gameId: 'game-1' }, locals: authenticatedLocals() };
 
 		const response = await GET(args as any);
 		const body = await response.json();
@@ -104,6 +167,7 @@ describe('GET /api/game/[gameId]', () => {
 			],
 			state: { players: [] }
 		});
+		expect(mockManager.verifyParticipant).toHaveBeenCalledWith('game-1', 'user-1');
 		expect(mockManager.getGameState).toHaveBeenCalledWith('game-1');
 	});
 });

@@ -39,6 +39,12 @@ import { GET } from './+server';
 
 interface HandlerArgs {
 	params: { gameId: string; index: string };
+	locals: App.Locals;
+}
+
+/** Minimal authenticated locals helper. */
+function authenticatedLocals(): App.Locals {
+	return { user: { id: 'user-1', username: 'test' }, session: null };
 }
 
 // ---------------------------------------------------------------------------
@@ -50,11 +56,51 @@ describe('GET /api/game/[gameId]/state/[index]', () => {
 		vi.clearAllMocks();
 	});
 
+	// ─── Authentication ──────────────────────────────────────────────────
+
+	it('returns 401 when user is not authenticated', async () => {
+		const args: HandlerArgs = {
+			params: { gameId: 'game-1', index: '0' },
+			locals: { user: null, session: null }
+		};
+
+		await expect(GET(args as any)).rejects.toMatchObject({
+			status: 401,
+			message: 'Authentication required'
+		});
+	});
+
+	// ─── Authorization ───────────────────────────────────────────────────
+
+	it('returns 404 when game is not found during participation check', async () => {
+		const { NotFoundError } = await import('$lib/server/errors');
+		const mockManager = mock<GameManager>({
+			verifyParticipant: vi.fn().mockRejectedValue(new NotFoundError('Game "game-1" not found'))
+		});
+		mockGetGameManager.mockReturnValue(mockManager);
+
+		const args: HandlerArgs = {
+			params: { gameId: 'game-1', index: '0' },
+			locals: authenticatedLocals()
+		};
+
+		await expect(GET(args as any)).rejects.toMatchObject({
+			status: 404,
+			message: 'Game "game-1" not found'
+		});
+	});
+
 	// ─── Index validation ────────────────────────────────────────────────
 
 	it('returns 400 when index is not a number', async () => {
+		const mockManager = mock<GameManager>({
+			verifyParticipant: vi.fn().mockResolvedValue(undefined)
+		});
+		mockGetGameManager.mockReturnValue(mockManager);
+
 		const args: HandlerArgs = {
-			params: { gameId: 'game-1', index: 'abc' }
+			params: { gameId: 'game-1', index: 'abc' },
+			locals: authenticatedLocals()
 		};
 
 		await expect(GET(args as any)).rejects.toMatchObject({
@@ -64,8 +110,14 @@ describe('GET /api/game/[gameId]/state/[index]', () => {
 	});
 
 	it('returns 400 when index is an empty string', async () => {
+		const mockManager = mock<GameManager>({
+			verifyParticipant: vi.fn().mockResolvedValue(undefined)
+		});
+		mockGetGameManager.mockReturnValue(mockManager);
+
 		const args: HandlerArgs = {
-			params: { gameId: 'game-1', index: '' }
+			params: { gameId: 'game-1', index: '' },
+			locals: authenticatedLocals()
 		};
 
 		await expect(GET(args as any)).rejects.toMatchObject({
@@ -78,12 +130,14 @@ describe('GET /api/game/[gameId]/state/[index]', () => {
 
 	it('returns 404 when there are no journal entries', async () => {
 		const mockManager = mock<GameManager>({
+			verifyParticipant: vi.fn().mockResolvedValue(undefined),
 			getGameStateAtIndex: vi.fn().mockResolvedValue(null)
 		});
 		mockGetGameManager.mockReturnValue(mockManager);
 
 		const args: HandlerArgs = {
-			params: { gameId: 'game-1', index: '0' }
+			params: { gameId: 'game-1', index: '0' },
+			locals: authenticatedLocals()
 		};
 
 		await expect(GET(args as any)).rejects.toMatchObject({
@@ -96,12 +150,14 @@ describe('GET /api/game/[gameId]/state/[index]', () => {
 
 	it('returns state at a valid positive index', async () => {
 		const mockManager = mock<GameManager>({
+			verifyParticipant: vi.fn().mockResolvedValue(undefined),
 			getGameStateAtIndex: vi.fn().mockResolvedValue({ players: [{ id: 'p1' }] })
 		});
 		mockGetGameManager.mockReturnValue(mockManager);
 
 		const args: HandlerArgs = {
-			params: { gameId: 'game-1', index: '2' }
+			params: { gameId: 'game-1', index: '2' },
+			locals: authenticatedLocals()
 		};
 
 		const response = await GET(args as any);
@@ -110,17 +166,20 @@ describe('GET /api/game/[gameId]/state/[index]', () => {
 			index: 2,
 			state: { players: [{ id: 'p1' }] }
 		});
+		expect(mockManager.verifyParticipant).toHaveBeenCalledWith('game-1', 'user-1');
 		expect(mockManager.getGameStateAtIndex).toHaveBeenCalledWith('game-1', 2);
 	});
 
 	it('returns state at a valid negative index', async () => {
 		const mockManager = mock<GameManager>({
+			verifyParticipant: vi.fn().mockResolvedValue(undefined),
 			getGameStateAtIndex: vi.fn().mockResolvedValue({ players: [] })
 		});
 		mockGetGameManager.mockReturnValue(mockManager);
 
 		const args: HandlerArgs = {
-			params: { gameId: 'game-1', index: '-1' }
+			params: { gameId: 'game-1', index: '-1' },
+			locals: authenticatedLocals()
 		};
 
 		const response = await GET(args as any);
@@ -129,6 +188,7 @@ describe('GET /api/game/[gameId]/state/[index]', () => {
 			index: -1,
 			state: { players: [] }
 		});
+		expect(mockManager.verifyParticipant).toHaveBeenCalledWith('game-1', 'user-1');
 		expect(mockManager.getGameStateAtIndex).toHaveBeenCalledWith('game-1', -1);
 	});
 });

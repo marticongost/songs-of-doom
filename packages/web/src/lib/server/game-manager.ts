@@ -16,7 +16,7 @@ import {
 } from '@songsofdoom/engine';
 import { type CharacterState, entities, isCampaign } from '@songsofdoom/game';
 import { prisma } from './db';
-import { ConflictError, NotFoundError } from './errors';
+import { ConflictError, ForbiddenError, NotFoundError } from './errors';
 
 // ---------------------------------------------------------------------------
 // SSE subscriber interface
@@ -119,6 +119,36 @@ export class GameManager {
 
 	constructor() {
 		this.serialisationContext = createEngineSerialisationContext();
+	}
+
+	// -------------------------------------------------------------------
+	// Participation
+	// -------------------------------------------------------------------
+
+	/**
+	 * Verifies that a user is a participant of a game.
+	 *
+	 * @throws {NotFoundError} if the game does not exist.
+	 * @throws {ForbiddenError} if the user is not a participant.
+	 */
+	async verifyParticipant(gameId: string, userId: string): Promise<void> {
+		const game = await prisma.game.findUnique({
+			where: { id: gameId },
+			select: {
+				participants: {
+					select: { userId: true }
+				}
+			}
+		});
+
+		if (!game) {
+			throw new NotFoundError(`Game "${gameId}" not found`);
+		}
+
+		const isParticipant = game.participants.some((p) => p.userId === userId);
+		if (!isParticipant) {
+			throw new ForbiddenError('You are not a participant in this game');
+		}
 	}
 
 	// -------------------------------------------------------------------
