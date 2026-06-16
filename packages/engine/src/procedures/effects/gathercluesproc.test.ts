@@ -206,13 +206,13 @@ describe('gatherCluesEffectProc', () => {
 		it('returns the mutated game state', () => {
 			const effect = mock<GatherCluesEffect>({ amount: 1 });
 			const mutatedGame = mock<ReadonlyGameState>();
+			const subject = mock<MutableCardState>({ clues: 0 });
 
 			const game = mock<ReadonlyGameState>();
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			(game as any).mutate.mockImplementation((cb: (mutable: MutableGameState) => void) => {
 				const mutableGame = mock<MutableGameState>({
-					requireSubject: () => mock<MutableCardState>({ clues: 0 }),
-					requireCard: () => mock<MutableCardState>({ clues: 0 }),
+					requireSubject: () => subject,
 					evaluateScalar: () => 1
 				} as unknown as MutableGameState);
 				cb(mutableGame);
