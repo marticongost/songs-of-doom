@@ -1,5 +1,5 @@
 import { finalise } from '@songsofdoom/common';
-import { and } from './expressions';
+import { and } from './expressions/boolean';
 import { type BooleanExpressionType } from './expressions/boolean/boolean-expression';
 import {
 	ScalarExpression,
