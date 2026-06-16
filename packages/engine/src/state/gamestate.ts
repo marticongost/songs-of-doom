@@ -5,6 +5,7 @@ import type {
 	CapabilityCost,
 	EntityTypeId,
 	ScalarExpressionType,
+	Scenario,
 	Target,
 	TargetType
 } from '@songsofdoom/game';
@@ -58,6 +59,8 @@ export interface GameStateProps {
 	subjectStack?: Array<EntityId>;
 	testResolutionStack?: Array<TestResolution>;
 	woundResolutionStack?: Array<WoundResolution>;
+	scenario?: Scenario;
+	nextScenario?: Scenario;
 }
 
 export abstract class GameState<
@@ -76,6 +79,8 @@ export abstract class GameState<
 	readonly woundResolutionStack: Array<WoundResolution>;
 	readonly chapter: number;
 	readonly turn: number;
+	readonly scenario?: Scenario;
+	readonly nextScenario?: Scenario;
 
 	constructor({
 		players,
@@ -88,7 +93,9 @@ export abstract class GameState<
 		testResolutionStack,
 		woundResolutionStack,
 		chapter,
-		turn
+		turn,
+		scenario,
+		nextScenario
 	}: GameStateProps) {
 		this.chapter = chapter ?? 0;
 		this.turn = turn ?? 0;
@@ -101,6 +108,8 @@ export abstract class GameState<
 		this.subjectStack = subjectStack ?? [];
 		this.testResolutionStack = testResolutionStack ?? [];
 		this.woundResolutionStack = woundResolutionStack ?? [];
+		this.scenario = scenario;
+		this.nextScenario = nextScenario;
 	}
 
 	abstract mutableClone(): MutableGameState;
@@ -616,6 +625,8 @@ export class MutableGameState extends GameState<
 	declare woundResolutionStack: Array<ReadonlyWoundResolution | MutableWoundResolution>;
 	declare chapter: number;
 	declare turn: number;
+	declare scenario?: Scenario;
+	declare nextScenario?: Scenario;
 
 	constructor(gameState: ReadonlyGameState) {
 		const stack = gameState.testResolutionStack as Array<ReadonlyTestResolution>;
@@ -635,7 +646,9 @@ export class MutableGameState extends GameState<
 			woundResolutionStack: [
 				...woundStack.slice(0, -1),
 				...(woundStack.length > 0 ? [woundStack[woundStack.length - 1].mutable()] : [])
-			]
+			],
+			scenario: gameState.scenario,
+			nextScenario: gameState.nextScenario
 		});
 	}
 
@@ -718,7 +731,9 @@ export class MutableGameState extends GameState<
 			),
 			woundResolutionStack: this.woundResolutionStack.map((r) =>
 				r instanceof MutableWoundResolution ? r.readonly() : r
-			)
+			),
+			scenario: this.scenario,
+			nextScenario: this.nextScenario
 		});
 	}
 

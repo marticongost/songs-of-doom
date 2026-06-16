@@ -6,6 +6,7 @@ import {
 	not,
 	Opportunity,
 	plus,
+	Scenario,
 	strength,
 	type Entity
 } from '@songsofdoom/game';
@@ -41,7 +42,8 @@ function makeLocation(id: LocationId, players: EntityId[] = []): ReadonlyLocatio
 		ownerId: 'plr1',
 		container: { type: 'location', locationId: id },
 		players,
-		properties: []
+		properties: [],
+		coordinates: { x: 0, y: 0 }
 	});
 }
 
@@ -217,7 +219,8 @@ describe('GameState.getCard', () => {
 			card: mock<Entity>(),
 			ownerId: 'plr1',
 			container: { type: 'location', locationId: 'loc9' },
-			properties: []
+			properties: [],
+			coordinates: { x: 0, y: 0 }
 		});
 		const state = makeGameState([mock<ReadonlyPlayerState>()], [location]);
 		expect(state.getCard('loc9')).toBe(location);
@@ -1276,5 +1279,161 @@ describe('MutableGameState wound resolution stack', () => {
 		const mutable = state.mutable();
 		expect(mutable.woundResolutionStack[0].damageDealt).toBe(3);
 		expect(mutable.woundResolutionStack[1].damageDealt).toBe(7);
+	});
+});
+
+// ─── GameState.scenario / nextScenario ─────────────────────────────────────
+
+function makeScenario(title = 'test-scenario'): Scenario {
+	return mock<Scenario>({ id: title, title: { ca: title, es: title, en: title } });
+}
+
+describe('GameState.scenario', () => {
+	it('defaults to undefined when not provided', () => {
+		const state = makeGameState([]);
+		expect(state.scenario).toBeUndefined();
+	});
+
+	it('stores the provided scenario', () => {
+		const sc = makeScenario();
+		const state = new ReadonlyGameState({ players: [], scenario: sc });
+		expect(state.scenario).toBe(sc);
+	});
+
+	it('is preserved through mutable() round-trip', () => {
+		const sc = makeScenario();
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			scenario: sc
+		});
+		expect(state.mutable().scenario).toBe(sc);
+	});
+
+	it('is preserved through mutate()', () => {
+		const sc = makeScenario();
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			scenario: sc
+		});
+		const updated = state.mutate((m) => {
+			m.subjectStack.push('plr1');
+		});
+		expect(updated.scenario).toBe(sc);
+	});
+
+	it('is settable on MutableGameState', () => {
+		const sc1 = makeScenario('sc1');
+		const sc2 = makeScenario('sc2');
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			scenario: sc1
+		});
+		const mutable = state.mutable();
+		mutable.scenario = sc2;
+		expect(mutable.scenario).toBe(sc2);
+	});
+
+	it('is preserved through mutable().readonly() round-trip', () => {
+		const sc = makeScenario();
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			scenario: sc
+		});
+		const roundTripped = state.mutable().readonly();
+		expect(roundTripped.scenario).toBe(sc);
+	});
+
+	it('is preserved when set on mutable and then readonly()', () => {
+		const sc1 = makeScenario('sc1');
+		const sc2 = makeScenario('sc2');
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			scenario: sc1
+		});
+		const mutable = state.mutable();
+		mutable.scenario = sc2;
+		const roundTripped = mutable.readonly();
+		expect(roundTripped.scenario).toBe(sc2);
+	});
+});
+
+describe('GameState.nextScenario', () => {
+	it('defaults to undefined when not provided', () => {
+		const state = makeGameState([]);
+		expect(state.nextScenario).toBeUndefined();
+	});
+
+	it('stores the provided nextScenario', () => {
+		const sc = makeScenario();
+		const state = new ReadonlyGameState({ players: [], nextScenario: sc });
+		expect(state.nextScenario).toBe(sc);
+	});
+
+	it('is preserved through mutable() round-trip', () => {
+		const sc = makeScenario();
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			nextScenario: sc
+		});
+		expect(state.mutable().nextScenario).toBe(sc);
+	});
+
+	it('is preserved through mutate()', () => {
+		const sc = makeScenario();
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			nextScenario: sc
+		});
+		const updated = state.mutate((m) => {
+			m.subjectStack.push('plr1');
+		});
+		expect(updated.nextScenario).toBe(sc);
+	});
+
+	it('is settable on MutableGameState', () => {
+		const sc1 = makeScenario('sc1');
+		const sc2 = makeScenario('sc2');
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			nextScenario: sc1
+		});
+		const mutable = state.mutable();
+		mutable.nextScenario = sc2;
+		expect(mutable.nextScenario).toBe(sc2);
+	});
+
+	it('is preserved through mutable().readonly() round-trip', () => {
+		const sc = makeScenario();
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			nextScenario: sc
+		});
+		const roundTripped = state.mutable().readonly();
+		expect(roundTripped.nextScenario).toBe(sc);
+	});
+
+	it('is preserved when set on mutable and then readonly()', () => {
+		const sc1 = makeScenario('sc1');
+		const sc2 = makeScenario('sc2');
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			nextScenario: sc1
+		});
+		const mutable = state.mutable();
+		mutable.nextScenario = sc2;
+		const roundTripped = mutable.readonly();
+		expect(roundTripped.nextScenario).toBe(sc2);
+	});
+
+	it('scenario and nextScenario are independent', () => {
+		const sc1 = makeScenario('sc1');
+		const sc2 = makeScenario('sc2');
+		const state = new ReadonlyGameState({
+			players: [makeMutablePlayer()],
+			scenario: sc1,
+			nextScenario: sc2
+		});
+		expect(state.scenario).toBe(sc1);
+		expect(state.nextScenario).toBe(sc2);
 	});
 });
