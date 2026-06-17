@@ -6,7 +6,6 @@ import {
 	not,
 	Opportunity,
 	plus,
-	Scenario,
 	strength,
 	type Entity
 } from '@songsofdoom/game';
@@ -1284,8 +1283,15 @@ describe('MutableGameState wound resolution stack', () => {
 
 // ─── GameState.scenario / nextScenario ─────────────────────────────────────
 
-function makeScenario(title = 'test-scenario'): Scenario {
-	return mock<Scenario>({ id: title, title: { ca: title, es: title, en: title } });
+function makeScenario(title = 'test-scenario'): ReadonlyCardState {
+	const sc = mock<ReadonlyCardState>({
+		id: title as CardId,
+		card: mock<Entity>({ title: { ca: title, es: title, en: title } })
+	});
+	const mutableSc = mock<MutableCardState>({ id: title as CardId });
+	mutableSc.readonly.mockReturnValue(sc);
+	sc.mutable.mockReturnValue(mutableSc);
+	return sc;
 }
 
 describe('GameState.scenario', () => {
@@ -1306,7 +1312,7 @@ describe('GameState.scenario', () => {
 			players: [makeMutablePlayer()],
 			scenario: sc
 		});
-		expect(state.mutable().scenario).toBe(sc);
+		expect(state.mutable().scenario).toBe(sc.mutable());
 	});
 
 	it('is preserved through mutate()', () => {
@@ -1329,8 +1335,9 @@ describe('GameState.scenario', () => {
 			scenario: sc1
 		});
 		const mutable = state.mutable();
-		mutable.scenario = sc2;
-		expect(mutable.scenario).toBe(sc2);
+		const sc2Mutable = sc2.mutable();
+		mutable.scenario = sc2Mutable;
+		expect(mutable.scenario).toBe(sc2Mutable);
 	});
 
 	it('is preserved through mutable().readonly() round-trip', () => {
@@ -1351,7 +1358,7 @@ describe('GameState.scenario', () => {
 			scenario: sc1
 		});
 		const mutable = state.mutable();
-		mutable.scenario = sc2;
+		mutable.scenario = sc2.mutable();
 		const roundTripped = mutable.readonly();
 		expect(roundTripped.scenario).toBe(sc2);
 	});
@@ -1375,7 +1382,7 @@ describe('GameState.nextScenario', () => {
 			players: [makeMutablePlayer()],
 			nextScenario: sc
 		});
-		expect(state.mutable().nextScenario).toBe(sc);
+		expect(state.mutable().nextScenario).toBe(sc.mutable());
 	});
 
 	it('is preserved through mutate()', () => {
@@ -1398,8 +1405,9 @@ describe('GameState.nextScenario', () => {
 			nextScenario: sc1
 		});
 		const mutable = state.mutable();
-		mutable.nextScenario = sc2;
-		expect(mutable.nextScenario).toBe(sc2);
+		const sc2Mutable = sc2.mutable();
+		mutable.nextScenario = sc2Mutable;
+		expect(mutable.nextScenario).toBe(sc2Mutable);
 	});
 
 	it('is preserved through mutable().readonly() round-trip', () => {
@@ -1420,7 +1428,7 @@ describe('GameState.nextScenario', () => {
 			nextScenario: sc1
 		});
 		const mutable = state.mutable();
-		mutable.nextScenario = sc2;
+		mutable.nextScenario = sc2.mutable();
 		const roundTripped = mutable.readonly();
 		expect(roundTripped.nextScenario).toBe(sc2);
 	});

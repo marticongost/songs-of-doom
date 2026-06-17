@@ -43,12 +43,13 @@ export type CardParent =
 	| { type: 'location'; locationId: LocationId }
 	| { type: 'banish'; playerId: PlayerId }
 	| { type: 'encounter-deck' }
-	| { type: 'encounter-discard' };
+	| { type: 'encounter-discard' }
+	| { type: 'game' };
 
 export interface CardStateProps {
 	id: CardId;
 	card: Entity;
-	ownerId: EntityId;
+	ownerId?: EntityId;
 	container: CardParent;
 	exhausted?: boolean;
 	activated?: boolean;
@@ -66,7 +67,7 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 	Self
 > {
 	readonly card: Entity;
-	readonly ownerId: EntityId;
+	readonly ownerId: EntityId | undefined;
 	readonly container: CardParent;
 	readonly exhausted: boolean;
 	readonly activated: boolean;

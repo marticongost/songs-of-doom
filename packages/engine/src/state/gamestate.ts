@@ -5,7 +5,6 @@ import type {
 	CapabilityCost,
 	EntityTypeId,
 	ScalarExpressionType,
-	Scenario,
 	Target,
 	TargetType
 } from '@songsofdoom/game';
@@ -59,8 +58,8 @@ export interface GameStateProps {
 	subjectStack?: Array<EntityId>;
 	testResolutionStack?: Array<TestResolution>;
 	woundResolutionStack?: Array<WoundResolution>;
-	scenario?: Scenario;
-	nextScenario?: Scenario;
+	scenario?: CardState;
+	nextScenario?: CardState;
 }
 
 export abstract class GameState<
@@ -79,8 +78,8 @@ export abstract class GameState<
 	readonly woundResolutionStack: Array<WoundResolution>;
 	readonly chapter: number;
 	readonly turn: number;
-	readonly scenario?: Scenario;
-	readonly nextScenario?: Scenario;
+	readonly scenario?: TCard;
+	readonly nextScenario?: TCard;
 
 	constructor({
 		players,
@@ -108,8 +107,8 @@ export abstract class GameState<
 		this.subjectStack = subjectStack ?? [];
 		this.testResolutionStack = testResolutionStack ?? [];
 		this.woundResolutionStack = woundResolutionStack ?? [];
-		this.scenario = scenario;
-		this.nextScenario = nextScenario;
+		this.scenario = scenario as TCard | undefined;
+		this.nextScenario = nextScenario as TCard | undefined;
 	}
 
 	abstract mutableClone(): MutableGameState;
@@ -158,6 +157,10 @@ export abstract class GameState<
 		this.locations.forEach(visit);
 		this.players.forEach((player) => player.cards(options).forEach(visit));
 
+		if (this.scenario) {
+			visit(this.scenario);
+		}
+
 		if (!options?.ready) {
 			this.encounterDeck.forEach(visit);
 			this.encounterDiscardPile.forEach(visit);
@@ -171,6 +174,9 @@ export abstract class GameState<
 	getCard(cardId: CardId): TCard | TLocation | undefined {
 		if (isLocationId(cardId)) {
 			return this.locations.find((l) => l.id === cardId);
+		}
+		if (this.scenario && this.scenario.id === cardId) {
+			return this.scenario;
 		}
 		for (const location of this.locations) {
 			const found = location.getCard(cardId);
@@ -252,7 +258,7 @@ export abstract class GameState<
 
 	getActivePlayer(): TPlayer | undefined {
 		const card = this.getActiveCard();
-		if (card && isPlayerId(card.ownerId)) return this.getPlayer(card.ownerId);
+		if (card?.ownerId && isPlayerId(card.ownerId)) return this.getPlayer(card.ownerId);
 		// Fallback: check subjectStack for a player ID (used by phase-level contexts
 		// like focus/draw phases where a player is active without a capability).
 		if (this.subjectStack.length > 0) {
@@ -287,7 +293,7 @@ export abstract class GameState<
 	getReactivePlayer(): TPlayer | undefined {
 		const card = this.getReactiveCard();
 		if (!card) return undefined;
-		if (isPlayerId(card.ownerId)) return this.getPlayer(card.ownerId);
+		if (card.ownerId && isPlayerId(card.ownerId)) return this.getPlayer(card.ownerId);
 		return undefined;
 	}
 
@@ -532,7 +538,8 @@ export abstract class GameState<
 			this.players.forEach((player) => targetIds.add(player.id));
 		}
 		if (target.matchesType('owner')) {
-			targetIds.add(this.requireCurrentCard().ownerId);
+			const ownerId = this.requireCurrentCard().ownerId;
+			if (ownerId) targetIds.add(ownerId);
 		}
 		if (target.matchesType('active-player')) {
 			// TODO: Should this be a condition?
@@ -625,8 +632,8 @@ export class MutableGameState extends GameState<
 	declare woundResolutionStack: Array<ReadonlyWoundResolution | MutableWoundResolution>;
 	declare chapter: number;
 	declare turn: number;
-	declare scenario?: Scenario;
-	declare nextScenario?: Scenario;
+	declare scenario?: MutableCardState;
+	declare nextScenario?: MutableCardState;
 
 	constructor(gameState: ReadonlyGameState) {
 		const stack = gameState.testResolutionStack as Array<ReadonlyTestResolution>;
@@ -647,8 +654,8 @@ export class MutableGameState extends GameState<
 				...woundStack.slice(0, -1),
 				...(woundStack.length > 0 ? [woundStack[woundStack.length - 1].mutable()] : [])
 			],
-			scenario: gameState.scenario,
-			nextScenario: gameState.nextScenario
+			scenario: gameState.scenario?.mutable(),
+			nextScenario: gameState.nextScenario?.mutable()
 		});
 	}
 
@@ -732,8 +739,8 @@ export class MutableGameState extends GameState<
 			woundResolutionStack: this.woundResolutionStack.map((r) =>
 				r instanceof MutableWoundResolution ? r.readonly() : r
 			),
-			scenario: this.scenario,
-			nextScenario: this.nextScenario
+			scenario: this.scenario?.readonly(),
+			nextScenario: this.nextScenario?.readonly()
 		});
 	}
 

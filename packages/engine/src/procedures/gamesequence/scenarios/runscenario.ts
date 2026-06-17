@@ -2,6 +2,8 @@ import { entities, isScenario } from '@songsofdoom/game';
 import { instructions } from '../../../core/instructions';
 import { type ProcedureState } from '../../../core/procedure';
 import { ProcedureId } from '../../../core/procedureid';
+import { ReadonlyCardState } from '../../../state/cardstate';
+import type { CardId } from '../../../state/identifiers';
 import { chapter } from '../chapters/chapter';
 
 export interface RunScenarioState extends ProcedureState {
@@ -27,7 +29,12 @@ export const runScenario = define({
 			return {
 				...state,
 				game: state.game.mutate((mutable) => {
-					mutable.scenario = scenario;
+					const scenarioCard = new ReadonlyCardState({
+						id: scenario.id as CardId,
+						card: scenario,
+						container: { type: 'game' }
+					});
+					mutable.scenario = scenarioCard.mutable();
 					mutable.chapter = 0;
 					mutable.turn = 0;
 				})

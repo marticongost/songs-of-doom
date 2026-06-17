@@ -76,7 +76,7 @@ describe('runScenario — init step', () => {
 		const mockGame = mock<ReadonlyGameState>({
 			mutate: () => ({}) as unknown as ReadonlyGameState
 		});
-		const scenario = { type: { id: 'scenario' }, title: { en: 'Test' } };
+		const scenario = { type: { id: 'scenario' }, title: { en: 'Test' }, properties: [] };
 
 		mockEntitiesRequire.mockReturnValue(scenario);
 		mockIsScenario.mockReturnValue(true);
@@ -90,8 +90,10 @@ describe('runScenario — init step', () => {
 		const mutable = { scenario: undefined, chapter: undefined, turn: undefined };
 		mutateCallback(mutable as any);
 
-		expect(mutable.scenario).toBe(scenario);
-		expect(mutable).toEqual({ scenario, chapter: 0, turn: 0 });
+		expect(mutable.scenario).toBeDefined();
+		expect((mutable as any).scenario.card).toBe(scenario);
+		expect(mutable.chapter).toBe(0);
+		expect(mutable.turn).toBe(0);
 	});
 
 	it('auto-advances (returns undefined for step, so engine moves to next step)', () => {
