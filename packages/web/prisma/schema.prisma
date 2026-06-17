@@ -83,12 +83,11 @@ model GameParticipant {
 }
 
 model JournalEntry {
-  id     String @id @default(uuid())
   gameId String
   index  Int
   data   Json
   game   Game   @relation(references: [id], fields: [gameId], onDelete: Cascade)
 
-  @@unique([gameId, index])
+  @@id([gameId, index])
   @@index([gameId])
 }
