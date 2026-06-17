@@ -39,6 +39,12 @@ export const procedureDefinitions: Record<ProcedureId, ProcedureDefinition<any>>
 			noop: () => undefined
 		}
 	}),
+	[ProcedureId.UnimplementedAlt]: new ProcedureDefinition({
+		id: ProcedureId.UnimplementedAlt,
+		steps: {
+			noop: () => undefined
+		}
+	}),
 
 	// Core
 	[ProcedureId.TriggerCapability]: triggerCapability,

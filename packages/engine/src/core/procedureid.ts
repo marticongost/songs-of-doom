@@ -5,6 +5,7 @@
  */
 export enum ProcedureId {
 	Unimplemented = 'Unimplemented',
+	UnimplementedAlt = 'UnimplementedAlt',
 
 	// Core
 	TriggerCapability = 'TriggerCapability',

@@ -97,10 +97,16 @@ export class Engine {
 				const procedure = this._requireProcedure(procedureId);
 				step = procedure.steps[state.step!];
 				stepMap = procedure.steps;
+				const parentIndex = entry.parentIndex;
+				const _loopParentStepId = entry._loopParentStepId;
+				const _loopQueue = entry._loopQueue;
 				onComplete = (s) =>
 					this._journal.push({
 						procedureId,
-						state: { ...s, status: 'complete' } as ProcedureState
+						state: { ...s, status: 'complete' } as ProcedureState,
+						parentIndex,
+						_loopParentStepId,
+						_loopQueue
 					});
 			}
 
@@ -155,22 +161,39 @@ export class Engine {
 		state: ProcedureState,
 		result: ProcedureState | undefined,
 		stepMap: Record<string, Step>,
-		onComplete: (s: ProcedureState) => void
+		onComplete: (s: ProcedureState) => void,
+		/** Override metadata for the pushed entry (used by _resumeParent). */
+		_meta?: { parentIndex?: number; _loopParentStepId?: string; _loopQueue?: unknown[] }
 	): void {
+		const parentIndex = _meta ? _meta.parentIndex : this.currentEntry?.parentIndex;
+		const _loopParentStepId = _meta
+			? _meta._loopParentStepId
+			: this.currentEntry?._loopParentStepId;
+		const _loopQueue = _meta ? _meta._loopQueue : this.currentEntry?._loopQueue;
+
 		if (result === undefined || result.step === undefined) {
 			const base = result ?? state;
 			const next = this._nextStepKey(stepMap, state.step!);
 			if (next !== undefined) {
 				this._journal.push({
 					procedureId,
-					state: { ...base, step: next, status: 'ongoing' } as ProcedureState
+					state: { ...base, step: next, status: 'ongoing' } as ProcedureState,
+					parentIndex,
+					_loopParentStepId,
+					_loopQueue
 				});
 			} else {
 				onComplete(base);
 			}
 			return;
 		}
-		this._journal.push({ procedureId, state: result as ProcedureState });
+		this._journal.push({
+			procedureId,
+			state: result as ProcedureState,
+			parentIndex,
+			_loopParentStepId,
+			_loopQueue
+		});
 	}
 
 	private _nextStepKey(stepMap: Record<string, unknown>, current: string): string | undefined {
@@ -332,19 +355,42 @@ export class Engine {
 		const parentEntry = this._journal[parentIndex];
 		const parentStepId = parentEntry.state.step;
 
-		let parentStep: Step;
+		let callStep: CallStep<any, any>;
+		let stepMap: Record<string, Step>;
+		let onComplete: (s: ProcedureState) => void;
+
 		if (parentEntry._loopParentStepId) {
-			parentStep = this._resolveForEachStep(parentEntry).steps[parentStepId!];
+			const forEachStep = this._resolveForEachStep(parentEntry);
+			const ps = forEachStep.steps[parentStepId!];
+			if (!(ps instanceof CallStep)) {
+				throw new Error(`Engine invariant: parent step "${parentStepId}" is not a CallStep.`);
+			}
+			callStep = ps;
+			stepMap = forEachStep.steps;
+			onComplete = (s) => this._advanceLoopIteration(forEachStep, s);
 		} else {
-			parentStep = this._requireProcedure(parentEntry.procedureId).steps[parentStepId!];
+			const ps = this._requireProcedure(parentEntry.procedureId).steps[parentStepId!];
+			if (!(ps instanceof CallStep)) {
+				throw new Error(`Engine invariant: parent step "${parentStepId}" is not a CallStep.`);
+			}
+			callStep = ps;
+			stepMap = this._requireProcedure(parentEntry.procedureId).steps;
+			onComplete = (s) =>
+				this._journal.push({
+					procedureId: parentEntry.procedureId,
+					state: { ...s, status: 'complete' } as ProcedureState
+				});
 		}
 
-		if (!(parentStep instanceof CallStep)) {
-			throw new Error(`Engine invariant: parent step "${parentStepId}" is not a CallStep.`);
-		}
-
-		const result = parentStep.then({ ...parentEntry.state, step: undefined }, childState);
-		this._journal.push({ procedureId: parentEntry.procedureId, state: result as ProcedureState });
+		const result = callStep.then({ ...parentEntry.state, step: undefined }, childState);
+		this._processStepResult(
+			parentEntry.procedureId,
+			parentEntry.state,
+			result,
+			stepMap,
+			onComplete,
+			{} // parent continuation — no parentIndex or loop metadata
+		);
 	}
 
 	// -------------------------------------------------------------------

@@ -640,3 +640,173 @@ describe('Engine.restore', () => {
 		expect((doneEntry.state as any).collected).toEqual(['got-input']);
 	});
 });
+
+// ---------------------------------------------------------------------------
+// Engine with CallStep
+// ---------------------------------------------------------------------------
+
+describe('Engine with CallStep', () => {
+	it('auto-advances to the next step when the CallStep has no `then`', () => {
+		expect.assertions(2);
+
+		interface ChildState extends ProcedureState {
+			message: string;
+		}
+
+		const childProc = new ProcedureDefinition<ChildState>({
+			id: ProcedureId.Unimplemented,
+			steps: {
+				finish: (state: ChildState) => ({
+					...state,
+					message: 'child-done',
+					status: 'complete'
+				})
+			}
+		});
+
+		interface ParentState extends ProcedureState {
+			childMessage?: string;
+		}
+
+		const { call, define } = instructions<ParentState>();
+
+		const parentProc = define({
+			id: ProcedureId.UnimplementedAlt,
+			steps: {
+				invoke: call(childProc),
+				after: (state: ParentState) => ({
+					...state,
+					childMessage: 'parent-continued',
+					status: 'complete'
+				})
+			}
+		});
+
+		const allProcs: ProcedureRegistry = {
+			[childProc.id]: childProc,
+			[parentProc.id]: parentProc
+		};
+
+		const engine = Engine.create(allProcs, parentProc.id, parentProc.createState(testGame(), {}));
+
+		const finished = engine.run();
+		expect(finished).toBe(true);
+
+		// Should have reached the 'after' step
+		const lastEntry = engine.journal.at(-1)!;
+		expect((lastEntry.state as ParentState).childMessage).toBe('parent-continued');
+	});
+
+	it('uses the `then` callback when provided to set explicit step', () => {
+		expect.assertions(2);
+
+		interface ChildState extends ProcedureState {
+			value: number;
+		}
+
+		const childProc = new ProcedureDefinition<ChildState>({
+			id: ProcedureId.Unimplemented,
+			steps: {
+				finish: (state: ChildState) => ({
+					...state,
+					value: 42,
+					status: 'complete'
+				})
+			}
+		});
+
+		interface ParentState extends ProcedureState {
+			result?: number;
+		}
+
+		const { call, define } = instructions<ParentState>();
+
+		const parentProc = define({
+			id: ProcedureId.UnimplementedAlt,
+			steps: {
+				invoke: call(childProc, {}, (state, child: ChildState) => ({
+					...state,
+					result: child.value,
+					step: 'done'
+				})),
+				unreachable: (state: ParentState) => ({
+					...state,
+					status: 'complete'
+				}),
+				done: (state: ParentState) => ({
+					...state,
+					status: 'complete'
+				})
+			}
+		});
+
+		const allProcs: ProcedureRegistry = {
+			[childProc.id]: childProc,
+			[parentProc.id]: parentProc
+		};
+
+		const engine = Engine.create(allProcs, parentProc.id, parentProc.createState(testGame(), {}));
+
+		const finished = engine.run();
+		expect(finished).toBe(true);
+
+		const lastEntry = engine.journal.at(-1)!;
+		expect((lastEntry.state as ParentState).result).toBe(42);
+	});
+
+	it('auto-advances when `then` callback returns step: undefined', () => {
+		expect.assertions(2);
+
+		interface ChildState extends ProcedureState {
+			value: number;
+		}
+
+		const childProc = new ProcedureDefinition<ChildState>({
+			id: ProcedureId.Unimplemented,
+			steps: {
+				finish: (state: ChildState) => ({
+					...state,
+					value: 7,
+					status: 'complete'
+				})
+			}
+		});
+
+		interface ParentState extends ProcedureState {
+			result?: number;
+			reachedNext?: boolean;
+		}
+
+		const { call, define } = instructions<ParentState>();
+
+		const parentProc = define({
+			id: ProcedureId.UnimplementedAlt,
+			steps: {
+				invoke: call(childProc, {}, (state, child: ChildState) => ({
+					...state,
+					result: child.value
+					// intentionally no `step` — should auto-advance
+				})),
+				after: (state: ParentState) => ({
+					...state,
+					reachedNext: true,
+					status: 'complete'
+				})
+			}
+		});
+
+		const allProcs: ProcedureRegistry = {
+			[childProc.id]: childProc,
+			[parentProc.id]: parentProc
+		};
+
+		const engine = Engine.create(allProcs, parentProc.id, parentProc.createState(testGame(), {}));
+
+		const finished = engine.run();
+		expect(finished).toBe(true);
+
+		const lastEntry = engine.journal.at(-1)!;
+		const lastState = lastEntry.state as ParentState;
+		expect(lastState.reachedNext).toBe(true);
+	});
+});
