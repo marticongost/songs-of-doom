@@ -75,7 +75,7 @@ export class BooleanField<N extends string = string, R extends boolean = true> e
 	R
 > {}
 
-export interface CapabilityChoiceFieldProps<
+export interface CapabilityFieldProps<
 	C extends Capability = Capability,
 	N extends string = string,
 	R extends boolean = true
@@ -83,14 +83,14 @@ export interface CapabilityChoiceFieldProps<
 	choices: Set<CapabilityRef<C>>;
 }
 
-export class CapabilityChoiceField<
+export class CapabilityField<
 	C extends Capability = Capability,
 	N extends string = string,
 	R extends boolean = true
 > extends Field<CapabilityRef<C>, N, R> {
 	readonly choices: Set<CapabilityRef<C>>;
 
-	constructor({ choices, ...baseProps }: CapabilityChoiceFieldProps<C, N, R>) {
+	constructor({ choices, ...baseProps }: CapabilityFieldProps<C, N, R>) {
 		super(baseProps);
 		this.choices = choices;
 	}

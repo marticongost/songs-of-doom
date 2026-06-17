@@ -10,7 +10,7 @@ import {
 import * as Game from '@songsofdoom/game';
 import {
 	BooleanField,
-	CapabilityChoiceField,
+	CapabilityField,
 	EntityField,
 	FocusesField,
 	PaymentField,
@@ -96,7 +96,7 @@ export const engineSerialisation = new Serialisation<EngineSerialisationContext>
 		TargetField,
 		FocusesField,
 		BooleanField,
-		CapabilityChoiceField,
+		CapabilityField,
 		ResultField,
 		PaymentField,
 		EntityField,

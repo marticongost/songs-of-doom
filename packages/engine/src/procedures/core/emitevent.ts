@@ -1,5 +1,5 @@
 import { type EventType, type Reaction, events, Obligation } from '@songsofdoom/game';
-import { CapabilityChoiceField } from '../../core/input';
+import { CapabilityField } from '../../core/input';
 import { instructions } from '../../core/instructions';
 import { type ProcedureState } from '../../core/procedure';
 import { ProcedureId } from '../../core/procedureid';
@@ -75,7 +75,7 @@ export const emitEvent = define({
 		},
 		askPlayersForNextReaction: input({
 			fields: (state) => [
-				new CapabilityChoiceField<Reaction, 'chosenReaction', boolean>({
+				new CapabilityField<Reaction, 'chosenReaction', boolean>({
 					name: 'chosenReaction',
 					choices: new Set(state.reactionGroups![0].reactions),
 					required: state.reactionGroups![0].reactions.some(

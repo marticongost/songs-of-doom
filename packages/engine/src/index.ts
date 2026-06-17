@@ -2,7 +2,7 @@
 export { Engine } from './core/engine';
 export {
 	BooleanField,
-	CapabilityChoiceField,
+	CapabilityField,
 	EntityField,
 	Field,
 	FocusesField,

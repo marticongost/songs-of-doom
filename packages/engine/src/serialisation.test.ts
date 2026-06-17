@@ -4,7 +4,7 @@ import * as Game from '@songsofdoom/game';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
 	BooleanField,
-	CapabilityChoiceField,
+	CapabilityField,
 	EntityField,
 	FocusesField,
 	PaymentField,
@@ -206,14 +206,14 @@ describe('engineSerialisation — fields', () => {
 		expect(json['@type']).toBe('BooleanField');
 	});
 
-	it('brands CapabilityChoiceField with @type', () => {
+	it('brands CapabilityField with @type', () => {
 		expect.assertions(1);
-		const field = new CapabilityChoiceField({
+		const field = new CapabilityField({
 			name: 'reaction',
 			choices: new Set<CapabilityRef>()
 		});
 		const json = serialiseToObject(field);
-		expect(json['@type']).toBe('CapabilityChoiceField');
+		expect(json['@type']).toBe('CapabilityField');
 	});
 
 	it('brands ResultField with @type', () => {
@@ -287,10 +287,10 @@ describe('engineSerialisation — fields', () => {
 		expect(restored.entities).toEqual(['plr1', 'plr2']);
 	});
 
-	it('round-trips a CapabilityChoiceField with Set of choices', () => {
+	it('round-trips a CapabilityField with Set of choices', () => {
 		expect.assertions(2);
 		const ref: CapabilityRef = { cardId: 'trt1', capability: {} as Game.Capability };
-		const field = new CapabilityChoiceField({
+		const field = new CapabilityField({
 			name: 'reaction',
 			choices: new Set([ref])
 		});

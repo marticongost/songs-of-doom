@@ -1,5 +1,5 @@
 import type { Action } from '@songsofdoom/game';
-import { CapabilityChoiceField, EntityField } from '../../../core/input';
+import { CapabilityField, EntityField } from '../../../core/input';
 import { instructions } from '../../../core/instructions';
 import { type ProcedureState } from '../../../core/procedure';
 import { ProcedureId } from '../../../core/procedureid';
@@ -80,7 +80,7 @@ export const turnPlayerActionsPhase = define({
 			// 1+ actions available: ask the actor's player to choose, or pass
 			return input({
 				fields: [
-					new CapabilityChoiceField({
+					new CapabilityField({
 						name: 'action',
 						choices: new Set(choices),
 						required: false // Allow players to pass (choose no action)

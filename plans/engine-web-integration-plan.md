@@ -432,17 +432,17 @@ Components are **derived views** — they read from `GameStore` but never mutate
 
 Input fields from the engine map to UI components:
 
-| Field Type              | Component                                       |
-| ----------------------- | ----------------------------------------------- |
-| `TargetField`           | Target picker (clickable cards/locations)       |
-| `CapabilityChoiceField` | Capability selector (list of actions/reactions) |
-| `BooleanField`          | Checkbox or confirm/cancel buttons              |
-| `EntityField`           | Entity picker (player/ally/creature selection)  |
-| `FocusesField`          | Focus token allocation UI                       |
-| `PaymentField`          | Cost payment UI (choose how to pay)             |
-| `ResultField`           | Result picker (from a test roll)                |
+| Field Type        | Component                                       |
+| ----------------- | ----------------------------------------------- |
+| `TargetField`     | Target picker (clickable cards/locations)       |
+| `CapabilityField` | Capability selector (list of actions/reactions) |
+| `BooleanField`    | Checkbox or confirm/cancel buttons              |
+| `EntityField`     | Entity picker (player/ally/creature selection)  |
+| `FocusesField`    | Focus token allocation UI                       |
+| `PaymentField`    | Cost payment UI (choose how to pay)             |
+| `ResultField`     | Result picker (from a test roll)                |
 
-A `FieldRenderer` component dispatches to the appropriate sub-component based on the field's `@type` brand.
+A `InputForm` component dispatches to the appropriate sub-component based on the field's `@type` brand.
 
 ---
 
@@ -595,18 +595,18 @@ migrateJournals().catch(console.error);
 
 ### Phase 6: Input Components
 
-- [ ] **6.1** Create `FieldRenderer.svelte` — dispatches to field-specific components based on `@type`.
+- [x] **6.1** Create `InputForm.svelte` — dispatches to field-specific components based on `@type`.
 - [ ] **6.2** Create `TargetFieldInput.svelte` — interactive card/location picker.
-- [ ] **6.3** Create `CapabilityChoiceFieldInput.svelte` — list of actions/reactions.
-- [ ] **6.4** Create `BooleanFieldInput.svelte` — confirm/cancel.
-- [ ] **6.5** Create `EntityFieldInput.svelte` — player/ally/creature picker.
-- [ ] **6.6** Create `FocusesFieldInput.svelte` — focus token allocation.
-- [ ] **6.7** Create `PaymentFieldInput.svelte` — cost payment selection.
-- [ ] **6.8** Create `ResultFieldInput.svelte` — test result picker.
+- [x] **6.3** Create `CapabilityInput.svelte` — list of actions/reactions.
+- [ ] **6.4** Create `BooleanInput.svelte` — confirm/cancel.
+- [ ] **6.5** Create `EntityInput.svelte` — player/ally/creature picker.
+- [ ] **6.6** Create `FocusesInput.svelte` — focus token allocation.
+- [ ] **6.7** Create `PaymentInput.svelte` — cost payment selection.
+- [ ] **6.8** Create `ResultInput.svelte` — test result picker.
 
 ### Phase 7: Game UI
 
-- [ ] **7.1** Create game route: `src/routes/[locale]/game/[gameId]/`.
+- [x] **7.1** Create game route: `src/routes/[locale]/games/[gameId]/`.
 - [ ] **7.2** Create `GameBoard.svelte` — main game layout (player areas, encounter area).
 - [ ] **7.3** Create `PlayerArea.svelte` — hand, stage, attachments, stats.
 - [ ] **7.4** Create `CardDisplay.svelte` — card rendering from `CardState`.
