@@ -218,10 +218,13 @@ describe('GET /api/game/[gameId]/events', () => {
 
 	// ─── Engine pre-load ─────────────────────────────────────────────────
 
-	it('returns 404 when the engine cannot be loaded', async () => {
+	it('accepts SSE connection for PREPARATION games without an engine', async () => {
 		const mockManager = mock<GameManager>({
 			verifyParticipant: vi.fn().mockResolvedValue(undefined),
-			getEngine: vi.fn().mockResolvedValue(undefined)
+			getEngine: vi.fn().mockResolvedValue(undefined),
+			getInputState: vi.fn().mockReturnValue(undefined),
+			subscribe: vi.fn(),
+			unsubscribe: vi.fn()
 		});
 		mockGetGameManager.mockReturnValue(mockManager);
 
@@ -230,10 +233,10 @@ describe('GET /api/game/[gameId]/events', () => {
 			locals: authenticatedLocals()
 		};
 
-		await expect(GET(args as any)).rejects.toMatchObject({
-			status: 404,
-			message: 'Game "game-1" not found'
-		});
+		const response = await GET(args as any);
+		expect(response.status).toBe(200);
+		expect(response.headers.get('Content-Type')).toBe('text/event-stream');
+		expect(mockManager.subscribe).toHaveBeenCalledWith('game-1', expect.any(Object));
 	});
 
 	// ─── Response headers ────────────────────────────────────────────────

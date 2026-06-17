@@ -246,6 +246,7 @@ describe('GameManager', () => {
 			const sub: SSESubscriber = {
 				sendState: vi.fn(),
 				sendInputRequired: vi.fn(),
+				sendMeta: vi.fn(),
 				close: vi.fn()
 			};
 			manager.subscribe('game-1', sub);
@@ -287,6 +288,7 @@ describe('GameManager', () => {
 			const sub: SSESubscriber = {
 				sendState: vi.fn(),
 				sendInputRequired: vi.fn(),
+				sendMeta: vi.fn(),
 				close: vi.fn()
 			};
 			manager.subscribe('game-1', sub);
@@ -451,6 +453,7 @@ describe('GameManager', () => {
 			const sub: SSESubscriber = {
 				sendState: vi.fn(),
 				sendInputRequired: vi.fn(),
+				sendMeta: vi.fn(),
 				close: vi.fn()
 			};
 
@@ -465,11 +468,13 @@ describe('GameManager', () => {
 			const sub1: SSESubscriber = {
 				sendState: vi.fn(),
 				sendInputRequired: vi.fn(),
+				sendMeta: vi.fn(),
 				close: vi.fn()
 			};
 			const sub2: SSESubscriber = {
 				sendState: vi.fn(),
 				sendInputRequired: vi.fn(),
+				sendMeta: vi.fn(),
 				close: vi.fn()
 			};
 
@@ -492,11 +497,13 @@ describe('GameManager', () => {
 			const sub1: SSESubscriber = {
 				sendState: vi.fn(),
 				sendInputRequired: vi.fn(),
+				sendMeta: vi.fn(),
 				close: vi.fn()
 			};
 			const sub2: SSESubscriber = {
 				sendState: vi.fn(),
 				sendInputRequired: vi.fn(),
+				sendMeta: vi.fn(),
 				close: vi.fn()
 			};
 
@@ -513,6 +520,7 @@ describe('GameManager', () => {
 			const sub: SSESubscriber = {
 				sendState: vi.fn(),
 				sendInputRequired: vi.fn(),
+				sendMeta: vi.fn(),
 				close: vi.fn()
 			};
 
@@ -544,11 +552,13 @@ describe('GameManager', () => {
 					throw new Error('boom');
 				}),
 				sendInputRequired: vi.fn(),
+				sendMeta: vi.fn(),
 				close: vi.fn()
 			};
 			const goodSub: SSESubscriber = {
 				sendState: vi.fn(),
 				sendInputRequired: vi.fn(),
+				sendMeta: vi.fn(),
 				close: vi.fn()
 			};
 

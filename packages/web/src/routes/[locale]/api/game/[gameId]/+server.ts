@@ -33,7 +33,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		where: { id: gameId },
 		include: {
 			participants: {
-				select: { userId: true, characterId: true }
+				select: { userId: true, characterId: true, character: { select: { name: true } } }
 			}
 		}
 	});
@@ -47,7 +47,13 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 	return json({
 		id: game.id,
 		status: game.status,
-		participants: game.participants,
+		campaignId: game.campaignId,
+		ownerId: game.ownerId,
+		participants: game.participants.map((p) => ({
+			userId: p.userId,
+			characterId: p.characterId,
+			characterName: p.character.name
+		})),
 		state
 	});
 };

@@ -1,5 +1,5 @@
 import { ForbiddenError, NotFoundError } from '$lib/server/errors';
-import { getGameManager, type SSESubscriber } from '$lib/server/game-manager';
+import { getGameManager, type GameMeta, type SSESubscriber } from '$lib/server/game-manager';
 import { engineSerialisation, type JournalEntry } from '@songsofdoom/engine';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
@@ -55,11 +55,8 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
 	const sinceParam = url?.searchParams.get('since') ?? null;
 	const since = parseSince(sinceParam);
 
-	// --- Pre-load engine ---
+	// --- Pre-load engine (may not exist for PREPARATION games) ---
 	const engine = await gameManager.getEngine(gameId);
-	if (!engine) {
-		error(404, `Game "${gameId}" not found`);
-	}
 
 	const context = gameManager.serialisationContext;
 
@@ -95,6 +92,15 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
 					}
 				},
 
+				sendMeta(meta: GameMeta) {
+					if (closed) return;
+					try {
+						controller.enqueue(`event: meta\ndata: ${wireEncode(meta)}\n\n`);
+					} catch {
+						/* stream may have been cancelled */
+					}
+				},
+
 				close(_reason?: string) {
 					if (closed) return;
 					closed = true;
@@ -106,20 +112,28 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
 				}
 			};
 
-			// --- Catch-up: pre-flush entries after `since` ---
-			if (since !== null && engine.journal.length > since + 1) {
+			// --- Catch-up: pre-flush entries after `since` (only if engine exists) ---
+			if (engine && since !== null && engine.journal.length > since + 1) {
 				const catchUpEntries = engine.journal.slice(since + 1) as JournalEntry[];
 				subscriber.sendState(catchUpEntries);
 			}
 
 			// If the engine is currently awaiting input, notify immediately.
-			const inputState = gameManager.getInputState(gameId);
-			if (inputState) {
-				subscriber.sendInputRequired(inputState.awaitingPlayerId, inputState.fields);
+			if (engine) {
+				const inputState = gameManager.getInputState(gameId);
+				if (inputState) {
+					subscriber.sendInputRequired(inputState.awaitingPlayerId, inputState.fields);
+				}
 			}
 
 			// --- Subscribe for live updates ---
 			gameManager.subscribe(gameId, subscriber);
+
+			// --- Send initial meta so clients transition out of 'connecting' ---
+			// Always send a meta event on initial connection so the client
+			// transitions from 'connecting' to 'lobby' or gameplay, even when
+			// no state/input-required events are immediately pending.
+			gameManager.sendMetaToSubscriber(gameId, subscriber);
 		},
 
 		cancel() {
@@ -148,12 +162,18 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
  *
  * Returns a non-negative integer index, or `null` when the parameter is
  * missing or invalid (so the stream starts live with no catch-up).
+ *
+ * A value of `-1` is allowed as a sentinel meaning "I have no entries yet,
+ * send everything from the start."
  */
 function parseSince(raw: string | null): number | null {
 	if (raw === null) return null;
 
 	const n = Number(raw);
-	if (!Number.isFinite(n) || n < 0 || !Number.isInteger(n)) return null;
+	if (!Number.isFinite(n) || !Number.isInteger(n)) return null;
+
+	// -1 means "from the beginning" (entry indices are 0-based)
+	if (n < -1) return null;
 
 	return n;
 }

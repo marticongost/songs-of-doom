@@ -54,3 +54,16 @@ export const editCharacterUrl = createUrlHandler((character: Character | number,
 		id: String(typeof character === 'number' ? character : character.id)
 	})
 );
+
+/** URL handler for the new game page. */
+export const newGameUrl = createUrlHandler((locale?: Locale) =>
+	resolve('/[locale]/games/new', { locale: locale ?? getLocale() })
+);
+
+/** URL handler for game pages. */
+export const gameUrl = createUrlHandler((gameId: string, locale?: Locale) =>
+	resolve('/[locale]/games/[gameId]', {
+		locale: locale ?? getLocale(),
+		gameId
+	})
+);

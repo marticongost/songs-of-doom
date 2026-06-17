@@ -12,11 +12,13 @@ import {
 // Types
 // ---------------------------------------------------------------------------
 
-type GameStatus = 'idle' | 'connecting' | 'awaiting_input' | 'complete' | 'error';
+type GameStatus = 'idle' | 'connecting' | 'lobby' | 'awaiting_input' | 'complete' | 'error';
 
 interface GameMeta {
 	status: string;
-	participants: Array<{ userId: string; characterId: number }>;
+	campaignId: string | null;
+	ownerId: string | null;
+	participants: Array<{ userId: string; characterId: number; characterName: string }>;
 }
 
 interface StateEventPayload {
@@ -137,12 +139,25 @@ export class GameStore {
 			}
 
 			const meta = (await stateRes.json()) as {
-				id: string;
+				id: GameStatus;
 				status: string;
+				campaignId: string | null;
+				ownerId: string | null;
 				participants: GameMeta['participants'];
 				state: unknown;
 			};
-			this.gameMeta = { status: meta.status, participants: meta.participants };
+			this.gameMeta = {
+				status: meta.status,
+				campaignId: meta.campaignId,
+				ownerId: meta.ownerId,
+				participants: meta.participants
+			};
+
+			// Transition immediately for PREPARATION games — no engine / state
+			// events will arrive until the game is started.
+			if (meta.status === 'PREPARATION') {
+				this.status = 'lobby';
+			}
 
 			// Step 2 — open SSE stream (catch-up via ?since=-1)
 			this._subscribeSSE(gameId, -1);
@@ -187,6 +202,95 @@ export class GameStore {
 			}
 		} catch (err) {
 			this.error = err instanceof Error ? err.message : 'Input request failed';
+		}
+	}
+
+	/**
+	 * Start the game (owner only).
+	 *
+	 * Sends `POST /{locale}/api/game/{gameId}/start`. The server broadcasts
+	 * a `meta` event and initial journal entries via SSE.
+	 */
+	async startGame(): Promise<void> {
+		if (!browser || !this.gameId) return;
+
+		const locale = this._locale;
+
+		try {
+			const res = await fetch(`/${locale}/api/game/${this.gameId}/start`, {
+				method: 'POST',
+				headers: { 'Game-Client-Version': GAME_VERSION }
+			});
+
+			if (!res.ok) {
+				if (res.status === 409) {
+					const body = await res.json();
+					this._handleVersionMismatch(body.requiredVersion);
+					return;
+				}
+				this.error = `Start failed: ${res.status}`;
+			}
+		} catch (err) {
+			this.error = err instanceof Error ? err.message : 'Start request failed';
+		}
+	}
+
+	/**
+	 * Join the game with the given character.
+	 *
+	 * Sends `POST /{locale}/api/game/{gameId}/join`. The server broadcasts
+	 * a `meta` event with updated participants via SSE.
+	 */
+	async joinGame(characterId: number): Promise<void> {
+		if (!browser || !this.gameId) return;
+
+		const locale = this._locale;
+
+		try {
+			const res = await fetch(`/${locale}/api/game/${this.gameId}/join`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Game-Client-Version': GAME_VERSION
+				},
+				body: JSON.stringify({ characterId })
+			});
+
+			if (!res.ok) {
+				if (res.status === 409) {
+					const body = await res.json();
+					this._handleVersionMismatch(body.requiredVersion);
+					return;
+				}
+				this.error = `Join failed: ${res.status}`;
+			}
+		} catch (err) {
+			this.error = err instanceof Error ? err.message : 'Join request failed';
+		}
+	}
+
+	/**
+	 * Leave the game.
+	 *
+	 * Sends `POST /{locale}/api/game/{gameId}/leave`. The server broadcasts
+	 * a `meta` event with updated participants via SSE.
+	 */
+	async leaveGame(): Promise<void> {
+		if (!browser || !this.gameId) return;
+
+		const locale = this._locale;
+
+		try {
+			const res = await fetch(`/${locale}/api/game/${this.gameId}/leave`, {
+				method: 'POST',
+				headers: { 'Game-Client-Version': GAME_VERSION }
+			});
+
+			if (!res.ok) {
+				this.error = `Leave failed: ${res.status}`;
+			}
+		} catch (err) {
+			this.error = err instanceof Error ? err.message : 'Leave request failed';
 		}
 	}
 
@@ -332,6 +436,16 @@ export class GameStore {
 					this.awaitingPlayerId = inputPayload.awaitingPlayerId ?? null;
 					this.inputFields = inputPayload.fields ?? [];
 					this.status = 'awaiting_input';
+					break;
+				}
+
+				case 'meta': {
+					const metaPayload = payload as unknown as GameMeta;
+					this.gameMeta = metaPayload;
+					// Transition out of connecting or lobby when game starts.
+					if (this.status === 'connecting' || this.status === 'lobby') {
+						this.status = metaPayload.status === 'PREPARATION' ? 'lobby' : 'complete';
+					}
 					break;
 				}
 			}

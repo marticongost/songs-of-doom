@@ -141,9 +141,11 @@ describe('GET /api/game/[gameId]', () => {
 		mockPrisma.game.findUnique.mockResolvedValue({
 			id: 'game-1',
 			status: 'ACTIVE',
+			campaignId: 'campaign-1',
+			ownerId: 'user-1',
 			participants: [
-				{ userId: 'user-1', characterId: 1 },
-				{ userId: 'user-2', characterId: 2 }
+				{ userId: 'user-1', characterId: 1, character: { name: 'Hero' } },
+				{ userId: 'user-2', characterId: 2, character: { name: 'Sidekick' } }
 			]
 		});
 
@@ -161,9 +163,11 @@ describe('GET /api/game/[gameId]', () => {
 		expect(body).toEqual({
 			id: 'game-1',
 			status: 'ACTIVE',
+			campaignId: 'campaign-1',
+			ownerId: 'user-1',
 			participants: [
-				{ userId: 'user-1', characterId: 1 },
-				{ userId: 'user-2', characterId: 2 }
+				{ userId: 'user-1', characterId: 1, characterName: 'Hero' },
+				{ userId: 'user-2', characterId: 2, characterName: 'Sidekick' }
 			],
 			state: { players: [] }
 		});

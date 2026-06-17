@@ -1,4 +1,7 @@
-import type { ReadonlyGameState as ReadonlyGameStateType } from '@songsofdoom/engine';
+import type {
+	ReadonlyGameState as ReadonlyGameStateType,
+	RunCampaignState
+} from '@songsofdoom/engine';
 import {
 	createEngineSerialisationContext,
 	deserialiseJournalEntry,
@@ -36,6 +39,9 @@ export interface SSESubscriber {
 	/** Send an input-required event. */
 	sendInputRequired(awaitingPlayerId: string, fields: Field<unknown>[]): void;
 
+	/** Send a meta update event (participants, status, etc.). */
+	sendMeta(meta: GameMeta): void;
+
 	/** Close the SSE connection with a reason. */
 	close(reason?: string): void;
 }
@@ -55,7 +61,20 @@ export interface GameInputRequiredEvent {
 	fields: Field<unknown>[];
 }
 
-export type GameEvent = GameStateEvent | GameInputRequiredEvent;
+/** Lightweight game metadata shared via SSE. */
+export interface GameMeta {
+	status: string;
+	participants: Array<{ userId: string; characterId: number; characterName: string }>;
+	campaignId: string | null;
+	ownerId: string | null;
+}
+
+export interface GameMetaEvent {
+	type: 'meta';
+	meta: GameMeta;
+}
+
+export type GameEvent = GameStateEvent | GameInputRequiredEvent | GameMetaEvent;
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -225,6 +244,42 @@ export class GameManager {
 				characterId
 			}
 		});
+
+		// Broadcast updated participants
+		await this._broadcastMeta(gameId);
+	}
+
+	/**
+	 * Removes a participant from a game in PREPARATION state.
+	 *
+	 * After leaving, if no participants remain the game is left in PREPARATION
+	 * state (owner can still join/re-invite, or abandon).
+	 */
+	async leaveGame(gameId: string, userId: string): Promise<void> {
+		const game = await prisma.game.findUnique({
+			where: { id: gameId },
+			include: { participants: true }
+		});
+
+		if (!game) {
+			throw new NotFoundError(`Game "${gameId}" not found`);
+		}
+
+		if (game.status !== 'PREPARATION') {
+			throw new ConflictError(`Game "${gameId}" is not in PREPARATION state`);
+		}
+
+		const isParticipant = game.participants.some((p) => p.userId === userId);
+		if (!isParticipant) {
+			throw new ConflictError(`User "${userId}" is not a participant in game "${gameId}"`);
+		}
+
+		await prisma.gameParticipant.delete({
+			where: { gameId_userId: { gameId, userId } }
+		});
+
+		// Broadcast updated participants
+		await this._broadcastMeta(gameId);
 	}
 
 	/**
@@ -267,14 +322,13 @@ export class GameManager {
 		// Minimal placeholder game state — the Setup procedure replaces it.
 		const placeholderGame = new ReadonlyGameState({ players: [] });
 
-		// Create and run the engine starting with the Setup procedure.
-		const engine = Engine.create(procedureDefinitions, ProcedureId.RunCampaign, {
-			step: undefined,
-			status: 'ongoing',
+		// Create and run the engine. Engine.create() fleshes out the procedure's
+		// default state (step, status) from the definition.
+		const engine = Engine.create<RunCampaignState>(procedureDefinitions, ProcedureId.RunCampaign, {
 			game: placeholderGame,
 			campaignId: game.campaignId,
 			characters
-		} as unknown as ProcedureState);
+		});
 
 		engine.run();
 
@@ -289,6 +343,14 @@ export class GameManager {
 		});
 
 		this.engines.set(gameId, engine);
+
+		// Broadcast initial journal entries and meta update so clients
+		// see the game board immediately.
+		const initialEntries = engine.journal as JournalEntry[];
+		if (initialEntries.length > 0) {
+			this.broadcast(gameId, { type: 'state', newEntries: initialEntries });
+		}
+		await this._broadcastMeta(gameId);
 	}
 
 	// -------------------------------------------------------------------
@@ -447,6 +509,9 @@ export class GameManager {
 					case 'input-required':
 						sub.sendInputRequired(event.awaitingPlayerId, event.fields);
 						break;
+					case 'meta':
+						sub.sendMeta(event.meta);
+						break;
 				}
 			} catch (err) {
 				console.error(`Error broadcasting to subscriber for game "${gameId}":`, err);
@@ -465,6 +530,63 @@ export class GameManager {
 	// -------------------------------------------------------------------
 	// Internal helpers
 	// -------------------------------------------------------------------
+
+	/**
+	 * Loads a game's metadata from DB and broadcasts it as a `meta` event
+	 * to all SSE subscribers.
+	 */
+	private async _broadcastMeta(gameId: string): Promise<void> {
+		const meta = await this._loadGameMeta(gameId);
+		if (!meta) return;
+		this.broadcast(gameId, { type: 'meta', meta });
+	}
+
+	/**
+	 * Sends the current game metadata to a single SSE subscriber.
+	 *
+	 * Used on initial SSE connection so the client can transition out of
+	 * 'connecting' status even when no state or input events are pending.
+	 */
+	async sendMetaToSubscriber(gameId: string, subscriber: SSESubscriber): Promise<void> {
+		const meta = await this._loadGameMeta(gameId);
+		if (!meta) return;
+
+		try {
+			subscriber.sendMeta(meta);
+		} catch (err) {
+			console.error(`Error sending meta for game "${gameId}" to subscriber:`, err);
+		}
+	}
+
+	/**
+	 * Loads game metadata from the database.
+	 */
+	private async _loadGameMeta(gameId: string): Promise<GameMeta | null> {
+		const game = await prisma.game.findUnique({
+			where: { id: gameId },
+			select: {
+				status: true,
+				campaignId: true,
+				ownerId: true,
+				participants: {
+					select: { userId: true, characterId: true, character: { select: { name: true } } }
+				}
+			}
+		});
+
+		if (!game) return null;
+
+		return {
+			status: game.status,
+			campaignId: game.campaignId,
+			ownerId: game.ownerId,
+			participants: game.participants.map((p) => ({
+				userId: p.userId,
+				characterId: p.characterId,
+				characterName: p.character.name
+			}))
+		};
+	}
 
 	/**
 	 * Rebuilds an engine from the persisted journal.

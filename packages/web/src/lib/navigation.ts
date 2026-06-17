@@ -123,11 +123,11 @@ export const siteTree = new Section({
 			}
 		},
 		{
-			name: 'simulator',
+			name: 'games',
 			title: {
-				ca: 'Simulador',
-				es: 'Simulador',
-				en: 'Simulator'
+				ca: 'Partides',
+				es: 'Partidas',
+				en: 'Games'
 			}
 		}
 	]

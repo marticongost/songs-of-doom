@@ -33,6 +33,15 @@ export const getCharacters = async (): Promise<Character[]> => {
 	return characterData.map(characterFromRecord);
 };
 
+/** Retrieves all characters owned by a specific user, with owner and latest revision. */
+export const getCharactersByOwner = async (userId: string): Promise<Character[]> => {
+	const characterData = await prisma.character.findMany({
+		where: { ownerId: userId },
+		include: CharacterFields
+	});
+	return characterData.map(characterFromRecord);
+};
+
 /** Transforms a {@link CharacterRecord} into a {@link Character} instance. */
 export const characterFromRecord = (characterData: CharacterRecord): Character =>
 	new Character({
