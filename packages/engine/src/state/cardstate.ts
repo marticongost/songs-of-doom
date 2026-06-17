@@ -43,14 +43,13 @@ export type CardParent =
 	| { type: 'location'; locationId: LocationId }
 	| { type: 'banish'; playerId: PlayerId }
 	| { type: 'encounter-deck' }
-	| { type: 'encounter-discard' }
-	| { type: 'game' };
+	| { type: 'encounter-discard' };
 
 export interface CardStateProps {
 	id: CardId;
 	card: Entity;
 	ownerId?: EntityId;
-	container: CardParent;
+	container?: CardParent;
 	exhausted?: boolean;
 	activated?: boolean;
 	charges?: number;
@@ -68,7 +67,7 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 > {
 	readonly card: Entity;
 	readonly ownerId: EntityId | undefined;
-	readonly container: CardParent;
+	readonly container?: CardParent;
 	readonly exhausted: boolean;
 	readonly activated: boolean;
 	readonly charges: number;
@@ -106,7 +105,7 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 	}
 
 	override get playerId(): PlayerId | undefined {
-		return this.container.type === 'player' ? this.container.playerId : undefined;
+		return this.container?.type === 'player' ? this.container.playerId : undefined;
 	}
 
 	override get hostile(): boolean {
@@ -114,7 +113,7 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 	}
 
 	get capabilities(): Array<Capability> {
-		if (this.container.type === 'card') {
+		if (this.container?.type === 'card') {
 			return this.card.attachmentCapabilities;
 		} else {
 			return this.card.capabilities;
@@ -159,7 +158,7 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 	}
 
 	isAttached(): boolean {
-		return this.container.type === 'card' || this.container.type === 'player';
+		return this.container?.type === 'card' || this.container?.type === 'player';
 	}
 
 	getReactionsToEvent(event: Event, gameState: ReadonlyGameState): Array<Reaction> {
@@ -211,16 +210,16 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 
 	inPlay(): boolean {
 		return (
-			this.container.type === 'hand' ||
-			this.container.type === 'stage' ||
-			this.container.type === 'player' ||
-			this.container.type === 'card' ||
-			this.container.type === 'location'
+			this.container?.type === 'hand' ||
+			this.container?.type === 'stage' ||
+			this.container?.type === 'player' ||
+			this.container?.type === 'card' ||
+			this.container?.type === 'location'
 		);
 	}
 
 	getPlayerId(): PlayerId | undefined {
-		return 'playerId' in this.container ? this.container.playerId : undefined;
+		return this.container && 'playerId' in this.container ? this.container.playerId : undefined;
 	}
 }
 

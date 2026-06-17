@@ -31,8 +31,7 @@ export const runScenario = define({
 				game: state.game.mutate((mutable) => {
 					const scenarioCard = new ReadonlyCardState({
 						id: scenario.id as CardId,
-						card: scenario,
-						container: { type: 'game' }
+						card: scenario
 					});
 					mutable.scenario = scenarioCard.mutable();
 					mutable.chapter = 0;

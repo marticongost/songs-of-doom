@@ -14,6 +14,7 @@ import { exhaustEffectProc } from '../procedures/effects/exhaustproc';
 import { gatherCluesEffectProc } from '../procedures/effects/gathercluesproc';
 import { healEffectProc } from '../procedures/effects/healproc';
 import { moveEffectProc } from '../procedures/effects/moveproc';
+import { playStoryCardsEffectProc } from '../procedures/effects/playstorycardsproc';
 import { runCampaign } from '../procedures/gamesequence/campaign/runcampaign';
 import { chapter } from '../procedures/gamesequence/chapters/chapter';
 import { chapterEndPhase } from '../procedures/gamesequence/chapters/chapterendphase';
@@ -79,5 +80,6 @@ export const procedureDefinitions: Record<ProcedureId, ProcedureDefinition<any>>
 	[ProcedureId.ExhaustEffect]: exhaustEffectProc,
 	[ProcedureId.GatherCluesEffect]: gatherCluesEffectProc,
 	[ProcedureId.HealEffect]: healEffectProc,
-	[ProcedureId.MoveEffect]: moveEffectProc
+	[ProcedureId.MoveEffect]: moveEffectProc,
+	[ProcedureId.PlayStoryCardsEffect]: playStoryCardsEffectProc
 };

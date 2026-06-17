@@ -52,6 +52,7 @@ export type { ExhaustEffectState } from './procedures/effects/exhaustproc';
 export type { GatherCluesEffectState } from './procedures/effects/gathercluesproc';
 export type { HealEffectState } from './procedures/effects/healproc';
 export type { MoveEffectState } from './procedures/effects/moveproc';
+export type { PlayStoryCardsEffectState } from './procedures/effects/playstorycardsproc';
 export type { RunCampaignState } from './procedures/gamesequence/campaign/runcampaign';
 export type { ChapterState } from './procedures/gamesequence/chapters/chapter';
 export type { ChapterEndState } from './procedures/gamesequence/chapters/chapterendphase';

@@ -82,6 +82,7 @@
 		GatherCluesEffectState,
 		HealEffectState,
 		MoveEffectState,
+		PlayStoryCardsEffectState,
 		RunCampaignState,
 		RunScenarioState,
 		TriggerCapabilityState,
@@ -113,6 +114,7 @@
 	import GenericLogEntry from './GenericLogEntry.svelte';
 	import HealEffectLogEntry from './HealEffectLogEntry.svelte';
 	import MoveEffectLogEntry from './MoveEffectLogEntry.svelte';
+	import PlayStoryCardsEffectLogEntry from './PlayStoryCardsEffectLogEntry.svelte';
 	import RunCampaignLogEntry from './RunCampaignLogEntry.svelte';
 	import RunScenarioLogEntry from './RunScenarioLogEntry.svelte';
 	import TriggerCapabilityLogEntry from './TriggerCapabilityLogEntry.svelte';
@@ -203,6 +205,8 @@
 						<HealEffectLogEntry state={entry.state as HealEffectState} />
 					{:else if procId === ProcedureId.MoveEffect}
 						<MoveEffectLogEntry state={entry.state as MoveEffectState} />
+					{:else if procId === ProcedureId.PlayStoryCardsEffect}
+						<PlayStoryCardsEffectLogEntry state={entry.state as PlayStoryCardsEffectState} />
 					{:else if procId === ProcedureId.TriggerCapability}
 						<TriggerCapabilityLogEntry state={entry.state as TriggerCapabilityState} />
 					{:else}

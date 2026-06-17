@@ -12,7 +12,7 @@ import type { CardId, LocationId, PlayerId } from './identifiers';
 export interface MutableCardLike {
 	readonly id: CardId;
 	readonly card: Entity;
-	container: CardParent;
+	container?: CardParent;
 	attachments: Array<MutableCardState>;
 	getPlayerId(): PlayerId | undefined;
 }
@@ -42,9 +42,10 @@ export function mutate<R extends { mutable(): M }, M extends { readonly(): R }>(
  * This is the low-level operation used by all move functions.
  */
 export function removeCardFromParent(card: MutableCardLike, gameState: MutableGameState): void {
-	if (card.container.type === 'game') {
-		throw new Error('Cannot remove a card from the game container');
-	} else if (card.container.type === 'card') {
+	if (!card.container) {
+		return;
+	}
+	if (card.container.type === 'card') {
 		const previousContainer = gameState.requireCard(card.container.cardId);
 		previousContainer.attachments = previousContainer.attachments.filter((a) => a.id !== card.id);
 	} else if (card.container.type === 'player') {
