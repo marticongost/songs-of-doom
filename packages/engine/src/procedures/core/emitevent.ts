@@ -4,6 +4,7 @@ import { instructions } from '../../core/instructions';
 import { type ProcedureState } from '../../core/procedure';
 import { ProcedureId } from '../../core/procedureid';
 import type { CapabilityRef, CardState } from '../../state/cardstate';
+import type { GameContext } from '../../state/gamestate';
 import type { ActorId, CardId, EntityId, PlayerId } from '../../state/identifiers';
 import { triggerCapability } from './triggercapability';
 
@@ -55,7 +56,9 @@ export const emitEvent = define({
 	steps: {
 		init(state: EmitEventState) {
 			const { game, eventContext, eventType } = state;
-			const gameStateWithContext = game.mutate((gameState) => gameState.pushContext(eventContext));
+			const gameStateWithContext = eventContext
+				? game.mutate((gameState) => gameState.pushContext(eventContext as GameContext))
+				: game;
 			const event = events[eventType];
 
 			const allReactions = game.cards({ ready: true }).flatMap((cardState) => {
@@ -111,15 +114,13 @@ export const emitEvent = define({
 			}
 		}),
 		finalise(state: EmitEventState) {
+			const { eventContext } = state;
 			return {
 				...state,
 				status: 'complete',
-				game: state.game.mutate((gameState) => {
-					gameState.popContext({
-						subjectId: state.eventContext.subjectId,
-						targetId: state.eventContext.targetId
-					});
-				})
+				game: eventContext
+					? state.game.mutate((gameState) => gameState.popContext(eventContext))
+					: state.game
 			};
 		}
 	}
