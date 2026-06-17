@@ -284,6 +284,70 @@ describe('Serialisation', () => {
 			// Root is an array — ObjectPool.insertInto requires an object root
 			expect(() => s.serialise([new Person('Alice', 30)])).toThrow(DecomposeError);
 		});
+
+		it('resolves references for a subclass using parent ObjectIdentity', () => {
+			class Employee extends Person {
+				constructor(
+					name: string,
+					age: number,
+					public role: string
+				) {
+					super(name, age);
+				}
+			}
+
+			const identity: ObjectIdentity<Person> = {
+				external: false,
+				getObjectId: (p) => p.name
+			};
+
+			const s = new Serialisation({
+				types: [Person, Employee],
+				objectIdentity: new Map([[Person, identity]])
+			});
+
+			const alice = new Employee('Alice', 30, 'Engineer');
+			const bob = new Employee('Bob', 25, 'Designer');
+			alice.friend = bob;
+
+			const result = s.deserialise<Employee>(s.serialise(alice));
+
+			expect(result).toBeInstanceOf(Employee);
+			expect(result.name).toBe('Alice');
+			expect(result.role).toBe('Engineer');
+			expect(result.friend).toBeInstanceOf(Employee);
+			expect(result.friend!.name).toBe('Bob');
+			expect((result.friend as Employee).role).toBe('Designer');
+		});
+
+		it('preserves object identity for a subclass with parent ObjectIdentity', () => {
+			class Employee extends Person {
+				constructor(
+					name: string,
+					age: number,
+					public role: string
+				) {
+					super(name, age);
+				}
+			}
+
+			const identity: ObjectIdentity<Person> = {
+				external: false,
+				getObjectId: (p) => p.name
+			};
+
+			const s = new Serialisation({
+				types: [Person, Employee],
+				objectIdentity: new Map([[Person, identity]])
+			});
+
+			const alice = new Employee('Alice', 30, 'Engineer');
+			const container = { a: alice, b: alice };
+
+			const result = s.deserialise<typeof container>(s.serialise(container));
+			expect(result.a).toBe(result.b); // same reference
+			expect(result.a).toBeInstanceOf(Employee);
+		});
 	});
 
 	// === Object identity (external) ===
@@ -309,6 +373,40 @@ describe('Serialisation', () => {
 			const result = s.deserialise<typeof container>(s.serialise(container, people), people);
 
 			expect(result.person).toBe(alice); // exact same reference from external lookup
+		});
+
+		it('resolves external references for a subclass using parent ObjectIdentity', () => {
+			class Employee extends Person {
+				constructor(
+					name: string,
+					age: number,
+					public role: string
+				) {
+					super(name, age);
+				}
+			}
+
+			const people = new Map<string, Person>();
+			const alice = new Employee('Alice', 30, 'Engineer');
+			people.set('Alice', alice);
+
+			const identity: ObjectIdentity<Person, Map<string, Person>> = {
+				external: true,
+				getObjectId: (p) => p.name,
+				resolveExternalReference: (key, _context) => people.get(key)
+			};
+
+			const s = new Serialisation({
+				types: [Person, Employee],
+				objectIdentity: new Map([[Person, identity]])
+			});
+
+			const container = { person: alice };
+			const result = s.deserialise<typeof container>(s.serialise(container, people), people);
+
+			expect(result.person).toBe(alice); // exact same reference from external lookup
+			expect(result.person).toBeInstanceOf(Employee);
+			expect((result.person as Employee).role).toBe('Engineer');
 		});
 	});
 

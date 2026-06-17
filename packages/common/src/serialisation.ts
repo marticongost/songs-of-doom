@@ -497,6 +497,22 @@ export class Serialisation<ContextData = undefined> {
 		);
 	}
 
+	/**
+	 * Walks the inheritance chain of a type (constructor) to find a matching
+	 * {@link ObjectIdentity} in the registry.  This mirrors
+	 * {@link getObjectIdentity} but works from a constructor rather than an
+	 * instance.
+	 */
+	private getObjectIdentityForType(type: Type): ObjectIdentity<any, ContextData> | undefined {
+		let proto: object | null = type.prototype;
+		while (proto) {
+			const identity = this.objectIdentityByType.get(proto.constructor as Type);
+			if (identity) return identity;
+			proto = Object.getPrototypeOf(proto);
+		}
+		return undefined;
+	}
+
 	private getObjectId(
 		obj: any,
 		contextData: ContextData,
@@ -530,7 +546,7 @@ export class Serialisation<ContextData = undefined> {
 		objectPool?: JSONValue,
 		resolvedRefs?: Map<string, any>
 	): T | undefined {
-		const objectIdentity = this.objectIdentityByType.get(type);
+		const objectIdentity = this.getObjectIdentityForType(type);
 		if (!objectIdentity) {
 			context.fail(
 				`Can't find objects of type ${type.name}. Check the 'objectIdentity' parameter.`
