@@ -46,7 +46,7 @@ vi.mock('../../../state/gamestate', () => ({
 }));
 
 vi.mock('../../../state/playerstate', () => ({
-	PlayerState: mockPlayerState
+	ReadonlyPlayerState: mockPlayerState
 }));
 
 // Import after mocks are set up
@@ -237,8 +237,8 @@ describe('runCampaign — init step', () => {
 
 		const result = initStep(state());
 
-		// The init step explicitly sets step: 'startScenario' to continue
-		expect(result!.step).toBe('startScenario');
+		// The init step explicitly sets step: 'scenario' to continue
+		expect(result!.step).toBe('scenario');
 	});
 
 	it('preserves fields from the input state', () => {

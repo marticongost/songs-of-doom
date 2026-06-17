@@ -28,6 +28,7 @@ export type {
 	ForEachStepProps,
 	InputStepProps
 } from './core/steps';
+export type { RunCampaignState } from './procedures/gamesequence/campaign/runcampaign';
 export {
 	createEngineSerialisationContext,
 	deserialiseJournalEntry,

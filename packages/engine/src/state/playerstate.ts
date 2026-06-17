@@ -34,11 +34,10 @@ export interface PlayerStateProps {
 	activated?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export class PlayerState<TCard extends CardState<TCard> = CardState<any>> extends EntityState<
-	PlayerId,
-	TCard
-> {
+export abstract class PlayerState<
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- default for self-referential generic
+	TCard extends CardState<TCard> = CardState<any>
+> extends EntityState<PlayerId, TCard> {
 	readonly character: CharacterState;
 	readonly deck: ReadonlyArray<TCard>;
 	readonly hand: ReadonlyArray<TCard>;

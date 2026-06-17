@@ -5,7 +5,7 @@ import { instructions } from '../../../core/instructions';
 import { type ProcedureState } from '../../../core/procedure';
 import { ProcedureId } from '../../../core/procedureid';
 import { ReadonlyGameState } from '../../../state/gamestate';
-import { PlayerState } from '../../../state/playerstate';
+import { ReadonlyPlayerState } from '../../../state/playerstate';
 import { runScenario } from '../scenarios/runscenario';
 
 export interface RunCampaignState extends ProcedureState {
@@ -41,7 +41,7 @@ export const runCampaign = define({
 			}
 
 			const players = state.characters.map((character, i) => {
-				return new PlayerState({
+				return new ReadonlyPlayerState({
 					id: `plr${i + 1}` as `plr${number}`,
 					character: character ?? ({} as CharacterState),
 					deck: [],
@@ -63,7 +63,7 @@ export const runCampaign = define({
 
 			return {
 				...state,
-				step: 'startScenario',
+				step: 'scenario',
 				scenarioId: getCampaignScenarioId(state.campaignId!, campaign.initialScenarioId),
 				game
 			};
