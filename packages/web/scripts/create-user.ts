@@ -1,8 +1,7 @@
+import { hash } from '@node-rs/argon2';
+import { PrismaPg } from '@prisma/adapter-pg';
 import 'dotenv/config';
 import { PrismaClient } from '../prisma/generated/prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { hash } from '@node-rs/argon2';
-import * as readline from 'node:readline';
 
 const ARGON2_OPTIONS = {
 	memoryCost: 19456,
@@ -20,50 +19,47 @@ function generateUserId(): string {
 }
 
 async function promptPassword(): Promise<string> {
-	const rl = readline.createInterface({
-		input: process.stdin,
-		output: process.stdout
-	});
+	if (!process.stdin.isTTY) {
+		throw new Error('stdin is not a TTY — pass the password as a CLI argument instead');
+	}
 
-	return new Promise((resolve) => {
-		// Hide input by writing to stdout directly and clearing the line
-		process.stdout.write('Password: ');
+	const stdin = process.stdin;
+	const wasRaw = stdin.isRaw;
+	stdin.setRawMode(true);
+	process.stdout.write('Password: ');
 
-		const stdin = process.stdin;
-		const wasRaw = stdin.isRaw;
+	let password = '';
 
-		if (stdin.isTTY) {
-			stdin.setRawMode(true);
-		}
-
-		let password = '';
-
-		const onData = (char: Buffer) => {
-			const c = char.toString();
-
-			if (c === '\n' || c === '\r') {
-				stdin.removeListener('data', onData);
-				if (stdin.isTTY) {
-					stdin.setRawMode(wasRaw ?? false);
-				}
+	for await (const chunk of stdin) {
+		// Decode as UTF-8 — the terminal sends complete multi-byte sequences in one chunk
+		const text = chunk.toString('utf8');
+		for (const char of text) {
+			// Enter (CR or LF)
+			if (char === '\r' || char === '\n') {
+				stdin.setRawMode(wasRaw);
 				process.stdout.write('\n');
-				rl.close();
-				resolve(password);
-			} else if (c === '\u0003') {
-				// Ctrl+C
+				return password;
+			}
+			// Ctrl+C (sends 0x03 in raw mode)
+			if (char === '\x03') {
+				stdin.setRawMode(wasRaw);
+				process.stdout.write('\n');
 				process.exit(1);
-			} else if (c === '\u007F' || c === '\b') {
-				// Backspace
+			}
+			// Backspace / DEL
+			if (char === '\x7f' || char === '\x08') {
 				if (password.length > 0) {
 					password = password.slice(0, -1);
 				}
-			} else {
-				password += c;
+				continue;
 			}
-		};
+			password += char;
+		}
+	}
 
-		stdin.on('data', onData);
-	});
+	// Unreachable under normal use
+	stdin.setRawMode(wasRaw);
+	return password;
 }
 
 async function main() {

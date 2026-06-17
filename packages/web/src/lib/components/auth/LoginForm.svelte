@@ -10,6 +10,7 @@
 
 	const styles = css.styles({
 		loginForm: {
+			width: '20em',
 			...css.column('md')
 		},
 		formField: {

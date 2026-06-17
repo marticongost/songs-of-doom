@@ -1,8 +1,8 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { createSession, setSessionCookie } from '$lib/server/auth';
 import { prisma } from '$lib/server/db';
 import { verifyPassword } from '$lib/server/password';
-import { createSession, setSessionCookie } from '$lib/server/auth';
 import { translate, type Locale } from '@songsofdoom/common/localisation';
+import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
