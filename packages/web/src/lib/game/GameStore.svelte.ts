@@ -42,9 +42,13 @@ type SSEPayload = StateEventPayload | InputRequiredPayload;
  * input field state, and connection status.  All mutations are server-driven —
  * the client only supplies input via {@link supplyInput}.
  *
- * @module — Svelte 5 runes module, imported as a singleton.
+ * Intended to be instantiated once per game route and shared via Svelte
+ * context ({@link GAME_STORE_KEY}).  Do not instantiate directly in
+ * components — use {@link getContext} instead.
+ *
+ * @module — Svelte 5 runes module.
  */
-class GameStore {
+export class GameStore {
 	// --- Reactive state ---
 
 	gameId = $state<string | null>(null);
@@ -261,7 +265,6 @@ class GameStore {
 				const decoder = new TextDecoder();
 				let buffer = '';
 
-				// eslint-disable-next-line no-constant-condition
 				while (true) {
 					const { done, value } = await reader.read();
 					if (done) break;
@@ -355,11 +358,25 @@ class GameStore {
 		}
 	}
 
+	/**
+	 * Disconnect from the game — abort SSE, reset state.
+	 *
+	 * Call this when the component tree that owns the store is torn down
+	 * (e.g. navigating away from the game route).
+	 */
+	disconnect(): void {
+		this._abort();
+		this.gameId = null;
+		this.journal = [];
+		this.status = 'idle';
+		this.inputFields = [];
+		this.awaitingPlayerId = null;
+		this.error = null;
+		this.gameMeta = null;
+	}
+
 	/** Current locale from the SvelteKit page store. */
 	private get _locale(): string {
 		return (page.data?.locale as string) ?? 'ca';
 	}
 }
-
-/** Singleton GameStore instance — import this in components. */
-export const gameStore = new GameStore();
