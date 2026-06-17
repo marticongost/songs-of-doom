@@ -50,6 +50,7 @@
 	import { page } from '$app/state';
 	import Button from '$lib/components/Button.svelte';
 	import Dropdown from '$lib/components/forms/Dropdown.svelte';
+	import GameLog from '$lib/components/game/log/GameLog.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { getGameStore } from '$lib/context/gamestore';
 	import { entities, isCampaign } from '@songsofdoom/game';
@@ -153,9 +154,7 @@
 	{:else if isActive}
 		<!-- ACTIVE / COMPLETE gameplay -->
 		<div class={styles.gameplay}>
-			<p>Game ID: {store.gameId}</p>
-			<p>Status: {store.status}</p>
-			<p>Journal entries: {store.journalLength}</p>
+			<GameLog journal={store.journal} />
 		</div>
 	{/if}
 </div>

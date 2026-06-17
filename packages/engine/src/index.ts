@@ -28,7 +28,6 @@ export type {
 	ForEachStepProps,
 	InputStepProps
 } from './core/steps';
-export type { RunCampaignState } from './procedures/gamesequence/campaign/runcampaign';
 export {
 	createEngineSerialisationContext,
 	deserialiseJournalEntry,
@@ -38,6 +37,35 @@ export {
 export type { EngineSerialisationContext } from './serialisation';
 
 // State
+export type { EmitEventState } from './procedures/core/emitevent';
+export type { ResolveTargetState } from './procedures/core/resolvetarget';
+export type { TriggerCapabilityState } from './procedures/core/triggercapability';
+export type { AttachEffectProcedureState } from './procedures/effects/attachproc';
+export type { ConditionalEffectState } from './procedures/effects/conditionalproc';
+export type { ConferPropertiesEffectState } from './procedures/effects/conferpropertiesproc';
+export type { DiscardFromHandEffectState } from './procedures/effects/discardfromhandproc';
+export type { DiscardEffectState } from './procedures/effects/discardproc';
+export type { DrawCardsEffectState } from './procedures/effects/drawcardsproc';
+export type { DrawFocusState } from './procedures/effects/drawfocusproc';
+export type { EngageEffectState } from './procedures/effects/engageproc';
+export type { ExhaustEffectState } from './procedures/effects/exhaustproc';
+export type { GatherCluesEffectState } from './procedures/effects/gathercluesproc';
+export type { HealEffectState } from './procedures/effects/healproc';
+export type { MoveEffectState } from './procedures/effects/moveproc';
+export type { RunCampaignState } from './procedures/gamesequence/campaign/runcampaign';
+export type { ChapterState } from './procedures/gamesequence/chapters/chapter';
+export type { ChapterEndState } from './procedures/gamesequence/chapters/chapterendphase';
+export type { ChapterStartState } from './procedures/gamesequence/chapters/chapterstartphase';
+export type { DrawPhaseState } from './procedures/gamesequence/chapters/drawphase';
+export type { EncounterPhaseState } from './procedures/gamesequence/chapters/encounterphase';
+export type { FocusPhaseState } from './procedures/gamesequence/chapters/focusphase';
+export type { TurnsPhaseState } from './procedures/gamesequence/chapters/turnsphase';
+export type { RunScenarioState } from './procedures/gamesequence/scenarios/runscenario';
+export type { TurnState } from './procedures/gamesequence/turns/turn';
+export type { TurnCreatureActionsPhaseState } from './procedures/gamesequence/turns/turncreatureactionsphase';
+export type { TurnEndPhaseState } from './procedures/gamesequence/turns/turnendphase';
+export type { TurnPlayerActionsPhaseState } from './procedures/gamesequence/turns/turnplayeractionsphase';
+export type { TurnStartPhaseState } from './procedures/gamesequence/turns/turnstartphase';
 export {
 	AttackResolution,
 	MutableAttackResolution,
