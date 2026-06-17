@@ -33,15 +33,22 @@ export class Engine {
 		return this._journal.at(-1);
 	}
 
-	static create(
+	/**
+	 * Creates a new engine from a procedure definition, fleshing out the
+	 * caller-provided state overrides with the procedure's own defaults
+	 * (including `step` — callers never need to set it directly).
+	 */
+	static create<C extends ProcedureState>(
 		procedureRegistry: ProcedureRegistry,
 		procedureId: ProcedureId,
-		initialState: ProcedureState
+		stateOverrides: Partial<C>
 	): Engine {
-		if (!procedureRegistry[procedureId]) {
+		const procedure = procedureRegistry[procedureId];
+		if (!procedure) {
 			throw new Error(`Cannot create engine: unknown procedure "${procedureId}".`);
 		}
-		return new Engine(procedureRegistry, [{ procedureId, state: initialState }]);
+		const state = procedure.createState(stateOverrides.game!, stateOverrides);
+		return new Engine(procedureRegistry, [{ procedureId, state }]);
 	}
 
 	/**

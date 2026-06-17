@@ -6,6 +6,9 @@ import { ProcedureDefinition, type ProcedureState } from './procedure';
 import { ProcedureId } from './procedureid';
 import { ComputeStep, InputStep } from './steps';
 
+/** Mirrors the private ProcedureRegistry type from engine.ts for test usage. */
+type ProcedureRegistry = Partial<Record<ProcedureId, ProcedureDefinition<any>>>;
+
 // ---------------------------------------------------------------------------
 // Test helpers
 // ---------------------------------------------------------------------------
@@ -402,6 +405,149 @@ describe('Engine with DispatchStep', () => {
 
 		const finished = engine.run();
 		expect(finished).toBe(true);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Engine.restore
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Engine.create — state initialization (bugfix: defaults merging)
+// ---------------------------------------------------------------------------
+
+describe('Engine.create state initialization', () => {
+	it('merges procedure defaults into initial state', () => {
+		expect.assertions(3);
+
+		interface TestState extends ProcedureState {
+			name: string;
+			count: number;
+		}
+
+		const proc = new ProcedureDefinition<TestState>({
+			id: ProcedureId.Unimplemented,
+			defaults: { name: 'default-name', count: 0 },
+			steps: {
+				start: (state: TestState) => ({ ...state, status: 'complete' })
+			}
+		});
+
+		const engine = Engine.create(registryWith(proc), ProcedureId.Unimplemented, {
+			game: testGame()
+		} as Partial<TestState>);
+
+		const initialState = engine.currentEntry!.state as TestState;
+		expect(initialState.name).toBe('default-name');
+		expect(initialState.count).toBe(0);
+		expect(initialState.step).toBe('start');
+	});
+
+	it('caller overrides take precedence over procedure defaults', () => {
+		expect.assertions(2);
+
+		interface TestState extends ProcedureState {
+			name: string;
+		}
+
+		const proc = new ProcedureDefinition<TestState>({
+			id: ProcedureId.Unimplemented,
+			defaults: { name: 'default-name' },
+			steps: {
+				start: (state: TestState) => ({ ...state, status: 'complete' })
+			}
+		});
+
+		const engine = Engine.create(registryWith(proc), ProcedureId.Unimplemented, {
+			game: testGame(),
+			name: 'overridden-name'
+		} as Partial<TestState>);
+
+		const initialState = engine.currentEntry!.state as TestState;
+		expect(initialState.name).toBe('overridden-name');
+		expect(initialState.step).toBe('start');
+	});
+
+	it('always sets step to the first step — callers never need to set it', () => {
+		expect.assertions(1);
+
+		interface TestState extends ProcedureState {
+			x: number;
+		}
+
+		const proc = new ProcedureDefinition<TestState>({
+			id: ProcedureId.Unimplemented,
+			defaults: { x: 42 },
+			steps: {
+				first: () => undefined,
+				second: (state: TestState) => ({ ...state, status: 'complete' })
+			}
+		});
+
+		// When the caller does NOT provide step, it defaults to the first step
+		const engine = Engine.create(registryWith(proc), ProcedureId.Unimplemented, {
+			game: testGame()
+		} as Partial<TestState>);
+
+		expect((engine.currentEntry!.state as TestState).step).toBe('first');
+	});
+
+	it('accepts partial state with only game provided', () => {
+		expect.assertions(2);
+
+		interface TestState extends ProcedureState {
+			count: number;
+		}
+
+		const proc = new ProcedureDefinition<TestState>({
+			id: ProcedureId.Unimplemented,
+			defaults: { count: 0 },
+			steps: {
+				step1: (state: TestState) => ({ ...state, status: 'complete' })
+			}
+		});
+
+		const engine = Engine.create(registryWith(proc), ProcedureId.Unimplemented, {
+			game: testGame()
+		} as Partial<TestState>);
+
+		const initialState = engine.currentEntry!.state as TestState;
+		expect(initialState.count).toBe(0);
+		expect(initialState.step).toBe('step1');
+	});
+
+	it('throws when the procedure is unknown', () => {
+		expect.assertions(1);
+
+		expect(() =>
+			Engine.create({} as ProcedureRegistry, ProcedureId.Unimplemented, {
+				game: testGame()
+			} as any)
+		).toThrow('Cannot create engine: unknown procedure "Unimplemented".');
+	});
+
+	it('uses defaults factory when provided as a function', () => {
+		expect.assertions(2);
+
+		interface TestState extends ProcedureState {
+			playerCount: number;
+		}
+
+		const proc = new ProcedureDefinition<TestState>({
+			id: ProcedureId.Unimplemented,
+			defaults: (game: any) => ({ playerCount: game.players.length }),
+			steps: {
+				step1: (state: TestState) => ({ ...state, status: 'complete' })
+			}
+		});
+
+		const engine = Engine.create(registryWith(proc), ProcedureId.Unimplemented, {
+			game: testGame()
+		} as Partial<TestState>);
+
+		const initialState = engine.currentEntry!.state as TestState;
+		expect(initialState.playerCount).toBe(0);
+		expect(initialState.step).toBe('step1');
 	});
 });
 
