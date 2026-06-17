@@ -26,7 +26,7 @@
 		ModifyGatheredCluesEffect,
 		ModifyRollEffect,
 		MoveEffect,
-		NarrationEventEffect,
+		NarrationEffect,
 		NegateDamageEffect,
 		OneOfEffect,
 		PayEffect,
@@ -82,7 +82,7 @@
 	import ModifyGatheredCluesEffectChip from './ModifyGatheredCluesEffectChip.svelte';
 	import ModifyRollEffectChip from './ModifyRollEffectChip.svelte';
 	import MoveEffectChip from './MoveEffectChip.svelte';
-	import NarrationEventEffectChip from './NarrationEventEffectChip.svelte';
+	import NarrationEffectChip from './NarrationEffectChip.svelte';
 	import NegateDamageEffectChip from './NegateDamageEffectChip.svelte';
 	import OneOfEffectChip from './OneOfEffectChip.svelte';
 	import PayEffectChip from './PayEffectChip.svelte';
@@ -212,8 +212,8 @@
 		<TalentEffectChip {effect} />
 	{:else if effect instanceof MoveEffect}
 		<MoveEffectChip {effect} />
-	{:else if effect instanceof NarrationEventEffect}
-		<NarrationEventEffectChip {effect} />
+	{:else if effect instanceof NarrationEffect}
+		<NarrationEffectChip {effect} />
 	{:else if effect instanceof OneOfEffect}
 		<OneOfEffectChip {effect} />
 	{:else if effect instanceof PayEffect}

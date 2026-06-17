@@ -25,11 +25,7 @@ export { modifyDamage, ModifyDamageEffect } from './modifydamage';
 export { modifyGatheredClues, ModifyGatheredCluesEffect } from './modifygatheredclues';
 export { modifyRoll, ModifyRollEffect } from './modifyroll';
 export { move, MoveEffect } from './move';
-export {
-	narrationEvent,
-	NarrationEventEffect,
-	type NarrationEventEffectProps
-} from './narrationevent';
+export { narration, NarrationEffect, type NarrationEffectProps } from './narration';
 export { negateDamage, NegateDamageEffect } from './negatedamage';
 export { oneOf, OneOfEffect, type OneOfEffectProps } from './oneof';
 export { pay, PayEffect, type PayEffectProps } from './payeffect';

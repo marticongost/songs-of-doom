@@ -1,6 +1,6 @@
 import multiline from 'multiline-ts';
 import { Obligation } from '../../../../models/capabilities';
-import { narrationEvent } from '../../../../models/effects';
+import { narration } from '../../../../models/effects';
 import { Story } from '../../../../models/entities/story';
 import { reactiveCardIsSubject } from '../../../../models/expressions';
 
@@ -15,7 +15,7 @@ export default new Story({
 			id: 'activate',
 			triggers: [{ event: 'storyPlayed', condition: reactiveCardIsSubject }],
 			effects: [
-				narrationEvent({
+				narration({
 					text: {
 						ca: multiline`
 							El duc de Halendak us observa, en silenci, durant uns segons.

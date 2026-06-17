@@ -21,10 +21,10 @@
 	} from '$lib/components/standardattributes';
 	import { getLocale } from '$lib/context/locale';
 	import { translate } from '@songsofdoom/common/localisation';
-	import { NarrationEventEffect } from '@songsofdoom/game';
+	import { NarrationEffect } from '@songsofdoom/game';
 
 	interface Props extends StandardAttributeProps {
-		effect: NarrationEventEffect;
+		effect: NarrationEffect;
 	}
 
 	const { effect, ...attributes }: Props = $props();
