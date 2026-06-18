@@ -15,7 +15,6 @@
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
-	import { getGameStore } from '$lib/context/gamestore';
 	import type { TriggerCapabilityState } from '@songsofdoom/engine';
 
 	interface Props extends StandardAttributeProps {
@@ -23,8 +22,7 @@
 	}
 
 	const { state, ...attributes }: Props = $props();
-	const store = getGameStore();
-	const card = $derived(store.gameState?.getEntityState(state.cardId)?.card);
+	const card = $derived(state.game?.getEntityState(state.cardId)?.card);
 </script>
 
 {#if card}
