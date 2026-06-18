@@ -33,7 +33,8 @@
 		},
 		icon: {
 			height: '0.8em',
-			width: 'auto'
+			width: 'auto',
+			cursor: 'default'
 		}
 	});
 
@@ -78,6 +79,19 @@
 			depths.push(depth);
 		}
 		return depths;
+	}
+
+	function getJournalEntryIcon(entry: JournalEntry): string {
+		const procId = entry.procedureId;
+		if (procId === ProcedureId.EmitEvent) return 'log/event.svg';
+		if (procId === ProcedureId.NarrationEffect) return 'log/narration.svg';
+		if (procId === ProcedureId.TriggerCapability) {
+			const capability = (entry.state as TriggerCapabilityState).capability;
+			if (capability instanceof Opportunity) return 'capabilities/opportunity.svg';
+			if (capability instanceof Obligation) return 'capabilities/obligation.svg';
+			if (capability instanceof Action) return 'capabilities/action.svg';
+		}
+		return 'log/call.svg';
 	}
 </script>
 
@@ -193,23 +207,17 @@
 			{#if !isComputeStep(entry)}
 				{@const procId = entry.procedureId}
 				<div class={styles.entry} style="margin-left: {depths[i] * INDENT_PER_LEVEL}em">
-					{#if procId === ProcedureId.EmitEvent}
-						<InlineSvg src="log/event.svg" class={styles.icon} />
-					{:else if procId === ProcedureId.NarrationEffect}
-						<InlineSvg src="log/narration.svg" class={styles.icon} />
-					{:else if procId === ProcedureId.TriggerCapability}
-						{@const capability = (entry.state as TriggerCapabilityState).capability}
-						{#if capability instanceof Opportunity}
-							<InlineSvg src="capabilities/opportunity.svg" class={styles.icon} />
-						{:else if capability instanceof Obligation}
-							<InlineSvg src="capabilities/obligation.svg" class={styles.icon} />
-						{:else if capability instanceof Action}
-							<InlineSvg src="capabilities/action.svg" class={styles.icon} />
-						{/if}
-					{:else}
-						<InlineSvg src="log/call.svg" class={styles.icon} />
-					{/if}
-
+					<button
+						onclick={(e) => {
+							if (e.ctrlKey) {
+								console.log(entry);
+								e.stopPropagation();
+								e.preventDefault();
+							}
+						}}
+					>
+						<InlineSvg src={getJournalEntryIcon(entry)} class={styles.icon} />
+					</button>
 					{#if procId === ProcedureId.EmitEvent}
 						<EmitEventLogEntry state={entry.state as EmitEventState} />
 					{:else if procId === ProcedureId.RunCampaign}
