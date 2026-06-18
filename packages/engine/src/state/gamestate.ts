@@ -1,4 +1,4 @@
-import { shuffle } from '@songsofdoom/common';
+import { Counter, shuffle } from '@songsofdoom/common';
 import type {
 	BooleanExpressionType,
 	Capability,
@@ -8,11 +8,18 @@ import type {
 	Target,
 	TargetType
 } from '@songsofdoom/game';
-import { Action, ActualCapabilityCost, focuses, Reaction, type FocusType } from '@songsofdoom/game';
+import {
+	Action,
+	ActualCapabilityCost,
+	focuses,
+	Reaction,
+	type Entity,
+	type FocusType
+} from '@songsofdoom/game';
 import { evaluateBoolean, evaluateScalar } from '../expressions';
 import { MutableCapabilityResolution, type CapabilityResolution } from './capabilityresolution';
 import type { CardOptions } from './cardcontainer';
-import type { CardState, MutableCardState, ReadonlyCardState } from './cardstate';
+import { CardState, MutableCardState, ReadonlyCardState } from './cardstate';
 import type { EntityState } from './entitystate';
 import { mutate } from './entitystatemutation';
 import {
@@ -24,7 +31,7 @@ import {
 	type LocationId,
 	type PlayerId
 } from './identifiers';
-import type { LocationState, MutableLocationState, ReadonlyLocationState } from './locationstate';
+import { LocationState, MutableLocationState, ReadonlyLocationState } from './locationstate';
 import { MutablePlayerState, PlayerState, ReadonlyPlayerState } from './playerstate';
 import { MutableTestResolution, ReadonlyTestResolution, TestResolution } from './testresolution';
 import {
@@ -46,6 +53,19 @@ export interface GameContext {
 	capabilityResolution?: CapabilityResolution;
 }
 
+/** Maps an entity type ID to the prefix used in {@link CardId} generation. */
+const ENTITY_TYPE_TO_PREFIX: Partial<Record<EntityTypeId, string>> = {
+	location: 'loc',
+	creature: 'crt',
+	ally: 'aly',
+	item: 'obj',
+	skill: 'skl',
+	trait: 'trt',
+	encounter: 'enc',
+	story: 'sto',
+	scenario: 'scn'
+};
+
 export interface GameStateProps {
 	chapter?: number;
 	turn?: number;
@@ -60,6 +80,8 @@ export interface GameStateProps {
 	woundResolutionStack?: Array<WoundResolution>;
 	scenario?: CardState;
 	nextScenario?: CardState;
+	/** Counter used to generate sequential {@link CardId}s for each card type. */
+	cardIdCounter?: Counter<string>;
 }
 
 export abstract class GameState<
@@ -80,6 +102,7 @@ export abstract class GameState<
 	readonly turn: number;
 	readonly scenario?: TCard;
 	readonly nextScenario?: TCard;
+	readonly cardIdCounter: Counter<string>;
 
 	constructor({
 		players,
@@ -94,7 +117,8 @@ export abstract class GameState<
 		chapter,
 		turn,
 		scenario,
-		nextScenario
+		nextScenario,
+		cardIdCounter
 	}: GameStateProps) {
 		this.chapter = chapter ?? 0;
 		this.turn = turn ?? 0;
@@ -109,6 +133,32 @@ export abstract class GameState<
 		this.woundResolutionStack = woundResolutionStack ?? [];
 		this.scenario = scenario as TCard | undefined;
 		this.nextScenario = nextScenario as TCard | undefined;
+		this.cardIdCounter = cardIdCounter ?? new Counter<string>();
+	}
+
+	/**
+	 * Creates a new {@link CardState} (or {@link LocationState} for location entities)
+	 * with an auto-generated sequential {@link CardId}.
+	 *
+	 * The ID prefix is determined by the entity's type (see {@link ENTITY_TYPE_TO_PREFIX}).
+	 * The numeric suffix is managed by an internal {@link Counter} that tracks the next
+	 * available number for each card type.
+	 */
+	abstract createCardState(entity: Entity): TCard | TLocation;
+
+	/**
+	 * Generates the next sequential {@link CardId} for the given entity's type.
+	 *
+	 * Increments the internal {@link cardIdCounter} and returns the resulting ID.
+	 * Throws if the entity type does not map to a known card ID prefix.
+	 */
+	protected _generateCardId(entity: Entity): CardId {
+		const prefix = ENTITY_TYPE_TO_PREFIX[entity.type.id];
+		if (!prefix) {
+			throw new Error(`Cannot generate card ID for entity type "${entity.type.id}".`);
+		}
+		this.cardIdCounter.add(prefix);
+		return `${prefix}${this.cardIdCounter.get(prefix)}` as CardId;
 	}
 
 	abstract mutableClone(): MutableGameState;
@@ -606,6 +656,18 @@ export class ReadonlyGameState extends GameState<
 	ReadonlyPlayerState,
 	ReadonlyLocationState
 > {
+	override createCardState(entity: Entity): ReadonlyCardState | ReadonlyLocationState {
+		const id = this._generateCardId(entity);
+		if (entity.type.id === 'location') {
+			return new ReadonlyLocationState({
+				id: id as LocationId,
+				card: entity,
+				coordinates: { x: 0, y: 0 }
+			});
+		}
+		return new ReadonlyCardState({ id: id as CardId, card: entity });
+	}
+
 	mutable(): MutableGameState {
 		return new MutableGameState(this);
 	}
@@ -637,6 +699,21 @@ export class MutableGameState extends GameState<
 	declare turn: number;
 	declare scenario?: MutableCardState;
 	declare nextScenario?: MutableCardState;
+	declare cardIdCounter: Counter<string>;
+
+	override createCardState(entity: Entity): MutableCardState | MutableLocationState {
+		const id = this._generateCardId(entity);
+		if (entity.type.id === 'location') {
+			return new MutableLocationState(
+				new ReadonlyLocationState({
+					id: id as LocationId,
+					card: entity,
+					coordinates: { x: 0, y: 0 }
+				})
+			);
+		}
+		return new ReadonlyCardState({ id: id as CardId, card: entity }).mutable();
+	}
 
 	constructor(gameState: ReadonlyGameState) {
 		const stack = gameState.testResolutionStack as Array<ReadonlyTestResolution>;
@@ -658,7 +735,8 @@ export class MutableGameState extends GameState<
 				...(woundStack.length > 0 ? [woundStack[woundStack.length - 1].mutable()] : [])
 			],
 			scenario: gameState.scenario?.mutable(),
-			nextScenario: gameState.nextScenario?.mutable()
+			nextScenario: gameState.nextScenario?.mutable(),
+			cardIdCounter: gameState.cardIdCounter
 		});
 	}
 
@@ -744,7 +822,8 @@ export class MutableGameState extends GameState<
 				r instanceof MutableWoundResolution ? r.readonly() : r
 			),
 			scenario: this.scenario?.readonly(),
-			nextScenario: this.nextScenario?.readonly()
+			nextScenario: this.nextScenario?.readonly(),
+			cardIdCounter: this.cardIdCounter
 		});
 	}
 

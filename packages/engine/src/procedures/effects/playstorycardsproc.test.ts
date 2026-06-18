@@ -5,7 +5,7 @@ import { ProcedureId } from '../../core/procedureid';
 import { CallStep, ComputeStep, ForEachStep } from '../../core/steps';
 import type { MutableCardState } from '../../state/cardstate';
 import type { MutableGameState, ReadonlyGameState } from '../../state/gamestate';
-import type { CardId, EntityId } from '../../state/identifiers';
+import type { CardId, EntityId, StoryId } from '../../state/identifiers';
 import type { EmitEventState } from '../core/emitevent';
 import { playStoryCardsEffectProc, type PlayStoryCardsEffectState } from './playstorycardsproc';
 
@@ -63,17 +63,30 @@ describe('playStoryCardsEffectProc', () => {
 	describe('attach body step', () => {
 		const attachStep = forEachStep.steps.attach as ComputeStep<PlayStoryCardsEffectState>;
 
-		it('attaches a new card state for the current story to the scenario', () => {
-			const story = makeStory('stry1' as EntityId);
-			const scenario = mock<MutableCardState>();
-
+		/** Helper to set up the game mock with createCardState returning the given card. */
+		function mockGameWithCreateCardState(
+			returnedCard: MutableCardState,
+			scenario?: MutableCardState
+		) {
 			const game = mock<ReadonlyGameState>();
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			(game as any).mutate.mockImplementation((cb: (mutable: MutableGameState) => void) => {
-				const mutableGame = mock<MutableGameState>({ scenario });
+				const mutableGame = mock<MutableGameState>({
+					scenario: scenario ?? mock<MutableCardState>()
+				});
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				(mutableGame as any).createCardState.mockReturnValue(returnedCard);
 				cb(mutableGame);
 				return game;
 			});
+			return game;
+		}
+
+		it('attaches a new card state for the current story to the scenario', () => {
+			const story = makeStory('stry1' as EntityId);
+			const scenario = mock<MutableCardState>();
+			const createdCard = mock<MutableCardState>({ id: 'sto1' as StoryId });
+			const game = mockGameWithCreateCardState(createdCard, scenario);
 
 			const state = makeState({
 				effect: mock<PlayStoryCardsEffect>({ cards: [story] }),
@@ -81,23 +94,17 @@ describe('playStoryCardsEffectProc', () => {
 				currentCard: story
 			});
 
-			attachStep.logic(state);
+			const result = attachStep.logic(state);
 
 			expect(scenario.addAttachment).toHaveBeenCalled();
-			// The first argument should be the mutable game
-			expect(scenario.addAttachment).toHaveBeenCalledWith(expect.anything(), expect.anything());
+			expect(scenario.addAttachment).toHaveBeenCalledWith(expect.anything(), createdCard);
+			expect(result!.currentCardId).toBe('sto1');
 		});
 
 		it('throws when there is no scenario in the game state', () => {
 			const story = makeStory('stry1' as EntityId);
 
-			const game = mock<ReadonlyGameState>();
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			(game as any).mutate.mockImplementation((cb: (mutable: MutableGameState) => void) => {
-				const mutableGame = mock<MutableGameState>({ scenario: undefined });
-				cb(mutableGame);
-				return game;
-			});
+			const game = mock<ReadonlyGameState>({ scenario: undefined });
 
 			const state = makeState({
 				effect: mock<PlayStoryCardsEffect>({ cards: [story] }),
@@ -108,13 +115,10 @@ describe('playStoryCardsEffectProc', () => {
 			expect(() => attachStep.logic(state)).toThrow('No scenario in game state');
 		});
 
-		it('returns the mutated game state', () => {
+		it('returns the state with currentCardId set', () => {
 			const story = makeStory('stry1' as EntityId);
-			const mutatedGame = mock<ReadonlyGameState>();
-
-			const game = mock<ReadonlyGameState>();
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			(game as any).mutate.mockReturnValue(mutatedGame);
+			const createdCard = mock<MutableCardState>({ id: 'sto1' as StoryId });
+			const game = mockGameWithCreateCardState(createdCard);
 
 			const state = makeState({
 				effect: mock<PlayStoryCardsEffect>({ cards: [story] }),
@@ -124,22 +128,22 @@ describe('playStoryCardsEffectProc', () => {
 
 			const result = attachStep.logic(state);
 
-			expect(result!.game).toBe(mutatedGame);
+			expect(result!.currentCardId).toBe('sto1');
 		});
 
-		it('creates the card state with the story id and entity', () => {
+		it('calls createCardState with the current story entity', () => {
 			const story = makeStory('stry1' as EntityId);
-			const scenario = mock<MutableCardState>();
-			let capturedAttachment: unknown = undefined;
-
-			scenario.addAttachment.mockImplementation((_game, attachment: unknown) => {
-				capturedAttachment = attachment;
-			});
+			let capturedEntity: unknown = undefined;
 
 			const game = mock<ReadonlyGameState>();
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			(game as any).mutate.mockImplementation((cb: (mutable: MutableGameState) => void) => {
-				const mutableGame = mock<MutableGameState>({ scenario });
+				const mutableGame = mock<MutableGameState>({ scenario: mock<MutableCardState>() });
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				(mutableGame as any).createCardState.mockImplementation((entity: unknown) => {
+					capturedEntity = entity;
+					return mock<MutableCardState>({ id: 'sto1' as StoryId });
+				});
 				cb(mutableGame);
 				return game;
 			});
@@ -152,10 +156,7 @@ describe('playStoryCardsEffectProc', () => {
 
 			attachStep.logic(state);
 
-			// The attachment should be a MutableCardState with the story's id and entity
-			const attachment = capturedAttachment as MutableCardState;
-			expect(attachment.id).toBe('sto-stry1');
-			expect(attachment.card).toBe(story);
+			expect(capturedEntity).toBe(story);
 		});
 	});
 
@@ -165,27 +166,25 @@ describe('playStoryCardsEffectProc', () => {
 		const emitStep = forEachStep.steps.emit as CallStep<PlayStoryCardsEffectState, EmitEventState>;
 
 		it('emits a storyPlayed event', () => {
-			const story = makeStory('stry1' as EntityId);
-			const state = makeState({ currentCard: story });
+			const state = makeState({ currentCardId: 'sto1' as StoryId });
 
 			const params = emitStep.parameters(state);
 
 			expect(params.eventType).toBe('storyPlayed');
 		});
 
-		it('sets the current card as the event subject', () => {
-			const story = makeStory('stry1' as EntityId);
-			const state = makeState({ currentCard: story });
+		it('sets the current card id as the event subject', () => {
+			const state = makeState({ currentCardId: 'sto1' as StoryId });
 
 			const params = emitStep.parameters(state);
 
-			expect(params.eventContext).toEqual({ subjectId: 'sto-stry1' as CardId });
+			expect(params.eventContext).toEqual({ subjectId: 'sto1' as CardId });
 		});
 
 		it('calls the EmitEvent procedure', () => {
 			const procedureId =
 				typeof emitStep.procedureId === 'function'
-					? emitStep.procedureId(makeState())
+					? emitStep.procedureId(makeState({ currentCardId: 'sto1' as StoryId }))
 					: emitStep.procedureId;
 
 			expect(procedureId).toBe(ProcedureId.EmitEvent);
