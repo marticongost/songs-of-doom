@@ -61,11 +61,12 @@ export const emitEvent = define({
 				: game;
 			const event = events[eventType];
 
-			const allReactions = game.cards({ ready: true }).flatMap((cardState) => {
-				return cardState.getReactionsToEvent(event, game).map((reaction) => ({
+			const allReactions = gameStateWithContext.cards({ ready: true }).flatMap((cardState) => {
+				return cardState.getReactionsToEvent(event, gameStateWithContext).map((reaction) => ({
 					cardState,
 					reaction,
-					playerId: cardState.playerId ?? gameStateWithContext.requireActivePlayer().id
+					playerId:
+						cardState.playerId ?? gameStateWithContext.getActivePlayer()?.id ?? game.players[0].id
 				}));
 			});
 			const playerOrder = gameStateWithContext.players.map((p) => p.id);
@@ -104,7 +105,13 @@ export const emitEvent = define({
 				actorId: reactionGroups![0].playerId
 			}),
 			then: (state, _result) => {
-				const reactionGroups = state.reactionGroups!;
+				// Pop the consumed reaction — it may have been auto-selected by
+				// nextReactionState (for mandatory reactions), which skips
+				// askPlayersForNextReaction where popReaction normally lives.
+				let reactionGroups = state.reactionGroups!;
+				if (state.chosenReaction) {
+					reactionGroups = popReaction(reactionGroups, state.chosenReaction);
+				}
 				return {
 					...state,
 					step: reactionGroups.length ? 'askPlayersForNextReaction' : 'finalise',
