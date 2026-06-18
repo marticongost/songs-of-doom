@@ -100,7 +100,7 @@ export const emitEvent = define({
 		invokeReaction: call({
 			procedure: triggerCapability,
 			parameters: ({ chosenReaction, reactionGroups }) => ({
-				capability: chosenReaction!.capabilityId,
+				capabilityId: chosenReaction!.capabilityId,
 				cardId: chosenReaction!.cardId,
 				actorId: reactionGroups![0].playerId
 			}),

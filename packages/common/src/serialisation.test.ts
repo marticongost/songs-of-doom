@@ -471,6 +471,77 @@ describe('Serialisation', () => {
 			expect(parsed['@type']).toBe('Map');
 			expect(parsed['@keys']).toBe('Person');
 		});
+		it('round-trips a Map with string keys', () => {
+			const s = serialisationFor();
+			const map = new Map<string, number>([
+				['apple', 1],
+				['banana', 2],
+				['cherry', 3]
+			]);
+
+			const result = s.deserialise<Map<string, number>>(s.serialise(map));
+
+			expect(result).toBeInstanceOf(Map);
+			expect(result.size).toBe(3);
+			expect(result.get('apple')).toBe(1);
+			expect(result.get('banana')).toBe(2);
+			expect(result.get('cherry')).toBe(3);
+		});
+
+		it('round-trips a Map with string keys and class instance values', () => {
+			const s = serialisationFor(Person, Map);
+			const alice = new Person('Alice', 30);
+			const bob = new Person('Bob', 25);
+			const map = new Map<string, Person>([
+				['admin', alice],
+				['user', bob]
+			]);
+
+			const result = s.deserialise<Map<string, Person>>(s.serialise(map));
+
+			expect(result).toBeInstanceOf(Map);
+			expect(result.size).toBe(2);
+			expect(result.get('admin')).toBeInstanceOf(Person);
+			expect(result.get('admin')!.name).toBe('Alice');
+			expect(result.get('user')).toBeInstanceOf(Person);
+			expect(result.get('user')!.name).toBe('Bob');
+		});
+
+		it('round-trips a Map with numeric string keys', () => {
+			const s = serialisationFor();
+			const map = new Map<string, boolean>([
+				['42', true],
+				['99', false]
+			]);
+
+			const result = s.deserialise<Map<string, boolean>>(s.serialise(map));
+
+			expect(result.size).toBe(2);
+			expect(result.get('42')).toBe(true);
+			expect(result.get('99')).toBe(false);
+		});
+
+		it('round-trips an empty Map via decompose / recompose', () => {
+			const s = serialisationFor();
+			const map = new Map<string, number>();
+
+			const result = s.recompose<Map<string, number>>(s.decompose(map));
+
+			expect(result).toBeInstanceOf(Map);
+			expect(result.size).toBe(0);
+		});
+
+		it('serialises a Map with string keys using @keys: String', () => {
+			const s = serialisationFor();
+			const map = new Map<string, number>([['x', 1]]);
+
+			const json = s.serialise(map);
+			const parsed = JSON.parse(json);
+
+			expect(parsed['@type']).toBe('Map');
+			expect(parsed['@keys']).toBe('String');
+			expect(parsed['x']).toBe(1);
+		});
 	});
 
 	// === Set serialisation ===

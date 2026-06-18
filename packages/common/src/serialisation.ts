@@ -378,7 +378,7 @@ export class Serialisation<ContextData = undefined> {
 			decomposeChild: (pathComponent: string, child: any) =>
 				context.withPath(pathComponent, () => this._decompose(child, context)),
 			getObjectId: (obj) => this.getObjectId(obj, context.data, objectPool),
-			requireObjectId: (obj) => this.requireObjectId(obj, context.data, objectPool),
+			requireObjectId: (obj) => this.requireObjectId(obj, context, objectPool),
 			getTypeBrand: this.typeBranding
 		});
 		const objectPool = new ObjectPool(
@@ -561,10 +561,14 @@ export class Serialisation<ContextData = undefined> {
 		return key;
 	}
 
-	private requireObjectId(obj: any, contextData: ContextData, objectPool?: ObjectPool): string {
-		const key = this.getObjectId(obj, contextData, objectPool);
+	private requireObjectId(
+		obj: any,
+		context: DecomposeContext<ContextData>,
+		objectPool?: ObjectPool
+	): string {
+		const key = this.getObjectId(obj, context.data, objectPool);
 		if (key === undefined) {
-			throw new Error(
+			context.fail(
 				`Can't produce a key for type ${obj.constructor.name}. Check the 'objectIdentity' parameter.`
 			);
 		}
@@ -746,7 +750,7 @@ export const decomposeMap = <K, V>(obj: Map<K, V>, context: DecomposeContext): J
 				[KEYS_FIELD]: context.getTypeBrand(obj.keys().next().value!.constructor as Type),
 				...mapToRecord(obj, {
 					mapEntries: ([key, value]) => {
-						const serialisedKey = context.requireObjectId(key);
+						const serialisedKey = typeof key === 'string' ? key : context.requireObjectId(key);
 						return [serialisedKey, context.decomposeChild(serialisedKey, value)];
 					}
 				})
@@ -758,17 +762,22 @@ export const recomposeMap = <K, V>(
 	_target?: Map<K, V>
 ): Map<K, V> => {
 	const map = new Map<K, V>();
-	let keysType: Type | undefined = undefined;
+	let recomposeKey: ((key: string) => K) | undefined = undefined;
 	for (const [key, value] of Object.entries(data)) {
 		if (!key.startsWith(METADATA_PREFIX)) {
-			if (keysType === undefined) {
+			if (recomposeKey === undefined) {
 				const keyTypeBrand = data[KEYS_FIELD];
 				if (typeof keyTypeBrand !== 'string') {
 					context.fail(`Invalid or missing ${KEYS_FIELD} field in Map data`);
 				}
-				keysType = context.requireTypeForBrand(keyTypeBrand);
+				if (keyTypeBrand === 'String') {
+					recomposeKey = (k: string) => k as unknown as K;
+				} else {
+					recomposeKey = (k: string) =>
+						context.resolveReference(context.requireTypeForBrand(keyTypeBrand), k) as K;
+				}
 			}
-			map.set(context.resolveReference(keysType, key), context.recomposeChild(key, value));
+			map.set(recomposeKey(key), context.recomposeChild(key, value));
 		}
 	}
 	return map;
