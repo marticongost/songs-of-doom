@@ -43,6 +43,10 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 	}
 
 	const state = await gameManager.getGameState(gameId);
+	const lastAcknowledgedJournalIndex = await gameManager.getAcknowledgedIndex(
+		gameId,
+		locals.user.id
+	);
 
 	return json({
 		id: game.id,
@@ -54,6 +58,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			characterId: p.characterId,
 			characterName: p.character.name
 		})),
+		lastAcknowledgedJournalIndex,
 		state
 	});
 };

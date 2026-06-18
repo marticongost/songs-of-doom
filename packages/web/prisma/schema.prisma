@@ -69,9 +69,10 @@ model Game {
 }
 
 model GameParticipant {
-  gameId      String
-  userId      String
-  characterId Int
+  gameId                       String
+  userId                       String
+  characterId                  Int
+  lastAcknowledgedJournalIndex Int    @default(-1)
 
   game      Game      @relation(references: [id], fields: [gameId], onDelete: Cascade)
   user      User      @relation(references: [id], fields: [userId], onDelete: Cascade)

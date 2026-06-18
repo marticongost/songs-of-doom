@@ -151,7 +151,8 @@ describe('GET /api/game/[gameId]', () => {
 
 		const mockManager = mock<GameManager>({
 			verifyParticipant: vi.fn().mockResolvedValue(undefined),
-			getGameState: vi.fn().mockResolvedValue({ players: [] })
+			getGameState: vi.fn().mockResolvedValue({ players: [] }),
+			getAcknowledgedIndex: vi.fn().mockResolvedValue(2)
 		});
 		mockGetGameManager.mockReturnValue(mockManager);
 
@@ -169,9 +170,11 @@ describe('GET /api/game/[gameId]', () => {
 				{ userId: 'user-1', characterId: 1, characterName: 'Hero' },
 				{ userId: 'user-2', characterId: 2, characterName: 'Sidekick' }
 			],
+			lastAcknowledgedJournalIndex: 2,
 			state: { players: [] }
 		});
 		expect(mockManager.verifyParticipant).toHaveBeenCalledWith('game-1', 'user-1');
 		expect(mockManager.getGameState).toHaveBeenCalledWith('game-1');
+		expect(mockManager.getAcknowledgedIndex).toHaveBeenCalledWith('game-1', 'user-1');
 	});
 });

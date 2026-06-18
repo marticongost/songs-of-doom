@@ -102,11 +102,15 @@ export class GameStore {
 	 * journal entries until the next narration entry (which becomes the new
 	 * gate) or the end of the journal.
 	 *
+	 * Persists the acknowledged index to the server so the cursor survives
+	 * page reloads and reconnects.
+	 *
 	 * Safe to call when there is no active narration gate (no-op).
 	 */
 	acknowledgeNarration(): void {
 		if (!this.isNarrationGated) return;
 		this._advancePresentation(this.presentedJournalLength);
+		this._persistAcknowledgedIndex();
 	}
 
 	// --- Private ---
@@ -129,6 +133,31 @@ export class GameStore {
 			}
 		}
 		this.presentedJournalLength = cursor;
+	}
+
+	/**
+	 * Persist the current acknowledged narration index to the server.
+	 *
+	 * The acknowledged index is the journal index of the last visible
+	 * entry (which is the narration entry acting as the gate).  Fire-and-
+	 * forget — failures are logged but do not affect UI state.
+	 */
+	private _persistAcknowledgedIndex(): void {
+		if (!browser || !this.gameId || this.presentedJournalLength === 0) return;
+
+		const acknowledgedIndex = this.presentedJournalLength - 1;
+
+		const locale = this._locale;
+		fetch(`/${locale}/api/game/${this.gameId}/acknowledge`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Game-Client-Version': GAME_VERSION
+			},
+			body: JSON.stringify({ index: acknowledgedIndex })
+		}).catch((err) => {
+			console.warn('Failed to persist acknowledged narration index:', err);
+		});
 	}
 
 	/** Abort controller for the active SSE fetch, if any. */
@@ -199,6 +228,7 @@ export class GameStore {
 				campaignId: string | null;
 				ownerId: string | null;
 				participants: GameMeta['participants'];
+				lastAcknowledgedJournalIndex?: number;
 				state: unknown;
 			};
 			this.gameMeta = {
@@ -207,6 +237,14 @@ export class GameStore {
 				ownerId: meta.ownerId,
 				participants: meta.participants
 			};
+
+			// Restore the presentation cursor to where this player left off.
+			if (
+				meta.lastAcknowledgedJournalIndex !== undefined &&
+				meta.lastAcknowledgedJournalIndex >= 0
+			) {
+				this.presentedJournalLength = meta.lastAcknowledgedJournalIndex + 1;
+			}
 
 			// Transition immediately for PREPARATION games — no engine / state
 			// events will arrive until the game is started.

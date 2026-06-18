@@ -449,6 +449,37 @@ export class GameManager {
 		return { awaitingPlayerId, fields };
 	}
 
+	/**
+	 * Returns the last journal index acknowledged by a player in this game.
+	 */
+	async getAcknowledgedIndex(gameId: string, userId: string): Promise<number> {
+		const participant = await prisma.gameParticipant.findUnique({
+			where: { gameId_userId: { gameId, userId } },
+			select: { lastAcknowledgedJournalIndex: true }
+		});
+		return participant?.lastAcknowledgedJournalIndex ?? -1;
+	}
+
+	/**
+	 * Updates a player's acknowledged journal index for narration gating.
+	 *
+	 * The index is only advanced — never decreased — so a player cannot
+	 * accidentally re-gate a narration they have already acknowledged.
+	 */
+	async acknowledgeNarration(gameId: string, userId: string, index: number): Promise<void> {
+		// Uses updateMany rather than gameParticipant.update so the guard can
+		// be part of the where clause. The composite key (gameId, userId) ensures
+		// at most one row is affected.
+		await prisma.gameParticipant.updateMany({
+			where: {
+				gameId,
+				userId,
+				lastAcknowledgedJournalIndex: { lt: index }
+			},
+			data: { lastAcknowledgedJournalIndex: index }
+		});
+	}
+
 	// -------------------------------------------------------------------
 	// Persistence
 	// -------------------------------------------------------------------

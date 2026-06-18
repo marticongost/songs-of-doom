@@ -20,6 +20,10 @@ const mockPrisma = vi.hoisted(() => ({
 		findUnique: vi.fn(),
 		update: vi.fn()
 	},
+	gameParticipant: {
+		findUnique: vi.fn(),
+		updateMany: vi.fn()
+	},
 	journalEntry: {
 		createMany: vi.fn(),
 		findMany: vi.fn()
@@ -374,6 +378,59 @@ describe('GameManager', () => {
 
 			// Clean up — remove the mock step so other tests aren't affected.
 			delete (proc.steps as Record<string, unknown>)['ask'];
+		});
+	});
+
+	// -------------------------------------------------------------------
+	// getAcknowledgedIndex
+	// -------------------------------------------------------------------
+
+	describe('getAcknowledgedIndex', () => {
+		it('returns the stored index when the participant exists', async () => {
+			mockPrisma.gameParticipant.findUnique.mockResolvedValue({
+				lastAcknowledgedJournalIndex: 5
+			});
+
+			const index = await manager.getAcknowledgedIndex('game-1', 'user-1');
+			expect(index).toBe(5);
+			expect(mockPrisma.gameParticipant.findUnique).toHaveBeenCalledWith({
+				where: { gameId_userId: { gameId: 'game-1', userId: 'user-1' } },
+				select: { lastAcknowledgedJournalIndex: true }
+			});
+		});
+
+		it('returns -1 when the participant does not exist', async () => {
+			mockPrisma.gameParticipant.findUnique.mockResolvedValue(null);
+
+			const index = await manager.getAcknowledgedIndex('game-1', 'user-1');
+			expect(index).toBe(-1);
+		});
+	});
+
+	// -------------------------------------------------------------------
+	// acknowledgeNarration
+	// -------------------------------------------------------------------
+
+	describe('acknowledgeNarration', () => {
+		it('calls updateMany with the game, user, and index guard', async () => {
+			mockPrisma.gameParticipant.updateMany.mockResolvedValue({ count: 1 });
+
+			await manager.acknowledgeNarration('game-1', 'user-1', 3);
+
+			expect(mockPrisma.gameParticipant.updateMany).toHaveBeenCalledWith({
+				where: {
+					gameId: 'game-1',
+					userId: 'user-1',
+					lastAcknowledgedJournalIndex: { lt: 3 }
+				},
+				data: { lastAcknowledgedJournalIndex: 3 }
+			});
+		});
+
+		it('does not throw when zero rows match (index already higher)', async () => {
+			mockPrisma.gameParticipant.updateMany.mockResolvedValue({ count: 0 });
+
+			await expect(manager.acknowledgeNarration('game-1', 'user-1', 0)).resolves.toBeUndefined();
 		});
 	});
 
