@@ -53,6 +53,7 @@ vi.mock('@songsofdoom/engine', async (importOriginal) => {
 			currentEntry: JournalEntry | undefined = undefined;
 			run = vi.fn();
 			supplyInput = vi.fn();
+			setLogger = vi.fn();
 		}
 	};
 });
@@ -98,7 +99,8 @@ function makeFakeEngine(
 	const journal = overrides.journal ?? [];
 	const engine: any = {
 		run: vi.fn().mockReturnValue(overrides.runReturn ?? true),
-		supplyInput: vi.fn()
+		supplyInput: vi.fn(),
+		setLogger: vi.fn()
 	};
 
 	Object.defineProperty(engine, 'journal', {
@@ -222,6 +224,7 @@ describe('GameManager', () => {
 
 			const fakeEngine: any = {
 				supplyInput: vi.fn(),
+				setLogger: vi.fn(),
 				run: vi.fn().mockImplementation(function (this: any) {
 					// Simulate run() appending a new entry
 					this._journal.push(newEntry);

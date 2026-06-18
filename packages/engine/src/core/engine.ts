@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { JournalEntry } from './journal';
+import { noopLogger, type StepLogInfo, type StepLogger } from './logger';
 import type { ProcedureDefinition, ProcedureState } from './procedure';
 import type { ProcedureId } from './procedureid';
 import { CallStep, ComputeStep, DispatchStep, ForEachStep, InputStep, type Step } from './steps';
@@ -16,6 +17,7 @@ type ProcedureRegistry = Partial<Record<ProcedureId, ProcedureDefinition<any>>>;
 export class Engine {
 	private _journal: JournalEntry[];
 	readonly procedureRegistry: ProcedureRegistry;
+	private _logger: StepLogger = noopLogger;
 
 	/**
 	 * Rebuilds an engine from a previously persisted journal.
@@ -31,6 +33,15 @@ export class Engine {
 
 	get currentEntry(): JournalEntry | undefined {
 		return this._journal.at(-1);
+	}
+
+	/**
+	 * Sets the logger used for step execution logging.
+	 *
+	 * Pass {@link noopLogger} to disable logging. Call before {@link run}.
+	 */
+	setLogger(logger: StepLogger): void {
+		this._logger = logger;
 	}
 
 	/**
@@ -114,17 +125,28 @@ export class Engine {
 			step = this._resolveStep(step, state);
 
 			// --- Dispatch ---
-			if (step instanceof ComputeStep) {
-				const result = step.logic({ ...state, step: undefined });
-				this._processStepResult(procedureId, state, result, stepMap, onComplete);
-			} else if (step instanceof InputStep) {
-				return false;
-			} else if (step instanceof CallStep) {
-				this.executeCallStep(step, state);
-			} else if (step instanceof ForEachStep) {
-				this._enterForEachStep(step, state);
-			} else {
-				throw new Error(`Engine invariant: unknown step at "${procedureId}.${state.step}".`);
+			const logInfo = this._buildLogInfo(entry, step);
+
+			try {
+				if (step instanceof ComputeStep) {
+					const result = step.logic({ ...state, step: undefined });
+					this._logger.logStep(logInfo, this._summariseComputeResult(result));
+					this._processStepResult(procedureId, state, result, stepMap, onComplete);
+				} else if (step instanceof InputStep) {
+					this._logger.logStep(logInfo, 'awaiting input');
+					return false;
+				} else if (step instanceof CallStep) {
+					this._logger.logStep(logInfo, '→ call');
+					this.executeCallStep(step, state);
+				} else if (step instanceof ForEachStep) {
+					this._logger.logStep(logInfo, `→ forEach ${step.name}`);
+					this._enterForEachStep(step, state);
+				} else {
+					throw new Error(`Engine invariant: unknown step at "${procedureId}.${state.step}".`);
+				}
+			} catch (error) {
+				this._logger.logError(logInfo, error);
+				throw error;
 			}
 		}
 	}
@@ -144,6 +166,32 @@ export class Engine {
 			step = step.factory(state);
 		}
 		return step;
+	}
+
+	/**
+	 * Builds a {@link StepLogInfo} from the current entry and resolved step.
+	 */
+	private _buildLogInfo(entry: JournalEntry, step: Step): StepLogInfo {
+		return {
+			procedureId: entry.procedureId,
+			step: entry.state.step ?? '(undefined)',
+			stepType: step.constructor.name,
+			journalIndex: this._journal.indexOf(entry),
+			isLoopBody: this._isLoopBodyStep(entry)
+		};
+	}
+
+	/**
+	 * Produces a short human-readable summary of a ComputeStep result.
+	 */
+	private _summariseComputeResult(result: ProcedureState | undefined): string {
+		if (result === undefined) {
+			return '(no result — auto-advance)';
+		}
+		if (result.step !== undefined) {
+			return `→ step "${result.step}"`;
+		}
+		return '(auto-advance)';
 	}
 
 	// -------------------------------------------------------------------
@@ -251,7 +299,8 @@ export class Engine {
 				: ({ ...state, status: 'complete' } as ProcedureState);
 			this._journal.push({
 				procedureId: this.currentEntry!.procedureId,
-				state: ns as ProcedureState
+				state: ns as ProcedureState,
+				parentIndex: this.currentEntry!.parentIndex
 			});
 			return;
 		}
@@ -265,14 +314,24 @@ export class Engine {
 				step: step.firstBodyStep,
 				status: 'ongoing'
 			} as ProcedureState,
+			parentIndex: this.currentEntry!.parentIndex,
 			_loopParentStepId: parentStepId,
 			_loopQueue: queue
 		});
 	}
 
-	private _advanceLoopIteration(step: ForEachStep<any, any>, bodyState: ProcedureState): void {
+	private _advanceLoopIteration(
+		step: ForEachStep<any, any>,
+		bodyState: ProcedureState,
+		meta?: {
+			procedureId: ProcedureId;
+			loopParentStepId: string;
+			loopQueue: unknown[];
+			parentIndex?: number;
+		}
+	): void {
 		const entry = this.currentEntry!;
-		const queue = (entry._loopQueue ?? []) as unknown[];
+		const queue = meta ? [...meta.loopQueue] : ((entry._loopQueue ?? []) as unknown[]);
 		const where = step.where;
 
 		let nextItem: unknown | undefined;
@@ -284,14 +343,16 @@ export class Engine {
 			}
 		}
 
-		const procedureId = entry.procedureId;
+		const procedureId = meta ? meta.procedureId : entry.procedureId;
+		const loopParentStepId = meta ? meta.loopParentStepId : entry._loopParentStepId!;
+		const parentIndex = meta ? meta.parentIndex : entry.parentIndex;
 
 		if (nextItem === undefined) {
 			const ns = step.then
-				? step.then({ ...bodyState, step: entry._loopParentStepId!, game: bodyState.game })
+				? step.then({ ...bodyState, step: loopParentStepId, game: bodyState.game })
 				: ({
 						...bodyState,
-						step: entry._loopParentStepId!,
+						step: loopParentStepId,
 						game: bodyState.game,
 						status: 'complete'
 					} as ProcedureState);
@@ -302,7 +363,7 @@ export class Engine {
 			let containerEntry: JournalEntry | undefined;
 			for (let i = idx - 1; i >= 0; i--) {
 				const c = this._journal[i];
-				if (c._loopParentStepId && c.state.step === entry._loopParentStepId) {
+				if (c._loopParentStepId && c.state.step === loopParentStepId) {
 					containerEntry = c;
 					break;
 				}
@@ -316,6 +377,7 @@ export class Engine {
 					// loop instead of staying at this loop's own step ID.
 					step: containerEntry ? undefined : ns.step
 				} as ProcedureState,
+				parentIndex,
 				_loopParentStepId: containerEntry?._loopParentStepId,
 				_loopQueue: containerEntry?._loopQueue
 			});
@@ -330,7 +392,8 @@ export class Engine {
 				step: step.firstBodyStep,
 				status: 'ongoing'
 			} as ProcedureState,
-			_loopParentStepId: entry._loopParentStepId,
+			parentIndex,
+			_loopParentStepId: loopParentStepId,
 			_loopQueue: queue
 		});
 	}
@@ -367,7 +430,13 @@ export class Engine {
 			}
 			callStep = ps;
 			stepMap = forEachStep.steps;
-			onComplete = (s) => this._advanceLoopIteration(forEachStep, s);
+			onComplete = (s) =>
+				this._advanceLoopIteration(forEachStep, s, {
+					procedureId: parentEntry.procedureId,
+					loopParentStepId: parentEntry._loopParentStepId!,
+					loopQueue: (parentEntry._loopQueue ?? []) as unknown[],
+					parentIndex: parentEntry.parentIndex
+				});
 		} else {
 			const ps = this._requireProcedure(parentEntry.procedureId).steps[parentStepId!];
 			if (!(ps instanceof CallStep)) {
@@ -378,7 +447,8 @@ export class Engine {
 			onComplete = (s) =>
 				this._journal.push({
 					procedureId: parentEntry.procedureId,
-					state: { ...s, status: 'complete' } as ProcedureState
+					state: { ...s, status: 'complete' } as ProcedureState,
+					parentIndex: parentEntry.parentIndex
 				});
 		}
 
@@ -389,7 +459,11 @@ export class Engine {
 			result,
 			stepMap,
 			onComplete,
-			{} // parent continuation — no parentIndex or loop metadata
+			{
+				parentIndex: parentEntry.parentIndex,
+				_loopParentStepId: parentEntry._loopParentStepId,
+				_loopQueue: parentEntry._loopQueue
+			}
 		);
 	}
 

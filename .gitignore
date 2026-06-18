@@ -33,3 +33,6 @@ vite.config.ts.timestamp-*
 
 # Image generation script state
 packages/web/scripts/.image-gen-state.json
+
+# Engine step logs
+packages/engine/logs/

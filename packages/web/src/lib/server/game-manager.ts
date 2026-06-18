@@ -18,8 +18,10 @@ import {
 	serialiseJournalEntry
 } from '@songsofdoom/engine';
 import { type CharacterState, entities, isCampaign } from '@songsofdoom/game';
+import { join } from 'node:path';
 import { prisma } from './db';
 import { ConflictError, ForbiddenError, NotFoundError } from './errors';
+import { FileStepLogger } from './step-logger';
 
 // ---------------------------------------------------------------------------
 // SSE subscriber interface
@@ -136,8 +138,12 @@ export class GameManager {
 	/** Shared serialisation context for all games. */
 	readonly serialisationContext: EngineSerialisationContext;
 
+	/** Directory where engine step logs are written. */
+	private readonly _logsDir: string;
+
 	constructor() {
 		this.serialisationContext = createEngineSerialisationContext();
+		this._logsDir = join(import.meta.dirname, '../../../../engine/logs/game');
 	}
 
 	// -------------------------------------------------------------------
@@ -330,6 +336,7 @@ export class GameManager {
 			characters
 		});
 
+		this._setEngineLogger(gameId, engine);
 		engine.run();
 
 		// Persist initial journal entries.
@@ -389,6 +396,7 @@ export class GameManager {
 		const previousLength = engine.journal.length;
 
 		engine.supplyInput(input);
+		this._setEngineLogger(gameId, engine);
 		const completed = engine.run();
 
 		const newEntries = engine.journal.slice(previousLength) as JournalEntry[];
@@ -603,7 +611,9 @@ export class GameManager {
 			deserialiseJournalEntry(row.data as object, this.serialisationContext)
 		);
 
-		return Engine.restore(procedureDefinitions, journal);
+		const engine = Engine.restore(procedureDefinitions, journal);
+		this._setEngineLogger(gameId, engine);
+		return engine;
 	}
 
 	/**
@@ -731,6 +741,14 @@ export class GameManager {
 
 	private _serialiseGameState(game: ReadonlyGameStateType): object {
 		return JSON.parse(engineSerialisation.serialise(game, this.serialisationContext)) as object;
+	}
+
+	/**
+	 * Attaches a {@link FileStepLogger} to the engine so step execution is
+	 * logged to `packages/engine/logs/game/{gameId}.log`.
+	 */
+	private _setEngineLogger(gameId: string, engine: Engine): void {
+		engine.setLogger(new FileStepLogger(gameId, this._logsDir));
 	}
 }
 
