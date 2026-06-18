@@ -43,7 +43,7 @@ export interface EmitEventState extends ProcedureState {
 	reactionGroups?: Array<ReactionsGroup>;
 
 	/** The reaction the player chose. Set in `askPlayersForNextReaction`. */
-	chosenReaction?: CapabilityRef<Reaction> | null;
+	chosenReaction?: CapabilityRef | null;
 }
 
 /**
@@ -79,11 +79,11 @@ export const emitEvent = define({
 		},
 		askPlayersForNextReaction: input({
 			fields: (state) => [
-				new CapabilityField<Reaction, 'chosenReaction', boolean>({
+				new CapabilityField<'chosenReaction', boolean>({
 					name: 'chosenReaction',
 					choices: new Set(state.reactionGroups![0].reactions),
 					required: state.reactionGroups![0].reactions.some(
-						(capabilityRef) => capabilityRef.capability instanceof Obligation
+						(capabilityRef) => state.game.requireCapability(capabilityRef) instanceof Obligation
 					)
 				})
 			],
@@ -100,7 +100,7 @@ export const emitEvent = define({
 		invokeReaction: call({
 			procedure: triggerCapability,
 			parameters: ({ chosenReaction, reactionGroups }) => ({
-				capability: chosenReaction!.capability,
+				capability: chosenReaction!.capabilityId,
 				cardId: chosenReaction!.cardId,
 				actorId: reactionGroups![0].playerId
 			}),
@@ -144,7 +144,7 @@ const nextReactionState = (state: EmitEventState): EmitEventState => {
 		};
 	} else if (
 		reactionGroups[0].reactions.length === 1 &&
-		reactionGroups[0].reactions[0].capability.mandatory
+		(state.game.requireCapability(reactionGroups[0].reactions[0]) as Reaction).mandatory
 	) {
 		return {
 			...state,
@@ -161,11 +161,11 @@ const nextReactionState = (state: EmitEventState): EmitEventState => {
 
 const popReaction = (
 	reactionGroups: Array<ReactionsGroup>,
-	capabilityRef: CapabilityRef<Reaction>
+	capabilityRef: CapabilityRef
 ): Array<ReactionsGroup> => {
 	const [currentGroup, ...remainingGroups] = reactionGroups;
 	currentGroup.reactions = currentGroup.reactions.filter(
-		(ref) => ref.capability !== capabilityRef.capability || ref.cardId !== capabilityRef.cardId
+		(ref) => ref.capabilityId !== capabilityRef.capabilityId || ref.cardId !== capabilityRef.cardId
 	);
 	return [...(currentGroup.reactions.length ? [currentGroup] : []), ...remainingGroups];
 };
@@ -177,7 +177,7 @@ interface ReactionRef {
 }
 
 interface ReactionsGroup {
-	reactions: Array<CapabilityRef<Reaction>>;
+	reactions: Array<CapabilityRef>;
 	playerId: PlayerId;
 }
 
@@ -198,7 +198,7 @@ export const groupReactions = (
 	for (const reaction of sortedReactions) {
 		const capabilityRef = {
 			cardId: reaction.cardState.id,
-			capability: reaction.reaction
+			capabilityId: reaction.reaction.id
 		};
 		if (
 			reaction.cardState.card.reactionOrder !== currentReactionOrder ||

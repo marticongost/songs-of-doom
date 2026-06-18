@@ -28,9 +28,13 @@ import {
 import type { MutableGameState, ReadonlyGameState } from './gamestate';
 import type { CardId, EntityId, LocationId, PlayerId } from './identifiers';
 
-export interface CapabilityRef<T extends Capability = Capability> {
+export interface CapabilityRef {
 	cardId: CardId;
-	capability: T;
+	capabilityId: string;
+}
+
+export interface PotentialCapabilityRef extends CapabilityRef {
+	prioritary: boolean;
 }
 
 export type CardParent =
@@ -179,7 +183,8 @@ export class CardState<Self extends CardState<Self> = CardState<any>> extends En
 			const resolution = new MutableCapabilityResolution({
 				subjectId: this.id,
 				cardId: this.id,
-				capability
+				capabilityId: capability.id,
+				cost: capability.cost
 			});
 			const scopedGameState = gameState.mutate((state) =>
 				state.pushContext({ capabilityResolution: resolution })

@@ -1,4 +1,4 @@
-import type { Property, Reaction, Result, ScalarExpressionType } from '@songsofdoom/game';
+import type { Property, Result, ScalarExpressionType } from '@songsofdoom/game';
 import type { CapabilityRef } from './cardstate';
 import type { EntityId } from './identifiers';
 
@@ -16,7 +16,7 @@ export interface TestResolutionProps {
 	result?: Result;
 
 	/** Additional reactions attached to the test for its duration. */
-	additionalReactions?: Array<CapabilityRef<Reaction>>;
+	additionalReactions?: Array<CapabilityRef>;
 }
 
 export abstract class TestResolution {
@@ -24,7 +24,7 @@ export abstract class TestResolution {
 	readonly proficiency: ScalarExpressionType;
 	readonly properties: Array<Property>;
 	readonly result?: Result;
-	readonly additionalReactions?: Array<CapabilityRef<Reaction>>;
+	readonly additionalReactions?: Array<CapabilityRef>;
 
 	constructor({
 		subjectId,
@@ -46,7 +46,7 @@ export class ReadonlyTestResolution extends TestResolution {
 	declare readonly proficiency: ScalarExpressionType;
 	declare readonly properties: Array<Property>;
 	declare readonly result?: Result;
-	declare readonly additionalReactions?: Array<CapabilityRef<Reaction>>;
+	declare readonly additionalReactions?: Array<CapabilityRef>;
 
 	mutable(): MutableTestResolution {
 		return new MutableTestResolution({
@@ -69,10 +69,10 @@ export class MutableTestResolution extends TestResolution {
 	declare proficiency: ScalarExpressionType;
 	declare properties: Array<Property>;
 	declare result?: Result;
-	declare additionalReactions?: Array<CapabilityRef<Reaction>>;
+	declare additionalReactions?: Array<CapabilityRef>;
 
 	/** Appends a reaction to the test's additional reactions list. */
-	addReaction(reaction: CapabilityRef<Reaction>): void {
+	addReaction(reaction: CapabilityRef): void {
 		if (!this.additionalReactions) {
 			this.additionalReactions = [];
 		}

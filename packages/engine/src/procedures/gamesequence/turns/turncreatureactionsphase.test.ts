@@ -49,7 +49,7 @@ describe('chooseEnemyAction', () => {
 
 		const result = chooseEnemyAction(state, 'crt1');
 		expect(result?.cardId).toBe('crt1');
-		expect(result?.capability).toBe(action);
+		expect(result?.capabilityId).toBe('test');
 	});
 
 	it('prefers a prioritary action over a non-prioritary one', () => {
@@ -69,7 +69,7 @@ describe('chooseEnemyAction', () => {
 
 		const result = chooseEnemyAction(state, 'crt1');
 		expect(result?.cardId).toBe('crt1');
-		expect(result?.capability).toBe(prioritary);
+		expect(result?.capabilityId).toBe('test');
 	});
 
 	it('returns the first feasible action from a direct attachment', () => {
@@ -91,7 +91,7 @@ describe('chooseEnemyAction', () => {
 
 		const result = chooseEnemyAction(state, 'crt1');
 		expect(result?.cardId).toBe('skl1');
-		expect(result?.capability).toBe(action);
+		expect(result?.capabilityId).toBe('test');
 	});
 
 	it('returns the first feasible action from a deeply nested attachment', () => {
@@ -125,7 +125,7 @@ describe('chooseEnemyAction', () => {
 
 		const result = chooseEnemyAction(state, 'crt1');
 		expect(result?.cardId).toBe('skl2');
-		expect(result?.capability).toBe(action);
+		expect(result?.capabilityId).toBe('test');
 	});
 
 	it('prefers a prioritary action from an attachment over a non-prioritary one from the card', () => {
@@ -154,6 +154,6 @@ describe('chooseEnemyAction', () => {
 
 		const result = chooseEnemyAction(state, 'crt1');
 		expect(result?.cardId).toBe('skl1');
-		expect(result?.capability).toBe(prioritary);
+		expect(result?.capabilityId).toBe('test');
 	});
 });

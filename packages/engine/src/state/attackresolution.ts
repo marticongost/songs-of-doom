@@ -1,4 +1,4 @@
-import type { Property, Reaction, Result } from '@songsofdoom/game';
+import type { Property, Result } from '@songsofdoom/game';
 import type { CapabilityRef } from './cardstate';
 import { mutate } from './entitystatemutation';
 import type { EntityId } from './identifiers';
@@ -58,10 +58,10 @@ export class MutableAttackResolution extends AttackResolution implements Mutable
 	declare result?: Result;
 	declare damageModifier: number;
 	declare negated: boolean;
-	declare additionalReactions?: Array<CapabilityRef<Reaction>>;
+	declare additionalReactions?: Array<CapabilityRef>;
 
 	/** Appends a reaction to the test's additional reactions list. */
-	addReaction(reaction: CapabilityRef<Reaction>): void {
+	addReaction(reaction: CapabilityRef): void {
 		if (!this.additionalReactions) {
 			this.additionalReactions = [];
 		}

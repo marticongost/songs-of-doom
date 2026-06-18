@@ -86,7 +86,8 @@
 		if (procId === ProcedureId.EmitEvent) return 'log/event.svg';
 		if (procId === ProcedureId.NarrationEffect) return 'log/narration.svg';
 		if (procId === ProcedureId.TriggerCapability) {
-			const capability = (entry.state as TriggerCapabilityState).capability;
+			const capabilityRef = entry.state as TriggerCapabilityState;
+			const capability = entry.state.game.requireCapability(capabilityRef);
 			if (capability instanceof Opportunity) return 'capabilities/opportunity.svg';
 			if (capability instanceof Obligation) return 'capabilities/obligation.svg';
 			if (capability instanceof Action) return 'capabilities/action.svg';

@@ -289,13 +289,13 @@ describe('engineSerialisation — fields', () => {
 
 	it('round-trips a CapabilityField with Set of choices', () => {
 		expect.assertions(2);
-		const ref: CapabilityRef = { cardId: 'trt1', capability: {} as Game.Capability };
+		const ref: CapabilityRef = { cardId: 'trt1', capabilityId: 'foo' };
 		const field = new CapabilityField({
 			name: 'reaction',
 			choices: new Set([ref])
 		});
 		const restored = roundTrip(field);
 		expect(restored.name).toBe('reaction');
-		expect(restored.choices).toBeInstanceOf(Set);
+		expect(restored.choices).toEqual(field.choices);
 	});
 });

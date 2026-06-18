@@ -1,6 +1,7 @@
 import { mock } from '@songsofdoom/common/test-utils';
 import {
 	Action,
+	CapabilityCost,
 	Constant,
 	modifyConcentration,
 	not,
@@ -307,6 +308,55 @@ describe('GameState.requireCard', () => {
 	});
 });
 
+// ─── GameState.requireCapability ──────────────────────────────────────────────
+
+describe('GameState.requireCapability', () => {
+	it('returns the capability from card.capabilities when found', () => {
+		const cap = new Action({ id: 'action1', effects: [] });
+		const card = mock<ReadonlyCardState>({
+			card: { capabilities: [cap], attachmentCapabilities: [] } as unknown as Entity
+		});
+		const state = makeGameState([
+			mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt1' ? card : undefined) })
+		]);
+
+		expect(state.requireCapability({ cardId: 'trt1', capabilityId: 'action1' })).toBe(cap);
+	});
+
+	it('returns the capability from card.attachmentCapabilities when found', () => {
+		const cap = new Action({ id: 'attach1', effects: [] });
+		const card = mock<ReadonlyCardState>({
+			card: { capabilities: [], attachmentCapabilities: [cap] } as unknown as Entity
+		});
+		const state = makeGameState([
+			mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt1' ? card : undefined) })
+		]);
+
+		expect(state.requireCapability({ cardId: 'trt1', capabilityId: 'attach1' })).toBe(cap);
+	});
+
+	it('throws when the card does not exist', () => {
+		const state = makeGameState([mock<ReadonlyPlayerState>()]);
+
+		expect(() => state.requireCapability({ cardId: 'trt99', capabilityId: 'action1' })).toThrow(
+			'trt99'
+		);
+	});
+
+	it('throws when the capability id is not found on the card', () => {
+		const card = mock<ReadonlyCardState>({
+			card: { capabilities: [], attachmentCapabilities: [] } as unknown as Entity
+		});
+		const state = makeGameState([
+			mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt1' ? card : undefined) })
+		]);
+
+		expect(() => state.requireCapability({ cardId: 'trt1', capabilityId: 'nonexistent' })).toThrow(
+			'nonexistent'
+		);
+	});
+});
+
 // ─── GameState.getPlayer ──────────────────────────────────────────────────────
 
 describe('GameState.getPlayer', () => {
@@ -423,7 +473,8 @@ function makeResolution(
 	return new ReadonlyCapabilityResolution({
 		subjectId: cardId,
 		cardId,
-		capability
+		capabilityId: capability.id,
+		cost: capability.cost
 	});
 }
 
@@ -440,8 +491,13 @@ describe('GameState capability resolution stack getters', () => {
 		});
 
 		it('getActiveCard returns the card of the top non-Reaction resolution', () => {
-			const c1 = mock<ReadonlyCardState>();
-			const c2 = mock<ReadonlyCardState>();
+			const actionCap = new Action({ id: 'test', effects: [] });
+			const c1 = mock<ReadonlyCardState>({
+				card: { capabilities: [actionCap], attachmentCapabilities: [] } as unknown as Entity
+			});
+			const c2 = mock<ReadonlyCardState>({
+				card: { capabilities: [actionCap], attachmentCapabilities: [] } as unknown as Entity
+			});
 			const p1 = mock<ReadonlyPlayerState>({
 				getCard: (id: string) => (id === 'trt1' ? c1 : id === 'trt2' ? c2 : undefined)
 			});
@@ -455,8 +511,14 @@ describe('GameState capability resolution stack getters', () => {
 		});
 
 		it('getActiveCard skips Reaction resolutions', () => {
-			const c1 = mock<ReadonlyCardState>();
-			const c2 = mock<ReadonlyCardState>();
+			const actionCap = new Action({ id: 'test', effects: [] });
+			const reactionCap = new Opportunity({ id: 'test', effects: [], triggers: ['turnStart'] });
+			const c1 = mock<ReadonlyCardState>({
+				card: { capabilities: [reactionCap], attachmentCapabilities: [] } as unknown as Entity
+			});
+			const c2 = mock<ReadonlyCardState>({
+				card: { capabilities: [actionCap], attachmentCapabilities: [] } as unknown as Entity
+			});
 			const p1 = mock<ReadonlyPlayerState>({
 				getCard: (id: string) => (id === 'trt1' ? c1 : id === 'trt2' ? c2 : undefined)
 			});
@@ -503,8 +565,14 @@ describe('GameState capability resolution stack getters', () => {
 		});
 
 		it('getReactiveCard returns the card of the top Reaction resolution', () => {
-			const c1 = mock<ReadonlyCardState>();
-			const c2 = mock<ReadonlyCardState>();
+			const actionCap = new Action({ id: 'test', effects: [] });
+			const reactionCap = new Opportunity({ id: 'test', effects: [], triggers: ['turnStart'] });
+			const c1 = mock<ReadonlyCardState>({
+				card: { capabilities: [actionCap], attachmentCapabilities: [] } as unknown as Entity
+			});
+			const c2 = mock<ReadonlyCardState>({
+				card: { capabilities: [reactionCap], attachmentCapabilities: [] } as unknown as Entity
+			});
 			const p1 = mock<ReadonlyPlayerState>({
 				getCard: (id: string) => (id === 'trt1' ? c1 : id === 'trt2' ? c2 : undefined)
 			});
@@ -518,7 +586,10 @@ describe('GameState capability resolution stack getters', () => {
 		});
 
 		it('getReactiveCard returns undefined when only non-Reaction resolutions exist', () => {
-			const c1 = mock<ReadonlyCardState>();
+			const actionCap = new Action({ id: 'test', effects: [] });
+			const c1 = mock<ReadonlyCardState>({
+				card: { capabilities: [actionCap], attachmentCapabilities: [] } as unknown as Entity
+			});
 			const p1 = mock<ReadonlyPlayerState>({
 				getCard: (id: string) => (id === 'trt1' ? c1 : undefined)
 			});
@@ -1037,7 +1108,8 @@ describe('MutableGameState.pushContext', () => {
 		const resolution = new MutableCapabilityResolution({
 			subjectId: 'trt1',
 			cardId: 'trt1',
-			capability: new Action({ id: 'test', effects: [] })
+			capabilityId: 'test',
+			cost: new CapabilityCost({})
 		});
 		state.pushContext({ capabilityResolution: resolution });
 		expect(state.capabilityResolutionStack).toEqual([resolution]);
@@ -1060,7 +1132,8 @@ describe('MutableGameState.pushContext', () => {
 		const resolution = new MutableCapabilityResolution({
 			subjectId: 'trt1',
 			cardId: 'trt1',
-			capability: new Action({ id: 'test', effects: [] })
+			capabilityId: 'test',
+			cost: new CapabilityCost({})
 		});
 		state.pushContext({
 			capabilityResolution: resolution,
@@ -1103,7 +1176,8 @@ describe('MutableGameState.popContext', () => {
 		const resolution = new MutableCapabilityResolution({
 			subjectId: 'trt1',
 			cardId: 'trt1',
-			capability: new Action({ id: 'test', effects: [] })
+			capabilityId: 'test',
+			cost: new CapabilityCost({})
 		});
 		const state = makeMutableState({ capabilityResolutionStack: [resolution] });
 		state.popContext({ capabilityResolution: resolution });
@@ -1114,7 +1188,8 @@ describe('MutableGameState.popContext', () => {
 		const resolution = new MutableCapabilityResolution({
 			subjectId: 'trt1',
 			cardId: 'trt1',
-			capability: new Action({ id: 'test', effects: [] })
+			capabilityId: 'test',
+			cost: new CapabilityCost({})
 		});
 		const state = makeMutableState({
 			capabilityResolutionStack: [resolution],
@@ -1150,7 +1225,8 @@ describe('MutableGameState pushContext / popContext round-trip', () => {
 		const resolution = new MutableCapabilityResolution({
 			subjectId: 'trt1',
 			cardId: 'trt1',
-			capability: new Action({ id: 'test', effects: [] })
+			capabilityId: 'test',
+			cost: new CapabilityCost({})
 		});
 		const ctx: GameContext = {
 			capabilityResolution: resolution,

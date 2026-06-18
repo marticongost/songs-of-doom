@@ -19,7 +19,7 @@ import {
 import { evaluateBoolean, evaluateScalar } from '../expressions';
 import { MutableCapabilityResolution, type CapabilityResolution } from './capabilityresolution';
 import type { CardOptions } from './cardcontainer';
-import { CardState, MutableCardState, ReadonlyCardState } from './cardstate';
+import { CardState, MutableCardState, ReadonlyCardState, type CapabilityRef } from './cardstate';
 import type { EntityState } from './entitystate';
 import { mutate } from './entitystatemutation';
 import {
@@ -52,6 +52,12 @@ export interface GameContext {
 	 */
 	capabilityResolution?: CapabilityResolution;
 }
+
+export const PopGameContextValue = Symbol('PopGameContextValue');
+
+export type PopGameContext = {
+	[K in keyof GameContext]: GameContext[K] | typeof PopGameContextValue;
+};
 
 /** Maps an entity type ID to the prefix used in {@link CardId} generation. */
 const ENTITY_TYPE_TO_PREFIX: Partial<Record<EntityTypeId, string>> = {
@@ -295,6 +301,17 @@ export abstract class GameState<
 		];
 	}
 
+	requireCapability(ref: CapabilityRef): Capability {
+		const card = this.requireCard(ref.cardId);
+		const capability =
+			card.card.capabilities.find((cap) => cap.id === ref.capabilityId) ??
+			card.card.attachmentCapabilities.find((cap) => cap.id === ref.capabilityId);
+		if (!capability) {
+			throw new Error(`Capability with id ${ref.capabilityId} not found on card ${ref.cardId}`);
+		}
+		return capability;
+	}
+
 	getActiveCard(): TCard | undefined {
 		const resolution = this.getActionResolution();
 		if (!resolution) return undefined;
@@ -378,7 +395,7 @@ export abstract class GameState<
 	 */
 	private getActionResolution(): CapabilityResolution | undefined {
 		for (let i = this.capabilityResolutionStack.length - 1; i >= 0; i--) {
-			if (this.capabilityResolutionStack[i].capability instanceof Action) {
+			if (this.requireCapability(this.capabilityResolutionStack[i]) instanceof Action) {
 				return this.capabilityResolutionStack[i];
 			}
 		}
@@ -391,7 +408,7 @@ export abstract class GameState<
 	 */
 	private getReactionResolution(): CapabilityResolution | undefined {
 		for (let i = this.capabilityResolutionStack.length - 1; i >= 0; i--) {
-			if (this.capabilityResolutionStack[i].capability instanceof Reaction) {
+			if (this.requireCapability(this.capabilityResolutionStack[i]) instanceof Reaction) {
 				return this.capabilityResolutionStack[i];
 			}
 		}
@@ -779,7 +796,7 @@ export class MutableGameState extends GameState<
 		if (ctx.targetId !== undefined) this.targetStack.push(ctx.targetId);
 	}
 
-	popContext(ctx: GameContext): void {
+	popContext(ctx: PopGameContext): void {
 		if (ctx.targetId !== undefined) this.targetStack.pop();
 		if (ctx.subjectId !== undefined) this.subjectStack.pop();
 		if (ctx.capabilityResolution !== undefined) this.capabilityResolutionStack.pop();

@@ -5,8 +5,8 @@ Used by {@link InputForm} when the engine requests a capability choice via
 a {@link CapabilityField}.
 -->
 <script lang="ts">
+	import { getGameStore } from '$lib/context/gamestore';
 	import { CapabilityField, type CapabilityRef } from '@songsofdoom/engine';
-	import type { Capability } from '@songsofdoom/game';
 	import CapabilityChip from '../capabilities/CapabilityChip.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
 
@@ -22,18 +22,19 @@ a {@link CapabilityField}.
 	}
 
 	const { field, onchange, value = null, ...attributes }: Props = $props();
+	const store = getGameStore();
 
-	const choices: CapabilityRef<Capability>[] = $derived([...field.choices]);
+	const choices: CapabilityRef[] = $derived([...field.choices]);
 </script>
 
 <div {...standardAttributes(attributes)}>
-	{#each choices as choice (choice.capability.id)}
+	{#each choices as choice (choice.capabilityId)}
 		<button
 			role="option"
 			aria-selected={value === choice}
 			onclick={() => onchange(value === choice ? null : choice)}
 		>
-			<CapabilityChip capability={choice.capability} />
+			<CapabilityChip capability={store.gameState!.requireCapability(choice)} />
 		</button>
 	{/each}
 </div>

@@ -1,4 +1,3 @@
-import type { Action } from '@songsofdoom/game';
 import { CapabilityField, EntityField } from '../../../core/input';
 import { instructions } from '../../../core/instructions';
 import { type ProcedureState } from '../../../core/procedure';
@@ -16,7 +15,7 @@ export interface TurnPlayerActionsPhaseState extends ProcedureState {
 	/**
 	 * The actions chosen by each actor during this phase.
 	 */
-	actorActions?: Record<EntityId, CapabilityRef<Action> | undefined>;
+	actorActions?: Record<EntityId, CapabilityRef | undefined>;
 }
 
 const { define, dispatch, input, call } = instructions<TurnPlayerActionsPhaseState>();
@@ -57,7 +56,7 @@ export const turnPlayerActionsPhase = define({
 			const { game, actorId } = state;
 			const actor = game.requireEntityState(actorId!);
 			const availableActions = actor.getAvailableActions(game);
-			const prioritaryActions = availableActions.filter((ref) => ref.capability.prioritary);
+			const prioritaryActions = availableActions.filter((ref) => ref.prioritary);
 			const choices = prioritaryActions.length > 0 ? prioritaryActions : availableActions;
 			const modifiedGameState = game.mutate((gameState) => {
 				gameState.requireEntityState(actorId!).activated = true;

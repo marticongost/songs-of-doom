@@ -1,10 +1,19 @@
-import type { Capability, CapabilityCost, Reaction } from '@songsofdoom/game';
+import type { CapabilityCost, Reaction } from '@songsofdoom/game';
 import type { CapabilityRef } from './cardstate';
 import type { CardId, EntityId } from './identifiers';
 
 export interface CapabilityResolutionProps extends CapabilityRef {
+	/** The capability being resolved. */
+	readonly capabilityId: string;
+
+	/** Id of the card providing the capability. */
+	cardId: CardId;
+
 	/** Id of the subject (player, creature, ally) executing the capability. */
 	subjectId: EntityId;
+
+	/** The cost of executing the capability. */
+	cost: CapabilityCost;
 
 	/** Additional reactions that apply to the capability. Used by effects that modify
 	 * capabilities, such as `TriggerActionEffect`. */
@@ -13,7 +22,7 @@ export interface CapabilityResolutionProps extends CapabilityRef {
 
 export abstract class CapabilityResolution implements CapabilityRef {
 	/** The capability being resolved. */
-	readonly capability: Capability;
+	readonly capabilityId: string;
 
 	/** Id of the subject (player, creature, ally) executing the capability. */
 	readonly subjectId: EntityId;
@@ -28,11 +37,17 @@ export abstract class CapabilityResolution implements CapabilityRef {
 	 * capabilities, such as `TriggerActionEffect`. */
 	readonly additionalReactions: Array<Reaction>;
 
-	constructor({ subjectId, cardId, capability, additionalReactions }: CapabilityResolutionProps) {
+	constructor({
+		subjectId,
+		cardId,
+		capabilityId,
+		cost,
+		additionalReactions
+	}: CapabilityResolutionProps) {
 		this.subjectId = subjectId;
 		this.cardId = cardId;
-		this.capability = capability;
-		this.cost = capability.cost;
+		this.capabilityId = capabilityId;
+		this.cost = cost;
 		this.additionalReactions = additionalReactions ?? [];
 	}
 
@@ -42,7 +57,7 @@ export abstract class CapabilityResolution implements CapabilityRef {
 }
 
 export class ReadonlyCapabilityResolution extends CapabilityResolution {
-	declare readonly capability: Capability;
+	declare readonly capabilityId: string;
 	declare readonly subjectId: EntityId;
 	declare readonly cardId: CardId;
 	declare readonly cost: CapabilityCost;
@@ -50,10 +65,11 @@ export class ReadonlyCapabilityResolution extends CapabilityResolution {
 
 	override mutable(): MutableCapabilityResolution {
 		return new MutableCapabilityResolution({
-			capability: this.capability,
+			capabilityId: this.capabilityId,
 			subjectId: this.subjectId,
 			cardId: this.cardId,
-			additionalReactions: this.additionalReactions
+			additionalReactions: this.additionalReactions,
+			cost: this.cost
 		});
 	}
 
@@ -63,7 +79,7 @@ export class ReadonlyCapabilityResolution extends CapabilityResolution {
 }
 
 export class MutableCapabilityResolution extends CapabilityResolution {
-	declare capability: Capability;
+	declare capabilityId: string;
 	declare subjectId: EntityId;
 	declare cardId: CardId;
 	declare cost: CapabilityCost;
@@ -75,10 +91,11 @@ export class MutableCapabilityResolution extends CapabilityResolution {
 
 	override readonly(): ReadonlyCapabilityResolution {
 		return new ReadonlyCapabilityResolution({
-			capability: this.capability,
+			capabilityId: this.capabilityId,
 			subjectId: this.subjectId,
 			cardId: this.cardId,
-			additionalReactions: this.additionalReactions
+			additionalReactions: this.additionalReactions,
+			cost: this.cost
 		});
 	}
 }

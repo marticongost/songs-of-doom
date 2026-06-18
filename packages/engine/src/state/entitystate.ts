@@ -1,6 +1,6 @@
 import { Action, type Property } from '@songsofdoom/game';
 import type { CardContainer, CardOptions } from './cardcontainer';
-import type { CapabilityRef, CardState, MutableCardState } from './cardstate';
+import type { CardState, MutableCardState, PotentialCapabilityRef } from './cardstate';
 import type { GameState, MutableGameState } from './gamestate';
 import type { CardId, EntityId, PlayerId } from './identifiers';
 
@@ -46,7 +46,7 @@ export abstract class EntityState<
 	abstract requireCard(id: CardId): TCard;
 	abstract cards(options?: CardOptions): Array<TCard>;
 
-	getAvailableActions(gameState: GameState): Array<CapabilityRef<Action>> {
+	getAvailableActions(gameState: GameState): Array<PotentialCapabilityRef> {
 		const cards = this.cards({ ready: true }) as CardState[];
 		const location = gameState.getEntityLocation(this);
 		if (location) {
@@ -59,7 +59,11 @@ export abstract class EntityState<
 					(capability) =>
 						gameState.getCapabilityImpediment(capability, card.id, this.id) === undefined
 				)
-				.flatMap((capability) => ({ capability, cardId: card.id }))
+				.flatMap((capability) => ({
+					capabilityId: capability.id,
+					cardId: card.id,
+					prioritary: capability.prioritary
+				}))
 		);
 	}
 

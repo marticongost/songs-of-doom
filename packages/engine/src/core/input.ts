@@ -1,11 +1,5 @@
 import type { ReadonlyCounter } from '@songsofdoom/common';
-import type {
-	ActualCapabilityCost,
-	Capability,
-	FocusToken,
-	Result,
-	Target
-} from '@songsofdoom/game';
+import type { ActualCapabilityCost, FocusToken, Result, Target } from '@songsofdoom/game';
 import type { CapabilityRef } from '../state/cardstate';
 import type { EntityId } from '../state/identifiers';
 import type { Payment } from '../state/payment';
@@ -76,21 +70,20 @@ export class BooleanField<N extends string = string, R extends boolean = true> e
 > {}
 
 export interface CapabilityFieldProps<
-	C extends Capability = Capability,
 	N extends string = string,
 	R extends boolean = true
 > extends FieldProps<N, R> {
-	choices: Set<CapabilityRef<C>>;
+	choices: Set<CapabilityRef>;
 }
 
-export class CapabilityField<
-	C extends Capability = Capability,
-	N extends string = string,
-	R extends boolean = true
-> extends Field<CapabilityRef<C>, N, R> {
-	readonly choices: Set<CapabilityRef<C>>;
+export class CapabilityField<N extends string = string, R extends boolean = true> extends Field<
+	CapabilityRef,
+	N,
+	R
+> {
+	readonly choices: Set<CapabilityRef>;
 
-	constructor({ choices, ...baseProps }: CapabilityFieldProps<C, N, R>) {
+	constructor({ choices, ...baseProps }: CapabilityFieldProps<N, R>) {
 		super(baseProps);
 		this.choices = choices;
 	}

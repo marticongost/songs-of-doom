@@ -4,7 +4,11 @@ import { EntityField } from '../../../core/input';
 import { instructions } from '../../../core/instructions';
 import { type ProcedureState } from '../../../core/procedure';
 import { ProcedureId } from '../../../core/procedureid';
-import type { CapabilityRef, ReadonlyCardState } from '../../../state/cardstate';
+import type {
+	CapabilityRef,
+	PotentialCapabilityRef,
+	ReadonlyCardState
+} from '../../../state/cardstate';
 import type { ReadonlyGameState } from '../../../state/gamestate';
 import type { CreatureId } from '../../../state/identifiers';
 import { triggerCapability } from '../../core/triggercapability';
@@ -14,7 +18,7 @@ export interface TurnCreatureActionsPhaseState extends ProcedureState {
 	creatureId?: CreatureId;
 
 	/** The action that the active creature has chosen. */
-	creatureActions?: Record<CreatureId, CapabilityRef<Action> | undefined>;
+	creatureActions?: Record<CreatureId, CapabilityRef | undefined>;
 }
 
 const { define, dispatch, input, call } = instructions<TurnCreatureActionsPhaseState>();
@@ -78,20 +82,24 @@ export const turnCreatureActionsPhase = define({
 export function chooseEnemyAction(
 	state: ReadonlyGameState,
 	enemyId: CreatureId
-): CapabilityRef<Action> | undefined {
+): PotentialCapabilityRef | undefined {
 	const enemyCard = state.requireCard(enemyId);
 
 	const findAction = (
 		cardState: ReadonlyCardState,
 		getCardCapabilities: (cardState: ReadonlyCardState) => Array<Capability>
-	): CapabilityRef<Action> | undefined => {
-		let chosenCapability: CapabilityRef<Action> | undefined = undefined;
+	): PotentialCapabilityRef | undefined => {
+		let chosenCapability: PotentialCapabilityRef | undefined = undefined;
 		for (const capability of getCardCapabilities(cardState)) {
 			if (
 				capability instanceof Action &&
 				!state.getCapabilityImpediment(capability, cardState.id, enemyId)
 			) {
-				const potentialCapability = { capability, cardId: cardState.id };
+				const potentialCapability = {
+					capabilityId: capability.id,
+					cardId: cardState.id,
+					prioritary: capability.prioritary
+				};
 				if (capability.prioritary) {
 					return potentialCapability;
 				} else if (!chosenCapability) {
@@ -104,7 +112,7 @@ export function chooseEnemyAction(
 				attachment,
 				(attachmentState) => attachmentState.card.attachmentCapabilities
 			);
-			if (attachmentCapability?.capability.prioritary) {
+			if (attachmentCapability?.prioritary) {
 				return attachmentCapability;
 			} else if (!chosenCapability) {
 				chosenCapability = attachmentCapability;

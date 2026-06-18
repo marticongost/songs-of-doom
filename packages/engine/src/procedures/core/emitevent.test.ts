@@ -96,6 +96,7 @@ describe('emitEvent', () => {
 			(card2 as any).getReactionsToEvent.mockReturnValue([reaction2]);
 
 			(game as any).cards.mockReturnValue([card1, card2]);
+			(game as any).requireCapability.mockReturnValue({ mandatory: false });
 
 			const state = makeState({
 				game,
@@ -131,6 +132,7 @@ describe('emitEvent', () => {
 			(card as any).getReactionsToEvent.mockReturnValue([mandatoryReaction]);
 
 			(game as any).cards.mockReturnValue([card]);
+			(game as any).requireCapability.mockReturnValue({ mandatory: true });
 
 			const state = makeState({
 				game,

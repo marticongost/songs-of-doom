@@ -1,8 +1,10 @@
-import type { Capability, Effect, Reaction } from '@songsofdoom/game';
+import type { Effect, Reaction } from '@songsofdoom/game';
 import { instructions } from '../../core/instructions';
 import { type ProcedureState } from '../../core/procedure';
 import { ProcedureId } from '../../core/procedureid';
 import { MutableCapabilityResolution } from '../../state/capabilityresolution';
+import type { CapabilityRef } from '../../state/cardstate';
+import { PopGameContextValue } from '../../state/gamestate';
 import type { ActorId, CardId } from '../../state/identifiers';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -11,14 +13,14 @@ import type { ActorId, CardId } from '../../state/identifiers';
 
 export type TriggerCapabilityStepId = 'init' | 'triggerEffects' | 'finalise';
 
-export interface TriggerCapabilityState extends ProcedureState {
+export interface TriggerCapabilityState extends ProcedureState, CapabilityRef {
 	/**
 	 * The capability being triggered.
 	 *
 	 * Only needed for the resolution stack — effect dispatch uses {@link effects}.
 	 * Once `CapabilityResolution` is decoupled from `Capability`, this can be removed.
 	 */
-	capability: Capability;
+	capabilityId: string;
 
 	/** The card whose capability is being triggered. */
 	cardId: CardId;
@@ -42,15 +44,16 @@ export const triggerCapability = define({
 	id: ProcedureId.TriggerCapability,
 	steps: {
 		init(state) {
-			const { game, capability, cardId, actorId, additionalReactions } = state;
+			const { game, capabilityId, cardId, actorId, additionalReactions } = state;
 			return {
 				...state,
 				game: game.mutate((gameState) => {
 					gameState.pushContext({
 						capabilityResolution: new MutableCapabilityResolution({
-							capability,
+							capabilityId,
 							subjectId: actorId,
 							cardId,
+							cost: gameState.requireCapability({ cardId, capabilityId }).cost,
 							additionalReactions
 						}),
 						subjectId: actorId,
@@ -66,7 +69,8 @@ export const triggerCapability = define({
 		},
 		triggerEffects: forEach({
 			name: 'effect',
-			items: ({ capability }) => capability.effects,
+			items: ({ capabilityId, game, cardId }) =>
+				game.requireCapability({ cardId, capabilityId }).effects,
 			steps: {
 				triggerEffect: triggerEffect({ effect: (state) => state.effect! })
 			}
@@ -82,13 +86,9 @@ export const triggerCapability = define({
 					}
 
 					mutable.popContext({
-						capabilityResolution: new MutableCapabilityResolution({
-							capability: state.capability,
-							subjectId: state.actorId,
-							cardId: state.cardId
-						}),
-						subjectId: state.actorId,
-						targetId: state.cardId
+						capabilityResolution: PopGameContextValue,
+						subjectId: PopGameContextValue,
+						targetId: PopGameContextValue
 					});
 				})
 			};
