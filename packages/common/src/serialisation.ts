@@ -334,23 +334,8 @@ export class Serialisation<ContextData = undefined> {
 	 * @returns The JSON string representation of the data.
 	 */
 	serialise<T>(data: T, ...contextData: ContextArg<ContextData>): string {
-		const context: DecomposeContext<ContextData> = contextFactory({
-			errorType: DecomposeError,
-			data: contextData[0] as ContextData,
-			decomposeChild: (pathComponent: string, data: any) =>
-				context.withPath(pathComponent, () => this.decompose(data, context)),
-			getObjectId: (obj) => this.getObjectId(obj, context.data, objectPool),
-			requireObjectId: (obj) => this.requireObjectId(obj, context.data, objectPool),
-			getTypeBrand: this.typeBranding
-		});
-		const objectPool = new ObjectPool(
-			this.typeBranding,
-			(obj: any, typeBrand: string, key: string) =>
-				context.withPath(`@ref(${typeBrand}-${key})`, () => this.decompose(obj, context, true))
-		);
-		const decomposedData = this.decompose(data, context);
-		objectPool.insertInto(decomposedData);
-		return JSON.stringify(decomposedData ?? null);
+		const decomposed = this.decompose(data, ...contextData);
+		return JSON.stringify(decomposed ?? null);
 	}
 
 	/**
@@ -371,30 +356,83 @@ export class Serialisation<ContextData = undefined> {
 	 */
 	deserialise<T>(data: string, ...contextData: ContextArg<ContextData>): T {
 		const parsedData = JSON.parse(data);
+		return this.recompose(parsedData, ...contextData) as T;
+	}
+
+	/**
+	 * Decomposes an object to a JSON-compatible structure without going through a JSON
+	 * string round-trip. Builds the internal {@link DecomposeContext}, handles the object
+	 * pool, and returns a plain JavaScript value suitable for direct storage (e.g. a
+	 * Prisma `Json` column).
+	 *
+	 * This is the reverse of {@link recompose}.
+	 *
+	 * @param data The data to decompose.
+	 * @param contextData Additional context data for the decomposition process.
+	 * @returns The decomposed JSON-compatible structure.
+	 */
+	decompose<T>(data: T, ...contextData: ContextArg<ContextData>): JSONValue {
+		const context: DecomposeContext<ContextData> = contextFactory({
+			errorType: DecomposeError,
+			data: contextData[0] as ContextData,
+			decomposeChild: (pathComponent: string, child: any) =>
+				context.withPath(pathComponent, () => this._decompose(child, context)),
+			getObjectId: (obj) => this.getObjectId(obj, context.data, objectPool),
+			requireObjectId: (obj) => this.requireObjectId(obj, context.data, objectPool),
+			getTypeBrand: this.typeBranding
+		});
+		const objectPool = new ObjectPool(
+			this.typeBranding,
+			(obj: any, typeBrand: string, key: string) =>
+				context.withPath(`@ref(${typeBrand}-${key})`, () => this._decompose(obj, context, true))
+		);
+		const decomposedData = this._decompose(data, context);
+		objectPool.insertInto(decomposedData);
+		return decomposedData ?? null;
+	}
+
+	/**
+	 * Recomposes a JSON-compatible structure back into its original form without going
+	 * through a JSON string round-trip. Builds the internal {@link RecomposeContext},
+	 * resolves the object pool, and returns the restored object graph.
+	 *
+	 * This is the reverse of {@link decompose}.
+	 *
+	 * @param data The JSON-compatible structure to recompose.
+	 * @param contextData Additional context data for the recomposition process.
+	 * @returns The recomposed original data structure.
+	 */
+	recompose<T>(data: JSONValue, ...contextData: ContextArg<ContextData>): T {
 		const resolvedRefs = new Map<string, any>();
 		const context: RecomposeContext<ContextData> = contextFactory({
 			errorType: RecomposeError,
 			data: contextData[0] as ContextData,
-			recomposeChild: (pathComponent: string, data: JSONValue, target?: object) =>
-				context.withPath(pathComponent, () => this.recompose(data, context, target)),
+			recomposeChild: (pathComponent: string, child: JSONValue, target?: object) =>
+				context.withPath(pathComponent, () => this._recompose(child, context, target)),
 			resolveReference: (type, key) =>
-				this.resolveReference(type, key, context, parsedData[OBJECT_POOL_FIELD], resolvedRefs),
+				this.resolveReference(
+					type,
+					key,
+					context,
+					typeof data === 'object' && data !== null && !Array.isArray(data)
+						? data[OBJECT_POOL_FIELD]
+						: undefined,
+					resolvedRefs
+				),
 			requireTypeForBrand: (brand) => this.requireTypeForBrand(brand, context)
 		});
-		return this.recompose(parsedData, context) as T;
+		return this._recompose(data, context) as T;
 	}
 
 	/**
-	 * Decomposes an object to a JSON-compatible structure by recursively decomposing its
-	 * properties using registered object mappers.
-	 *
-	 * This is the reverse of the {@link recompose} method and should be used to prepare
-	 * data for serialisation.
-	 *
-	 * @param data The data to decompose.
-	 * @returns The decomposed JSON-compatible structure.
+	 * Internal decomposition — takes a pre-built {@link DecomposeContext} so that
+	 * recursive calls share the same context and object pool.
 	 */
-	private decompose<T>(data: T, context: DecomposeContext<ContextData>, inline = false): JSONValue {
+	private _decompose<T>(
+		data: T,
+		context: DecomposeContext<ContextData>,
+		inline = false
+	): JSONValue {
 		if (typeof data === 'object' && data !== null) {
 			if (Array.isArray(data)) {
 				return data.map((item, index) => context.decomposeChild(index.toString(), item));
@@ -430,16 +468,10 @@ export class Serialisation<ContextData = undefined> {
 	}
 
 	/**
-	 * Recomposes a JSON-compatible structure back into its original form by recursively
-	 * recomposing its properties using registered object mappers.
-	 *
-	 * This is the reverse of the {@link decompose} method and should be used to restore
-	 * the original data structure.
-	 *
-	 * @param data The JSON-compatible structure to recompose.
-	 * @returns The recomposed original data structure.
+	 * Internal recomposition — takes a pre-built {@link RecomposeContext} so that
+	 * recursive calls share the same context and resolved reference cache.
 	 */
-	private recompose<T>(
+	private _recompose<T>(
 		data: JSONValue,
 		context: RecomposeContext<ContextData>,
 		target?: object
@@ -449,7 +481,7 @@ export class Serialisation<ContextData = undefined> {
 		}
 		if (typeof data === 'object') {
 			if (Array.isArray(data)) {
-				return data.map((item) => this.recompose(item, context)) as unknown as T;
+				return data.map((item) => this._recompose(item, context)) as unknown as T;
 			} else if (TYPE_BRAND_FIELD in data) {
 				const id = data[REF_FIELD];
 
@@ -474,7 +506,7 @@ export class Serialisation<ContextData = undefined> {
 				return objectMapper.recompose(data as JSONObject, context, target as T);
 			} else {
 				return mapToRecord(data as JSONObject, {
-					mapValues: (value) => this.recompose(value, context)
+					mapValues: (value) => this._recompose(value, context)
 				}) as unknown as T;
 			}
 		}

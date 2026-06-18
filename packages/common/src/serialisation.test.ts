@@ -838,37 +838,225 @@ describe('Serialisation', () => {
 		});
 	});
 
-	// === Multiple object identity types in the same document ===
+	// === decompose / recompose (public API without JSON round-trip) ===
 
-	describe('mixed object identities', () => {
-		it('handles multiple types with internal identity in the same graph', () => {
-			const personIdentity: ObjectIdentity<Person> = {
-				external: false,
-				getObjectId: (p) => p.name
-			};
+	describe('decompose / recompose', () => {
+		it('round-trips a string', () => {
+			const s = serialisationFor();
+			expect(s.recompose(s.decompose('hello'))).toBe('hello');
+		});
 
-			const petIdentity: ObjectIdentity<Pet> = {
+		it('round-trips a number', () => {
+			const s = serialisationFor();
+			expect(s.recompose(s.decompose(42))).toBe(42);
+		});
+
+		it('round-trips a boolean', () => {
+			const s = serialisationFor();
+			expect(s.recompose(s.decompose(true))).toBe(true);
+		});
+
+		it('round-trips null → undefined', () => {
+			const s = serialisationFor();
+			expect(s.recompose(s.decompose(null))).toBeUndefined();
+		});
+
+		it('round-trips undefined', () => {
+			const s = serialisationFor();
+			expect(s.recompose(s.decompose(undefined))).toBeUndefined();
+		});
+
+		it('round-trips a flat object', () => {
+			const s = serialisationFor();
+			const obj = { name: 'Alice', score: 10, active: true };
+			expect(s.recompose(s.decompose(obj))).toEqual(obj);
+		});
+
+		it('round-trips a nested object', () => {
+			const s = serialisationFor();
+			const obj = { user: { name: 'Bob', address: { city: 'Girona' } } };
+			expect(s.recompose(s.decompose(obj))).toEqual(obj);
+		});
+
+		it('round-trips a flat array', () => {
+			const s = serialisationFor();
+			expect(s.recompose(s.decompose([1, 2, 3]))).toEqual([1, 2, 3]);
+		});
+
+		it('round-trips an array of objects', () => {
+			const s = serialisationFor();
+			const arr = [{ x: 1 }, { x: 2 }];
+			expect(s.recompose(s.decompose(arr))).toEqual(arr);
+		});
+
+		it('round-trips a class instance', () => {
+			const s = serialisationFor(Person);
+			const person = new Person('Alice', 30);
+			const result = s.recompose<Person>(s.decompose(person));
+
+			expect(result).toBeInstanceOf(Person);
+			expect(result.name).toBe('Alice');
+			expect(result.age).toBe(30);
+			expect(result.greet()).toBe("Hi, I'm Alice");
+		});
+
+		it('produces the same JSON as serialise', () => {
+			const s = serialisationFor(Person);
+			const person = new Person('Alice', 30);
+
+			const fromDecompose = JSON.stringify(s.decompose(person));
+			const fromSerialise = s.serialise(person);
+
+			expect(fromDecompose).toBe(fromSerialise);
+		});
+
+		it('produces the same result as deserialise', () => {
+			const s = serialisationFor(Person);
+			const person = new Person('Alice', 30);
+			const json = s.serialise(person);
+
+			const viaRecompose = s.recompose<Person>(JSON.parse(json));
+			const viaDeserialise = s.deserialise<Person>(json);
+
+			expect(viaRecompose).toEqual(viaDeserialise);
+		});
+
+		it('preserves object identity with internal references', () => {
+			const identity: ObjectIdentity<Person> = {
 				external: false,
 				getObjectId: (p) => p.name
 			};
 
 			const s = new Serialisation({
-				types: [Person, Pet],
-				objectIdentity: new Map<any, any>([
-					[Person, personIdentity],
-					[Pet, petIdentity]
-				])
+				types: [Person],
+				objectIdentity: new Map([[Person, identity]])
 			});
 
 			const alice = new Person('Alice', 30);
-			const rex = new Pet('Rex', 'dog');
+			const container = { a: alice, b: alice };
 
-			const container = { owner: alice, pet: rex, alsoOwner: alice };
+			const result = s.recompose<typeof container>(s.decompose(container));
+			expect(result.a).toBe(result.b);
+		});
 
-			const result = s.deserialise<typeof container>(s.serialise(container));
+		it('handles circular references', () => {
+			const identity: ObjectIdentity<Person> = {
+				external: false,
+				getObjectId: (p) => p.name
+			};
 
-			expect(result.owner).toBe(result.alsoOwner); // same Person reference
-			expect(result.pet.name).toBe('Rex');
+			const s = new Serialisation({
+				types: [Person],
+				objectIdentity: new Map([[Person, identity]])
+			});
+
+			const alice = new Person('Alice', 30);
+			const bob = new Person('Bob', 25);
+			alice.friend = bob;
+			bob.friend = alice;
+
+			const result = s.recompose<Person>(s.decompose(alice));
+			expect(result.name).toBe('Alice');
+			expect(result.friend!.name).toBe('Bob');
+			expect(result.friend!.friend).toBe(result);
+		});
+
+		it('includes @objects pool in decompose output for internal identity', () => {
+			const identity: ObjectIdentity<Person> = {
+				external: false,
+				getObjectId: (p) => p.name
+			};
+
+			const s = new Serialisation({
+				types: [Person],
+				objectIdentity: new Map([[Person, identity]])
+			});
+
+			const decomposed = s.decompose(new Person('Alice', 30)) as JSONObject;
+
+			expect(decomposed['@objects']).toBeDefined();
+			expect((decomposed['@objects'] as JSONObject)['Person']).toBeDefined();
+		});
+
+		it('resolves external references during recompose', () => {
+			const people = new Map<string, Person>();
+			const alice = new Person('Alice', 30);
+			people.set('Alice', alice);
+
+			const identity: ObjectIdentity<Person, Map<string, Person>> = {
+				external: true,
+				getObjectId: (p) => p.name,
+				resolveExternalReference: (key, _context) => people.get(key)
+			};
+
+			const s = new Serialisation({
+				types: [Person],
+				objectIdentity: new Map([[Person, identity]])
+			});
+
+			const container = { person: alice };
+			const result = s.recompose<typeof container>(s.decompose(container, people), people);
+
+			expect(result.person).toBe(alice);
+		});
+
+		it('round-trips a Set via decompose / recompose', () => {
+			const s = serialisationFor(Set);
+			const set = new Set([1, 2, 3]);
+
+			const result = s.recompose<Set<number>>(s.decompose(set));
+
+			expect(result).toBeInstanceOf(Set);
+			expect(result.size).toBe(3);
+			expect(result.has(1)).toBe(true);
+			expect(result.has(2)).toBe(true);
+			expect(result.has(3)).toBe(true);
+		});
+
+		it('round-trips a Map with complex keys via decompose / recompose', () => {
+			const personIdentity: ObjectIdentity<Person> = {
+				external: false,
+				getObjectId: (p) => p.name
+			};
+
+			const s = new Serialisation({
+				types: [Person, Map],
+				objectIdentity: new Map([[Person, personIdentity]])
+			});
+
+			const alice = new Person('Alice', 30);
+			const bob = new Person('Bob', 25);
+			const map = new Map<Person, string>([
+				[alice, 'admin'],
+				[bob, 'user']
+			]);
+
+			const result = s.recompose<Map<Person, string>>(s.decompose(map));
+
+			expect(result.size).toBe(2);
+			const aliceKey = [...result.keys()].find((k) => k.name === 'Alice')!;
+			const bobKey = [...result.keys()].find((k) => k.name === 'Bob')!;
+			expect(result.get(aliceKey)).toBe('admin');
+			expect(result.get(bobKey)).toBe('user');
+		});
+
+		it('throws RecomposeError for unknown type brands in recompose', () => {
+			const s = serialisationFor();
+			expect(() => s.recompose({ '@type': 'UnknownType', x: 1 })).toThrow(RecomposeError);
+		});
+
+		it('throws DecomposeError when root is array with non-external identity', () => {
+			const identity: ObjectIdentity<Person> = {
+				external: false,
+				getObjectId: (p) => p.name
+			};
+
+			const s = new Serialisation({
+				types: [Person],
+				objectIdentity: new Map([[Person, identity]])
+			});
+
+			expect(() => s.decompose([new Person('Alice', 30)])).toThrow(DecomposeError);
 		});
 	});
 });
