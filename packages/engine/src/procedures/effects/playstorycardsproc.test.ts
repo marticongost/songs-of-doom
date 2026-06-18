@@ -154,7 +154,7 @@ describe('playStoryCardsEffectProc', () => {
 
 			// The attachment should be a MutableCardState with the story's id and entity
 			const attachment = capturedAttachment as MutableCardState;
-			expect(attachment.id).toBe('stry1');
+			expect(attachment.id).toBe('sto-stry1');
 			expect(attachment.card).toBe(story);
 		});
 	});
@@ -179,7 +179,7 @@ describe('playStoryCardsEffectProc', () => {
 
 			const params = emitStep.parameters(state);
 
-			expect(params.eventContext).toEqual({ subjectId: 'stry1' as CardId });
+			expect(params.eventContext).toEqual({ subjectId: 'sto-stry1' as CardId });
 		});
 
 		it('calls the EmitEvent procedure', () => {

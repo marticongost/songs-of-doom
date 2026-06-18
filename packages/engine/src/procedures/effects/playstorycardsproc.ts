@@ -2,7 +2,7 @@ import type { PlayStoryCardsEffect, Story } from '@songsofdoom/game';
 import { instructions } from '../../core/instructions';
 import { ProcedureId } from '../../core/procedureid';
 import { ReadonlyCardState } from '../../state/cardstate';
-import type { CardId } from '../../state/identifiers';
+import type { StoryId } from '../../state/identifiers';
 import type { EffectProcedureState } from '../core/triggereffect';
 
 export interface PlayStoryCardsEffectState extends EffectProcedureState<PlayStoryCardsEffect> {
@@ -26,14 +26,14 @@ export const playStoryCardsEffectProc = define({
 					game.scenario.addAttachment(
 						game,
 						new ReadonlyCardState({
-							id: state.currentCard!.id as CardId,
+							id: ('sto-' + state.currentCard!.id) as StoryId,
 							card: state.currentCard!
 						}).mutable()
 					);
 				}),
 				emit: emitEvent({
 					eventType: 'storyPlayed',
-					eventContext: (state) => ({ subjectId: state.currentCard!.id as CardId })
+					eventContext: (state) => ({ subjectId: ('sto-' + state.currentCard!.id) as StoryId })
 				})
 			}
 		})
