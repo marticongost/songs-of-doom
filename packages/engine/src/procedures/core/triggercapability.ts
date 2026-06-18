@@ -58,7 +58,7 @@ export const triggerCapability = define({
 					});
 
 					const card = gameState.requireCard(cardId);
-					if (card.container.type === 'hand') {
+					if (card.container?.type === 'hand') {
 						card.moveToStage(gameState, card.container.playerId);
 					}
 				})
