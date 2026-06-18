@@ -19,10 +19,7 @@
 
 	const styles = css.styles({
 		gameLog: {
-			...css.column('sm'),
-			maxHeight: '20em',
-			overflowY: 'auto',
-			padding: css.spacing.xs
+			...css.column('sm')
 		},
 		entry: {
 			...css.row('xs')
