@@ -21,7 +21,7 @@ export { ProcedureDefinition } from './core/procedure';
 export type { ProcedureState, ProcedureStatus } from './core/procedure';
 export { ProcedureId } from './core/procedureid';
 export { procedureDefinitions } from './core/procedureregistry';
-export { CallStep, ComputeStep, DispatchStep, ForEachStep, InputStep } from './core/steps';
+export { CallStep, ComputeStep, DispatchStep, ForEachStep, InputStep, Step } from './core/steps';
 export type {
 	CallStepProps,
 	ComputeStepProps,

@@ -5,6 +5,7 @@ import type {
 import {
 	createEngineSerialisationContext,
 	deserialiseJournalEntryFromParts,
+	DispatchStep,
 	Engine,
 	engineSerialisation,
 	type EngineSerialisationContext,
@@ -358,6 +359,18 @@ export class GameManager {
 		if (initialEntries.length > 0) {
 			this.broadcast(gameId, { type: 'state', newEntries: initialEntries });
 		}
+
+		if (this.isAwaitingInput(engine)) {
+			const { awaitingPlayerId, fields } = this.extractInputFields(engine);
+			if (awaitingPlayerId && fields) {
+				this.broadcast(gameId, {
+					type: 'input-required',
+					awaitingPlayerId,
+					fields
+				});
+			}
+		}
+
 		await this._broadcastMeta(gameId);
 	}
 
@@ -681,20 +694,14 @@ export class GameManager {
 
 	/**
 	 * Checks whether the engine is currently paused at an InputStep.
+	 *
+	 * The engine's {@code run()} returns false only when it hits an
+	 * InputStep (after resolving any DispatchStep chains internally).
+	 * If the current entry is ongoing, the engine is awaiting input.
 	 */
 	private isAwaitingInput(engine: Engine): boolean {
 		const entry = engine.currentEntry;
-		if (!entry || entry.state.status !== 'ongoing') return false;
-
-		// Look up the step from the procedure definition.
-		// If the engine stopped (run() returned false), the current step
-		// is an InputStep (possibly wrapped in DispatchStep chains).
-		const proc = procedureDefinitions[entry.procedureId];
-		if (!proc) return false;
-
-		const step = proc.steps[entry.state.step!];
-		// Direct InputStep — DispatchStep chains are resolved in extractInputFields.
-		return step instanceof InputStep;
+		return entry !== undefined && entry.state.status === 'ongoing';
 	}
 
 	/**
@@ -710,11 +717,14 @@ export class GameManager {
 		const proc = procedureDefinitions[entry.procedureId];
 		if (!proc) return { awaitingPlayerId: null, fields: null };
 
-		const step = proc.steps[entry.state.step!];
+		let step = proc.steps[entry.state.step!];
 		if (!step) return { awaitingPlayerId: null, fields: null };
 
-		// TODO: Handle DispatchStep chains that resolve to InputStep.
-		// For now, only handle direct InputStep references.
+		// Resolve DispatchStep chains to find the concrete InputStep.
+		while (step instanceof DispatchStep) {
+			step = step.factory(entry.state);
+		}
+
 		if (step instanceof InputStep) {
 			const fields = step.getFields(entry.state as Parameters<typeof step.getFields>[0]);
 			return {

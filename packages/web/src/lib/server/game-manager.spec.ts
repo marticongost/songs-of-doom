@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
 	BooleanField,
+	DispatchStep,
 	InputStep,
 	ProcedureId,
 	procedureDefinitions,
@@ -181,6 +182,158 @@ describe('GameManager', () => {
 	});
 
 	// -------------------------------------------------------------------
+	// startGame
+	// -------------------------------------------------------------------
+
+	describe('startGame', () => {
+		function setupStartGameMocks(opts: { pausedEntry?: JournalEntry; runReturn?: boolean } = {}) {
+			const pausedEntry =
+				opts.pausedEntry ?? makeEntry(ProcedureId.Unimplemented, 'ask', 'ongoing');
+			const fakeEngine = makeFakeEngine({
+				currentEntry: pausedEntry,
+				runReturn: opts.runReturn ?? false
+			});
+			// Give the engine a journal with the paused entry so
+			// persistJournal / broadcast have entries to work with.
+			Object.defineProperty(fakeEngine, 'journal', {
+				value: [pausedEntry],
+				writable: true,
+				configurable: true
+			});
+
+			mockEngineCreate.mockReturnValue(fakeEngine);
+			mockEntities.get.mockReturnValue({ type: { id: 'campaign' } });
+			mockIsCampaign.mockReturnValue(true);
+			mockPrisma.game.findUnique.mockResolvedValue({
+				id: 'game-1',
+				campaignId: 'SoHH',
+				status: 'PREPARATION',
+				participants: [
+					{
+						character: {
+							revisions: [{ state: {} }]
+						}
+					}
+				]
+			});
+			mockPrisma.game.update.mockResolvedValue({});
+			mockPrisma.journalEntry.createMany.mockResolvedValue({});
+
+			return { fakeEngine, pausedEntry };
+		}
+
+		it('sets game status to ACTIVE and broadcasts state + meta', async () => {
+			expect.assertions(4);
+			setupStartGameMocks();
+
+			const sub: SSESubscriber = {
+				sendState: vi.fn(),
+				sendInputRequired: vi.fn(),
+				sendMeta: vi.fn(),
+				close: vi.fn()
+			};
+			manager.subscribe('game-1', sub);
+
+			await manager.startGame('game-1');
+
+			expect(mockPrisma.game.update).toHaveBeenCalledWith({
+				where: { id: 'game-1' },
+				data: { status: 'ACTIVE' }
+			});
+			expect(sub.sendState).toHaveBeenCalledWith(
+				expect.arrayContaining([
+					expect.objectContaining({ procedureId: ProcedureId.Unimplemented })
+				])
+			);
+			expect(sub.sendMeta).toHaveBeenCalled();
+			// No input-required because the step isn't registered on Unimplemented
+			expect(sub.sendInputRequired).not.toHaveBeenCalled();
+
+			manager.unsubscribe('game-1', sub);
+		});
+
+		it('broadcasts input-required when engine pauses at an InputStep', async () => {
+			expect.assertions(1);
+
+			// Register a mock InputStep on the Unimplemented procedure.
+			const proc = procedureDefinitions[ProcedureId.Unimplemented];
+			const mockStep = new InputStep({
+				fields: [new BooleanField({ name: 'confirm' })],
+				playerId: 'plr1'
+			});
+			(proc.steps as Record<string, unknown>)['ask'] = mockStep;
+			setupStartGameMocks();
+
+			const sub: SSESubscriber = {
+				sendState: vi.fn(),
+				sendInputRequired: vi.fn(),
+				sendMeta: vi.fn(),
+				close: vi.fn()
+			};
+			manager.subscribe('game-1', sub);
+
+			try {
+				await manager.startGame('game-1');
+				expect(sub.sendInputRequired).toHaveBeenCalledWith('plr1', expect.any(Array));
+			} finally {
+				delete (proc.steps as Record<string, unknown>)['ask'];
+				manager.unsubscribe('game-1', sub);
+			}
+		});
+
+		it('broadcasts input-required when engine pauses at a DispatchStep wrapping an InputStep', async () => {
+			expect.assertions(1);
+
+			// Register a DispatchStep on the Unimplemented procedure that resolves to an InputStep.
+			const proc = procedureDefinitions[ProcedureId.Unimplemented];
+			const mockStep = new DispatchStep({
+				factory: () =>
+					new InputStep({
+						fields: [new BooleanField({ name: 'confirm' })],
+						playerId: 'plr2'
+					})
+			});
+			(proc.steps as Record<string, unknown>)['ask'] = mockStep;
+			setupStartGameMocks();
+
+			const sub: SSESubscriber = {
+				sendState: vi.fn(),
+				sendInputRequired: vi.fn(),
+				sendMeta: vi.fn(),
+				close: vi.fn()
+			};
+			manager.subscribe('game-1', sub);
+
+			try {
+				await manager.startGame('game-1');
+				expect(sub.sendInputRequired).toHaveBeenCalledWith('plr2', expect.any(Array));
+			} finally {
+				delete (proc.steps as Record<string, unknown>)['ask'];
+				manager.unsubscribe('game-1', sub);
+			}
+		});
+
+		it('does not broadcast input-required when engine finishes immediately', async () => {
+			expect.assertions(1);
+			const pausedEntry = makeEntry(ProcedureId.Unimplemented, 'done', 'complete');
+			setupStartGameMocks({ pausedEntry, runReturn: true });
+
+			const sub: SSESubscriber = {
+				sendState: vi.fn(),
+				sendInputRequired: vi.fn(),
+				sendMeta: vi.fn(),
+				close: vi.fn()
+			};
+			manager.subscribe('game-1', sub);
+
+			await manager.startGame('game-1');
+
+			expect(sub.sendInputRequired).not.toHaveBeenCalled();
+			manager.unsubscribe('game-1', sub);
+		});
+	});
+
+	// -------------------------------------------------------------------
 	// getEngine
 	// -------------------------------------------------------------------
 
@@ -275,7 +428,7 @@ describe('GameManager', () => {
 			);
 		});
 
-		it('broadcasts input-required when engine pauses at an InputStep', async () => {
+		it('does not broadcast input-required when the engine is not awaiting input (ongoing but no field extraction)', async () => {
 			const pausedEntry = mock<JournalEntry>({
 				procedureId: ProcedureId.Unimplemented,
 				state: { step: 'ask', status: 'ongoing' as const, game: mock<ReadonlyGameState>() }
@@ -302,8 +455,8 @@ describe('GameManager', () => {
 
 			await manager.supplyInput('game-1', {});
 
-			// The Unimplemented procedure has no InputStep, so
-			// isAwaitingInput returns false — input-required is NOT broadcast.
+			// isAwaitingInput returns true (engine is paused), but extractInputFields
+			// returns null because 'ask' is not defined on the Unimplemented procedure.
 			expect(sub.sendInputRequired).not.toHaveBeenCalled();
 		});
 
@@ -346,13 +499,42 @@ describe('GameManager', () => {
 			expect(manager.getInputState('game-1')).toBeUndefined();
 		});
 
-		it('returns undefined when the engine is not awaiting input (ongoing, non-InputStep)', () => {
+		it('returns undefined when extractInputFields returns null for an ongoing entry', () => {
 			expect.assertions(1);
 			const entry = makeEntry(ProcedureId.Unimplemented, 'noop', 'ongoing');
 			const fakeEngine = makeFakeEngine({ journal: [entry], currentEntry: entry });
 			manager['engines'].set('game-1', fakeEngine);
 
 			expect(manager.getInputState('game-1')).toBeUndefined();
+		});
+
+		it('returns the input state when the engine is awaiting input (dispatch-wrapped InputStep)', () => {
+			expect.assertions(4);
+
+			// Register a DispatchStep that resolves to an InputStep.
+			const proc = procedureDefinitions[ProcedureId.Unimplemented];
+			const mockStep = new DispatchStep({
+				factory: () =>
+					new InputStep({
+						fields: [new BooleanField({ name: 'confirm' })],
+						playerId: 'plr1'
+					})
+			});
+			(proc.steps as Record<string, unknown>)['ask'] = mockStep;
+
+			const entry = makeEntry(ProcedureId.Unimplemented, 'ask', 'ongoing');
+			const fakeEngine = makeFakeEngine({ journal: [entry], currentEntry: entry });
+			manager['engines'].set('game-1', fakeEngine);
+
+			try {
+				const result = manager.getInputState('game-1');
+				expect(result).toBeDefined();
+				expect(result!.awaitingPlayerId).toBe('plr1');
+				expect(result!.fields).toHaveLength(1);
+				expect(result!.fields[0]).toBeInstanceOf(BooleanField);
+			} finally {
+				delete (proc.steps as Record<string, unknown>)['ask'];
+			}
 		});
 
 		it('returns the input state when the engine is awaiting input', () => {

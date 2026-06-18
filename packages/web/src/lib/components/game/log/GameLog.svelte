@@ -9,10 +9,13 @@
 	import * as css from '$lib/styles';
 	import {
 		ComputeStep,
+		DispatchStep,
 		ForEachStep,
+		InputStep,
 		ProcedureId,
 		procedureDefinitions,
-		type JournalEntry
+		type JournalEntry,
+		type Step
 	} from '@songsofdoom/engine';
 
 	const INDENT_PER_LEVEL = 1; // em
@@ -35,13 +38,15 @@
 		}
 	});
 
-	function isComputeStep(entry: JournalEntry): boolean {
-		// NarrationEffect is always visible — its sole purpose is to be shown.
-		if (entry.procedureId === ProcedureId.NarrationEffect) return false;
+	/**
+	 * Resolves the {@link Step} that produced the given journal entry, or
+	 * `undefined` when the procedure or step name cannot be found.
+	 */
+	function getStep(entry: JournalEntry): Step | undefined {
 		const procDef = procedureDefinitions[entry.procedureId];
-		if (!procDef) return false;
+		if (!procDef) return undefined;
 		const stepName = entry.state.step;
-		if (!stepName) return false;
+		if (!stepName) return undefined;
 
 		// If this entry is a ForEachStep loop-body step, look up its definition
 		// inside the parent ForEachStep's sub-steps.
@@ -51,31 +56,26 @@
 		const parentStep = loopParentStepId ? procDef.steps[loopParentStepId] : undefined;
 		const parentSteps = (parentStep as unknown as { steps?: Record<string, unknown> } | undefined)
 			?.steps;
-		const stepDef = parentSteps ? parentSteps[stepName] : procDef.steps[stepName];
+		let step = (parentSteps ? parentSteps[stepName] : procDef.steps[stepName]) as Step | undefined;
 
-		if (!stepDef) return false;
+		// Resolve DispatchStep chains to find the concrete step type.
+		// DispatchSteps are transparent wrappers — the real step (e.g. an
+		// InputStep) is determined at runtime by the factory.
+		while (step instanceof DispatchStep) {
+			step = step.factory(entry.state);
+		}
 
-		// EmitEvent's init step carries the event name for display — always show it,
-		// even though it is technically a ComputeStep (a plain function auto-wrapped).
-		// Without this, events with no reactions (chapterStart, turnStart) are invisible.
-		if (entry.procedureId === ProcedureId.EmitEvent && stepName === 'init') return false;
+		return step;
+	}
 
-		// ComputeSteps are internal mutations — always hidden.
-		if (stepDef instanceof ComputeStep) return true;
-
-		// ForEachSteps are structural iteration constructs — hidden.
-		if (stepDef instanceof ForEachStep) return true;
-
-		return false;
+	function isInputStep(entry: JournalEntry): boolean {
+		return getStep(entry) instanceof InputStep;
 	}
 
 	/**
 	 * Returns true for parent-procedure entries that serve only as structural
 	 * containers — their first step acts as a header, but subsequent steps
 	 * should not produce their own visible rows (children still render).
-	 *
-	 * Event-emission steps (e.g. RunScenario's "emit") are NOT structural
-	 * and remain visible.
 	 */
 	function isStructuralOnlyEntry(entry: JournalEntry): boolean {
 		const stepName = entry.state.step;
@@ -99,6 +99,40 @@
 		return false;
 	}
 
+	/**
+	 * Returns true when the journal entry should produce a visible row in the log.
+	 *
+	 * Hides ComputeSteps (internal mutations), ForEachSteps (iteration
+	 * constructs), structural-only parent entries (see
+	 * {@link isStructuralOnlyEntry}), and entries without a resolved step.
+	 *
+	 * EmitEvent's init step is an exception: although technically a ComputeStep
+	 * (a plain function auto-wrapped), it carries the event name for display.
+	 */
+	function shouldRenderEntry(entry: JournalEntry): boolean {
+		// NarrationEffect is always visible — its sole purpose is to be shown.
+		if (entry.procedureId === ProcedureId.NarrationEffect) return true;
+
+		if (!entry.state.step) return false;
+
+		const step = getStep(entry);
+		if (!step) return false;
+
+		// EmitEvent's init step carries the event name for display — always show it.
+		if (entry.procedureId === ProcedureId.EmitEvent && entry.state.step === 'init') return true;
+
+		// ForEachSteps are structural iteration constructs — hidden.
+		if (step instanceof ForEachStep) return false;
+
+		// ComputeSteps are internal mutations — hidden.
+		if (step instanceof ComputeStep) return false;
+
+		// Structural-only parent entries — hidden (children still render).
+		if (isStructuralOnlyEntry(entry)) return false;
+
+		return true;
+	}
+
 	function computeDepths(journal: readonly JournalEntry[]): number[] {
 		const depths: number[] = [];
 		for (let i = 0; i < journal.length; i++) {
@@ -114,6 +148,7 @@
 	}
 
 	function getJournalEntryIcon(entry: JournalEntry): string {
+		if (isInputStep(entry)) return 'log/input.svg';
 		const procId = entry.procedureId;
 		if (procId === ProcedureId.EmitEvent) return 'log/event.svg';
 		if (procId === ProcedureId.NarrationEffect) return 'log/narration.svg';
@@ -237,7 +272,7 @@
 		</p>
 	{:else}
 		{#each visibleJournal as entry, i (i)}
-			{#if !isComputeStep(entry) && !isStructuralOnlyEntry(entry) && entry.state.step !== undefined}
+			{#if shouldRenderEntry(entry)}
 				{@const procId = entry.procedureId}
 				<div class={styles.entry} style="margin-left: {depths[i] * INDENT_PER_LEVEL}em">
 					<button
