@@ -224,6 +224,70 @@ describe('GameState.getCard', () => {
 		const state = makeGameState([mock<ReadonlyPlayerState>()], [location]);
 		expect(state.getCard('loc9')).toBe(location);
 	});
+
+	it('finds a card attached to a location via location.getCard', () => {
+		const attached = mock<ReadonlyCardState>();
+		const location = mock<ReadonlyLocationState>({
+			id: 'loc1',
+			getCard: (id) => (id === 'trt1' ? attached : undefined)
+		});
+		const state = makeGameState([mock<ReadonlyPlayerState>()], [location]);
+		expect(state.getCard('trt1')).toBe(attached);
+	});
+
+	it('returns a card found in the scenario', () => {
+		const scenarioCard = mock<ReadonlyCardState>();
+		const scenario = mock<ReadonlyCardState>({
+			getCard: (id) => (id === 'trt1' ? scenarioCard : undefined)
+		});
+		const state = new ReadonlyGameState({
+			players: [mock<ReadonlyPlayerState>()],
+			scenario
+		});
+		expect(state.getCard('trt1')).toBe(scenarioCard);
+	});
+
+	it('falls through to locations when scenario does not contain the card', () => {
+		const attached = mock<ReadonlyCardState>();
+		const scenario = mock<ReadonlyCardState>({
+			getCard: () => undefined
+		});
+		const location = mock<ReadonlyLocationState>({
+			id: 'loc1',
+			getCard: (id) => (id === 'trt1' ? attached : undefined)
+		});
+		const state = new ReadonlyGameState({
+			players: [mock<ReadonlyPlayerState>()],
+			locations: [location],
+			scenario
+		});
+		expect(state.getCard('trt1')).toBe(attached);
+	});
+
+	it('prefers a card in a location over one in a player', () => {
+		const locationCard = mock<ReadonlyCardState>();
+		const playerCard = mock<ReadonlyCardState>();
+		const location = mock<ReadonlyLocationState>({
+			id: 'loc1',
+			getCard: (id) => (id === 'trt1' ? locationCard : undefined)
+		});
+		const state = makeGameState(
+			[mock<ReadonlyPlayerState>({ getCard: (id) => (id === 'trt1' ? playerCard : undefined) })],
+			[location]
+		);
+		expect(state.getCard('trt1')).toBe(locationCard);
+	});
+
+	it('returns undefined when scenario exists but no entity matches', () => {
+		const scenario = mock<ReadonlyCardState>({
+			getCard: () => undefined
+		});
+		const state = new ReadonlyGameState({
+			players: [mock<ReadonlyPlayerState>()],
+			scenario
+		});
+		expect(state.getCard('trt99')).toBeUndefined();
+	});
 });
 
 // ─── GameState.requireCard ────────────────────────────────────────────────────

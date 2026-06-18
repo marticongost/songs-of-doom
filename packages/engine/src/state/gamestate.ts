@@ -175,8 +175,11 @@ export abstract class GameState<
 		if (isLocationId(cardId)) {
 			return this.locations.find((l) => l.id === cardId);
 		}
-		if (this.scenario && this.scenario.id === cardId) {
-			return this.scenario;
+		if (this.scenario) {
+			const found = this.scenario.getCard(cardId);
+			if (found) {
+				return found as TCard;
+			}
 		}
 		for (const location of this.locations) {
 			const found = location.getCard(cardId);
