@@ -22,7 +22,7 @@
 	}
 
 	const { state, ...attributes }: Props = $props();
-	const turn = $derived(state.game.turn);
+	const turn = $derived(state.game.turn + 1);
 </script>
 
 <div {...standardAttributes(attributes, styles.entry)}>

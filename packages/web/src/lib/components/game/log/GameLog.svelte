@@ -55,11 +55,46 @@
 
 		if (!stepDef) return false;
 
+		// EmitEvent's init step carries the event name for display — always show it,
+		// even though it is technically a ComputeStep (a plain function auto-wrapped).
+		// Without this, events with no reactions (chapterStart, turnStart) are invisible.
+		if (entry.procedureId === ProcedureId.EmitEvent && stepName === 'init') return false;
+
 		// ComputeSteps are internal mutations — always hidden.
 		if (stepDef instanceof ComputeStep) return true;
 
 		// ForEachSteps are structural iteration constructs — hidden.
 		if (stepDef instanceof ForEachStep) return true;
+
+		return false;
+	}
+
+	/**
+	 * Returns true for parent-procedure entries that serve only as structural
+	 * containers — their first step acts as a header, but subsequent steps
+	 * should not produce their own visible rows (children still render).
+	 *
+	 * Event-emission steps (e.g. RunScenario's "emit") are NOT structural
+	 * and remain visible.
+	 */
+	function isStructuralOnlyEntry(entry: JournalEntry): boolean {
+		const stepName = entry.state.step;
+		if (!stepName) return false;
+
+		// RunScenario: only the "init" step shows the scenario banner.
+		// "emit" and "beginPlay" are structural wrappers whose children
+		// (EmitEvent / Chapter) handle their own display.
+		if (entry.procedureId === ProcedureId.RunScenario && stepName !== 'init') return true;
+
+		// Chapter: only the "chapterStartPhase" step shows the chapter header.
+		if (entry.procedureId === ProcedureId.Chapter && stepName !== 'chapterStartPhase') return true;
+
+		// Turn: only the "turnStartPhase" step shows the turn header.
+		if (entry.procedureId === ProcedureId.Turn && stepName !== 'turnStartPhase') return true;
+
+		// EmitEvent: init shows the event name; invokeReaction is a structural
+		// call to TriggerCapability whose children handle the reaction display.
+		if (entry.procedureId === ProcedureId.EmitEvent && stepName === 'invokeReaction') return true;
 
 		return false;
 	}
@@ -202,7 +237,7 @@
 		</p>
 	{:else}
 		{#each visibleJournal as entry, i (i)}
-			{#if !isComputeStep(entry)}
+			{#if !isComputeStep(entry) && !isStructuralOnlyEntry(entry) && entry.state.step !== undefined}
 				{@const procId = entry.procedureId}
 				<div class={styles.entry} style="margin-left: {depths[i] * INDENT_PER_LEVEL}em">
 					<button

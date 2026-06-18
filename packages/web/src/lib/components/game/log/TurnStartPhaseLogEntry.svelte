@@ -21,10 +21,9 @@
 		state: TurnStartPhaseState;
 	}
 
-	const { state, ...attributes }: Props = $props();
-	const turn = $derived(state.game.turn);
+	const { state: _state, ...attributes }: Props = $props();
 </script>
 
 <div {...standardAttributes(attributes, styles.entry)}>
-	<Text ca="Inici del torn %(n)" es="Inicio del turno %(n)" en="Turn %(n) begins" n={turn} />
+	<Text ca="Inici del torn" es="Inicio del turno" en="Start of turn" />
 </div>

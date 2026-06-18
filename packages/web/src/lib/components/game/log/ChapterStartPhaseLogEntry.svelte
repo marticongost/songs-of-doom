@@ -21,15 +21,9 @@
 		state: ChapterStartState;
 	}
 
-	const { state, ...attributes }: Props = $props();
-	const chapter = $derived(state.game.chapter);
+	const { state: _state, ...attributes }: Props = $props();
 </script>
 
 <div {...standardAttributes(attributes, styles.entry)}>
-	<Text
-		ca="Inici del capítol %(n)"
-		es="Inicio del capítulo %(n)"
-		en="Chapter %(n) begins"
-		n={chapter}
-	/>
+	<Text ca="Inici del capítol" es="Inicio del capítulo" en="Start of chapter" />
 </div>

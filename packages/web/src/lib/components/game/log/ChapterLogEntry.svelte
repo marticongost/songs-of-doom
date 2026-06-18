@@ -22,7 +22,7 @@
 	}
 
 	const { state, ...attributes }: Props = $props();
-	const chapter = $derived(state.game.chapter);
+	const chapter = $derived(state.game.chapter + 1);
 </script>
 
 <div {...standardAttributes(attributes, styles.entry)}>
