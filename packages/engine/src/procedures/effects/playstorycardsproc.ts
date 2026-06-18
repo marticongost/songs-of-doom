@@ -30,7 +30,7 @@ export const playStoryCardsEffectProc = define({
 						throw new Error('No scenario in game state');
 					}
 					let storyStateId: StoryId;
-					game.mutate((mutableGame) => {
+					const modifiedGame = game.mutate((mutableGame) => {
 						const attachmentState = mutableGame.createCardState(
 							state.currentCard!
 						) as MutableCardState;
@@ -39,6 +39,7 @@ export const playStoryCardsEffectProc = define({
 					});
 					return {
 						...state,
+						game: modifiedGame,
 						currentCardId: storyStateId!
 					};
 				},

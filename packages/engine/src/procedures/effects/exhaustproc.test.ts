@@ -14,7 +14,11 @@ function makeState(effect: ExhaustEffect, game: ReadonlyGameState): ExhaustEffec
 	return { effect, game, status: 'ongoing' } as ExhaustEffectState;
 }
 
-function setupMutateGame(game: ReadonlyGameState, cards: Record<string, MutableCardState>): void {
+function setupMutateGame(
+	game: ReadonlyGameState,
+	cards: Record<string, MutableCardState>
+): ReadonlyGameState {
+	const mutatedGame = mock<ReadonlyGameState>();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	(game as any).mutate.mockImplementation((cb: (mutable: MutableGameState) => void) => {
 		const mutableGame = mock<MutableGameState>({
@@ -25,8 +29,9 @@ function setupMutateGame(game: ReadonlyGameState, cards: Record<string, MutableC
 			}
 		} as unknown as MutableGameState);
 		cb(mutableGame);
-		return game;
+		return mutatedGame;
 	});
+	return mutatedGame;
 }
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
@@ -107,7 +112,7 @@ describe('exhaustEffectProc', () => {
 			const effect = mock<ExhaustEffect>();
 			const game = mock<ReadonlyGameState>();
 
-			setupMutateGame(game, { card1, card2 });
+			const mutatedGame = setupMutateGame(game, { card1, card2 });
 
 			const state = makeState(effect, game);
 			state.targetIds = ['card1', 'card2'] as unknown as CardId[];
@@ -117,6 +122,7 @@ describe('exhaustEffectProc', () => {
 			expect(card1.exhausted).toBe(true);
 			expect(card2.exhausted).toBe(true);
 			expect(result!.exhaustedCardIds).toEqual(['card1', 'card2']);
+			expect(result!.game).toBe(mutatedGame);
 		});
 
 		it('skips cards that are already exhausted', () => {
@@ -125,7 +131,7 @@ describe('exhaustEffectProc', () => {
 			const effect = mock<ExhaustEffect>();
 			const game = mock<ReadonlyGameState>();
 
-			setupMutateGame(game, { card1, card2 });
+			const mutatedGame = setupMutateGame(game, { card1, card2 });
 
 			const state = makeState(effect, game);
 			state.targetIds = ['card1', 'card2'] as unknown as CardId[];
@@ -136,15 +142,17 @@ describe('exhaustEffectProc', () => {
 			expect(card1.exhausted).toBe(true);
 			// card2 was already exhausted → skipped, not in exhaustedCardIds
 			expect(result!.exhaustedCardIds).toEqual(['card1']);
+			expect(result!.game).toBe(mutatedGame);
 		});
 
 		it('handles empty targetIds gracefully', () => {
 			const effect = mock<ExhaustEffect>();
 			const game = mock<ReadonlyGameState>();
+			const mutatedGame = mock<ReadonlyGameState>();
 
 			game.mutate.mockImplementation((cb: (mutable: MutableGameState) => void) => {
 				cb(mock<MutableGameState>({} as unknown as MutableGameState));
-				return game;
+				return mutatedGame;
 			});
 
 			const state = makeState(effect, game);
@@ -153,6 +161,7 @@ describe('exhaustEffectProc', () => {
 			const result = exhaustStep.logic(state);
 
 			expect(result!.exhaustedCardIds).toEqual([]);
+			expect(result!.game).toBe(mutatedGame);
 		});
 	});
 });

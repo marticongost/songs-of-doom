@@ -26,7 +26,7 @@ export const exhaustEffectProc = define({
 		}, 'targetIds'),
 		exhaust(state) {
 			const exhaustedCardIds: CardId[] = [];
-			state.game.mutate((game) => {
+			const modifiedGame = state.game.mutate((game) => {
 				for (const cardId of state.targetIds ?? []) {
 					const card = game.requireCard(cardId);
 					if (card.exhausted) {
@@ -36,7 +36,7 @@ export const exhaustEffectProc = define({
 					exhaustedCardIds.push(card.id);
 				}
 			});
-			return { ...state, exhaustedCardIds };
+			return { ...state, game: modifiedGame, exhaustedCardIds };
 		}
 	}
 });
