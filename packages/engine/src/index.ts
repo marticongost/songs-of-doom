@@ -13,6 +13,8 @@ export {
 export type { FieldProps } from './core/input';
 export { instructions } from './core/instructions';
 export type { JournalEntry } from './core/journal';
+export { noopLogger } from './core/logger';
+export type { StepLogger, StepLogInfo } from './core/logger';
 
 // Serialisation
 export { ProcedureDefinition } from './core/procedure';
@@ -52,6 +54,7 @@ export type { ExhaustEffectState } from './procedures/effects/exhaustproc';
 export type { GatherCluesEffectState } from './procedures/effects/gathercluesproc';
 export type { HealEffectState } from './procedures/effects/healproc';
 export type { MoveEffectState } from './procedures/effects/moveproc';
+export type { NarrationEffectState } from './procedures/effects/narrationeffectproc';
 export type { PlayStoryCardsEffectState } from './procedures/effects/playstorycardsproc';
 export type { RunCampaignState } from './procedures/gamesequence/campaign/runcampaign';
 export type { ChapterState } from './procedures/gamesequence/chapters/chapter';

@@ -3,6 +3,7 @@ import { page } from '$app/state';
 import {
 	createEngineSerialisationContext,
 	engineSerialisation,
+	ProcedureId,
 	type EngineSerialisationContext,
 	type Field,
 	type JournalEntry
@@ -55,6 +56,8 @@ export class GameStore {
 
 	gameId = $state<string | null>(null);
 	journal = $state<JournalEntry[]>([]);
+	/** How many journal entries are currently visible to this client. */
+	presentedJournalLength = $state(0);
 	status = $state<GameStatus>('idle');
 	inputFields = $state<Field<unknown>[]>([]);
 	awaitingPlayerId = $state<string | null>(null);
@@ -75,7 +78,58 @@ export class GameStore {
 		return this.journal.length;
 	}
 
+	/** Journal entries visible to this client (up to the presentation cursor). */
+	get visibleJournal(): JournalEntry[] {
+		return this.journal.slice(0, this.presentedJournalLength);
+	}
+
+	/** Whether a narration entry is currently gating the journal display. */
+	get isNarrationGated(): boolean {
+		if (this.presentedJournalLength >= this.journal.length) return false;
+		if (this.presentedJournalLength === 0) return false;
+		const lastVisible = this.journal[this.presentedJournalLength - 1];
+		return lastVisible.procedureId === ProcedureId.NarrationEffect;
+	}
+
+	// -------------------------------------------------------------------
+	// Public API — Narration gating
+	// -------------------------------------------------------------------
+
+	/**
+	 * Acknowledge the current narration gate.
+	 *
+	 * Advances {@link presentedJournalLength} past all consecutive non-narration
+	 * journal entries until the next narration entry (which becomes the new
+	 * gate) or the end of the journal.
+	 *
+	 * Safe to call when there is no active narration gate (no-op).
+	 */
+	acknowledgeNarration(): void {
+		if (!this.isNarrationGated) return;
+		this._advancePresentation(this.presentedJournalLength);
+	}
+
 	// --- Private ---
+
+	/**
+	 * Advance {@link presentedJournalLength} from the given start index,
+	 * stopping when a narration entry becomes the last visible entry.
+	 */
+	private _advancePresentation(startIndex: number): void {
+		let cursor = startIndex;
+		while (cursor < this.journal.length) {
+			cursor++;
+			// Check if the entry we just revealed is a narration.
+			if (
+				cursor <= this.journal.length &&
+				this.journal[cursor - 1].procedureId === ProcedureId.NarrationEffect
+			) {
+				this.presentedJournalLength = cursor;
+				return; // Stop — narration becomes the gate.
+			}
+		}
+		this.presentedJournalLength = cursor;
+	}
 
 	/** Abort controller for the active SSE fetch, if any. */
 	private _abortController: AbortController | null = null;
@@ -111,6 +165,7 @@ export class GameStore {
 		this.status = 'connecting';
 		this.error = null;
 		this.journal = [];
+		this.presentedJournalLength = 0;
 
 		// Lazy-initialise the serialisation context (needs catalog data
 		// which is only available after the game package modules load).
@@ -423,6 +478,10 @@ export class GameStore {
 					const statePayload = payload as StateEventPayload;
 					if (statePayload.newEntries?.length) {
 						this.journal = [...this.journal, ...statePayload.newEntries];
+						// Auto-advance presentation cursor, stopping at narration gates.
+						if (!this.isNarrationGated) {
+							this._advancePresentation(this.presentedJournalLength);
+						}
 						// Transition from 'connecting' to whatever the engine says
 						if (this.status === 'connecting') {
 							this.status = this.inputFields.length > 0 ? 'awaiting_input' : 'complete';
@@ -482,6 +541,7 @@ export class GameStore {
 		this._abort();
 		this.gameId = null;
 		this.journal = [];
+		this.presentedJournalLength = 0;
 		this.status = 'idle';
 		this.inputFields = [];
 		this.awaitingPlayerId = null;

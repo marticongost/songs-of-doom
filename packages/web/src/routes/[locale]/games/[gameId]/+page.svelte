@@ -154,7 +154,11 @@
 	{:else if isActive}
 		<!-- ACTIVE / COMPLETE gameplay -->
 		<div class={styles.gameplay}>
-			<GameLog journal={store.journal} />
+			<GameLog
+				journal={store.journal}
+				maxVisible={store.presentedJournalLength}
+				onNarrationAcknowledge={() => store.acknowledgeNarration()}
+			/>
 		</div>
 	{/if}
 </div>

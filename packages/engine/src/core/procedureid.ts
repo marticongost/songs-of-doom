@@ -41,5 +41,6 @@ export enum ProcedureId {
 	GatherCluesEffect = 'GatherCluesEffect',
 	HealEffect = 'HealEffect',
 	MoveEffect = 'MoveEffect',
+	NarrationEffect = 'NarrationEffect',
 	PlayStoryCardsEffect = 'PlayStoryCardsEffect'
 }

@@ -9,6 +9,7 @@
 	import * as css from '$lib/styles';
 	import {
 		ComputeStep,
+		ForEachStep,
 		ProcedureId,
 		procedureDefinitions,
 		type JournalEntry
@@ -37,11 +38,32 @@
 	});
 
 	function isComputeStep(entry: JournalEntry): boolean {
+		// NarrationEffect is always visible — its sole purpose is to be shown.
+		if (entry.procedureId === ProcedureId.NarrationEffect) return false;
 		const procDef = procedureDefinitions[entry.procedureId];
 		if (!procDef) return false;
 		const stepName = entry.state.step;
 		if (!stepName) return false;
-		return procDef.steps[stepName] instanceof ComputeStep;
+
+		// If this entry is a ForEachStep loop-body step, look up its definition
+		// inside the parent ForEachStep's sub-steps.
+		const loopParentStepId = (entry as unknown as Record<string, unknown>)._loopParentStepId as
+			| string
+			| undefined;
+		const parentStep = loopParentStepId ? procDef.steps[loopParentStepId] : undefined;
+		const parentSteps = (parentStep as unknown as { steps?: Record<string, unknown> } | undefined)
+			?.steps;
+		const stepDef = parentSteps ? parentSteps[stepName] : procDef.steps[stepName];
+
+		if (!stepDef) return false;
+
+		// ComputeSteps are internal mutations — always hidden.
+		if (stepDef instanceof ComputeStep) return true;
+
+		// ForEachSteps are structural iteration constructs — hidden.
+		if (stepDef instanceof ForEachStep) return true;
+
+		return false;
 	}
 
 	function computeDepths(journal: readonly JournalEntry[]): number[] {
@@ -82,6 +104,7 @@
 		GatherCluesEffectState,
 		HealEffectState,
 		MoveEffectState,
+		NarrationEffectState,
 		PlayStoryCardsEffectState,
 		RunCampaignState,
 		RunScenarioState,
@@ -93,6 +116,7 @@
 		TurnState,
 		TurnsPhaseState
 	} from '@songsofdoom/engine';
+	import { Action, Obligation, Opportunity } from '@songsofdoom/game';
 	import { standardAttributes, type StandardAttributeProps } from '../../standardattributes';
 	import AttachEffectLogEntry from './AttachEffectLogEntry.svelte';
 	import ChapterEndPhaseLogEntry from './ChapterEndPhaseLogEntry.svelte';
@@ -114,6 +138,8 @@
 	import GenericLogEntry from './GenericLogEntry.svelte';
 	import HealEffectLogEntry from './HealEffectLogEntry.svelte';
 	import MoveEffectLogEntry from './MoveEffectLogEntry.svelte';
+	import NarrationEffectLogEntry from './NarrationEffectLogEntry.svelte';
+	import NarrationPopup from './NarrationPopup.svelte';
 	import PlayStoryCardsEffectLogEntry from './PlayStoryCardsEffectLogEntry.svelte';
 	import RunCampaignLogEntry from './RunCampaignLogEntry.svelte';
 	import RunScenarioLogEntry from './RunScenarioLogEntry.svelte';
@@ -127,24 +153,59 @@
 
 	interface Props extends StandardAttributeProps {
 		journal: readonly JournalEntry[];
+		/** How many journal entries are visible to this client. Defaults to all. */
+		maxVisible?: number;
+		/** Called when the player acknowledges a narration gate. */
+		onNarrationAcknowledge?: () => void;
 	}
 
-	const { journal, ...attributes }: Props = $props();
+	const {
+		journal,
+		maxVisible = journal.length,
+		onNarrationAcknowledge,
+		...attributes
+	}: Props = $props();
 	const depths = $derived(computeDepths(journal));
+
+	const visibleJournal = $derived(journal.slice(0, maxVisible));
+
+	/** Journal index of the narration entry whose popup is open, or null. */
+	let narrationPopupIndex = $state<number | null>(null);
+	const narrationPopupOpen = $derived(narrationPopupIndex !== null);
+
+	function openNarrationPopup(index: number): void {
+		narrationPopupIndex = index;
+	}
+
+	function closeNarrationPopup(): void {
+		narrationPopupIndex = null;
+		onNarrationAcknowledge?.();
+	}
 </script>
 
 <div {...standardAttributes(attributes, styles.gameLog)}>
-	{#if journal.length === 0}
+	{#if visibleJournal.length === 0}
 		<p class={styles.empty}>
 			<Text ca="Cap entrada al registre" es="Sin entradas en el registro" en="No log entries" />
 		</p>
 	{:else}
-		{#each journal as entry, i (i)}
+		{#each visibleJournal as entry, i (i)}
 			{#if !isComputeStep(entry)}
 				{@const procId = entry.procedureId}
 				<div class={styles.entry} style="margin-left: {depths[i] * INDENT_PER_LEVEL}em">
 					{#if procId === ProcedureId.EmitEvent}
 						<InlineSvg src="log/event.svg" class={styles.icon} />
+					{:else if procId === ProcedureId.NarrationEffect}
+						<InlineSvg src="log/narration.svg" class={styles.icon} />
+					{:else if procId === ProcedureId.TriggerCapability}
+						{@const capability = (entry.state as TriggerCapabilityState).capability}
+						{#if capability instanceof Opportunity}
+							<InlineSvg src="capabilities/opportunity.svg" class={styles.icon} />
+						{:else if capability instanceof Obligation}
+							<InlineSvg src="capabilities/obligation.svg" class={styles.icon} />
+						{:else if capability instanceof Action}
+							<InlineSvg src="capabilities/action.svg" class={styles.icon} />
+						{/if}
 					{:else}
 						<InlineSvg src="log/call.svg" class={styles.icon} />
 					{/if}
@@ -205,6 +266,11 @@
 						<HealEffectLogEntry state={entry.state as HealEffectState} />
 					{:else if procId === ProcedureId.MoveEffect}
 						<MoveEffectLogEntry state={entry.state as MoveEffectState} />
+					{:else if procId === ProcedureId.NarrationEffect}
+						<NarrationEffectLogEntry
+							state={entry.state as NarrationEffectState}
+							onclick={() => openNarrationPopup(i)}
+						/>
 					{:else if procId === ProcedureId.PlayStoryCardsEffect}
 						<PlayStoryCardsEffectLogEntry state={entry.state as PlayStoryCardsEffectState} />
 					{:else if procId === ProcedureId.TriggerCapability}
@@ -217,3 +283,7 @@
 		{/each}
 	{/if}
 </div>
+
+{#if narrationPopupOpen && narrationPopupIndex !== null}
+	<NarrationPopup {journal} initialIndex={narrationPopupIndex} onClose={closeNarrationPopup} />
+{/if}
