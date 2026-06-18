@@ -41,7 +41,14 @@ export default defineConfig({
 	// Exclude workspace packages from pre-bundling so Vite tracks them in the
 	// module graph and HMR works when their source files change.
 	optimizeDeps: {
-		exclude: ['@songsofdoom/game', '@songsofdoom/common']
+		exclude: ['@songsofdoom/engine', '@songsofdoom/game', '@songsofdoom/common']
+	},
+
+	// Process workspace packages through Vite's SSR transform pipeline so source
+	// maps are available for debugging. Without this, they are externalized and
+	// run as raw Node ESM — breakpoints won't stop.
+	ssr: {
+		noExternal: ['@songsofdoom/engine', '@songsofdoom/game', '@songsofdoom/common']
 	},
 
 	test: {

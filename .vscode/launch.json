@@ -3,10 +3,27 @@
 	"configurations": [
 		{
 			"type": "node-terminal",
-			"name": "Run npm dev",
+			"name": "Debug Server",
 			"request": "launch",
 			"command": "npm run dev",
 			"cwd": "${workspaceFolder}"
+		},
+		{
+			"type": "chrome",
+			"name": "Debug Client",
+			"request": "launch",
+			"url": "http://localhost:5173",
+			"webRoot": "${workspaceFolder}/packages/web",
+			"sourceMapPathOverrides": {
+				"/@fs${workspaceFolder}/packages/*": "${workspaceFolder}/packages/*",
+				"file://${workspaceFolder}/packages/*": "${workspaceFolder}/packages/*"
+			}
+		}
+	],
+	"compounds": [
+		{
+			"name": "Debug Full Stack",
+			"configurations": ["Debug Server", "Debug Client"]
 		}
 	]
 }
