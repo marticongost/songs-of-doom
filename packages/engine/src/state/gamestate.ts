@@ -10,7 +10,7 @@ import type {
 } from '@songsofdoom/game';
 import { Action, ActualCapabilityCost, focuses, Reaction, type FocusType } from '@songsofdoom/game';
 import { evaluateBoolean, evaluateScalar } from '../expressions';
-import type { CapabilityResolution, MutableCapabilityResolution } from './capabilityresolution';
+import { MutableCapabilityResolution, type CapabilityResolution } from './capabilityresolution';
 import type { CardOptions } from './cardcontainer';
 import type { CardState, MutableCardState, ReadonlyCardState } from './cardstate';
 import type { EntityState } from './entitystate';
@@ -729,8 +729,9 @@ export class MutableGameState extends GameState<
 			locations: this.locations.map((location) => location.readonly()),
 			encounterDeck: this.encounterDeck.map((c) => c.readonly()),
 			encounterDiscardPile: this.encounterDiscardPile.map((c) => c.readonly()),
-			// FIXME: Review the cloning of the stacks
-			capabilityResolutionStack: [...this.capabilityResolutionStack],
+			capabilityResolutionStack: this.capabilityResolutionStack.map((r) =>
+				r instanceof MutableCapabilityResolution ? r.readonly() : r
+			),
 			targetStack: [...this.targetStack],
 			subjectStack: [...this.subjectStack],
 			testResolutionStack: this.testResolutionStack.map((r) =>
