@@ -83,10 +83,11 @@ model GameParticipant {
 }
 
 model JournalEntry {
-  gameId String
-  index  Int
-  data   Json
-  game   Game   @relation(references: [id], fields: [gameId], onDelete: Cascade)
+  gameId    String
+  index     Int
+  data      Json
+  gamestate Json?
+  game      Game   @relation(references: [id], fields: [gameId], onDelete: Cascade)
 
   @@id([gameId, index])
   @@index([gameId])

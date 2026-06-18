@@ -5,6 +5,7 @@ import {
 	isConcreteSubclassOf,
 	ReadonlyCounter,
 	Serialisation,
+	type JSONValue,
 	type Type
 } from '@songsofdoom/common';
 import * as Game from '@songsofdoom/game';
@@ -18,6 +19,7 @@ import {
 	TargetField
 } from './core/input';
 import type { JournalEntry } from './core/journal';
+import type { ProcedureState } from './core/procedure';
 import { ReadonlyAttackResolution } from './state/attackresolution';
 import { ReadonlyCapabilityResolution } from './state/capabilityresolution';
 import { ReadonlyCardState } from './state/cardstate';
@@ -259,7 +261,7 @@ export function serialiseJournalEntry(
 	entry: JournalEntry,
 	context: EngineSerialisationContext
 ): object {
-	return JSON.parse(engineSerialisation.serialise(entry, context));
+	return engineSerialisation.decompose(entry, context) as object;
 }
 
 /**
@@ -270,5 +272,65 @@ export function deserialiseJournalEntry(
 	json: object,
 	context: EngineSerialisationContext
 ): JournalEntry {
-	return engineSerialisation.deserialise<JournalEntry>(JSON.stringify(json), context);
+	return engineSerialisation.recompose<JournalEntry>(json as JSONValue, context);
+}
+
+// ---------------------------------------------------------------------------
+// Split serialisation (data + gamestate columns)
+// ---------------------------------------------------------------------------
+
+/**
+ * Serialises a {@link JournalEntry} without the game state snapshot,
+ * returning a JSON-compatible object for the {@code data} database column.
+ *
+ * Use together with {@link serialiseGameState} and
+ * {@link deserialiseJournalEntryFromParts}.
+ */
+export function serialiseJournalEntryWithoutGame(
+	entry: JournalEntry,
+	context: EngineSerialisationContext
+): object {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const { game: _, ...stateWithoutGame } = entry.state;
+	const entryWithoutGame = { ...entry, state: stateWithoutGame };
+	return engineSerialisation.decompose(entryWithoutGame, context) as object;
+}
+
+/**
+ * Serialises only the game state snapshot from a {@link JournalEntry},
+ * returning a JSON-compatible object for the {@code gamestate} database column.
+ *
+ * Use together with {@link serialiseJournalEntryWithoutGame} and
+ * {@link deserialiseJournalEntryFromParts}.
+ */
+export function serialiseGameState(
+	game: ReadonlyGameState,
+	context: EngineSerialisationContext
+): object {
+	return engineSerialisation.decompose(game, context) as object;
+}
+
+/**
+ * Deserialises a {@link JournalEntry} from the split {@code data} and
+ * {@code gamestate} columns previously produced by
+ * {@link serialiseJournalEntryWithoutGame} and {@link serialiseGameState}.
+ *
+ * @param data - The serialised entry without its game state.
+ * @param gamestate - The serialised game state snapshot (must be non-null).
+ */
+export function deserialiseJournalEntryFromParts(
+	data: object,
+	gamestate: object,
+	context: EngineSerialisationContext
+): JournalEntry {
+	const entryWithoutGame = engineSerialisation.recompose<
+		Omit<JournalEntry, 'state'> & { state: Omit<ProcedureState, 'game'> }
+	>(data as JSONValue, context);
+
+	const game = engineSerialisation.recompose<ReadonlyGameState>(gamestate as JSONValue, context);
+
+	return {
+		...entryWithoutGame,
+		state: { ...entryWithoutGame.state, game }
+	} as JournalEntry;
 }

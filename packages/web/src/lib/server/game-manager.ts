@@ -4,7 +4,7 @@ import type {
 } from '@songsofdoom/engine';
 import {
 	createEngineSerialisationContext,
-	deserialiseJournalEntry,
+	deserialiseJournalEntryFromParts,
 	Engine,
 	engineSerialisation,
 	type EngineSerialisationContext,
@@ -15,7 +15,8 @@ import {
 	ProcedureId,
 	type ProcedureState,
 	ReadonlyGameState,
-	serialiseJournalEntry
+	serialiseGameState,
+	serialiseJournalEntryWithoutGame
 } from '@songsofdoom/engine';
 import { type CharacterState, entities, isCampaign } from '@songsofdoom/game';
 import { join } from 'node:path';
@@ -455,19 +456,32 @@ export class GameManager {
 	/**
 	 * Persists journal entries for a game to the database.
 	 *
+	 * Uses copy-on-write for the {@code gamestate} column: the game state
+	 * snapshot is only written when it changed from the previous entry
+	 * (detected via object-identity comparison).
+	 *
 	 * @param fromIndex - Only persist entries from this index onward.
-	 *   Defaults to the current persisted count.
+	 *   Defaults to 0.
 	 */
 	async persistJournal(gameId: string, engine: Engine, fromIndex?: number): Promise<void> {
 		const startIndex = fromIndex ?? 0;
 		const entries = engine.journal.slice(startIndex);
 		if (entries.length === 0) return;
 
-		const rows = entries.map((entry, i) => ({
-			gameId,
-			index: startIndex + i,
-			data: serialiseJournalEntry(entry, this.serialisationContext)
-		}));
+		const rows = entries.map((entry, i) => {
+			const actualIndex = startIndex + i;
+			const prevEntry = actualIndex > 0 ? engine.journal[actualIndex - 1] : undefined;
+			const gameStateChanged = !prevEntry || entry.state.game !== prevEntry.state.game;
+
+			return {
+				gameId,
+				index: actualIndex,
+				data: serialiseJournalEntryWithoutGame(entry, this.serialisationContext),
+				gamestate: gameStateChanged
+					? serialiseGameState(entry.state.game, this.serialisationContext)
+					: undefined
+			};
+		});
 
 		await prisma.journalEntry.createMany({ data: rows });
 	}
@@ -598,6 +612,9 @@ export class GameManager {
 
 	/**
 	 * Rebuilds an engine from the persisted journal.
+	 *
+	 * Reconstructs the full game state for each entry by tracking the last
+	 * non-null {@code gamestate} column (copy-on-write optimisation).
 	 */
 	private async loadEngine(gameId: string): Promise<Engine | undefined> {
 		const rows = await prisma.journalEntry.findMany({
@@ -607,9 +624,24 @@ export class GameManager {
 
 		if (rows.length === 0) return undefined;
 
-		const journal = rows.map((row) =>
-			deserialiseJournalEntry(row.data as object, this.serialisationContext)
-		);
+		let lastGameState: object | null = null;
+
+		const journal = rows.map((row) => {
+			const gamestate = (row.gamestate as object | null) ?? lastGameState;
+			if (!gamestate) {
+				throw new Error(
+					`Missing gamestate for journal entry ${row.index} of game "${gameId}". ` +
+						'The first entry must always carry a game state snapshot.'
+				);
+			}
+			lastGameState = gamestate;
+
+			return deserialiseJournalEntryFromParts(
+				row.data as object,
+				gamestate,
+				this.serialisationContext
+			);
+		});
 
 		const engine = Engine.restore(procedureDefinitions, journal);
 		this._setEngineLogger(gameId, engine);
@@ -731,16 +763,29 @@ export class GameManager {
 			},
 			orderBy: { index: 'asc' }
 		});
-		return rows.map((row) =>
-			engineSerialisation.deserialise<JournalEntry>(
-				JSON.stringify(row.data as object),
+
+		let lastGameState: object | null = null;
+
+		return rows.map((row) => {
+			const gamestate = (row.gamestate as object | null) ?? lastGameState;
+			if (!gamestate) {
+				throw new Error(
+					`Missing gamestate for journal entry ${row.index} of game "${gameId}". ` +
+						'The first entry must always carry a game state snapshot.'
+				);
+			}
+			lastGameState = gamestate;
+
+			return deserialiseJournalEntryFromParts(
+				row.data as object,
+				gamestate,
 				this.serialisationContext
-			)
-		);
+			);
+		});
 	}
 
 	private _serialiseGameState(game: ReadonlyGameStateType): object {
-		return JSON.parse(engineSerialisation.serialise(game, this.serialisationContext)) as object;
+		return engineSerialisation.decompose(game, this.serialisationContext) as object;
 	}
 
 	/**

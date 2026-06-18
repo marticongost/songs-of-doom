@@ -33,8 +33,11 @@ export type {
 export {
 	createEngineSerialisationContext,
 	deserialiseJournalEntry,
+	deserialiseJournalEntryFromParts,
 	engineSerialisation,
-	serialiseJournalEntry
+	serialiseGameState,
+	serialiseJournalEntry,
+	serialiseJournalEntryWithoutGame
 } from './serialisation';
 export type { EngineSerialisationContext } from './serialisation';
 

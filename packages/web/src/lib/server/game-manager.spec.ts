@@ -194,7 +194,7 @@ describe('GameManager', () => {
 			const fakeEngine = makeFakeEngine();
 			mockEngineRestore.mockReturnValue(fakeEngine);
 			mockPrisma.journalEntry.findMany.mockResolvedValue([
-				{ index: 0, data: { _serialised: true } }
+				{ index: 0, data: { _serialised: true }, gamestate: { players: [] } }
 			]);
 
 			const engine = await manager.getEngine('game-db');
