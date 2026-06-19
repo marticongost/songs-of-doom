@@ -210,8 +210,11 @@ describe('GameManager', () => {
 				status: 'PREPARATION',
 				participants: [
 					{
+						characterId: 1,
 						character: {
-							revisions: [{ state: {} }]
+							revisions: [
+								{ state: { upgrades: {}, skillsDeck: {}, gold: 0 }, finalised: true, totalXp: 0 }
+							]
 						}
 					}
 				]

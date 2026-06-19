@@ -1,4 +1,4 @@
-import type { CharacterState } from '@songsofdoom/game';
+import { CharacterState, type CharacterStateProps } from '@songsofdoom/game';
 import { mapToRecord } from '../../../../common/src/utils';
 
 /** The JSON specification for the `CharacterRevision.state` database field. */
@@ -16,3 +16,20 @@ export const characterStateToJson = (state: CharacterState): CharacterStateJson 
 	skillsDeck: mapToRecord(state.skillsDeck, { mapKeys: (skill) => skill.variantId }),
 	gold: state.gold
 });
+
+/**
+ * Reconstructs a {@link CharacterState} from a raw Prisma revision row.
+ *
+ * The `state` field is the JSON stored in `CharacterRevision.state`;
+ * `totalXp` is stored as a separate column.
+ */
+export const characterStateFromRevision = (revision: {
+	state: unknown;
+	totalXp: number;
+}): CharacterState => {
+	const state = revision.state as CharacterStateJson;
+	return new CharacterState({
+		...state,
+		totalXp: revision.totalXp
+	} as CharacterStateProps);
+};

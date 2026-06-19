@@ -19,8 +19,9 @@ import {
 	serialiseGameState,
 	serialiseJournalEntryWithoutGame
 } from '@songsofdoom/engine';
-import { type CharacterState, entities, isCampaign } from '@songsofdoom/game';
+import { entities, isCampaign } from '@songsofdoom/game';
 import { join } from 'node:path';
+import { characterStateFromRevision } from '../database/characterstate';
 import { prisma } from './db';
 import { ConflictError, ForbiddenError, NotFoundError } from './errors';
 import { FileStepLogger } from './step-logger';
@@ -324,7 +325,10 @@ export class GameManager {
 		// Build character states for the Setup procedure.
 		const characters = game.participants.map((p) => {
 			const latestRevision = p.character.revisions[0];
-			return (latestRevision?.state ?? {}) as unknown as CharacterState;
+			if (!latestRevision) {
+				throw new NotFoundError(`Character "${p.characterId}" has no saved state`);
+			}
+			return characterStateFromRevision(latestRevision);
 		});
 
 		// Minimal placeholder game state — the Setup procedure replaces it.
