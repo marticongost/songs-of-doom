@@ -122,7 +122,7 @@
 	const hasMoreNarrations = $derived(
 		store.journal
 			.slice(store.presentedJournalLength)
-			.some((e) => e.procedureId === ProcedureId.NarrationEffect)
+			.some((e) => e.procedureId === ProcedureId.NarrationEffect && e.state.step)
 	);
 
 	let characterOptions = $derived.by(() => {

@@ -111,7 +111,9 @@
 	 */
 	function shouldRenderEntry(entry: JournalEntry): boolean {
 		// NarrationEffect is always visible — its sole purpose is to be shown.
-		if (entry.procedureId === ProcedureId.NarrationEffect) return true;
+		// Only render the "record" step entry; the completion marker (which has
+		// no `step`) carries the same procedureId but is an internal marker.
+		if (entry.procedureId === ProcedureId.NarrationEffect) return !!entry.state.step;
 
 		if (!entry.state.step) return false;
 

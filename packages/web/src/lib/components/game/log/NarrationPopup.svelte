@@ -101,10 +101,10 @@
 
 	const locale = getLocale();
 
-	/** Indices (into journal) of all narration entries. */
+	/** Indices (into journal) of all narration entries (excluding completion markers). */
 	const narrationIndices = $derived(
 		journal.reduce<number[]>((acc, entry, i) => {
-			if (entry.procedureId === ProcedureId.NarrationEffect) {
+			if (entry.procedureId === ProcedureId.NarrationEffect && entry.state.step) {
 				acc.push(i);
 			}
 			return acc;
