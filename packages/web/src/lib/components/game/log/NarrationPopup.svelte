@@ -1,10 +1,11 @@
 <!--
 	@component Modal dialog for reading narration entries.
 
-	Opened when the player clicks a narration entry in the game log.
-	Displays the full narration text with Back/Next navigation between
-	all narration entries in the journal, and a Close button that
-	acknowledges the current narration gate.
+	When {@link hasMore} is true (unacknowledged narrations ahead), the
+	dialog shows only a single "Next" button and hides the Back/Next
+	navigation arrows.  When all pending narrations have been seen,
+	Back/Next arrows let the player re-read past entries, and "Close"
+	dismisses the dialog.
 -->
 <script lang="ts" module>
 	import * as css from '$lib/styles';
@@ -83,9 +84,20 @@
 		initialIndex: number;
 		/** Called when the player closes the dialog (acknowledges the gate). */
 		onClose: () => void;
+		/**
+		 * Whether there are more unacknowledged narration entries after the
+		 * current one.  When `true`, a "Next" button is shown instead of
+		 * "Close" so the player can advance through pending narrations.
+		 */
+		hasMore?: boolean;
+		/**
+		 * Called when the player clicks "Next" to acknowledge the current
+		 * narration and advance to the next unacknowledged one.
+		 */
+		onNext?: () => void;
 	}
 
-	const { journal, initialIndex, onClose }: Props = $props();
+	const { journal, initialIndex, onClose, hasMore = false, onNext }: Props = $props();
 
 	const locale = getLocale();
 
@@ -104,6 +116,14 @@
 
 	/** Current position within narrationIndices (0-based). */
 	let currentPosition = $state(initialPosition >= 0 ? initialPosition : 0);
+
+	// Keep currentPosition in sync when the page changes the initialIndex
+	// (e.g. after clicking "Next" to advance to a new narration gate).
+	$effect(() => {
+		if (initialPosition >= 0) {
+			currentPosition = initialPosition;
+		}
+	});
 
 	/** The journal index of the currently displayed narration. */
 	const currentIndex = $derived(narrationIndices[currentPosition] ?? initialIndex);
@@ -135,6 +155,14 @@
 		onClose();
 	}
 
+	function handleAdvance(): void {
+		if (hasMore && onNext) {
+			onNext();
+		} else {
+			close();
+		}
+	}
+
 	function goBack(): void {
 		if (!isFirst) currentPosition--;
 	}
@@ -162,19 +190,30 @@
 	</div>
 
 	<div class={styles.controls}>
-		<div class={styles.navGroup}>
-			<Button disabled={isFirst} onclick={goBack}>
-				<Text ca="← Enrere" es="← Anterior" en="← Back" />
-			</Button>
+		{#if hasMore && onNext}
+			<!-- Unacknowledged narrations ahead: single "Next" action, no arrows. -->
 			<span class={styles.position}>
 				{currentPosition + 1} / {narrationIndices.length}
 			</span>
-			<Button disabled={isLast} onclick={goNext}>
-				<Text ca="Següent →" es="Siguiente →" en="Next →" />
+			<Button onclick={handleAdvance}>
+				<Text ca="Següent" es="Siguiente" en="Next" />
 			</Button>
-		</div>
-		<Button onclick={close}>
-			<Text ca="Tanca" es="Cierra" en="Close" />
-		</Button>
+		{:else}
+			<!-- Re-reading past narrations: Back/Next arrows + Close. -->
+			<div class={styles.navGroup}>
+				<Button disabled={isFirst} onclick={goBack}>
+					<Text ca="← Enrere" es="← Anterior" en="← Back" />
+				</Button>
+				<span class={styles.position}>
+					{currentPosition + 1} / {narrationIndices.length}
+				</span>
+				<Button disabled={isLast} onclick={goNext}>
+					<Text ca="Següent →" es="Siguiente →" en="Next →" />
+				</Button>
+			</div>
+			<Button onclick={handleAdvance}>
+				<Text ca="Tanca" es="Cierra" en="Close" />
+			</Button>
+		{/if}
 	</div>
 </dialog>

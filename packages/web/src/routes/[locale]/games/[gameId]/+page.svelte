@@ -54,6 +54,7 @@
 	import NarrationPopup from '$lib/components/game/log/NarrationPopup.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { getGameStore } from '$lib/context/gamestore';
+	import { ProcedureId } from '@songsofdoom/engine';
 	import { entities, isCampaign } from '@songsofdoom/game';
 
 	const store = getGameStore();
@@ -104,6 +105,25 @@
 		}
 		manualNarrationPopupIndex = null;
 	}
+
+	/**
+	 * Called when the user clicks "Next" in the NarrationPopup — there are
+	 * more unacknowledged narrations ahead.  Acknowledges the current gate
+	 * so the store advances to the next narration.
+	 */
+	function handleNarrationNext(): void {
+		store.acknowledgeNarration();
+	}
+
+	/**
+	 * Whether there are narration entries beyond the current presentation
+	 * gate that haven't been acknowledged yet.
+	 */
+	const hasMoreNarrations = $derived(
+		store.journal
+			.slice(store.presentedJournalLength)
+			.some((e) => e.procedureId === ProcedureId.NarrationEffect)
+	);
 
 	let characterOptions = $derived.by(() => {
 		// Only show characters not already in the game
@@ -199,5 +219,7 @@
 		journal={store.journal}
 		initialIndex={activePopupIndex}
 		onClose={handleNarrationClose}
+		hasMore={store.narrationPopupIndex !== null && hasMoreNarrations}
+		onNext={handleNarrationNext}
 	/>
 {/if}
