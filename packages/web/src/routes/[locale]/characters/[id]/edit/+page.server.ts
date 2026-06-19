@@ -5,8 +5,9 @@ import { CharacterState } from '@songsofdoom/game';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load: PageServerLoad = async ({ params, locals, depends }) => {
 	const characterId = parseInt(params.id, 10);
+	depends(`character:${characterId}`);
 	const character = isNaN(characterId) ? undefined : await getCharacterById(characterId);
 	if (!character) {
 		error(404, { message: 'Character not found' });

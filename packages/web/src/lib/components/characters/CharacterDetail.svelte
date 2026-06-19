@@ -109,6 +109,7 @@ Used by both the read-only character view and the edit view.
 </script>
 
 <script lang="ts">
+	import Portrait from '$lib/components/characters/Portrait.svelte';
 	import EntityListing from '$lib/components/entities/EntityListing.svelte';
 	import type { EntityManager } from '$lib/components/entities/entitymanager';
 	import FocusBag from '$lib/components/focuses/FocusBag.svelte';
@@ -143,6 +144,8 @@ Used by both the read-only character view and the edit view.
 		toolbarActions?: Snippet;
 		/** When provided, renders an "Add cards" section after the build area. */
 		catalog?: Snippet;
+		/** When provided, enables prev/next arrows on the portrait to cycle available portraits. */
+		onPortraitChange?: (portrait: number) => void;
 	}
 
 	const {
@@ -152,7 +155,8 @@ Used by both the read-only character view and the edit view.
 		onFilterClick,
 		cardSetsLayout,
 		toolbarActions,
-		catalog
+		catalog,
+		onPortraitChange
 	}: Props = $props();
 
 	const baseStats = $derived(characterState.getBaseStats());
@@ -163,6 +167,7 @@ Used by both the read-only character view and the edit view.
 </script>
 
 <Toolbar>
+	<Portrait portrait={characterState.portrait} onChange={onPortraitChange} circular />
 	<h1 class={styles.characterName}>{character.name}</h1>
 	{@render toolbarActions?.()}
 	<div class={styles.resources}>

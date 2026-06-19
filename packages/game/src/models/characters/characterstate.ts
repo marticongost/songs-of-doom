@@ -51,6 +51,9 @@ export interface CharacterStateProps {
 
 	/** The amount of gold the character currently has. */
 	gold: number;
+
+	/** The number of the portrait image to use (references `/portraits/{portrait}.png`). */
+	portrait: number;
 }
 
 export class CharacterState {
@@ -71,6 +74,9 @@ export class CharacterState {
 	/** The amount of gold the character currently has. */
 	readonly gold: number;
 
+	/** The number of the portrait image to use (references `/portraits/{portrait}.png`). */
+	readonly portrait: number;
+
 	/** The amount of experience points the character currently has available to spend.
 	 * Computed as {@link totalXp} minus the cost of all acquired upgrades, so that
 	 * changes to entity costs in the catalog are automatically reflected.
@@ -86,12 +92,13 @@ export class CharacterState {
 	/** The number of skill cards the character's deck should have. */
 	readonly skillDeckSize = 20;
 
-	constructor({ finalised, upgrades, skillsDeck, totalXp, gold }: CharacterStateProps) {
+	constructor({ finalised, upgrades, skillsDeck, totalXp, gold, portrait }: CharacterStateProps) {
 		this.finalised = finalised;
 		this.upgrades = CharacterState.normaliseUpgrades(upgrades);
 		this.skillsDeck = CharacterState.normaliseSkillDeck(skillsDeck);
 		this.totalXp = totalXp;
 		this.gold = gold;
+		this.portrait = portrait;
 	}
 
 	public static initial(): CharacterState {
@@ -100,7 +107,8 @@ export class CharacterState {
 			upgrades: {},
 			skillsDeck: {},
 			totalXp: STARTING_EXPERIENCE,
-			gold: STARTING_GOLD
+			gold: STARTING_GOLD,
+			portrait: 1
 		});
 	}
 
@@ -253,6 +261,14 @@ export class CharacterState {
 
 	public items(): Array<Item> {
 		return this.ownedEntities().filter((entity) => entity instanceof Item);
+	}
+
+	/** Returns a new {@link CharacterState} with the portrait changed to the given value. */
+	public withPortrait(portrait: number): CharacterState {
+		return new CharacterState({
+			...this,
+			portrait
+		});
 	}
 
 	public acquireEntity(entity: Entity): CharacterState {

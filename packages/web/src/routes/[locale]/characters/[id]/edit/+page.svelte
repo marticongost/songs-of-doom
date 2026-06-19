@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { invalidate } from '$app/navigation';
 	import CharacterDetail from '$lib/components/characters/CharacterDetail.svelte';
 	import EntityCatalog from '$lib/components/entities/EntityCatalog.svelte';
 	import type { EntityManager } from '$lib/components/entities/entitymanager';
@@ -41,6 +42,7 @@
 		return JSON.stringify({
 			finalised: json.finalised,
 			gold: json.gold,
+			portrait: json.portrait,
 			upgrades: Object.fromEntries(Object.entries(json.upgrades).sort()),
 			skillsDeck: Object.fromEntries(Object.entries(json.skillsDeck).sort())
 		});
@@ -97,6 +99,10 @@
 			pushState(characterState.returnEntity(entity));
 		}
 	};
+
+	function handlePortraitChange(portrait: number) {
+		pushState(characterState.withPortrait(portrait));
+	}
 </script>
 
 <CharacterDetail
@@ -104,6 +110,7 @@
 	{characterState}
 	{entityManager}
 	onFilterClick={handleFilterClick}
+	onPortraitChange={handlePortraitChange}
 	cardSetsLayout="single-column"
 >
 	{#snippet toolbarActions()}
@@ -133,6 +140,7 @@
 							saveStatus = 'success';
 							saveMessage = (result.data as { message?: string }).message;
 							savedStateJson = stableStateJson(characterState);
+							invalidate(`character:${character.id}`);
 							clearTimeout(successTimeout);
 							successTimeout = setTimeout(() => {
 								saveStatus = 'idle';

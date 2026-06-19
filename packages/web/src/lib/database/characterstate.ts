@@ -7,6 +7,7 @@ export interface CharacterStateJson {
 	upgrades: Record<string, number>;
 	skillsDeck: Record<string, number>;
 	gold: number;
+	portrait: number;
 }
 
 /** Transforms a {@link CharacterState} model into a {@link CharacterStateJson} record. */
@@ -14,7 +15,8 @@ export const characterStateToJson = (state: CharacterState): CharacterStateJson 
 	finalised: state.finalised,
 	upgrades: mapToRecord(state.upgrades, { mapKeys: (entity) => entity.variantId }),
 	skillsDeck: mapToRecord(state.skillsDeck, { mapKeys: (skill) => skill.variantId }),
-	gold: state.gold
+	gold: state.gold,
+	portrait: state.portrait
 });
 
 /**
