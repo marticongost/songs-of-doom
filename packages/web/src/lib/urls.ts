@@ -60,6 +60,11 @@ export const newGameUrl = createUrlHandler((locale?: Locale) =>
 	resolve('/[locale]/games/new', { locale: locale ?? getLocale() })
 );
 
+/** URL handler for the games list page. */
+export const gamesUrl = createUrlHandler((locale?: Locale) =>
+	resolve('/[locale]/games', { locale: locale ?? getLocale() })
+);
+
 /** URL handler for game pages. */
 export const gameUrl = createUrlHandler((gameId: string, locale?: Locale) =>
 	resolve('/[locale]/games/[gameId]', {
