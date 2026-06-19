@@ -1,11 +1,9 @@
-import { Counter } from '@songsofdoom/common';
 import type { CharacterState } from '@songsofdoom/game';
 import { entities, isCampaign } from '@songsofdoom/game';
 import { instructions } from '../../../core/instructions';
 import { type ProcedureState } from '../../../core/procedure';
 import { ProcedureId } from '../../../core/procedureid';
-import { ReadonlyGameState } from '../../../state/gamestate';
-import { ReadonlyPlayerState } from '../../../state/playerstate';
+import { MutableGameState } from '../../../state/gamestate';
 import { runScenario } from '../scenarios/runscenario';
 
 export interface RunCampaignState extends ProcedureState {
@@ -40,32 +38,14 @@ export const runCampaign = define({
 				throw new Error('At least one character is required to start a campaign');
 			}
 
-			const players = state.characters.map((character, i) => {
-				return new ReadonlyPlayerState({
-					id: `plr${i + 1}` as `plr${number}`,
-					character: character ?? ({} as CharacterState),
-					deck: [],
-					hand: [],
-					discardPile: [],
-					focusesBag: new Counter(),
-					focusesDiscardPile: new Counter(),
-					focusesHand: new Counter(),
-					physicalTrauma: 0,
-					mentalTrauma: 0
-				});
-			});
-
-			const game = new ReadonlyGameState({
-				players,
-				encounterDeck: [],
-				encounterDiscardPile: []
-			});
+			const game = new MutableGameState({});
+			state.characters.forEach((character) => game.addPlayer(character));
 
 			return {
 				...state,
 				step: 'scenario',
 				scenarioId: getCampaignScenarioId(state.campaignId!, campaign.initialScenarioId),
-				game
+				game: game.readonly()
 			};
 		},
 		scenario: call(

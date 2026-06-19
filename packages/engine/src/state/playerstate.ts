@@ -1,10 +1,16 @@
-import { Counter, shuffle, weightedChoice } from '@songsofdoom/common';
+import {
+	Counter,
+	shuffle,
+	weightedChoice,
+	type BaseCounter,
+	type ReadonlyCounter
+} from '@songsofdoom/common';
 import type { CharacterState, Property, Stat, StatType } from '@songsofdoom/game';
 import {
-	type FocusToken,
-	type FocusType,
 	getFocusTokenType,
-	getFocusTokenValue
+	getFocusTokenValue,
+	type FocusToken,
+	type FocusType
 } from '@songsofdoom/game';
 import type { CardOptions } from './cardcontainer';
 import type { CardParent, CardState, MutableCardState, ReadonlyCardState } from './cardstate';
@@ -16,22 +22,48 @@ import type { CardId, PlayerId } from './identifiers';
 export interface PlayerStateProps {
 	id: PlayerId;
 	character: CharacterState;
-	deck: ReadonlyArray<CardState>;
-	hand: ReadonlyArray<CardState>;
+	deck?: ReadonlyArray<CardState>;
+	hand?: ReadonlyArray<CardState>;
 	stage?: ReadonlyArray<CardState>;
-	discardPile: ReadonlyArray<CardState>;
+	discardPile?: ReadonlyArray<CardState>;
 	banishedCards?: ReadonlyArray<CardState>;
 	attachments?: ReadonlyArray<CardState>;
 	properties?: ReadonlyArray<Property>;
 	clues?: number;
 	gold?: number;
-	focusesBag: Counter<FocusToken>;
-	focusesDiscardPile: Counter<FocusToken>;
-	focusesHand: Counter<FocusToken>;
-	physicalTrauma: number;
-	mentalTrauma: number;
+	focusesBag?: BaseCounter<FocusToken>;
+	focusesDiscardPile?: BaseCounter<FocusToken>;
+	focusesHand?: BaseCounter<FocusToken>;
+	physicalTrauma?: number;
+	mentalTrauma?: number;
 	defeated?: boolean;
 	activated?: boolean;
+}
+
+export interface ReadonlyPlayerStateProps extends PlayerStateProps {
+	deck?: ReadonlyArray<ReadonlyCardState>;
+	hand?: ReadonlyArray<ReadonlyCardState>;
+	stage?: ReadonlyArray<ReadonlyCardState>;
+	discardPile?: ReadonlyArray<ReadonlyCardState>;
+	banishedCards?: ReadonlyArray<ReadonlyCardState>;
+	attachments?: ReadonlyArray<ReadonlyCardState>;
+	properties?: ReadonlyArray<Property>;
+	focusesBag?: ReadonlyCounter<FocusToken>;
+	focusesDiscardPile?: ReadonlyCounter<FocusToken>;
+	focusesHand?: ReadonlyCounter<FocusToken>;
+}
+
+export interface MutablePlayerStateProps extends PlayerStateProps {
+	deck?: ReadonlyArray<MutableCardState>;
+	hand?: ReadonlyArray<MutableCardState>;
+	stage?: ReadonlyArray<MutableCardState>;
+	discardPile?: ReadonlyArray<MutableCardState>;
+	banishedCards?: ReadonlyArray<MutableCardState>;
+	attachments?: ReadonlyArray<MutableCardState>;
+	properties?: ReadonlyArray<Property>;
+	focusesBag?: Counter<FocusToken>;
+	focusesDiscardPile?: Counter<FocusToken>;
+	focusesHand?: Counter<FocusToken>;
 }
 
 export abstract class PlayerState<
@@ -46,9 +78,9 @@ export abstract class PlayerState<
 	readonly banishedCards: ReadonlyArray<TCard>;
 	readonly clues: number;
 	readonly gold: number;
-	readonly focusesBag: Counter<FocusToken>;
-	readonly focusesDiscardPile: Counter<FocusToken>;
-	readonly focusesHand: Counter<FocusToken>;
+	readonly focusesBag: BaseCounter<FocusToken>;
+	readonly focusesDiscardPile: BaseCounter<FocusToken>;
+	readonly focusesHand: BaseCounter<FocusToken>;
 	readonly defeated: boolean;
 	readonly activated: boolean;
 
@@ -57,20 +89,20 @@ export abstract class PlayerState<
 		character,
 		deck,
 		hand,
-		stage = [],
+		stage,
 		discardPile,
-		banishedCards = [],
-		attachments = [],
+		banishedCards,
+		attachments,
 		properties,
-		clues = 0,
-		gold = 0,
+		clues,
+		gold,
 		focusesBag,
 		focusesDiscardPile,
 		focusesHand,
 		physicalTrauma,
 		mentalTrauma,
-		defeated = false,
-		activated = false
+		defeated,
+		activated
 	}: PlayerStateProps) {
 		super({
 			id,
@@ -81,18 +113,18 @@ export abstract class PlayerState<
 			activated
 		});
 		this.character = character;
-		this.deck = deck as ReadonlyArray<TCard>;
-		this.hand = hand as ReadonlyArray<TCard>;
-		this.stage = stage as ReadonlyArray<TCard>;
-		this.discardPile = discardPile as ReadonlyArray<TCard>;
-		this.banishedCards = banishedCards as ReadonlyArray<TCard>;
-		this.clues = clues;
-		this.gold = gold;
-		this.focusesBag = focusesBag;
-		this.focusesDiscardPile = focusesDiscardPile;
-		this.focusesHand = focusesHand;
-		this.defeated = defeated;
-		this.activated = activated;
+		this.deck = (deck ?? []) as ReadonlyArray<TCard>;
+		this.hand = (hand ?? []) as ReadonlyArray<TCard>;
+		this.stage = (stage ?? []) as ReadonlyArray<TCard>;
+		this.discardPile = (discardPile ?? []) as ReadonlyArray<TCard>;
+		this.banishedCards = (banishedCards ?? []) as ReadonlyArray<TCard>;
+		this.clues = clues ?? 0;
+		this.gold = gold ?? 0;
+		this.focusesBag = focusesBag ?? new Counter<FocusToken>();
+		this.focusesDiscardPile = focusesDiscardPile ?? new Counter<FocusToken>();
+		this.focusesHand = focusesHand ?? new Counter<FocusToken>();
+		this.defeated = defeated ?? false;
+		this.activated = activated ?? false;
 	}
 
 	override get playerId(): PlayerId | undefined {
@@ -153,7 +185,26 @@ export abstract class PlayerState<
 
 export class ReadonlyPlayerState extends PlayerState<ReadonlyCardState> {
 	mutable(): MutablePlayerState {
-		return new MutablePlayerState(this);
+		return new MutablePlayerState({
+			id: this.id,
+			character: this.character,
+			deck: this.deck.map((card) => card.mutable()),
+			hand: this.hand.map((card) => card.mutable()),
+			stage: this.stage.map((card) => card.mutable()),
+			discardPile: this.discardPile.map((card) => card.mutable()),
+			banishedCards: this.banishedCards.map((card) => card.mutable()),
+			attachments: this.attachments.map((card) => card.mutable()),
+			properties: [...this.properties],
+			clues: this.clues,
+			gold: this.gold,
+			physicalTrauma: this.physicalTrauma,
+			mentalTrauma: this.mentalTrauma,
+			defeated: this.defeated,
+			activated: this.activated,
+			focusesBag: new Counter(this.focusesBag),
+			focusesHand: new Counter(this.focusesHand),
+			focusesDiscardPile: new Counter(this.focusesDiscardPile)
+		});
 	}
 
 	mutate(change: (state: MutablePlayerState) => void): ReadonlyPlayerState {
@@ -183,27 +234,8 @@ export class MutablePlayerState
 	declare focusesDiscardPile: Counter<FocusToken>;
 	declare gold: number;
 
-	constructor(playerState: ReadonlyPlayerState) {
-		super({
-			id: playerState.id,
-			character: playerState.character,
-			deck: playerState.deck.map((card) => card.mutable()),
-			hand: playerState.hand.map((card) => card.mutable()),
-			stage: playerState.stage.map((card) => card.mutable()),
-			discardPile: playerState.discardPile.map((card) => card.mutable()),
-			banishedCards: playerState.banishedCards.map((card) => card.mutable()),
-			attachments: playerState.attachments.map((card) => card.mutable()),
-			properties: [...playerState.properties],
-			clues: playerState.clues,
-			gold: playerState.gold,
-			physicalTrauma: playerState.physicalTrauma,
-			mentalTrauma: playerState.mentalTrauma,
-			defeated: playerState.defeated,
-			activated: playerState.activated,
-			focusesBag: new Counter(playerState.focusesBag),
-			focusesHand: new Counter(playerState.focusesHand),
-			focusesDiscardPile: new Counter(playerState.focusesDiscardPile)
-		});
+	constructor(props: MutablePlayerStateProps) {
+		super(props);
 	}
 
 	readonly(): ReadonlyPlayerState {

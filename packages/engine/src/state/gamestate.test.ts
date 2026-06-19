@@ -1,13 +1,25 @@
+import { Counter } from '@songsofdoom/common';
 import { mock } from '@songsofdoom/common/test-utils';
 import {
 	Action,
+	Ally,
+	ally,
+	Archetype,
+	archetype,
 	CapabilityCost,
+	CharacterState,
 	Constant,
+	Item,
+	item,
 	modifyConcentration,
 	not,
 	Opportunity,
 	plus,
+	Skill,
+	skill,
 	strength,
+	Trait,
+	trait,
 	type Entity
 } from '@songsofdoom/game';
 import { describe, expect, it } from 'vitest';
@@ -16,15 +28,15 @@ import {
 	ReadonlyCapabilityResolution,
 	type CapabilityResolution
 } from './capabilityresolution';
-import type { MutableCardState, ReadonlyCardState } from './cardstate';
-import { ReadonlyGameState, type GameContext } from './gamestate';
+import { type MutableCardState, type ReadonlyCardState } from './cardstate';
+import { MutableGameState, ReadonlyGameState, type GameContext } from './gamestate';
 import type { CardId, EntityId, LocationId } from './identifiers';
 import {
 	ReadonlyLocationState,
 	type MutableLocationState,
 	type ReadonlyLocationState as ReadonlyLocationStateType
 } from './locationstate';
-import type { MutablePlayerState, ReadonlyPlayerState } from './playerstate';
+import { MutablePlayerState, type ReadonlyPlayerState } from './playerstate';
 import { MutableTestResolution, ReadonlyTestResolution } from './testresolution';
 import { MutableWoundResolution, ReadonlyWoundResolution } from './woundresolution';
 
@@ -772,7 +784,7 @@ describe('MutableGameState test resolution stack', () => {
 		expect(mutable.testResolutionStack[0]).toBeInstanceOf(MutableTestResolution);
 	});
 
-	it('leaves preceding elements as ReadonlyTestResolution', () => {
+	it('converts all elements to MutableTestResolution', () => {
 		const r1 = makeTestResolution(1);
 		const r2 = makeTestResolution(2);
 		const state = new ReadonlyGameState({
@@ -780,7 +792,7 @@ describe('MutableGameState test resolution stack', () => {
 			testResolutionStack: [r1, r2]
 		});
 		const mutable = state.mutable();
-		expect(mutable.testResolutionStack[0]).toBeInstanceOf(ReadonlyTestResolution);
+		expect(mutable.testResolutionStack[0]).toBeInstanceOf(MutableTestResolution);
 		expect(mutable.testResolutionStack[1]).toBeInstanceOf(MutableTestResolution);
 	});
 
@@ -1368,7 +1380,7 @@ describe('MutableGameState wound resolution stack', () => {
 		expect(mutable.woundResolutionStack[0]).toBeInstanceOf(MutableWoundResolution);
 	});
 
-	it('leaves preceding elements as ReadonlyWoundResolution', () => {
+	it('converts all elements to MutableWoundResolution', () => {
 		const w1 = makeWoundResolution(1);
 		const w2 = makeWoundResolution(2);
 		const state = new ReadonlyGameState({
@@ -1376,7 +1388,7 @@ describe('MutableGameState wound resolution stack', () => {
 			woundResolutionStack: [w1, w2]
 		});
 		const mutable = state.mutable();
-		expect(mutable.woundResolutionStack[0]).toBeInstanceOf(ReadonlyWoundResolution);
+		expect(mutable.woundResolutionStack[0]).toBeInstanceOf(MutableWoundResolution);
 		expect(mutable.woundResolutionStack[1]).toBeInstanceOf(MutableWoundResolution);
 	});
 
@@ -1583,5 +1595,219 @@ describe('GameState.nextScenario', () => {
 		});
 		expect(state.scenario).toBe(sc1);
 		expect(state.nextScenario).toBe(sc2);
+	});
+});
+
+// ─── MutableGameState.addPlayer ─────────────────────────────────────────────
+
+/** Empty skills deck stub used when the test doesn't care about skills. */
+function emptySkillsDeck(): Counter<Skill> {
+	return mock<Counter<Skill>>({ get: () => 0 });
+}
+
+/** Minimal entity stub that satisfies what createCardState and CardState need. */
+function makeCardEntity(entityType: Entity['type']): Entity {
+	const entity = {
+		type: entityType,
+		capabilities: [],
+		attachmentCapabilities: []
+	} as unknown as Entity;
+	Object.defineProperty(entity, 'properties', {
+		get() {
+			return [entityType];
+		}
+	});
+	return entity;
+}
+
+describe('MutableGameState.addPlayer', () => {
+	it('returns a MutablePlayerState', () => {
+		const game = new MutableGameState({});
+		const character = mock<CharacterState>({
+			archetypes: () => [],
+			traits: () => [],
+			allies: () => [],
+			items: () => [],
+			skills: () => [],
+			skillsDeck: emptySkillsDeck()
+		});
+
+		const player = game.addPlayer(character);
+
+		expect(player).toBeInstanceOf(MutablePlayerState);
+	});
+
+	it('generates sequential player IDs starting from player1', () => {
+		const game = new MutableGameState({});
+		const character = mock<CharacterState>({
+			archetypes: () => [],
+			traits: () => [],
+			allies: () => [],
+			items: () => [],
+			skills: () => [],
+			skillsDeck: emptySkillsDeck()
+		});
+
+		const p1 = game.addPlayer(character);
+		const p2 = game.addPlayer(character);
+
+		expect(p1.id).toBe('player1');
+		expect(p2.id).toBe('player2');
+	});
+
+	it('adds the player to the players array', () => {
+		const game = new MutableGameState({});
+		const character = mock<CharacterState>({
+			archetypes: () => [],
+			traits: () => [],
+			allies: () => [],
+			items: () => [],
+			skills: () => [],
+			skillsDeck: emptySkillsDeck()
+		});
+
+		const player = game.addPlayer(character);
+
+		expect(game.players).toHaveLength(1);
+		expect(game.players[0]).toBe(player);
+	});
+
+	it('preserves the character on the player state', () => {
+		const game = new MutableGameState({});
+		const character = mock<CharacterState>({
+			archetypes: () => [],
+			traits: () => [],
+			allies: () => [],
+			items: () => [],
+			skills: () => [],
+			skillsDeck: emptySkillsDeck()
+		});
+
+		const player = game.addPlayer(character);
+
+		expect(player.character).toBe(character);
+	});
+
+	it('creates attachment cards for archetypes, traits, allies, and items', () => {
+		const game = new MutableGameState({});
+		const archEntity = makeCardEntity(archetype);
+		const traitEntity = makeCardEntity(trait);
+		const allyEntity = makeCardEntity(ally);
+		const itemEntity = makeCardEntity(item);
+
+		const character = mock<CharacterState>({
+			archetypes: () => [archEntity as unknown as Archetype],
+			traits: () => [traitEntity as unknown as Trait],
+			allies: () => [allyEntity as unknown as Ally],
+			items: () => [itemEntity as unknown as Item],
+			skills: () => [],
+			skillsDeck: emptySkillsDeck()
+		});
+
+		const player = game.addPlayer(character);
+
+		expect(player.attachments).toHaveLength(4);
+		// All attachment cards should be attached to the player
+		for (const card of player.attachments) {
+			expect(card.container).toEqual({ type: 'player', playerId: 'player1' });
+		}
+		// Card entities should match
+		expect(player.attachments[0].card.type).toBe(archetype);
+		expect(player.attachments[1].card.type).toBe(trait);
+		expect(player.attachments[2].card.type).toBe(ally);
+		expect(player.attachments[3].card.type).toBe(item);
+	});
+
+	it('creates deck cards for skills with correct copy count', () => {
+		const game = new MutableGameState({});
+		const skillEntity = makeCardEntity(skill);
+
+		const character = mock<CharacterState>({
+			archetypes: () => [],
+			traits: () => [],
+			allies: () => [],
+			items: () => [],
+			skills: () => [skillEntity as unknown as Skill],
+			skillsDeck: mock<Counter<Skill>>({ get: (s: Skill) => (s === skillEntity ? 3 : 0) })
+		});
+
+		const player = game.addPlayer(character);
+
+		expect(player.deck).toHaveLength(3);
+		for (const card of player.deck) {
+			expect(card.container).toEqual({ type: 'deck', playerId: 'player1' });
+			expect(card.card.type).toBe(skill);
+		}
+	});
+
+	it('does not create cards when character has no entities', () => {
+		const game = new MutableGameState({});
+		const character = mock<CharacterState>({
+			archetypes: () => [],
+			traits: () => [],
+			allies: () => [],
+			items: () => [],
+			skills: () => [],
+			skillsDeck: emptySkillsDeck()
+		});
+
+		const player = game.addPlayer(character);
+
+		expect(player.attachments).toHaveLength(0);
+		expect(player.deck).toHaveLength(0);
+	});
+
+	it('increments entityCounts for player and each card type', () => {
+		const game = new MutableGameState({});
+		const archEntity = makeCardEntity(archetype);
+		const skillEntity = makeCardEntity(skill);
+
+		const character = mock<CharacterState>({
+			archetypes: () => [archEntity as unknown as Archetype],
+			traits: () => [],
+			allies: () => [],
+			items: () => [],
+			skills: () => [skillEntity as unknown as Skill],
+			skillsDeck: mock<Counter<Skill>>({ get: (s: Skill) => (s === skillEntity ? 2 : 0) })
+		});
+
+		game.addPlayer(character);
+
+		expect(game.entityCounts.get('player')).toBe(1);
+		expect(game.entityCounts.get('archetype')).toBe(1);
+		expect(game.entityCounts.get('skill')).toBe(2);
+	});
+
+	it('adds multiple players with distinct IDs and cards', () => {
+		const game = new MutableGameState({});
+		const skillEntity = makeCardEntity(skill);
+
+		const character1 = mock<CharacterState>({
+			archetypes: () => [],
+			traits: () => [],
+			allies: () => [],
+			items: () => [],
+			skills: () => [skillEntity as unknown as Skill],
+			skillsDeck: mock<Counter<Skill>>({ get: () => 1 })
+		});
+		const character2 = mock<CharacterState>({
+			archetypes: () => [],
+			traits: () => [],
+			allies: () => [],
+			items: () => [],
+			skills: () => [skillEntity as unknown as Skill],
+			skillsDeck: mock<Counter<Skill>>({ get: () => 2 })
+		});
+
+		const p1 = game.addPlayer(character1);
+		const p2 = game.addPlayer(character2);
+
+		expect(game.players).toHaveLength(2);
+		expect(p1.id).toBe('player1');
+		expect(p2.id).toBe('player2');
+		expect(p1.deck).toHaveLength(1);
+		expect(p2.deck).toHaveLength(2);
+		expect(p1.deck[0].container).toEqual({ type: 'deck', playerId: 'player1' });
+		expect(p2.deck[0].container).toEqual({ type: 'deck', playerId: 'player2' });
 	});
 });

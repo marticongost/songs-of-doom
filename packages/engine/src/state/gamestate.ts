@@ -1,8 +1,9 @@
-import { Counter, shuffle } from '@songsofdoom/common';
+import { Counter, shuffle, type BaseCounter, type ReadonlyCounter } from '@songsofdoom/common';
 import type {
 	BooleanExpressionType,
 	Capability,
 	CapabilityCost,
+	CharacterState,
 	EntityTypeId,
 	ScalarExpressionType,
 	Target,
@@ -17,15 +18,30 @@ import {
 	type FocusType
 } from '@songsofdoom/game';
 import { evaluateBoolean, evaluateScalar } from '../expressions';
-import { MutableCapabilityResolution, type CapabilityResolution } from './capabilityresolution';
+import {
+	MutableCapabilityResolution,
+	type CapabilityResolution,
+	type ReadonlyCapabilityResolution
+} from './capabilityresolution';
 import type { CardOptions } from './cardcontainer';
 import { CardState, MutableCardState, ReadonlyCardState, type CapabilityRef } from './cardstate';
 import type { EntityState } from './entitystate';
 import { mutate } from './entitystatemutation';
 import {
+	ALLY,
+	ARCHETYPE,
+	CREATURE,
+	ENCOUNTER,
 	isCardId,
 	isLocationId,
 	isPlayerId,
+	ITEM,
+	LOCATION,
+	PLAYER,
+	SCENARIO,
+	SKILL,
+	STORY,
+	TRAIT,
 	type CardId,
 	type EntityId,
 	type LocationId,
@@ -59,35 +75,68 @@ export type PopGameContext = {
 	[K in keyof GameContext]: GameContext[K] | typeof PopGameContextValue;
 };
 
+export type StatefulEntityId = EntityTypeId | 'player';
+
 /** Maps an entity type ID to the prefix used in {@link CardId} generation. */
-const ENTITY_TYPE_TO_PREFIX: Partial<Record<EntityTypeId, string>> = {
-	location: 'loc',
-	creature: 'crt',
-	ally: 'aly',
-	item: 'obj',
-	skill: 'skl',
-	trait: 'trt',
-	encounter: 'enc',
-	story: 'sto',
-	scenario: 'scn'
+const ENTITY_TYPE_TO_PREFIX: Partial<Record<StatefulEntityId, string>> = {
+	player: PLAYER,
+	location: LOCATION,
+	creature: CREATURE,
+	ally: ALLY,
+	item: ITEM,
+	skill: SKILL,
+	archetype: ARCHETYPE,
+	trait: TRAIT,
+	encounter: ENCOUNTER,
+	story: STORY,
+	scenario: SCENARIO
 };
 
 export interface GameStateProps {
 	chapter?: number;
 	turn?: number;
-	players: ReadonlyArray<PlayerState>;
+	players?: ReadonlyArray<PlayerState>;
 	locations?: ReadonlyArray<LocationState>;
 	encounterDeck?: ReadonlyArray<CardState>;
 	encounterDiscardPile?: ReadonlyArray<CardState>;
-	capabilityResolutionStack?: Array<CapabilityResolution>;
-	targetStack?: Array<EntityId>;
-	subjectStack?: Array<EntityId>;
-	testResolutionStack?: Array<TestResolution>;
-	woundResolutionStack?: Array<WoundResolution>;
+	capabilityResolutionStack?: ReadonlyArray<CapabilityResolution>;
+	targetStack?: ReadonlyArray<EntityId>;
+	subjectStack?: ReadonlyArray<EntityId>;
+	testResolutionStack?: ReadonlyArray<TestResolution>;
+	woundResolutionStack?: ReadonlyArray<WoundResolution>;
 	scenario?: CardState;
 	nextScenario?: CardState;
-	/** Counter used to generate sequential {@link CardId}s for each card type. */
-	cardIdCounter?: Counter<string>;
+	entityCounts?: BaseCounter<StatefulEntityId>;
+}
+
+export interface ReadonlyGameStateProps extends GameStateProps {
+	players?: ReadonlyArray<ReadonlyPlayerState>;
+	locations?: ReadonlyArray<ReadonlyLocationState>;
+	encounterDeck?: ReadonlyArray<ReadonlyCardState>;
+	encounterDiscardPile?: ReadonlyArray<ReadonlyCardState>;
+	capabilityResolutionStack?: ReadonlyArray<ReadonlyCapabilityResolution>;
+	targetStack?: ReadonlyArray<EntityId>;
+	subjectStack?: ReadonlyArray<EntityId>;
+	testResolutionStack?: ReadonlyArray<ReadonlyTestResolution>;
+	woundResolutionStack?: ReadonlyArray<ReadonlyWoundResolution>;
+	scenario?: ReadonlyCardState;
+	nextScenario?: ReadonlyCardState;
+	entityCounts?: ReadonlyCounter<StatefulEntityId>;
+}
+
+export interface MutableGameStateProps extends GameStateProps {
+	players?: ReadonlyArray<MutablePlayerState>;
+	locations?: ReadonlyArray<MutableLocationState>;
+	encounterDeck?: ReadonlyArray<MutableCardState>;
+	encounterDiscardPile?: ReadonlyArray<MutableCardState>;
+	capabilityResolutionStack?: ReadonlyArray<MutableCapabilityResolution>;
+	targetStack?: ReadonlyArray<EntityId>;
+	subjectStack?: ReadonlyArray<EntityId>;
+	testResolutionStack?: ReadonlyArray<MutableTestResolution>;
+	woundResolutionStack?: ReadonlyArray<MutableWoundResolution>;
+	scenario?: MutableCardState;
+	nextScenario?: MutableCardState;
+	entityCounts?: Counter<StatefulEntityId>;
 }
 
 export abstract class GameState<
@@ -99,16 +148,16 @@ export abstract class GameState<
 	readonly locations: ReadonlyArray<TLocation>;
 	readonly encounterDeck: ReadonlyArray<TCard>;
 	readonly encounterDiscardPile: ReadonlyArray<TCard>;
-	readonly capabilityResolutionStack: Array<CapabilityResolution>;
-	readonly targetStack: Array<EntityId>;
-	readonly subjectStack: Array<EntityId>;
-	readonly testResolutionStack: Array<TestResolution>;
-	readonly woundResolutionStack: Array<WoundResolution>;
+	readonly capabilityResolutionStack: ReadonlyArray<CapabilityResolution>;
+	readonly targetStack: ReadonlyArray<EntityId>;
+	readonly subjectStack: ReadonlyArray<EntityId>;
+	readonly testResolutionStack: ReadonlyArray<TestResolution>;
+	readonly woundResolutionStack: ReadonlyArray<WoundResolution>;
 	readonly chapter: number;
 	readonly turn: number;
 	readonly scenario?: TCard;
 	readonly nextScenario?: TCard;
-	readonly cardIdCounter: Counter<string>;
+	readonly entityCounts: ReadonlyCounter<StatefulEntityId>;
 
 	constructor({
 		players,
@@ -124,47 +173,23 @@ export abstract class GameState<
 		turn,
 		scenario,
 		nextScenario,
-		cardIdCounter
+		entityCounts
 	}: GameStateProps) {
 		this.chapter = chapter ?? 0;
 		this.turn = turn ?? 0;
-		this.players = players as ReadonlyArray<TPlayer>;
+		this.players = (players ?? []) as ReadonlyArray<TPlayer>;
 		this.locations = (locations ?? []) as ReadonlyArray<TLocation>;
 		this.encounterDeck = (encounterDeck ?? []) as ReadonlyArray<TCard>;
 		this.encounterDiscardPile = (encounterDiscardPile ?? []) as ReadonlyArray<TCard>;
 		this.capabilityResolutionStack = capabilityResolutionStack ?? [];
 		this.targetStack = targetStack ?? [];
 		this.subjectStack = subjectStack ?? [];
-		this.testResolutionStack = testResolutionStack ?? [];
-		this.woundResolutionStack = woundResolutionStack ?? [];
+		this.testResolutionStack = (testResolutionStack ?? []) as ReadonlyArray<ReadonlyTestResolution>;
+		this.woundResolutionStack = (woundResolutionStack ??
+			[]) as ReadonlyArray<ReadonlyWoundResolution>;
 		this.scenario = scenario as TCard | undefined;
 		this.nextScenario = nextScenario as TCard | undefined;
-		this.cardIdCounter = cardIdCounter ?? new Counter<string>();
-	}
-
-	/**
-	 * Creates a new {@link CardState} (or {@link LocationState} for location entities)
-	 * with an auto-generated sequential {@link CardId}.
-	 *
-	 * The ID prefix is determined by the entity's type (see {@link ENTITY_TYPE_TO_PREFIX}).
-	 * The numeric suffix is managed by an internal {@link Counter} that tracks the next
-	 * available number for each card type.
-	 */
-	abstract createCardState(entity: Entity): TCard | TLocation;
-
-	/**
-	 * Generates the next sequential {@link CardId} for the given entity's type.
-	 *
-	 * Increments the internal {@link cardIdCounter} and returns the resulting ID.
-	 * Throws if the entity type does not map to a known card ID prefix.
-	 */
-	protected _generateCardId(entity: Entity): CardId {
-		const prefix = ENTITY_TYPE_TO_PREFIX[entity.type.id];
-		if (!prefix) {
-			throw new Error(`Cannot generate card ID for entity type "${entity.type.id}".`);
-		}
-		this.cardIdCounter.add(prefix);
-		return `${prefix}${this.cardIdCounter.get(prefix)}` as CardId;
+		this.entityCounts = entityCounts ?? new Counter<StatefulEntityId>();
 	}
 
 	abstract mutableClone(): MutableGameState;
@@ -673,20 +698,40 @@ export class ReadonlyGameState extends GameState<
 	ReadonlyPlayerState,
 	ReadonlyLocationState
 > {
-	override createCardState(entity: Entity): ReadonlyCardState | ReadonlyLocationState {
-		const id = this._generateCardId(entity);
-		if (entity.type.id === 'location') {
-			return new ReadonlyLocationState({
-				id: id as LocationId,
-				card: entity,
-				coordinates: { x: 0, y: 0 }
-			});
-		}
-		return new ReadonlyCardState({ id: id as CardId, card: entity });
+	declare players: ReadonlyArray<ReadonlyPlayerState>;
+	declare locations: ReadonlyArray<ReadonlyLocationState>;
+	declare encounterDeck: ReadonlyArray<ReadonlyCardState>;
+	declare encounterDiscardPile: ReadonlyArray<ReadonlyCardState>;
+	declare capabilityResolutionStack: ReadonlyArray<ReadonlyCapabilityResolution>;
+	declare targetStack: ReadonlyArray<EntityId>;
+	declare subjectStack: ReadonlyArray<EntityId>;
+	declare testResolutionStack: ReadonlyArray<ReadonlyTestResolution>;
+	declare woundResolutionStack: ReadonlyArray<ReadonlyWoundResolution>;
+	declare chapter: number;
+	declare turn: number;
+	declare scenario?: ReadonlyCardState;
+	declare nextScenario?: ReadonlyCardState;
+	declare entityCounts: Counter<StatefulEntityId>;
+
+	constructor(props: ReadonlyGameStateProps) {
+		super(props);
 	}
 
 	mutable(): MutableGameState {
-		return new MutableGameState(this);
+		return new MutableGameState({
+			players: this.players.map((player) => player.mutable()),
+			locations: this.locations.map((location) => location.mutable()),
+			encounterDeck: this.encounterDeck.map((c) => c.mutable()),
+			encounterDiscardPile: this.encounterDiscardPile.map((c) => c.mutable()),
+			capabilityResolutionStack: this.capabilityResolutionStack.map((r) => r.mutable()),
+			targetStack: [...this.targetStack],
+			subjectStack: [...this.subjectStack],
+			testResolutionStack: this.testResolutionStack.map((r) => r.mutable()),
+			woundResolutionStack: this.woundResolutionStack.map((r) => r.mutable()),
+			scenario: this.scenario?.mutable(),
+			nextScenario: this.nextScenario?.mutable(),
+			entityCounts: new Counter(this.entityCounts)
+		});
 	}
 
 	mutate(callback: (mutableState: MutableGameState) => void): ReadonlyGameState {
@@ -694,7 +739,7 @@ export class ReadonlyGameState extends GameState<
 	}
 
 	override mutableClone(): MutableGameState {
-		return new MutableGameState(this);
+		return this.mutable();
 	}
 }
 
@@ -710,16 +755,65 @@ export class MutableGameState extends GameState<
 	declare capabilityResolutionStack: Array<MutableCapabilityResolution>;
 	declare targetStack: Array<EntityId>;
 	declare subjectStack: Array<EntityId>;
-	declare testResolutionStack: Array<ReadonlyTestResolution | MutableTestResolution>;
-	declare woundResolutionStack: Array<ReadonlyWoundResolution | MutableWoundResolution>;
+	declare testResolutionStack: Array<MutableTestResolution>;
+	declare woundResolutionStack: Array<MutableWoundResolution>;
 	declare chapter: number;
 	declare turn: number;
 	declare scenario?: MutableCardState;
 	declare nextScenario?: MutableCardState;
-	declare cardIdCounter: Counter<string>;
+	declare entityCounts: Counter<StatefulEntityId>;
 
-	override createCardState(entity: Entity): MutableCardState | MutableLocationState {
-		const id = this._generateCardId(entity);
+	constructor(props: MutableGameStateProps) {
+		super(props);
+	}
+
+	/**
+	 * Generates the next sequential {@link CardId} for the given entity's type.
+	 *
+	 * Increments the internal {@link entityCounts} and returns the resulting ID.
+	 * Throws if the entity type does not map to a known card ID prefix.
+	 */
+	private _generateEntityId(idType: EntityTypeId | 'player'): EntityId {
+		const prefix = ENTITY_TYPE_TO_PREFIX[idType];
+		if (!prefix) {
+			throw new Error(`Cannot generate ID for entity type ${idType}`);
+		}
+		this.entityCounts.add(idType);
+		return `${idType}${this.entityCounts.get(idType)}` as CardId;
+	}
+
+	addPlayer(character: CharacterState): MutablePlayerState {
+		const playerId = this._generateEntityId('player') as PlayerId;
+		const playerState = new MutablePlayerState({ id: playerId, character });
+
+		// Attach upgrade cards (Archetype, Trait, Ally, Item) to the player.
+		for (const entity of [
+			...character.archetypes(),
+			...character.traits(),
+			...character.allies(),
+			...character.items()
+		]) {
+			const cardState = this.createCardState(entity) as MutableCardState;
+			cardState.container = { type: 'player', playerId };
+			playerState.attachments.push(cardState);
+		}
+
+		// Add skill card copies to the player's deck.
+		for (const skill of character.skills()) {
+			const copies = character.skillsDeck.get(skill) ?? 0;
+			for (let copy = 0; copy < copies; copy++) {
+				const cardState = this.createCardState(skill) as MutableCardState;
+				cardState.container = { type: 'deck', playerId };
+				playerState.deck.push(cardState);
+			}
+		}
+
+		this.players.push(playerState);
+		return playerState;
+	}
+
+	createCardState(entity: Entity): MutableCardState | MutableLocationState {
+		const id = this._generateEntityId(entity.type.id);
 		if (entity.type.id === 'location') {
 			return new MutableLocationState(
 				new ReadonlyLocationState({
@@ -730,31 +824,6 @@ export class MutableGameState extends GameState<
 			);
 		}
 		return new ReadonlyCardState({ id: id as CardId, card: entity }).mutable();
-	}
-
-	constructor(gameState: ReadonlyGameState) {
-		const stack = gameState.testResolutionStack as Array<ReadonlyTestResolution>;
-		const woundStack = gameState.woundResolutionStack as Array<ReadonlyWoundResolution>;
-		super({
-			players: gameState.players.map((player) => player.mutable()),
-			locations: gameState.locations.map((location) => location.mutable()),
-			encounterDeck: gameState.encounterDeck.map((c) => c.mutable()),
-			encounterDiscardPile: gameState.encounterDiscardPile.map((c) => c.mutable()),
-			capabilityResolutionStack: [...gameState.capabilityResolutionStack],
-			targetStack: [...gameState.targetStack],
-			subjectStack: [...gameState.subjectStack],
-			testResolutionStack: [
-				...stack.slice(0, -1),
-				...(stack.length > 0 ? [stack[stack.length - 1].mutable()] : [])
-			],
-			woundResolutionStack: [
-				...woundStack.slice(0, -1),
-				...(woundStack.length > 0 ? [woundStack[woundStack.length - 1].mutable()] : [])
-			],
-			scenario: gameState.scenario?.mutable(),
-			nextScenario: gameState.nextScenario?.mutable(),
-			cardIdCounter: gameState.cardIdCounter
-		});
 	}
 
 	getActiveTestResolution(): MutableTestResolution | undefined {
@@ -840,12 +909,12 @@ export class MutableGameState extends GameState<
 			),
 			scenario: this.scenario?.readonly(),
 			nextScenario: this.nextScenario?.readonly(),
-			cardIdCounter: this.cardIdCounter
+			entityCounts: this.entityCounts
 		});
 	}
 
 	override mutableClone(): MutableGameState {
-		return new MutableGameState(this.readonly());
+		return this.readonly().mutable();
 	}
 }
 

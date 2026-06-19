@@ -13,14 +13,11 @@ import { describe, expect, it, vi } from 'vitest';
 // via vi.hoisted() so they exist when the factory executes.
 // ---------------------------------------------------------------------------
 
-const { mockIsCampaign, mockEntitiesRequire, mockReadonlyGameState, mockPlayerState } = vi.hoisted(
-	() => ({
-		mockIsCampaign: vi.fn(),
-		mockEntitiesRequire: vi.fn(),
-		mockReadonlyGameState: vi.fn(),
-		mockPlayerState: vi.fn()
-	})
-);
+const { mockIsCampaign, mockEntitiesRequire, mockMutableGameState } = vi.hoisted(() => ({
+	mockIsCampaign: vi.fn(),
+	mockEntitiesRequire: vi.fn(),
+	mockMutableGameState: vi.fn()
+}));
 
 vi.mock('@songsofdoom/game', async (importOriginal) => {
 	const actual: any = await importOriginal();
@@ -36,17 +33,12 @@ vi.mock('@songsofdoom/game', async (importOriginal) => {
 
 vi.mock('@songsofdoom/common', async (importOriginal) => {
 	const actual: any = await importOriginal();
-	// Keep the real Counter — it's used as `new Counter()` in the init step
-	// and has no side effects worth mocking.
 	return actual;
 });
 
 vi.mock('../../../state/gamestate', () => ({
-	ReadonlyGameState: mockReadonlyGameState
-}));
-
-vi.mock('../../../state/playerstate', () => ({
-	ReadonlyPlayerState: mockPlayerState
+	ReadonlyGameState: vi.fn(),
+	MutableGameState: mockMutableGameState
 }));
 
 // Import after mocks are set up
@@ -69,6 +61,14 @@ function mockCharacter(overrides: Partial<CharacterState> = {}): CharacterState 
 		finalised: true,
 		totalXp: 10,
 		gold: 5,
+		archetypes: () => [],
+		traits: () => [],
+		allies: () => [],
+		items: () => [],
+		skills: () => [],
+		skillsDeck: {
+			get: () => 0
+		} as any,
 		...overrides
 	});
 }
@@ -91,6 +91,23 @@ function state(overrides: Partial<RunCampaignState> = {}): RunCampaignState {
 
 describe('runCampaign — init step', () => {
 	const initStep = (runCampaign.steps['init'] as ComputeStep<any>).logic;
+
+	/**
+	 * Configures {@link mockMutableGameState} so that `new MutableGameState({})`
+	 * produces an object with {@link addPlayer} and {@link readonly} methods.
+	 *
+	 * {@link addPlayer} is tracked via a dedicated spy so each test can assert on
+	 * the characters that were passed to it.
+	 */
+	function setupGameMock(addPlayer = vi.fn()): { readonlyGame: any } {
+		const readonlyGame = {};
+		mockMutableGameState.mockImplementation(function (this: any) {
+			this.addPlayer = addPlayer;
+			this.readonly = vi.fn().mockReturnValue(readonlyGame);
+			return this;
+		});
+		return { readonlyGame };
+	}
 
 	it('throws when campaignId is missing', () => {
 		mockEntitiesRequire.mockImplementation((id: string) => {
@@ -125,83 +142,30 @@ describe('runCampaign — init step', () => {
 		);
 	});
 
-	it('creates one PlayerState per character with sequential ids', () => {
+	it('calls addPlayer for each character', () => {
 		mockEntitiesRequire.mockReturnValue({ initialScenarioId: 'sc1', type: { id: 'campaign' } });
 		mockIsCampaign.mockReturnValue(true);
-		mockPlayerState.mockImplementation(function (this: any, props: any) {
-			Object.assign(this, props);
-			return this;
-		});
-		mockReadonlyGameState.mockImplementation(function (this: any, props: any) {
-			Object.assign(this, props);
-			return this;
-		});
 
-		const ch1 = mockCharacter({ finalised: true, totalXp: 10, gold: 5 });
-		const ch2 = mockCharacter({ finalised: false, totalXp: 0, gold: 0 });
-		const characters = [ch1, ch2];
-		initStep(state({ characters }));
+		const addPlayer = vi.fn();
+		setupGameMock(addPlayer);
 
-		// PlayerState constructor called twice
-		expect(mockPlayerState).toHaveBeenCalledTimes(2);
-		expect(mockPlayerState).toHaveBeenNthCalledWith(
-			1,
-			expect.objectContaining({ id: 'plr1', character: ch1 })
-		);
-		expect(mockPlayerState).toHaveBeenNthCalledWith(
-			2,
-			expect.objectContaining({ id: 'plr2', character: ch2 })
-		);
+		const ch1 = mockCharacter();
+		const ch2 = mockCharacter();
+		initStep(state({ characters: [ch1, ch2] }));
+
+		expect(addPlayer).toHaveBeenCalledTimes(2);
+		expect(addPlayer).toHaveBeenCalledWith(ch1);
+		expect(addPlayer).toHaveBeenCalledWith(ch2);
 	});
 
-	it('initialises player state with empty decks and counts', () => {
+	it('returns the readonly game state', () => {
 		mockEntitiesRequire.mockReturnValue({ initialScenarioId: 'sc1', type: { id: 'campaign' } });
 		mockIsCampaign.mockReturnValue(true);
-		mockPlayerState.mockImplementation(function (this: any, props: any) {
-			Object.assign(this, props);
-			return this;
-		});
-		mockReadonlyGameState.mockImplementation(function (this: any, props: any) {
-			Object.assign(this, props);
-			return this;
-		});
 
-		initStep(state());
+		const { readonlyGame } = setupGameMock(vi.fn());
+		const result = initStep(state());
 
-		expect(mockPlayerState).toHaveBeenCalledWith(
-			expect.objectContaining({
-				deck: [],
-				hand: [],
-				discardPile: [],
-				physicalTrauma: 0,
-				mentalTrauma: 0
-			})
-		);
-	});
-
-	it('creates a ReadonlyGameState with the players', () => {
-		mockEntitiesRequire.mockReturnValue({ initialScenarioId: 'sc1', type: { id: 'campaign' } });
-		mockIsCampaign.mockReturnValue(true);
-		mockReadonlyGameState.mockImplementation(function (this: any, props: any) {
-			Object.assign(this, props);
-			return this;
-		});
-
-		const mockPlayer = { id: 'plr1' };
-		mockPlayerState.mockImplementation(function (this: any) {
-			Object.assign(this, mockPlayer);
-			return this;
-		});
-
-		initStep(state());
-
-		expect(mockReadonlyGameState).toHaveBeenCalledWith(
-			expect.objectContaining({
-				players: [mockPlayer],
-				encounterDeck: [],
-				encounterDiscardPile: []
-			})
-		);
+		expect(result!.game).toBe(readonlyGame);
 	});
 
 	it('sets scenarioId by qualifying it with the campaign id', () => {
@@ -209,14 +173,7 @@ describe('runCampaign — init step', () => {
 			initialScenarioId: 'sc1',
 			type: { id: 'campaign' }
 		});
-		mockPlayerState.mockImplementation(function (this: any, props: any) {
-			Object.assign(this, props);
-			return this;
-		});
-		mockReadonlyGameState.mockImplementation(function (this: any, props: any) {
-			Object.assign(this, props);
-			return this;
-		});
+		setupGameMock(vi.fn());
 
 		const result = initStep(state({ campaignId: 'SoHH' }));
 
@@ -226,32 +183,17 @@ describe('runCampaign — init step', () => {
 	it('advances to the next step with step set', () => {
 		mockEntitiesRequire.mockReturnValue({ initialScenarioId: 'sc1', type: { id: 'campaign' } });
 		mockIsCampaign.mockReturnValue(true);
-		mockPlayerState.mockImplementation(function (this: any, props: any) {
-			Object.assign(this, props);
-			return this;
-		});
-		mockReadonlyGameState.mockImplementation(function (this: any, props: any) {
-			Object.assign(this, props);
-			return this;
-		});
+		setupGameMock(vi.fn());
 
 		const result = initStep(state());
 
-		// The init step explicitly sets step: 'scenario' to continue
 		expect(result!.step).toBe('scenario');
 	});
 
 	it('preserves fields from the input state', () => {
 		mockEntitiesRequire.mockReturnValue({ initialScenarioId: 'sc1', type: { id: 'campaign' } });
 		mockIsCampaign.mockReturnValue(true);
-		mockPlayerState.mockImplementation(function (this: any, props: any) {
-			Object.assign(this, props);
-			return this;
-		});
-		mockReadonlyGameState.mockImplementation(function (this: any, props: any) {
-			Object.assign(this, props);
-			return this;
-		});
+		setupGameMock(vi.fn());
 
 		const result = initStep(state({ campaignId: 'MyCampaign' }));
 
@@ -262,30 +204,11 @@ describe('runCampaign — init step', () => {
 	it('resolves the campaign from the entities catalog', () => {
 		mockEntitiesRequire.mockReturnValue({ initialScenarioId: 'sc1', type: { id: 'campaign' } });
 		mockIsCampaign.mockReturnValue(true);
+		setupGameMock(vi.fn());
 
 		initStep(state({ campaignId: 'MyCampaign' }));
 
 		expect(mockEntitiesRequire).toHaveBeenCalledWith('MyCampaign');
-	});
-
-	it('handles a character with null (uses empty object as fallback)', () => {
-		mockEntitiesRequire.mockReturnValue({ initialScenarioId: 'sc1', type: { id: 'campaign' } });
-		mockIsCampaign.mockReturnValue(true);
-		mockPlayerState.mockImplementation(function (this: any, props: any) {
-			Object.assign(this, props);
-			return this;
-		});
-		mockReadonlyGameState.mockImplementation(function (this: any, props: any) {
-			Object.assign(this, props);
-			return this;
-		});
-
-		const characters = [null as any];
-		initStep(state({ characters }));
-
-		// The init code does: character ?? ({} as CharacterState)
-		// So null character becomes {}
-		expect(mockPlayerState).toHaveBeenCalledWith(expect.objectContaining({ character: {} }));
 	});
 });
 
