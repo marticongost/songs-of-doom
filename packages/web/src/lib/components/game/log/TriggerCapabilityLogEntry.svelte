@@ -22,7 +22,7 @@
 	}
 
 	const { state, ...attributes }: Props = $props();
-	const card = $derived(state.game?.getEntityState(state.cardId)?.card);
+	const card = $derived(state.cardId ? state.game?.getEntityState(state.cardId)?.card : undefined);
 </script>
 
 {#if card}

@@ -1,5 +1,6 @@
 <!--
-	@component Renders an EmitEvent journal entry — what event was emitted.
+	@component Renders an EmitEvent journal entry.
+	Shows the event name when available, otherwise a generic label.
 -->
 <script lang="ts" module>
 	import * as css from '$lib/styles';
@@ -25,10 +26,15 @@
 	}
 
 	const { state, ...attributes }: Props = $props();
-
-	const event = $derived(events[state.eventType!]);
+	const event = $derived(state.eventType ? events[state.eventType] : undefined);
 </script>
 
 <div {...standardAttributes(attributes, styles.entry)}>
-	<Text {...event.name} />
+	{#if event}
+		<Text {...event.name} />
+	{:else if state.step === 'askPlayersForNextReaction'}
+		<Text ca="Selecció de reacció" es="Selección de reacción" en="Reaction selection" />
+	{:else}
+		<Text ca="Processant reaccions" es="Procesando reacciones" en="Processing reactions" />
+	{/if}
 </div>

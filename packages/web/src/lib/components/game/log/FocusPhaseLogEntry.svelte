@@ -25,5 +25,5 @@
 </script>
 
 <div {...standardAttributes(attributes, styles.entry)}>
-	<Text ca="Fase d'enfocament" es="Fase de enfoque" en="Focus phase" />
+	<Text ca="Fase de focus" es="Fase de foco" en="Focus phase" />
 </div>

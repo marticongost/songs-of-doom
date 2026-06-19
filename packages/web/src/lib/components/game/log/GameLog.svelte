@@ -8,13 +8,13 @@
 <script lang="ts" module>
 	import * as css from '$lib/styles';
 	import {
-		ComputeStep,
+		CallStep,
 		DispatchStep,
-		ForEachStep,
 		InputStep,
 		ProcedureId,
 		procedureDefinitions,
 		type JournalEntry,
+		type ProcedureState,
 		type Step
 	} from '@songsofdoom/engine';
 
@@ -68,71 +68,76 @@
 		return step;
 	}
 
-	function isInputStep(entry: JournalEntry): boolean {
-		return getStep(entry) instanceof InputStep;
-	}
-
-	/**
-	 * Returns true for parent-procedure entries that serve only as structural
-	 * containers — their first step acts as a header, but subsequent steps
-	 * should not produce their own visible rows (children still render).
-	 */
-	function isStructuralOnlyEntry(entry: JournalEntry): boolean {
-		const stepName = entry.state.step;
-		if (!stepName) return false;
-
-		// RunScenario: only the "init" step shows the scenario banner.
-		// "emit" and "beginPlay" are structural wrappers whose children
-		// (EmitEvent / Chapter) handle their own display.
-		if (entry.procedureId === ProcedureId.RunScenario && stepName !== 'init') return true;
-
-		// Chapter: only the "chapterStartPhase" step shows the chapter header.
-		if (entry.procedureId === ProcedureId.Chapter && stepName !== 'chapterStartPhase') return true;
-
-		// Turn: only the "turnStartPhase" step shows the turn header.
-		if (entry.procedureId === ProcedureId.Turn && stepName !== 'turnStartPhase') return true;
-
-		// EmitEvent: init shows the event name; invokeReaction is a structural
-		// call to TriggerCapability whose children handle the reaction display.
-		if (entry.procedureId === ProcedureId.EmitEvent && stepName === 'invokeReaction') return true;
-
-		return false;
-	}
-
 	/**
 	 * Returns true when the journal entry should produce a visible row in the log.
 	 *
-	 * Hides ComputeSteps (internal mutations), ForEachSteps (iteration
-	 * constructs), structural-only parent entries (see
-	 * {@link isStructuralOnlyEntry}), and entries without a resolved step.
+	 * Rules:
+	 * - Hide by default.
+	 * - Show {@link CallStep} entries (structural procedure invocations).
+	 * - Show {@link InputStep} entries (player interaction points).
 	 *
-	 * EmitEvent's init step is an exception: although technically a ComputeStep
-	 * (a plain function auto-wrapped), it carries the event name for display.
+	 * Exceptions:
+	 * - RunCampaign.init carries the campaign banner and must be visible
+	 *   even though it is a ComputeStep.
 	 */
 	function shouldRenderEntry(entry: JournalEntry): boolean {
-		// NarrationEffect is always visible — its sole purpose is to be shown.
-		// Only render the "record" step entry; the completion marker (which has
-		// no `step`) carries the same procedureId but is an internal marker.
-		if (entry.procedureId === ProcedureId.NarrationEffect) return !!entry.state.step;
+		// RunCampaign.init announces the campaign — show it even though it's a ComputeStep.
+		if (entry.procedureId === ProcedureId.RunCampaign && entry.state.step === 'init') return true;
 
 		if (!entry.state.step) return false;
 
 		const step = getStep(entry);
 		if (!step) return false;
 
-		// EmitEvent's init step carries the event name for display — always show it.
-		if (entry.procedureId === ProcedureId.EmitEvent && entry.state.step === 'init') return true;
+		if (step instanceof CallStep) return true;
+		if (step instanceof InputStep) return true;
 
-		// ForEachSteps are structural iteration constructs — hidden.
-		if (step instanceof ForEachStep) return false;
+		return false;
+	}
 
-		// ComputeSteps are internal mutations — hidden.
-		if (step instanceof ComputeStep) return false;
+	/**
+	 * For {@link CallStep} entries, resolves and returns the parameters
+	 * passed to the called procedure. Returns `undefined` for non-CallStep
+	 * entries.
+	 */
+	function getCallStepParams(entry: JournalEntry): Record<string, unknown> | undefined {
+		const step = getStep(entry);
+		if (!(step instanceof CallStep)) return undefined;
+		try {
+			return step.parameters(entry.state) as Record<string, unknown>;
+		} catch {
+			return undefined;
+		}
+	}
 
-		// Structural-only parent entries — hidden (children still render).
-		if (isStructuralOnlyEntry(entry)) return false;
+	/**
+	 * For {@link CallStep} entries, returns the {@link ProcedureId} of the
+	 * called procedure. Returns `undefined` for non-CallStep entries.
+	 */
+	function getCalledProcedureId(entry: JournalEntry): ProcedureId | undefined {
+		const step = getStep(entry);
+		if (!(step instanceof CallStep)) return undefined;
+		const procId = step.procedureId;
+		return typeof procId === 'function' ? procId(entry.state) : procId;
+	}
 
-		return true;
+	/**
+	 * For {@link CallStep} entries, builds the called procedure's state
+	 * via {@link ProcedureDefinition.createState} so the dispatched
+	 * component receives the right shape.
+	 * Returns `undefined` for non-CallStep entries.
+	 */
+	function buildCalledState(entry: JournalEntry): Record<string, unknown> | undefined {
+		const calledProcId = getCalledProcedureId(entry);
+		if (!calledProcId) return undefined;
+		const procDef = procedureDefinitions[calledProcId];
+		if (!procDef) return undefined;
+		const params = getCallStepParams(entry);
+		try {
+			return procDef.createState(entry.state.game, params) as Record<string, unknown>;
+		} catch {
+			return undefined;
+		}
 	}
 
 	function computeDepths(journal: readonly JournalEntry[]): number[] {
@@ -149,13 +154,23 @@
 		return depths;
 	}
 
-	function getJournalEntryIcon(entry: JournalEntry): string {
-		if (isInputStep(entry)) return 'log/input.svg';
-		const procId = entry.procedureId;
-		if (procId === ProcedureId.EmitEvent) return 'log/event.svg';
-		if (procId === ProcedureId.NarrationEffect) return 'log/narration.svg';
-		if (procId === ProcedureId.TriggerCapability) {
-			const capabilityRef = entry.state as TriggerCapabilityState;
+	/**
+	 * Returns the icon to display for a journal entry.
+	 *
+	 * Uses `effectiveProcId` (the called procedure for CallStep dispatches)
+	 * so the icon matches the rendered component.
+	 */
+	function getJournalEntryIcon(
+		entry: JournalEntry,
+		effectiveProcId: string,
+		displayState: unknown
+	): string {
+		const step = getStep(entry);
+		if (step instanceof InputStep) return 'log/input.svg';
+		if (effectiveProcId === ProcedureId.NarrationEffect) return 'log/narration.svg';
+		if (effectiveProcId === ProcedureId.EmitEvent) return 'log/event.svg';
+		if (effectiveProcId === ProcedureId.TriggerCapability) {
+			const capabilityRef = displayState as TriggerCapabilityState;
 			const capability = entry.state.game.requireCapability(capabilityRef);
 			if (capability instanceof Opportunity) return 'capabilities/opportunity.svg';
 			if (capability instanceof Obligation) return 'capabilities/obligation.svg';
@@ -256,7 +271,11 @@
 	{:else}
 		{#each visibleJournal as entry, i (i)}
 			{#if shouldRenderEntry(entry)}
-				{@const procId = entry.procedureId}
+				{@const step = getStep(entry)}
+				{@const calledProcId = step instanceof CallStep ? getCalledProcedureId(entry) : undefined}
+				{@const effectiveProcId = calledProcId ?? entry.procedureId}
+				{@const displayState = ((step instanceof CallStep ? buildCalledState(entry) : undefined) ??
+					entry.state) as unknown}
 				<div class={styles.entry} style="margin-left: {depths[i] * INDENT_PER_LEVEL}em">
 					<button
 						onclick={(e) => {
@@ -267,75 +286,78 @@
 							}
 						}}
 					>
-						<InlineSvg src={getJournalEntryIcon(entry)} class={styles.icon} />
-					</button>
-					{#if procId === ProcedureId.EmitEvent}
-						<EmitEventLogEntry state={entry.state as EmitEventState} />
-					{:else if procId === ProcedureId.RunCampaign}
-						<RunCampaignLogEntry state={entry.state as RunCampaignState} />
-					{:else if procId === ProcedureId.RunScenario}
-						<RunScenarioLogEntry state={entry.state as RunScenarioState} />
-					{:else if procId === ProcedureId.Chapter}
-						<ChapterLogEntry state={entry.state as ChapterState} />
-					{:else if procId === ProcedureId.ChapterStartPhase}
-						<ChapterStartPhaseLogEntry state={entry.state as ChapterStartState} />
-					{:else if procId === ProcedureId.FocusPhase}
-						<FocusPhaseLogEntry state={entry.state as FocusPhaseState} />
-					{:else if procId === ProcedureId.TurnsPhase}
-						<TurnsPhaseLogEntry state={entry.state as TurnsPhaseState} />
-					{:else if procId === ProcedureId.DrawPhase}
-						<DrawPhaseLogEntry state={entry.state as DrawPhaseState} />
-					{:else if procId === ProcedureId.EncounterPhase}
-						<EncounterPhaseLogEntry state={entry.state as EncounterPhaseState} />
-					{:else if procId === ProcedureId.ChapterEndPhase}
-						<ChapterEndPhaseLogEntry state={entry.state as ChapterEndState} />
-					{:else if procId === ProcedureId.Turn}
-						<TurnLogEntry state={entry.state as TurnState} />
-					{:else if procId === ProcedureId.TurnStartPhase}
-						<TurnStartPhaseLogEntry state={entry.state as TurnStartPhaseState} />
-					{:else if procId === ProcedureId.TurnPlayerActionsPhase}
-						<TurnPlayerActionsPhaseLogEntry state={entry.state as TurnPlayerActionsPhaseState} />
-					{:else if procId === ProcedureId.TurnCreatureActionsPhase}
-						<TurnCreatureActionsPhaseLogEntry
-							state={entry.state as TurnCreatureActionsPhaseState}
+						<InlineSvg
+							src={getJournalEntryIcon(entry, effectiveProcId, displayState)}
+							class={styles.icon}
 						/>
-					{:else if procId === ProcedureId.TurnEndPhase}
-						<TurnEndPhaseLogEntry state={entry.state as TurnEndPhaseState} />
-					{:else if procId === ProcedureId.AttachEffect}
-						<AttachEffectLogEntry state={entry.state as AttachEffectProcedureState} />
-					{:else if procId === ProcedureId.ConferPropertiesEffect}
-						<ConferPropertiesEffectLogEntry state={entry.state as ConferPropertiesEffectState} />
-					{:else if procId === ProcedureId.ConditionalEffect}
-						<ConditionalEffectLogEntry state={entry.state as ConditionalEffectState} />
-					{:else if procId === ProcedureId.DiscardEffect}
-						<DiscardEffectLogEntry state={entry.state as DiscardEffectState} />
-					{:else if procId === ProcedureId.DiscardFromHandEffect}
-						<DiscardFromHandEffectLogEntry state={entry.state as DiscardFromHandEffectState} />
-					{:else if procId === ProcedureId.DrawCardsEffect}
-						<DrawCardsEffectLogEntry state={entry.state as DrawCardsEffectState} />
-					{:else if procId === ProcedureId.DrawFocusEffect}
-						<DrawFocusEffectLogEntry state={entry.state as DrawFocusState} />
-					{:else if procId === ProcedureId.EngageEffect}
-						<EngageEffectLogEntry state={entry.state as EngageEffectState} />
-					{:else if procId === ProcedureId.ExhaustEffect}
-						<ExhaustEffectLogEntry state={entry.state as ExhaustEffectState} />
-					{:else if procId === ProcedureId.GatherCluesEffect}
-						<GatherCluesEffectLogEntry state={entry.state as GatherCluesEffectState} />
-					{:else if procId === ProcedureId.HealEffect}
-						<HealEffectLogEntry state={entry.state as HealEffectState} />
-					{:else if procId === ProcedureId.MoveEffect}
-						<MoveEffectLogEntry state={entry.state as MoveEffectState} />
-					{:else if procId === ProcedureId.NarrationEffect}
+					</button>
+					{#if effectiveProcId === ProcedureId.EmitEvent}
+						<EmitEventLogEntry state={displayState as EmitEventState} />
+					{:else if effectiveProcId === ProcedureId.RunCampaign}
+						<RunCampaignLogEntry state={displayState as RunCampaignState} />
+					{:else if effectiveProcId === ProcedureId.RunScenario}
+						<RunScenarioLogEntry state={displayState as RunScenarioState} />
+					{:else if effectiveProcId === ProcedureId.Chapter}
+						<ChapterLogEntry state={displayState as ChapterState} />
+					{:else if effectiveProcId === ProcedureId.ChapterStartPhase}
+						<ChapterStartPhaseLogEntry state={displayState as ChapterStartState} />
+					{:else if effectiveProcId === ProcedureId.FocusPhase}
+						<FocusPhaseLogEntry state={displayState as FocusPhaseState} />
+					{:else if effectiveProcId === ProcedureId.TurnsPhase}
+						<TurnsPhaseLogEntry state={displayState as TurnsPhaseState} />
+					{:else if effectiveProcId === ProcedureId.DrawPhase}
+						<DrawPhaseLogEntry state={displayState as DrawPhaseState} />
+					{:else if effectiveProcId === ProcedureId.EncounterPhase}
+						<EncounterPhaseLogEntry state={displayState as EncounterPhaseState} />
+					{:else if effectiveProcId === ProcedureId.ChapterEndPhase}
+						<ChapterEndPhaseLogEntry state={displayState as ChapterEndState} />
+					{:else if effectiveProcId === ProcedureId.Turn}
+						<TurnLogEntry state={displayState as TurnState} />
+					{:else if effectiveProcId === ProcedureId.TurnStartPhase}
+						<TurnStartPhaseLogEntry state={displayState as TurnStartPhaseState} />
+					{:else if effectiveProcId === ProcedureId.TurnPlayerActionsPhase}
+						<TurnPlayerActionsPhaseLogEntry state={displayState as TurnPlayerActionsPhaseState} />
+					{:else if effectiveProcId === ProcedureId.TurnCreatureActionsPhase}
+						<TurnCreatureActionsPhaseLogEntry
+							state={displayState as TurnCreatureActionsPhaseState}
+						/>
+					{:else if effectiveProcId === ProcedureId.TurnEndPhase}
+						<TurnEndPhaseLogEntry state={displayState as TurnEndPhaseState} />
+					{:else if effectiveProcId === ProcedureId.AttachEffect}
+						<AttachEffectLogEntry state={displayState as AttachEffectProcedureState} />
+					{:else if effectiveProcId === ProcedureId.ConferPropertiesEffect}
+						<ConferPropertiesEffectLogEntry state={displayState as ConferPropertiesEffectState} />
+					{:else if effectiveProcId === ProcedureId.ConditionalEffect}
+						<ConditionalEffectLogEntry state={displayState as ConditionalEffectState} />
+					{:else if effectiveProcId === ProcedureId.DiscardEffect}
+						<DiscardEffectLogEntry state={displayState as DiscardEffectState} />
+					{:else if effectiveProcId === ProcedureId.DiscardFromHandEffect}
+						<DiscardFromHandEffectLogEntry state={displayState as DiscardFromHandEffectState} />
+					{:else if effectiveProcId === ProcedureId.DrawCardsEffect}
+						<DrawCardsEffectLogEntry state={displayState as DrawCardsEffectState} />
+					{:else if effectiveProcId === ProcedureId.DrawFocusEffect}
+						<DrawFocusEffectLogEntry state={displayState as DrawFocusState} />
+					{:else if effectiveProcId === ProcedureId.EngageEffect}
+						<EngageEffectLogEntry state={displayState as EngageEffectState} />
+					{:else if effectiveProcId === ProcedureId.ExhaustEffect}
+						<ExhaustEffectLogEntry state={displayState as ExhaustEffectState} />
+					{:else if effectiveProcId === ProcedureId.GatherCluesEffect}
+						<GatherCluesEffectLogEntry state={displayState as GatherCluesEffectState} />
+					{:else if effectiveProcId === ProcedureId.HealEffect}
+						<HealEffectLogEntry state={displayState as HealEffectState} />
+					{:else if effectiveProcId === ProcedureId.MoveEffect}
+						<MoveEffectLogEntry state={displayState as MoveEffectState} />
+					{:else if effectiveProcId === ProcedureId.NarrationEffect}
 						<NarrationEffectLogEntry
-							state={entry.state as NarrationEffectState}
+							state={displayState as NarrationEffectState}
 							onclick={() => onNarrationClick?.(i)}
 						/>
-					{:else if procId === ProcedureId.PlayStoryCardsEffect}
-						<PlayStoryCardsEffectLogEntry state={entry.state as PlayStoryCardsEffectState} />
-					{:else if procId === ProcedureId.TriggerCapability}
-						<TriggerCapabilityLogEntry state={entry.state as TriggerCapabilityState} />
+					{:else if effectiveProcId === ProcedureId.PlayStoryCardsEffect}
+						<PlayStoryCardsEffectLogEntry state={displayState as PlayStoryCardsEffectState} />
+					{:else if effectiveProcId === ProcedureId.TriggerCapability}
+						<TriggerCapabilityLogEntry state={displayState as TriggerCapabilityState} />
 					{:else}
-						<GenericLogEntry procedureId={procId} state={entry.state} />
+						<GenericLogEntry procedureId={effectiveProcId} state={displayState as ProcedureState} />
 					{/if}
 				</div>
 			{/if}

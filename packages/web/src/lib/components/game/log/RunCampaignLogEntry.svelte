@@ -1,3 +1,6 @@
+<!--
+	@component Renders a RunCampaign journal entry — which campaign is starting.
+-->
 <script lang="ts" module>
 	import * as css from '$lib/styles';
 
