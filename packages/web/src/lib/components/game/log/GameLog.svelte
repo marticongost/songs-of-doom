@@ -221,7 +221,6 @@
 	import HealEffectLogEntry from './HealEffectLogEntry.svelte';
 	import MoveEffectLogEntry from './MoveEffectLogEntry.svelte';
 	import NarrationEffectLogEntry from './NarrationEffectLogEntry.svelte';
-	import NarrationPopup from './NarrationPopup.svelte';
 	import PlayStoryCardsEffectLogEntry from './PlayStoryCardsEffectLogEntry.svelte';
 	import RunCampaignLogEntry from './RunCampaignLogEntry.svelte';
 	import RunScenarioLogEntry from './RunScenarioLogEntry.svelte';
@@ -237,32 +236,14 @@
 		journal: readonly JournalEntry[];
 		/** How many journal entries are visible to this client. Defaults to all. */
 		maxVisible?: number;
-		/** Called when the player acknowledges a narration gate. */
-		onNarrationAcknowledge?: () => void;
+		/** Called when the player clicks a narration entry to re-read it. */
+		onNarrationClick?: (index: number) => void;
 	}
 
-	const {
-		journal,
-		maxVisible = journal.length,
-		onNarrationAcknowledge,
-		...attributes
-	}: Props = $props();
+	const { journal, maxVisible = journal.length, onNarrationClick, ...attributes }: Props = $props();
 	const depths = $derived(computeDepths(journal));
 
 	const visibleJournal = $derived(journal.slice(0, maxVisible));
-
-	/** Journal index of the narration entry whose popup is open, or null. */
-	let narrationPopupIndex = $state<number | null>(null);
-	const narrationPopupOpen = $derived(narrationPopupIndex !== null);
-
-	function openNarrationPopup(index: number): void {
-		narrationPopupIndex = index;
-	}
-
-	function closeNarrationPopup(): void {
-		narrationPopupIndex = null;
-		onNarrationAcknowledge?.();
-	}
 </script>
 
 <div {...standardAttributes(attributes, styles.gameLog)}>
@@ -345,7 +326,7 @@
 					{:else if procId === ProcedureId.NarrationEffect}
 						<NarrationEffectLogEntry
 							state={entry.state as NarrationEffectState}
-							onclick={() => openNarrationPopup(i)}
+							onclick={() => onNarrationClick?.(i)}
 						/>
 					{:else if procId === ProcedureId.PlayStoryCardsEffect}
 						<PlayStoryCardsEffectLogEntry state={entry.state as PlayStoryCardsEffectState} />
@@ -359,7 +340,3 @@
 		{/each}
 	{/if}
 </div>
-
-{#if narrationPopupOpen && narrationPopupIndex !== null}
-	<NarrationPopup {journal} initialIndex={narrationPopupIndex} onClose={closeNarrationPopup} />
-{/if}

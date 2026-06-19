@@ -63,6 +63,13 @@ export class GameStore {
 	awaitingPlayerId = $state<string | null>(null);
 	error = $state<string | null>(null);
 	gameMeta = $state<GameMeta | null>(null);
+	/**
+	 * Journal index of a newly-arrived narration that should trigger an
+	 * auto-popup, or `null` when no unacknowledged narration is pending.
+	 * Set by {@link _advancePresentation} when a narration entry becomes
+	 * the presentation gate.  Cleared by {@link acknowledgeNarration}.
+	 */
+	narrationPopupIndex = $state<number | null>(null);
 
 	// --- Derived ---
 
@@ -109,6 +116,7 @@ export class GameStore {
 	 */
 	acknowledgeNarration(): void {
 		if (!this.isNarrationGated) return;
+		this.narrationPopupIndex = null;
 		this._advancePresentation(this.presentedJournalLength);
 		this._persistAcknowledgedIndex();
 	}
@@ -129,6 +137,8 @@ export class GameStore {
 				this.journal[cursor - 1].procedureId === ProcedureId.NarrationEffect
 			) {
 				this.presentedJournalLength = cursor;
+				// Signal that a new narration gate is ready for auto-display.
+				this.narrationPopupIndex = cursor - 1;
 				return; // Stop — narration becomes the gate.
 			}
 		}
@@ -195,6 +205,7 @@ export class GameStore {
 		this.error = null;
 		this.journal = [];
 		this.presentedJournalLength = 0;
+		this.narrationPopupIndex = null;
 
 		// Lazy-initialise the serialisation context (needs catalog data
 		// which is only available after the game package modules load).

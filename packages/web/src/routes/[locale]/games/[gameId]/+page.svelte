@@ -51,6 +51,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import Dropdown from '$lib/components/forms/Dropdown.svelte';
 	import GameLog from '$lib/components/game/log/GameLog.svelte';
+	import NarrationPopup from '$lib/components/game/log/NarrationPopup.svelte';
 	import Text from '$lib/components/localisation/Text.svelte';
 	import { getGameStore } from '$lib/context/gamestore';
 	import { entities, isCampaign } from '@songsofdoom/game';
@@ -74,6 +75,36 @@
 	);
 
 	let selectedCharacterId = $state('');
+
+	// --- Narration popup (page-level, separate from GameLog) ---
+
+	/**
+	 * Manual popup index: set when the user clicks a past narration entry
+	 * in the GameLog to re-read it.  The auto-popup (from the store's
+	 * {@link GameStore.narrationPopupIndex}) takes priority.
+	 */
+	let manualNarrationPopupIndex = $state<number | null>(null);
+
+	/** Active popup index — auto (new narration gate) takes priority over manual (re-read). */
+	const activePopupIndex = $derived(store.narrationPopupIndex ?? manualNarrationPopupIndex);
+
+	function handleNarrationClick(index: number): void {
+		manualNarrationPopupIndex = index;
+	}
+
+	function handleNarrationClose(): void {
+		// If the popup was showing the current narration gate (auto-popup),
+		// acknowledge it so the game advances past the gate.
+		if (
+			store.narrationPopupIndex !== null &&
+			activePopupIndex === store.narrationPopupIndex &&
+			store.isNarrationGated
+		) {
+			store.acknowledgeNarration();
+		}
+		manualNarrationPopupIndex = null;
+	}
+
 	let characterOptions = $derived.by(() => {
 		// Only show characters not already in the game
 		const usedCharacterIds = new Set(store.gameMeta?.participants.map((p) => p.characterId) ?? []);
@@ -157,8 +188,16 @@
 			<GameLog
 				journal={store.journal}
 				maxVisible={store.presentedJournalLength}
-				onNarrationAcknowledge={() => store.acknowledgeNarration()}
+				onNarrationClick={handleNarrationClick}
 			/>
 		</div>
 	{/if}
 </div>
+
+{#if activePopupIndex !== null}
+	<NarrationPopup
+		journal={store.journal}
+		initialIndex={activePopupIndex}
+		onClose={handleNarrationClose}
+	/>
+{/if}
