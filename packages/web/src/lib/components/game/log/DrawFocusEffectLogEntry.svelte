@@ -21,9 +21,23 @@
 		state: DrawFocusState;
 	}
 
-	const { state: _state, ...attributes }: Props = $props();
+	const { state, ...attributes }: Props = $props();
+	const amount = $derived(state.effect.amount);
 </script>
 
 <div {...standardAttributes(attributes, styles.entry)}>
-	<Text ca="Robant fitxes d'enfocament" es="Robando fichas de enfoque" en="Drawing focus tokens" />
+	<Text ca="Robar %(tokens)" es="Robar %(tokens)" en="Draw %(tokens)">
+		{#snippet tokens()}
+			{#if amount === 1}
+				<Text ca="1 fitxa de focus" es="1 ficha de foco" en="1 focus token" />
+			{:else}
+				<Text
+					ca="%(amount) fitxes de focus"
+					es="%(amount) fichas de foco"
+					en="%(amount) focus tokens"
+					{amount}
+				/>
+			{/if}
+		{/snippet}
+	</Text>
 </div>
