@@ -319,7 +319,7 @@ export interface ForEachStepProps<S extends ProcedureState, N extends keyof S & 
 	 * Declared as a method signature so callbacks with narrower item types
 	 * are accepted even when `N` is not fully inferred (bivariance).
 	 */
-	where?(state: S, item: S[N]): boolean;
+	where?(state: S, item: NonNullable<S[N]>): boolean;
 
 	/**
 	 * The loop body steps. They receive the same state type `S` as the parent,
@@ -353,7 +353,7 @@ export interface ForEachStepProps<S extends ProcedureState, N extends keyof S & 
 export class ForEachStep<S extends ProcedureState, N extends keyof S & string> extends Step {
 	readonly name: N;
 	readonly items: (state: S) => readonly S[N][];
-	readonly where?: (state: S, item: S[N]) => boolean;
+	readonly where?: (state: S, item: NonNullable<S[N]>) => boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	readonly steps: Record<string, Step>;
 	readonly then?: (state: S) => S;
