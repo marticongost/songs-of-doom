@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, it } from 'vitest';
+import { PopGameContextValue } from '../state/gamestate';
 import { Engine } from './engine';
 import { instructions } from './instructions';
 import { ProcedureDefinition, type ProcedureState } from './procedure';
@@ -24,6 +25,31 @@ interface MinimalGameState {
 
 function testGame(): any {
 	return { players: [] } as MinimalGameState;
+}
+
+/**
+ * Creates a mock game state that records {@link pushContext} / {@link popContext}
+ * calls for verifying {@link ForEachStep} boundContext behaviour.
+ */
+function mockGameWithContext() {
+	const pushCalls: any[] = [];
+	const popCalls: any[] = [];
+
+	const mock: any = {
+		players: [] as any[],
+		pushContext(ctx: any) {
+			pushCalls.push(ctx);
+		},
+		popContext(ctx: any) {
+			popCalls.push(ctx);
+		},
+		mutate(callback: (mutable: any) => void) {
+			callback(mock);
+			return mock;
+		}
+	};
+
+	return { mock, pushCalls, popCalls };
 }
 
 /** Creates a basic procedure registry with a single procedure. */
@@ -281,6 +307,346 @@ describe('Engine with ForEachStep', () => {
 			{ outer: 'a', inner: 1 },
 			{ outer: 'a', inner: 2 },
 			{ outer: 'b', inner: 3 }
+		]);
+	});
+});
+
+describe('Engine with ForEachStep boundContext', () => {
+	it('pushes and pops subjectId context (string shorthand) for each item', () => {
+		expect.assertions(3);
+
+		interface TestState extends ProcedureState {
+			player: string;
+			processed: string[];
+		}
+
+		const { forEach: loop } = instructions<TestState>();
+		const { mock, pushCalls, popCalls } = mockGameWithContext();
+
+		const proc = new ProcedureDefinition({
+			id: ProcedureId.Unimplemented,
+			defaults: { processed: [] } as any,
+			steps: {
+				loop: loop({
+					name: 'player',
+					items: () => ['a', 'b'] as any,
+					boundContext: 'subjectId',
+					steps: {
+						process: (state: TestState) => ({
+							...state,
+							processed: [...state.processed, state.player]
+						})
+					},
+					then: (state: TestState) => ({ ...state, step: 'done' })
+				}),
+				done: (state) => ({ ...state, status: 'complete' })
+			}
+		});
+
+		const engine = Engine.create(
+			registryWith(proc),
+			ProcedureId.Unimplemented,
+			proc.createState(mock, {} as any)
+		);
+
+		const finished = engine.run();
+		expect(finished).toBe(true);
+
+		// Push order: item 'a', then item 'b'.
+		expect(pushCalls).toEqual([{ subjectId: 'a' }, { subjectId: 'b' }]);
+		// Pop order: item 'a' (after first body completes), then item 'b' (after second body).
+		expect(popCalls).toEqual([
+			{ subjectId: PopGameContextValue },
+			{ subjectId: PopGameContextValue }
+		]);
+	});
+
+	it('pushes and pops targetId context (string shorthand) for each item', () => {
+		expect.assertions(3);
+
+		interface TestState extends ProcedureState {
+			enemy: string;
+			processed: string[];
+		}
+
+		const { forEach: loop } = instructions<TestState>();
+		const { mock, pushCalls, popCalls } = mockGameWithContext();
+
+		const proc = new ProcedureDefinition({
+			id: ProcedureId.Unimplemented,
+			defaults: { processed: [] } as any,
+			steps: {
+				loop: loop({
+					name: 'enemy',
+					items: () => ['x', 'y', 'z'] as any,
+					boundContext: 'targetId',
+					steps: {
+						process: (state: TestState) => ({
+							...state,
+							processed: [...state.processed, state.enemy]
+						})
+					},
+					then: (state: TestState) => ({ ...state, step: 'done' })
+				}),
+				done: (state) => ({ ...state, status: 'complete' })
+			}
+		});
+
+		const engine = Engine.create(
+			registryWith(proc),
+			ProcedureId.Unimplemented,
+			proc.createState(mock, {} as any)
+		);
+
+		const finished = engine.run();
+		expect(finished).toBe(true);
+
+		expect(pushCalls).toEqual([{ targetId: 'x' }, { targetId: 'y' }, { targetId: 'z' }]);
+		expect(popCalls).toEqual([
+			{ targetId: PopGameContextValue },
+			{ targetId: PopGameContextValue },
+			{ targetId: PopGameContextValue }
+		]);
+	});
+
+	it('calls boundContext function to build the pushed/popped context', () => {
+		expect.assertions(3);
+
+		interface TestState extends ProcedureState {
+			player: { id: string; name: string };
+			processed: string[];
+		}
+
+		const { forEach: loop } = instructions<TestState>();
+		const { mock, pushCalls, popCalls } = mockGameWithContext();
+
+		const proc = new ProcedureDefinition({
+			id: ProcedureId.Unimplemented,
+			defaults: { processed: [] } as any,
+			steps: {
+				loop: loop({
+					name: 'player',
+					items: () =>
+						[
+							{ id: 'p1', name: 'Alice' },
+							{ id: 'p2', name: 'Bob' }
+						] as any,
+					boundContext: (_state: any, player: { id: string }) =>
+						({
+							subjectId: player.id
+						}) as any,
+					steps: {
+						process: (state: TestState) => ({
+							...state,
+							processed: [...state.processed, state.player.id]
+						})
+					},
+					then: (state: TestState) => ({ ...state, step: 'done' })
+				}),
+				done: (state) => ({ ...state, status: 'complete' })
+			}
+		});
+
+		const engine = Engine.create(
+			registryWith(proc),
+			ProcedureId.Unimplemented,
+			proc.createState(mock, {} as any)
+		);
+
+		const finished = engine.run();
+		expect(finished).toBe(true);
+
+		expect(pushCalls).toEqual([{ subjectId: 'p1' }, { subjectId: 'p2' }]);
+		expect(popCalls).toEqual([
+			{ subjectId: PopGameContextValue },
+			{ subjectId: PopGameContextValue }
+		]);
+	});
+
+	it('does not push or pop context when boundContext is unset', () => {
+		expect.assertions(3);
+
+		interface TestState extends ProcedureState {
+			player: string;
+		}
+
+		const { forEach: loop } = instructions<TestState>();
+		const { mock, pushCalls, popCalls } = mockGameWithContext();
+
+		const proc = new ProcedureDefinition({
+			id: ProcedureId.Unimplemented,
+			steps: {
+				loop: loop({
+					name: 'player',
+					items: () => ['a', 'b'] as any,
+					// boundContext not set
+					steps: {
+						process: () => undefined
+					},
+					then: (state: TestState) => ({ ...state, step: 'done' })
+				}),
+				done: (state) => ({ ...state, status: 'complete' })
+			}
+		});
+
+		const engine = Engine.create(
+			registryWith(proc),
+			ProcedureId.Unimplemented,
+			proc.createState(mock, {} as any)
+		);
+
+		const finished = engine.run();
+		expect(finished).toBe(true);
+
+		expect(pushCalls).toEqual([]);
+		expect(popCalls).toEqual([]);
+	});
+
+	it('skips push/pop for items filtered out by `where`', () => {
+		expect.assertions(3);
+
+		interface TestState extends ProcedureState {
+			player: string;
+			processed: string[];
+		}
+
+		const { forEach: loop } = instructions<TestState>();
+		const { mock, pushCalls, popCalls } = mockGameWithContext();
+
+		const proc = new ProcedureDefinition({
+			id: ProcedureId.Unimplemented,
+			defaults: { processed: [] } as any,
+			steps: {
+				loop: loop({
+					name: 'player',
+					items: () => ['a', 'b', 'c'] as any,
+					boundContext: 'subjectId',
+					where: (_state, item: string) => item !== 'b',
+					steps: {
+						process: (state: TestState) => ({
+							...state,
+							processed: [...state.processed, state.player]
+						})
+					},
+					then: (state: TestState) => ({ ...state, step: 'done' })
+				}),
+				done: (state) => ({ ...state, status: 'complete' })
+			}
+		});
+
+		const engine = Engine.create(
+			registryWith(proc),
+			ProcedureId.Unimplemented,
+			proc.createState(mock, {} as any)
+		);
+
+		const finished = engine.run();
+		expect(finished).toBe(true);
+
+		// 'b' is filtered out — only 'a' and 'c' trigger context.
+		expect(pushCalls).toEqual([{ subjectId: 'a' }, { subjectId: 'c' }]);
+		expect(popCalls).toEqual([
+			{ subjectId: PopGameContextValue },
+			{ subjectId: PopGameContextValue }
+		]);
+	});
+
+	it('does not push context for empty loops', () => {
+		expect.assertions(3);
+
+		interface TestState extends ProcedureState {
+			player: string;
+		}
+
+		const { forEach: loop } = instructions<TestState>();
+		const { mock, pushCalls, popCalls } = mockGameWithContext();
+
+		const proc = new ProcedureDefinition({
+			id: ProcedureId.Unimplemented,
+			steps: {
+				loop: loop({
+					name: 'player',
+					items: () => [] as any,
+					boundContext: 'subjectId',
+					steps: {
+						process: () => undefined
+					},
+					then: (state: TestState) => ({ ...state, step: 'done' })
+				}),
+				done: (state) => ({ ...state, status: 'complete' })
+			}
+		});
+
+		const engine = Engine.create(
+			registryWith(proc),
+			ProcedureId.Unimplemented,
+			proc.createState(mock, {} as any)
+		);
+
+		const finished = engine.run();
+		expect(finished).toBe(true);
+
+		expect(pushCalls).toEqual([]);
+		expect(popCalls).toEqual([]);
+	});
+
+	it('preserves context across pause/resume with InputStep', () => {
+		expect.assertions(5);
+
+		interface TestState extends ProcedureState {
+			player: string;
+			collected: string[];
+		}
+
+		const { forEach: loop, input: askInput } = instructions<TestState>();
+		const { mock, pushCalls, popCalls } = mockGameWithContext();
+
+		const proc = new ProcedureDefinition({
+			id: ProcedureId.Unimplemented,
+			defaults: { collected: [] } as any,
+			steps: {
+				loop: loop({
+					name: 'player',
+					items: () => ['a', 'b'] as any,
+					boundContext: 'subjectId',
+					steps: {
+						ask: askInput({
+							fields: [] as const,
+							then: (state: TestState, _inputs) => ({
+								...state,
+								collected: [...state.collected, state.player]
+							})
+						})
+					},
+					then: (state: TestState) => ({ ...state, step: 'done' })
+				}),
+				done: (state) => ({ ...state, status: 'complete' })
+			}
+		});
+
+		const engine = Engine.create(
+			registryWith(proc),
+			ProcedureId.Unimplemented,
+			proc.createState(mock, {} as any)
+		);
+
+		// First run: pauses for input on first item.
+		let finished = engine.run();
+		expect(finished).toBe(false);
+
+		// Supply input — body step completes, advancing to second item.
+		engine.supplyInput({});
+		finished = engine.run();
+		expect(finished).toBe(false); // paused on second item
+
+		engine.supplyInput({});
+		finished = engine.run();
+		expect(finished).toBe(true);
+
+		expect(pushCalls).toEqual([{ subjectId: 'a' }, { subjectId: 'b' }]);
+		expect(popCalls).toEqual([
+			{ subjectId: PopGameContextValue },
+			{ subjectId: PopGameContextValue }
 		]);
 	});
 });

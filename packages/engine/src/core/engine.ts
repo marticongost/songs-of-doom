@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { PopGameContextValue, type GameContext, type PopGameContext } from '../state/gamestate';
 import type { JournalEntry } from './journal';
 import { noopLogger, type StepLogInfo, type StepLogger } from './logger';
 import type { ProcedureDefinition, ProcedureState } from './procedure';
@@ -286,6 +287,40 @@ export class Engine {
 		throw new Error(`Engine invariant: _loopParentStepId "${parentStepId}" is not a ForEachStep.`);
 	}
 
+	/**
+	 * Resolves the {@link GameContext} to push for a ForEachStep's current item.
+	 */
+	private _resolveForEachPushContext(
+		step: ForEachStep<any, any>,
+		state: ProcedureState,
+		item: unknown
+	): GameContext {
+		const bc = step.boundContext;
+		if (typeof bc === 'function') return bc(state, item);
+		return { [bc!]: item };
+	}
+
+	/**
+	 * Resolves the {@link PopGameContext} to pop when advancing or completing
+	 * a ForEachStep iteration.
+	 */
+	private _resolveForEachPopContext(
+		step: ForEachStep<any, any>,
+		state: ProcedureState,
+		item: unknown
+	): PopGameContext {
+		const bc = step.boundContext;
+		if (typeof bc === 'function') {
+			const ctx = bc(state, item);
+			const pop: PopGameContext = {};
+			for (const key of Object.keys(ctx) as (keyof GameContext)[]) {
+				if (ctx[key] !== undefined) pop[key] = PopGameContextValue;
+			}
+			return pop;
+		}
+		return { [bc!]: PopGameContextValue };
+	}
+
 	private _enterForEachStep(step: ForEachStep<any, any>, state: ProcedureState): void {
 		const parentStepId = state.step;
 		const allItems = step.items(state);
@@ -306,13 +341,19 @@ export class Engine {
 		}
 
 		const currentItem = queue.shift();
+		const game = step.boundContext
+			? state.game.mutate((gameState) =>
+					gameState.pushContext(this._resolveForEachPushContext(step, state, currentItem))
+				)
+			: state.game;
 		this._journal.push({
 			procedureId: this.currentEntry!.procedureId,
 			state: {
 				...state,
 				[step.name]: currentItem,
 				step: step.firstBodyStep,
-				status: 'ongoing'
+				status: 'ongoing',
+				game
 			} as ProcedureState,
 			parentIndex: this.currentEntry!.parentIndex,
 			_loopParentStepId: parentStepId,
@@ -347,13 +388,21 @@ export class Engine {
 		const loopParentStepId = meta ? meta.loopParentStepId : entry._loopParentStepId!;
 		const parentIndex = meta ? meta.parentIndex : entry.parentIndex;
 
+		// Pop the current item's context before advancing or completing.
+		const currentItem = (bodyState as any)[step.name];
+		const gameAfterPop = step.boundContext
+			? bodyState.game.mutate((gameState) =>
+					gameState.popContext(this._resolveForEachPopContext(step, bodyState, currentItem))
+				)
+			: bodyState.game;
+
 		if (nextItem === undefined) {
 			const ns = step.then
-				? step.then({ ...bodyState, step: loopParentStepId, game: bodyState.game })
+				? step.then({ ...bodyState, step: loopParentStepId, game: gameAfterPop })
 				: ({
 						...bodyState,
 						step: loopParentStepId,
-						game: bodyState.game,
+						game: gameAfterPop,
 						status: 'complete'
 					} as ProcedureState);
 
@@ -384,13 +433,21 @@ export class Engine {
 			return;
 		}
 
+		// Push the next item's context.
+		const game = step.boundContext
+			? gameAfterPop.mutate((gameState) =>
+					gameState.pushContext(this._resolveForEachPushContext(step, bodyState, nextItem!))
+				)
+			: gameAfterPop;
+
 		this._journal.push({
 			procedureId,
 			state: {
 				...bodyState,
 				[step.name]: nextItem,
 				step: step.firstBodyStep,
-				status: 'ongoing'
+				status: 'ongoing',
+				game
 			} as ProcedureState,
 			parentIndex,
 			_loopParentStepId: loopParentStepId,

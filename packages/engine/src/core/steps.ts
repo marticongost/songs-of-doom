@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { GameContext } from '../state/gamestate';
 import type { PlayerId } from '../state/identifiers';
 import type { Field } from './input';
 import { type ProcedureState, ProcedureDefinition } from './procedure';
@@ -337,6 +338,19 @@ export interface ForEachStepProps<S extends ProcedureState, N extends keyof S & 
 	 * Defaults to marking the procedure complete if omitted.
 	 */
 	then?: (state: S) => S;
+
+	/**
+	 * When set, each time the iteration variable is set on the state, the game
+	 * context is updated: the item value is pushed as the given context
+	 * variable, and when the iteration advances or the loop ends, the context
+	 * is popped.
+	 *
+	 * A string shorthand pushes/pops that single context key with the item as
+	 * the value. A function receives `(state, item)` and returns a full
+	 * {@link GameContext} — the engine pushes the returned context on entry
+	 * and pops all non-undefined keys on advance/completion.
+	 */
+	boundContext?: 'subjectId' | 'targetId' | ((state: S, item: NonNullable<S[N]>) => GameContext);
 }
 
 /**
@@ -357,8 +371,12 @@ export class ForEachStep<S extends ProcedureState, N extends keyof S & string> e
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	readonly steps: Record<string, Step>;
 	readonly then?: (state: S) => S;
+	readonly boundContext?:
+		| 'subjectId'
+		| 'targetId'
+		| ((state: S, item: NonNullable<S[N]>) => GameContext);
 
-	constructor({ name, items, where, steps, then }: ForEachStepProps<S, N>) {
+	constructor({ name, items, where, steps, then, boundContext }: ForEachStepProps<S, N>) {
 		super();
 		this.name = name;
 		this.items = items;
@@ -375,6 +393,7 @@ export class ForEachStep<S extends ProcedureState, N extends keyof S & string> e
 		}
 		this.steps = wrapped as Record<string, Step>;
 		this.then = then;
+		this.boundContext = boundContext;
 	}
 
 	/** The first body step in insertion order. */
