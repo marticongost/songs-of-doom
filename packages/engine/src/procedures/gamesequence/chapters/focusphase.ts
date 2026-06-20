@@ -13,7 +13,8 @@ export interface FocusPhaseState extends ProcedureState {
 	player?: ReadonlyPlayerState;
 }
 
-const { define, forEach, input, mutateGameState, triggerEffect } = instructions<FocusPhaseState>();
+const { define, forEach, dispatch, input, mutateGameState, triggerEffect } =
+	instructions<FocusPhaseState>();
 
 export const focusPhase = define({
 	id: ProcedureId.FocusPhase,
@@ -21,22 +22,28 @@ export const focusPhase = define({
 		everyPlayer: forEach({
 			name: 'player',
 			items: (state) => state.game.players,
-			where: (_state, player) => player!.defeated,
+			where: (_state, player) => !player.defeated,
+			boundContext: (_state, player) => ({ subjectId: player.id }),
 			steps: {
-				askWhichFocusTokensToKeep: input({
-					fields: (state) => {
-						const { player, game } = state;
-						const hand = player!.focusesHand;
-						const concentration = game.getConcentration(player!.id);
-						return [
-							new FocusesField({
-								name: 'selection',
-								focuses: hand,
-								maxTotalTokens: concentration,
-								required: true
-							})
-						];
+				askWhichFocusTokensToKeep: dispatch((state) => {
+					const { player, game } = state;
+					const hand = player!.focusesHand;
+					const concentration = game.getConcentration(player!.id);
+					if (hand.totalCount() <= concentration) {
+						return () => ({ ...state, step: 'drawNewTokens' });
 					}
+					return input({
+						fields: () => {
+							return [
+								new FocusesField({
+									name: 'selection',
+									focuses: hand,
+									maxTotalTokens: concentration,
+									required: true
+								})
+							];
+						}
+					});
 				}),
 				discardExcessiveTokens: mutateGameState(({ player, focusTokensToKeep }, game) => {
 					const mutablePlayer = game.requirePlayer(player!.id);

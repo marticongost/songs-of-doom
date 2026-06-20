@@ -600,10 +600,7 @@ export abstract class GameState<
 		// feasible anymore?
 	}
 
-	resolveTarget(target: Target): EntityId[] {
-		if (target.selection === 'player-chosen') {
-			throw new Error("Player-chosen targets can't be resolved non interactively");
-		}
+	determinePossibleTargets(target: Target): EntityId[] {
 		const targetIds = new Set<EntityId>();
 
 		if (target.matchesType('current-card')) {
@@ -661,8 +658,17 @@ export abstract class GameState<
 		}
 
 		// TODO: Select by stored variable
-		const possibleTargetIds: EntityId[] = [...targetIds];
-		let resolvedTargetIds: EntityId[];
+
+		return [...targetIds];
+	}
+
+	resolveTarget(target: Target, possibleTargetIds?: EntityId[]): EntityId[] {
+		if (target.selection === 'player-chosen') {
+			throw new Error('Cannot resolve a player-chosen target without player input');
+		}
+
+		possibleTargetIds ??= this.determinePossibleTargets(target);
+		let resolvedTargetIds: EntityId[] = [];
 
 		if (target.selection === 'random') {
 			shuffle(possibleTargetIds);
@@ -807,6 +813,9 @@ export class MutableGameState extends GameState<
 				playerState.deck.push(cardState);
 			}
 		}
+
+		// Fill the player's focus bag
+		playerState.focusesBag = new Counter(character.getFocusTokens());
 
 		this.players.push(playerState);
 		return playerState;

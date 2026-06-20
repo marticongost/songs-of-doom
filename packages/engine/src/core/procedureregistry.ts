@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { emitEvent } from '../procedures/core/emitevent';
-import { resolveTarget } from '../procedures/core/resolvetarget';
 import { triggerCapability } from '../procedures/core/triggercapability';
 import { attachEffectProc } from '../procedures/effects/attachproc';
 import { conditionalEffectProc } from '../procedures/effects/conditionalproc';
@@ -51,7 +50,6 @@ export const procedureDefinitions: Record<ProcedureId, ProcedureDefinition<any>>
 	// Core
 	[ProcedureId.TriggerCapability]: triggerCapability,
 	[ProcedureId.EmitEvent]: emitEvent,
-	[ProcedureId.ResolveTarget]: resolveTarget,
 
 	// Game sequence
 	[ProcedureId.RunCampaign]: runCampaign,

@@ -45,7 +45,7 @@ export class ComputeStep<S extends ProcedureState> extends Step {
  *
  * @example
  * ```typescript
- * const fields = [new TargetField({ name: 'target', target: ... }), new BooleanField({ name: 'confirm', required: false })] as const;
+ * const fields = [new EntitiesField({ name: 'target', entities: [...] }), new BooleanField({ name: 'confirm', required: false })] as const;
  * type Shape = FieldsShape<typeof fields>;
  * // Shape = { target: EntityId[]; confirm: boolean | null }
  * ```
@@ -76,25 +76,25 @@ export type FieldNames<Fields extends ReadonlyArray<Field<any, string, boolean>>
  * ```typescript
  * // Single field, static
  * input({
- *   fields: [new TargetField({ name: 'destinationId', target: ... })],
+ *   fields: [new EntitiesField({ name: 'destinationId', entities: [...] })],
  *   then: (state, inputs) => ({ ...state, step: 'next', destinationId: inputs.destinationId })
  * });
  *
  * // Multiple fields, static
  * input({
- *   fields: [new TargetField({ name: 'target', ... }), new BooleanField({ name: 'confirm' })] as const,
+ *   fields: [new EntitiesField({ name: 'target', entities: [...] }), new BooleanField({ name: 'confirm' })] as const,
  *   then: (state, inputs) => ({ ...state, step: 'next', ...inputs })
  * });
  *
  * // Single field, dynamic (depends on runtime state)
  * input({
- *   fields: (state) => [new TargetField({ name: 'target', target: state.someTarget })],
+ *   fields: (state) => [new EntitiesField({ name: 'target', entities: state.someEntities })],
  *   then: (state, inputs) => ({ ...state, step: 'next', target: inputs.target })
  * });
  *
  * // Multiple fields, dynamic
  * input({
- *   fields: (state) => [new TargetField({ name: 'target', ... }), new ResultField({ name: 'result' })],
+ *   fields: (state) => [new EntitiesField({ name: 'target', entities: state.someEntities }), new ResultField({ name: 'result' })],
  *   then: (state, inputs) => ({ ...state, step: 'next', ...inputs })
  * });
  * ```
@@ -330,7 +330,6 @@ export interface ForEachStepProps<S extends ProcedureState, N extends keyof S & 
 	 * Each value can be a {@link Step} instance or a {@link ProcedureDefinition}
 	 * (automatically wrapped in a {@link CallStep}).
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	steps: Record<string, Step | ProcedureDefinition<any>>;
 
 	/**
@@ -368,7 +367,6 @@ export class ForEachStep<S extends ProcedureState, N extends keyof S & string> e
 	readonly name: N;
 	readonly items: (state: S) => readonly S[N][];
 	readonly where?: (state: S, item: NonNullable<S[N]>) => boolean;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	readonly steps: Record<string, Step>;
 	readonly then?: (state: S) => S;
 	readonly boundContext?:

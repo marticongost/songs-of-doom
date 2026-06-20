@@ -10,7 +10,6 @@ export enum ProcedureId {
 	// Core
 	TriggerCapability = 'TriggerCapability',
 	EmitEvent = 'EmitEvent',
-	ResolveTarget = 'ResolveTarget',
 
 	// Game sequence
 	RunCampaign = 'RunCampaign',

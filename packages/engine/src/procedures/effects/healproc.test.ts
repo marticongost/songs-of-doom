@@ -1,10 +1,9 @@
 import { mock } from '@songsofdoom/common/test-utils';
-import type { HealEffect } from '@songsofdoom/game';
+import { Target, type HealEffect } from '@songsofdoom/game';
 import { describe, expect, it } from 'vitest';
-import { CallStep, ComputeStep } from '../../core/steps';
+import { ComputeStep, DispatchStep } from '../../core/steps';
 import type { MutableGameState, ReadonlyGameState } from '../../state/gamestate';
 import type { MutablePlayerState } from '../../state/playerstate';
-import type { ResolveTargetState } from '../core/resolvetarget';
 import { healEffectProc, type HealEffectState } from './healproc';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -16,44 +15,57 @@ function makeState(effect: HealEffect, game: ReadonlyGameState): HealEffectState
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe('healEffectProc', () => {
-	const resolveTargetStep = healEffectProc.steps.resolveTarget as CallStep<
-		HealEffectState,
-		ResolveTargetState
-	>;
+	const resolveTargetStep = healEffectProc.steps.resolveTarget as DispatchStep<HealEffectState>;
 	const applyHealingStep = healEffectProc.steps.applyHealing as ComputeStep<HealEffectState>;
 
 	describe('resolveTarget step', () => {
-		it('stores the resolved target ID in state.targetId', () => {
+		it('saves the resolved target ID to state.targetId', () => {
 			const effect = mock<HealEffect>({ target: undefined });
-			const game = mock<ReadonlyGameState>();
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => ['crt1'],
+				evaluateScalar: () => 1,
+				resolveTarget: () => ['crt1']
+			});
 			const state = makeState(effect, game);
-			const resolveTargetState = mock<ResolveTargetState>({ resolvedTargetIds: ['crt1'] });
 
-			const result = resolveTargetStep.then(state, resolveTargetState);
+			const resultStep = resolveTargetStep.factory(state);
+			expect(resultStep).toBeInstanceOf(ComputeStep);
 
-			expect(result.targetId).toBe('crt1');
+			const result = (resultStep as ComputeStep<HealEffectState>).logic(state);
+			expect(result!.targetId).toBe('crt1');
 		});
 
-		it('throws when no targets are resolved', () => {
+		it('saves undefined when no possible targets exist', () => {
 			const effect = mock<HealEffect>({ target: undefined });
-			const game = mock<ReadonlyGameState>();
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => [],
+				evaluateScalar: () => 1,
+				resolveTarget: () => []
+			});
 			const state = makeState(effect, game);
-			const resolveTargetState = mock<ResolveTargetState>({ resolvedTargetIds: [] });
 
-			expect(() => resolveTargetStep.then(state, resolveTargetState)).toThrow(
-				'Expected exactly one target'
-			);
+			const resultStep = resolveTargetStep.factory(state);
+			expect(resultStep).toBeInstanceOf(ComputeStep);
+
+			const result = (resultStep as ComputeStep<HealEffectState>).logic(state);
+			expect(result!.targetId).toBeUndefined();
 		});
 
-		it('throws when more than one target is resolved', () => {
-			const effect = mock<HealEffect>({ target: undefined });
-			const game = mock<ReadonlyGameState>();
+		it('resolves a single target even with multiple possibilities', () => {
+			const target = new Target({ type: 'creature', cardinality: 1, selection: 'random' });
+			const effect = mock<HealEffect>({ target });
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => ['crt1', 'crt2'],
+				evaluateScalar: () => 1,
+				resolveTarget: () => ['crt1']
+			});
 			const state = makeState(effect, game);
-			const resolveTargetState = mock<ResolveTargetState>({ resolvedTargetIds: ['crt1', 'crt2'] });
 
-			expect(() => resolveTargetStep.then(state, resolveTargetState)).toThrow(
-				'Expected exactly one target'
-			);
+			const resultStep = resolveTargetStep.factory(state);
+			expect(resultStep).toBeInstanceOf(ComputeStep);
+
+			const result = (resultStep as ComputeStep<HealEffectState>).logic(state);
+			expect(result!.targetId).toBe('crt1');
 		});
 	});
 

@@ -5,11 +5,11 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
 	BooleanField,
 	CapabilityField,
+	EntitiesField,
 	EntityField,
 	FocusesField,
 	PaymentField,
-	ResultField,
-	TargetField
+	ResultField
 } from './core/input';
 import { ProcedureId } from './core/procedureid';
 import {
@@ -57,8 +57,6 @@ describe('serialiseJournalEntry / deserialiseJournalEntry', () => {
 	});
 
 	it('round-trips a basic journal entry', () => {
-		expect.assertions(2);
-
 		const entry = makeEntry();
 		const json = serialiseJournalEntry(entry, context);
 		const restored = deserialiseJournalEntry(json, context);
@@ -68,8 +66,6 @@ describe('serialiseJournalEntry / deserialiseJournalEntry', () => {
 	});
 
 	it('round-trips an entry with parentIndex', () => {
-		expect.assertions(1);
-
 		const entry = makeEntry({ parentIndex: 3 });
 		const json = serialiseJournalEntry(entry, context);
 		const restored = deserialiseJournalEntry(json, context);
@@ -78,8 +74,6 @@ describe('serialiseJournalEntry / deserialiseJournalEntry', () => {
 	});
 
 	it('round-trips an entry with loop internals', () => {
-		expect.assertions(2);
-
 		const entry = makeEntry({
 			_loopParentStepId: 'foreach_1',
 			_loopQueue: [10, 20, 30]
@@ -92,8 +86,6 @@ describe('serialiseJournalEntry / deserialiseJournalEntry', () => {
 	});
 
 	it('round-trips a completed entry', () => {
-		expect.assertions(1);
-
 		const entry = makeEntry({
 			state: { step: 'done', status: 'complete', game: testGame() }
 		});
@@ -104,8 +96,6 @@ describe('serialiseJournalEntry / deserialiseJournalEntry', () => {
 	});
 
 	it('round-trips a cancelled entry', () => {
-		expect.assertions(1);
-
 		const entry = makeEntry({
 			state: { step: 'done', status: 'cancelled', game: testGame() }
 		});
@@ -122,24 +112,18 @@ describe('serialiseJournalEntry / deserialiseJournalEntry', () => {
 
 describe('createEngineSerialisationContext', () => {
 	it('returns a context that resolves talents from talent data', () => {
-		expect.assertions(2);
 		const context = createEngineSerialisationContext();
-
 		const lightArmour = context.resolveTalent('light-armour');
 		expect(lightArmour).toBeDefined();
 		expect(lightArmour!.id).toBe('light-armour');
 	});
 
 	it('returns undefined for unknown talent ids', () => {
-		expect.assertions(1);
-
 		const context = createEngineSerialisationContext();
 		expect(context.resolveTalent('nonexistent')).toBeUndefined();
 	});
 
 	it('resolves known stats', () => {
-		expect.assertions(2);
-
 		const context = createEngineSerialisationContext();
 		const strength = context.resolveStat('strength');
 		expect(strength).toBeDefined();
@@ -147,15 +131,11 @@ describe('createEngineSerialisationContext', () => {
 	});
 
 	it('resolves known events without throwing', () => {
-		expect.assertions(1);
-
 		const context = createEngineSerialisationContext();
 		expect(() => context.resolveEvent('attacks')).not.toThrow();
 	});
 
 	it('resolves known slots without throwing', () => {
-		expect.assertions(1);
-
 		const context = createEngineSerialisationContext();
 		expect(() => context.resolveSlot('hand')).not.toThrow();
 	});
@@ -185,29 +165,19 @@ describe('engineSerialisation — fields', () => {
 	// @type branding
 	// -------------------------------------------------------------------
 
-	it('brands TargetField with @type', () => {
-		expect.assertions(1);
-		const field = new TargetField({ name: 'dest', target: new Game.Target('player') });
-		const json = serialiseToObject(field);
-		expect(json['@type']).toBe('TargetField');
-	});
-
 	it('brands FocusesField with @type', () => {
-		expect.assertions(1);
 		const field = new FocusesField({ name: 'f', focuses: new Counter() });
 		const json = serialiseToObject(field);
 		expect(json['@type']).toBe('FocusesField');
 	});
 
 	it('brands BooleanField with @type', () => {
-		expect.assertions(1);
 		const field = new BooleanField({ name: 'confirm' });
 		const json = serialiseToObject(field);
 		expect(json['@type']).toBe('BooleanField');
 	});
 
 	it('brands CapabilityField with @type', () => {
-		expect.assertions(1);
 		const field = new CapabilityField({
 			name: 'reaction',
 			choices: new Set<CapabilityRef>()
@@ -217,14 +187,12 @@ describe('engineSerialisation — fields', () => {
 	});
 
 	it('brands ResultField with @type', () => {
-		expect.assertions(1);
 		const field = new ResultField({ name: 'result' });
 		const json = serialiseToObject(field);
 		expect(json['@type']).toBe('ResultField');
 	});
 
 	it('brands PaymentField with @type', () => {
-		expect.assertions(1);
 		const field = new PaymentField({
 			name: 'cost',
 			cost: new Game.ActualCapabilityCost({ health: 2 })
@@ -234,10 +202,15 @@ describe('engineSerialisation — fields', () => {
 	});
 
 	it('brands EntityField with @type', () => {
-		expect.assertions(1);
 		const field = new EntityField({ name: 'target', entities: [] });
 		const json = serialiseToObject(field);
 		expect(json['@type']).toBe('EntityField');
+	});
+
+	it('brands EntitiesField with @type', () => {
+		const field = new EntitiesField({ name: 'targets', entities: [] });
+		const json = serialiseToObject(field);
+		expect(json['@type']).toBe('EntitiesField');
 	});
 
 	// -------------------------------------------------------------------
@@ -245,7 +218,6 @@ describe('engineSerialisation — fields', () => {
 	// -------------------------------------------------------------------
 
 	it('round-trips a BooleanField', () => {
-		expect.assertions(2);
 		const field = new BooleanField({ name: 'confirm', required: false });
 		const restored = roundTrip(field);
 		expect(restored.name).toBe('confirm');
@@ -253,23 +225,13 @@ describe('engineSerialisation — fields', () => {
 	});
 
 	it('round-trips a ResultField', () => {
-		expect.assertions(2);
 		const field = new ResultField({ name: 'outcome' });
 		const restored = roundTrip(field);
 		expect(restored.name).toBe('outcome');
 		expect(restored.required).toBe(true);
 	});
 
-	it('round-trips a TargetField with target properties', () => {
-		expect.assertions(2);
-		const field = new TargetField({ name: 'dest', target: new Game.Target('player') });
-		const restored = roundTrip(field);
-		expect(restored.name).toBe('dest');
-		expect(restored.target.constructor.name).toBe('Target');
-	});
-
 	it('round-trips a PaymentField with cost', () => {
-		expect.assertions(2);
 		const field = new PaymentField({
 			name: 'cost',
 			cost: new Game.ActualCapabilityCost({ health: 3 })
@@ -280,15 +242,27 @@ describe('engineSerialisation — fields', () => {
 	});
 
 	it('round-trips an EntityField with entity ids', () => {
-		expect.assertions(2);
 		const field = new EntityField({ name: 'target', entities: ['plr1', 'plr2'] });
 		const restored = roundTrip(field);
 		expect(restored.name).toBe('target');
 		expect(restored.entities).toEqual(['plr1', 'plr2']);
 	});
 
+	it('round-trips an EntitiesField with entity ids, min and max', () => {
+		const field = new EntitiesField({
+			name: 'targets',
+			entities: ['plr1', 'plr2'],
+			min: 2,
+			max: 4
+		});
+		const restored = roundTrip(field);
+		expect(restored.name).toBe('targets');
+		expect(restored.entities).toEqual(['plr1', 'plr2']);
+		expect(restored.min).toBe(2);
+		expect(restored.max).toBe(4);
+	});
+
 	it('round-trips a CapabilityField with Set of choices', () => {
-		expect.assertions(2);
 		const ref: CapabilityRef = { cardId: 'trt1', capabilityId: 'foo' };
 		const field = new CapabilityField({
 			name: 'reaction',

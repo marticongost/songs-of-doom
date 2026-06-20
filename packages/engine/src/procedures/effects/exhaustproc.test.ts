@@ -1,11 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { mock } from '@songsofdoom/common/test-utils';
 import { Target, type ExhaustEffect } from '@songsofdoom/game';
 import { describe, expect, it } from 'vitest';
-import { CallStep, ComputeStep } from '../../core/steps';
+import { ComputeStep, DispatchStep } from '../../core/steps';
 import type { MutableCardState } from '../../state/cardstate';
 import type { MutableGameState, ReadonlyGameState } from '../../state/gamestate';
-import type { CardId } from '../../state/identifiers';
-import type { ResolveTargetState } from '../core/resolvetarget';
+import type { CardId, EntityId } from '../../state/identifiers';
 import { exhaustEffectProc, type ExhaustEffectState } from './exhaustproc';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -19,7 +19,6 @@ function setupMutateGame(
 	cards: Record<string, MutableCardState>
 ): ReadonlyGameState {
 	const mutatedGame = mock<ReadonlyGameState>();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	(game as any).mutate.mockImplementation((cb: (mutable: MutableGameState) => void) => {
 		const mutableGame = mock<MutableGameState>({
 			requireCard: (id: string) => {
@@ -40,64 +39,89 @@ describe('exhaustEffectProc', () => {
 	// ── resolveTarget ────────────────────────────────────────────────────
 
 	describe('resolveTarget step', () => {
-		const resolveTargetStep = exhaustEffectProc.steps.resolveTargets as CallStep<
-			ExhaustEffectState,
-			ResolveTargetState
-		>;
+		const resolveTargetStep = exhaustEffectProc.steps
+			.resolveTargets as DispatchStep<ExhaustEffectState>;
 
 		it('passes effect.target as the target to resolve, with not(exhausted) condition', () => {
 			const target = new Target('enemy');
 			const effect = mock<ExhaustEffect>({ target } as unknown as ExhaustEffect);
-			const game = mock<ReadonlyGameState>();
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => ['card1' as EntityId],
+				evaluateScalar: () => 1,
+				resolveTarget: () => []
+			});
 
-			const params = resolveTargetStep.parameters(makeState(effect, game));
+			const resultStep = resolveTargetStep.factory(makeState(effect, game));
+			expect(resultStep).toBeInstanceOf(ComputeStep);
 
-			// The target retains the original type but gains a not(exhausted) condition
-			expect(params.target).toBeInstanceOf(Target);
-			expect((params.target as Target).type).toEqual(new Set(['enemy']));
-			expect((params.target as Target).condition).toBeDefined();
+			// The factory calls determinePossibleTargets with a target that includes not(exhausted)
+			expect(game.determinePossibleTargets).toHaveBeenCalled();
+			const calledTarget = (game.determinePossibleTargets as any).mock.calls[0][0] as Target;
+			expect(calledTarget).toBeInstanceOf(Target);
+			expect(calledTarget.condition).toBeDefined();
 		});
 
 		it('defaults to current-card when effect has no target', () => {
 			const effect = mock<ExhaustEffect>({ target: undefined } as ExhaustEffect);
-			const game = mock<ReadonlyGameState>();
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => ['card1' as EntityId],
+				evaluateScalar: () => 1,
+				resolveTarget: () => []
+			});
 
-			const params = resolveTargetStep.parameters(makeState(effect, game));
+			const resultStep = resolveTargetStep.factory(makeState(effect, game));
+			expect(resultStep).toBeInstanceOf(ComputeStep);
 
-			expect(params.target).toBeInstanceOf(Target);
-			expect((params.target as Target).type).toEqual(new Set(['current-card']));
+			const state = (resultStep as ComputeStep<ExhaustEffectState>).logic(makeState(effect, game));
+			expect(state?.targetIds).toEqual(['card1']);
 		});
 
 		it('filters out already exhausted cards via satisfying(not(exhausted))', () => {
 			const effect = mock<ExhaustEffect>({ target: undefined } as ExhaustEffect);
-			const game = mock<ReadonlyGameState>();
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => ['card1' as EntityId],
+				evaluateScalar: () => 1,
+				resolveTarget: () => []
+			});
 
-			const params = resolveTargetStep.parameters(makeState(effect, game));
+			const resultStep = resolveTargetStep.factory(makeState(effect, game));
+			expect(resultStep).toBeInstanceOf(ComputeStep);
 
 			// The condition should be set (not(exhausted)) to filter out exhausted cards
-			expect((params.target as Target).condition).toBeDefined();
+			const calledTarget = (game.determinePossibleTargets as any).mock.calls[0][0] as Target;
+			expect(calledTarget.condition).toBeDefined();
 		});
 
 		it('saves resolved target IDs to state.targetIds', () => {
-			const effect = mock<ExhaustEffect>();
-			const game = mock<ReadonlyGameState>();
+			const effect = mock<ExhaustEffect>({ target: undefined } as unknown as ExhaustEffect);
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => ['card1' as EntityId, 'card2' as EntityId],
+				evaluateScalar: () => 3,
+				resolveTarget: () => []
+			});
 			const state = makeState(effect, game);
 
-			const result = resolveTargetStep.then(state, {
-				resolvedTargetIds: ['card1', 'card2']
-			} as unknown as ResolveTargetState);
+			const resultStep = resolveTargetStep.factory(state);
+			expect(resultStep).toBeInstanceOf(ComputeStep);
 
-			expect(result.targetIds).toEqual(['card1', 'card2']);
+			const result = (resultStep as ComputeStep<ExhaustEffectState>).logic(state);
+			expect(result?.targetIds).toEqual(['card1', 'card2']);
 		});
 
 		it('defaults to empty array when no targets are resolved', () => {
-			const effect = mock<ExhaustEffect>();
-			const game = mock<ReadonlyGameState>();
+			const effect = mock<ExhaustEffect>({ target: undefined } as unknown as ExhaustEffect);
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => [],
+				evaluateScalar: () => 1,
+				resolveTarget: () => []
+			});
 			const state = makeState(effect, game);
 
-			const result = resolveTargetStep.then(state, {} as unknown as ResolveTargetState);
+			const resultStep = resolveTargetStep.factory(state);
+			expect(resultStep).toBeInstanceOf(ComputeStep);
 
-			expect(result.targetIds).toEqual([]);
+			const result = (resultStep as ComputeStep<ExhaustEffectState>).logic(state);
+			expect(result?.targetIds).toEqual([]);
 		});
 	});
 

@@ -1,10 +1,9 @@
 import { mock } from '@songsofdoom/common/test-utils';
 import { Target, type DiscardFromHandEffect } from '@songsofdoom/game';
 import { describe, expect, it } from 'vitest';
-import { CallStep, ComputeStep, ForEachStep } from '../../core/steps';
+import { ComputeStep, DispatchStep, ForEachStep } from '../../core/steps';
 import type { MutableCardState } from '../../state/cardstate';
 import type { MutableGameState, ReadonlyGameState } from '../../state/gamestate';
-import type { ResolveTargetState } from '../core/resolvetarget';
 import { discardFromHandEffectProc, type DiscardFromHandEffectState } from './discardfromhandproc';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -22,42 +21,58 @@ describe('discardFromHandEffectProc', () => {
 	// ── resolvePlayers ────────────────────────────────────────────────────
 
 	describe('resolvePlayers step', () => {
-		const resolvePlayersStep = discardFromHandEffectProc.steps.resolvePlayers as CallStep<
-			DiscardFromHandEffectState,
-			ResolveTargetState
-		>;
+		const resolvePlayersStep = discardFromHandEffectProc.steps
+			.resolvePlayers as DispatchStep<DiscardFromHandEffectState>;
 
-		it('passes effect.players as the target when defined', () => {
+		it('resolves players using effect.players', () => {
 			const playersTarget = new Target('player');
 			const effect = mock<DiscardFromHandEffect>({ players: playersTarget });
-			const game = mock<ReadonlyGameState>();
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => ['plr1'],
+				evaluateScalar: () => 1
+			});
+			const state = makeState(effect, game);
 
-			const params = resolvePlayersStep.parameters(makeState(effect, game));
+			const resultStep = resolvePlayersStep.factory(state);
+			expect(resultStep).toBeInstanceOf(ComputeStep);
 
-			expect(params.target).toBe(playersTarget);
+			expect(game.determinePossibleTargets).toHaveBeenCalled();
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const calledTarget = (game.determinePossibleTargets as any).mock.calls[0][0] as Target;
+			expect(calledTarget).toBe(playersTarget);
+
+			const result = (resultStep as ComputeStep<DiscardFromHandEffectState>).logic(state);
+			expect(result!.playerIds).toEqual(['plr1']);
 		});
 
 		it('defaults to active-player when players is undefined', () => {
 			const effect = mock<DiscardFromHandEffect>({ players: undefined });
-			const game = mock<ReadonlyGameState>();
-
-			const params = resolvePlayersStep.parameters(makeState(effect, game));
-
-			expect(params.target).toBeInstanceOf(Target);
-		});
-
-		it('saves resolvedTargetIds to state.playerIds, defaulting to empty array', () => {
-			const effect = mock<DiscardFromHandEffect>();
-			const game = mock<ReadonlyGameState>();
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => ['plr1'],
+				evaluateScalar: () => 1
+			});
 			const state = makeState(effect, game);
 
-			const withIds = resolvePlayersStep.then(state, {
-				resolvedTargetIds: ['plr1', 'plr2']
-			} as unknown as ResolveTargetState);
-			expect(withIds.playerIds).toEqual(['plr1', 'plr2']);
+			resolvePlayersStep.factory(state);
+			expect(game.determinePossibleTargets).toHaveBeenCalled();
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const calledTarget = (game.determinePossibleTargets as any).mock.calls[0][0] as Target;
+			expect(calledTarget).toBeInstanceOf(Target);
+		});
 
-			const withoutIds = resolvePlayersStep.then(state, {} as unknown as ResolveTargetState);
-			expect(withoutIds.playerIds).toEqual([]);
+		it('saves an empty array when no players match', () => {
+			const effect = mock<DiscardFromHandEffect>();
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => [],
+				evaluateScalar: () => 1
+			});
+			const state = makeState(effect, game);
+
+			const resultStep = resolvePlayersStep.factory(state);
+			expect(resultStep).toBeInstanceOf(ComputeStep);
+
+			const result = (resultStep as ComputeStep<DiscardFromHandEffectState>).logic(state);
+			expect(result!.playerIds).toEqual([]);
 		});
 	});
 
@@ -83,33 +98,53 @@ describe('discardFromHandEffectProc', () => {
 		// ── chooseCards body step ─────────────────────────────────────────
 
 		describe('chooseCards resolve target step', () => {
-			const chooseCardsStep = forEachStep.steps.chooseCards as CallStep<
-				DiscardFromHandEffectState,
-				ResolveTargetState
-			>;
+			const chooseCardsStep = forEachStep.steps
+				.chooseCards as DispatchStep<DiscardFromHandEffectState>;
 
-			it('passes effect.cards as the target', () => {
+			it('resolves cards using effect.cards', () => {
 				const cardsTarget = new Target('skill');
 				const effect = mock<DiscardFromHandEffect>({ cards: cardsTarget });
-				const game = mock<ReadonlyGameState>();
-
-				const params = chooseCardsStep.parameters(makeState(effect, game));
-
-				expect(params.target).toBe(cardsTarget);
-			});
-
-			it('saves resolvedTargetIds to state.selectedCardIds, defaulting to empty array', () => {
-				const effect = mock<DiscardFromHandEffect>();
-				const game = mock<ReadonlyGameState>();
+				const game = mock<ReadonlyGameState>({
+					determinePossibleTargets: () => ['skl1'],
+					evaluateScalar: () => 1
+				});
 				const state = makeState(effect, game);
 
-				const withIds = chooseCardsStep.then(state, {
-					resolvedTargetIds: ['skl1', 'skl2']
-				} as unknown as ResolveTargetState);
-				expect(withIds.selectedCardIds).toEqual(['skl1', 'skl2']);
+				chooseCardsStep.factory(state);
+				expect(game.determinePossibleTargets).toHaveBeenCalled();
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				const calledTarget = (game.determinePossibleTargets as any).mock.calls[0][0] as Target;
+				expect(calledTarget).toBe(cardsTarget);
+			});
 
-				const withoutIds = chooseCardsStep.then(state, {} as unknown as ResolveTargetState);
-				expect(withoutIds.selectedCardIds).toEqual([]);
+			it('saves resolved IDs to state.selectedCardIds', () => {
+				const effect = mock<DiscardFromHandEffect>();
+				const game = mock<ReadonlyGameState>({
+					determinePossibleTargets: () => ['skl1', 'skl2'],
+					evaluateScalar: () => 3
+				});
+				const state = makeState(effect, game);
+
+				const resultStep = chooseCardsStep.factory(state);
+				expect(resultStep).toBeInstanceOf(ComputeStep);
+
+				const result = (resultStep as ComputeStep<DiscardFromHandEffectState>).logic(state);
+				expect(result!.selectedCardIds).toEqual(['skl1', 'skl2']);
+			});
+
+			it('saves an empty array when no cards match', () => {
+				const effect = mock<DiscardFromHandEffect>();
+				const game = mock<ReadonlyGameState>({
+					determinePossibleTargets: () => [],
+					evaluateScalar: () => 1
+				});
+				const state = makeState(effect, game);
+
+				const resultStep = chooseCardsStep.factory(state);
+				expect(resultStep).toBeInstanceOf(ComputeStep);
+
+				const result = (resultStep as ComputeStep<DiscardFromHandEffectState>).logic(state);
+				expect(result!.selectedCardIds).toEqual([]);
 			});
 		});
 

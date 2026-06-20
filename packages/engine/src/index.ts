@@ -3,12 +3,12 @@ export { Engine } from './core/engine';
 export {
 	BooleanField,
 	CapabilityField,
+	EntitiesField,
 	EntityField,
 	Field,
 	FocusesField,
 	PaymentField,
-	ResultField,
-	TargetField
+	ResultField
 } from './core/input';
 export type { FieldProps } from './core/input';
 export { instructions } from './core/instructions';
@@ -43,7 +43,6 @@ export type { EngineSerialisationContext } from './serialisation';
 
 // State
 export type { EmitEventState } from './procedures/core/emitevent';
-export type { ResolveTargetState } from './procedures/core/resolvetarget';
 export type { TriggerCapabilityState } from './procedures/core/triggercapability';
 export type { AttachEffectProcedureState } from './procedures/effects/attachproc';
 export type { ConditionalEffectState } from './procedures/effects/conditionalproc';

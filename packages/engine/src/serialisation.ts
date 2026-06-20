@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
 	Counter,
 	findConstructors,
@@ -12,11 +11,11 @@ import * as Game from '@songsofdoom/game';
 import {
 	BooleanField,
 	CapabilityField,
+	EntitiesField,
 	EntityField,
 	FocusesField,
 	PaymentField,
-	ResultField,
-	TargetField
+	ResultField
 } from './core/input';
 import type { JournalEntry } from './core/journal';
 import type { ProcedureState } from './core/procedure';
@@ -95,13 +94,13 @@ export const engineSerialisation = new Serialisation<EngineSerialisationContext>
 		ReadonlyWoundResolution,
 
 		// --- Input field types ---
-		TargetField,
 		FocusesField,
 		BooleanField,
 		CapabilityField,
 		ResultField,
 		PaymentField,
 		EntityField,
+		EntitiesField,
 
 		// --- Common types ---
 		Counter,
@@ -290,7 +289,6 @@ export function serialiseJournalEntryWithoutGame(
 	entry: JournalEntry,
 	context: EngineSerialisationContext
 ): object {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { game: _, ...stateWithoutGame } = entry.state;
 	const entryWithoutGame = { ...entry, state: stateWithoutGame };
 	return engineSerialisation.decompose(entryWithoutGame, context) as object;

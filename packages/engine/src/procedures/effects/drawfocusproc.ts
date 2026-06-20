@@ -4,7 +4,6 @@ import type { FocusToken } from '../../../../game/src/models/focus';
 import { instructions, type EffectProcedureState } from '../../core/instructions';
 import { ProcedureId } from '../../core/procedureid';
 import type { EntityId, PlayerId } from '../../state/identifiers';
-import { resolveTarget } from '../core/resolvetarget';
 
 export interface DrawFocusState extends EffectProcedureState<DrawFocusEffect> {
 	/** The players affected by the effect. */
@@ -14,19 +13,15 @@ export interface DrawFocusState extends EffectProcedureState<DrawFocusEffect> {
 	playerDrawnTokens?: Map<PlayerId, Counter<FocusToken>>;
 }
 
-const { define, call } = instructions<DrawFocusState>();
+const { define, resolveTargetList } = instructions<DrawFocusState>();
 
 export const drawFocusEffectProc = define({
 	id: ProcedureId.DrawFocusEffect,
 	steps: {
-		selectPlayers: call({
-			procedure: resolveTarget,
-			parameters: ({ effect }) => ({ target: effect.players }),
-			then: (state, { resolvedTargetIds }) => ({
-				...state,
-				playerIds: resolvedTargetIds as PlayerId[]
-			})
-		}),
+		selectPlayers: resolveTargetList(
+			({ effect }) => effect.players ?? 'active-player',
+			'playerIds'
+		),
 		drawTokens(state) {
 			const { game, playerIds, effect } = state;
 			const playerDrawnTokens = new Map<EntityId, Counter<FocusToken>>();

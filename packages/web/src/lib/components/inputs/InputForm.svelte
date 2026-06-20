@@ -13,11 +13,11 @@ unknown field types show a fallback placeholder.
 	import {
 		BooleanField,
 		CapabilityField,
+		EntitiesField,
 		EntityField,
 		FocusesField,
 		PaymentField,
 		ResultField,
-		TargetField,
 		type CapabilityRef
 	} from '@songsofdoom/engine';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
@@ -92,15 +92,15 @@ unknown field types show a fallback placeholder.
 					value={values[field.name] as CapabilityRef | null}
 					onchange={(v) => _handleChange(field.name, v)}
 				/>
-			{:else if field instanceof TargetField}
-				<!-- TODO: 6.2 TargetFieldInput -->
-				<div class="field-placeholder">TargetField — not yet implemented</div>
 			{:else if field instanceof BooleanField}
 				<!-- TODO: 6.4 BooleanFieldInput -->
 				<div class="field-placeholder">BooleanField — not yet implemented</div>
 			{:else if field instanceof EntityField}
 				<!-- TODO: 6.5 EntityFieldInput -->
 				<div class="field-placeholder">EntityField — not yet implemented</div>
+			{:else if field instanceof EntitiesField}
+				<!-- TODO: 6.5 EntitiesFieldInput -->
+				<div class="field-placeholder">EntitiesField — not yet implemented</div>
 			{:else if field instanceof FocusesField}
 				<!-- TODO: 6.6 FocusesFieldInput -->
 				<div class="field-placeholder">FocusesField — not yet implemented</div>

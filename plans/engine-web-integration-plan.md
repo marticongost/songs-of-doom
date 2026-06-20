@@ -432,15 +432,15 @@ Components are **derived views** — they read from `GameStore` but never mutate
 
 Input fields from the engine map to UI components:
 
-| Field Type        | Component                                       |
-| ----------------- | ----------------------------------------------- |
-| `TargetField`     | Target picker (clickable cards/locations)       |
-| `CapabilityField` | Capability selector (list of actions/reactions) |
-| `BooleanField`    | Checkbox or confirm/cancel buttons              |
-| `EntityField`     | Entity picker (player/ally/creature selection)  |
-| `FocusesField`    | Focus token allocation UI                       |
-| `PaymentField`    | Cost payment UI (choose how to pay)             |
-| `ResultField`     | Result picker (from a test roll)                |
+| Field Type        | Component                                             |
+| ----------------- | ----------------------------------------------------- |
+| `CapabilityField` | Capability selector (list of actions/reactions)       |
+| `BooleanField`    | Checkbox or confirm/cancel buttons                    |
+| `EntityField`     | Single entity picker (player/ally/creature selection) |
+| `EntitiesField`   | Multi entity picker (player/ally/creature selection)  |
+| `FocusesField`    | Focus token allocation UI                             |
+| `PaymentField`    | Cost payment UI (choose how to pay)                   |
+| `ResultField`     | Result picker (from a test roll)                      |
 
 A `InputForm` component dispatches to the appropriate sub-component based on the field's `@type` brand.
 
@@ -596,7 +596,7 @@ migrateJournals().catch(console.error);
 ### Phase 6: Input Components
 
 - [x] **6.1** Create `InputForm.svelte` — dispatches to field-specific components based on `@type`.
-- [ ] **6.2** Create `TargetFieldInput.svelte` — interactive card/location picker.
+- [ ] **6.2** Create `EntitiesFieldInput.svelte` — interactive card/location picker.
 - [x] **6.3** Create `CapabilityInput.svelte` — list of actions/reactions.
 - [ ] **6.4** Create `BooleanInput.svelte` — confirm/cancel.
 - [ ] **6.5** Create `EntityInput.svelte` — player/ally/creature picker.

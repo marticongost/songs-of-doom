@@ -1,5 +1,5 @@
 import type { ReadonlyCounter } from '@songsofdoom/common';
-import type { ActualCapabilityCost, FocusToken, Result, Target } from '@songsofdoom/game';
+import type { ActualCapabilityCost, FocusToken, Result } from '@songsofdoom/game';
 import type { CapabilityRef } from '../state/cardstate';
 import type { EntityId } from '../state/identifiers';
 import type { Payment } from '../state/payment';
@@ -17,26 +17,6 @@ export abstract class Field<T, N extends string = string, R extends boolean = tr
 	constructor({ name, required }: FieldProps<N, R>) {
 		this.name = name;
 		this.required = (required ?? true) as R;
-	}
-}
-
-export interface TargetFieldProps<
-	N extends string = string,
-	R extends boolean = true
-> extends FieldProps<N, R> {
-	target: Target;
-}
-
-export class TargetField<N extends string = string, R extends boolean = true> extends Field<
-	number[],
-	N,
-	R
-> {
-	readonly target: Target;
-
-	constructor({ target, ...baseProps }: TargetFieldProps<N, R>) {
-		super(baseProps);
-		this.target = target;
 	}
 }
 
@@ -143,5 +123,32 @@ export class EntityField<
 	constructor({ entities, ...baseProps }: EntityFieldProps<Id, N, R>) {
 		super(baseProps);
 		this.entities = entities;
+	}
+}
+
+export interface EntitiesFieldProps<
+	Id extends EntityId = EntityId,
+	N extends string = string,
+	R extends boolean = true
+> extends FieldProps<N, R> {
+	entities: Id[];
+	min?: number;
+	max?: number;
+}
+
+export class EntitiesField<
+	Id extends EntityId = EntityId,
+	N extends string = string,
+	R extends boolean = true
+> extends Field<Id[], N, R> {
+	readonly entities: Id[];
+	readonly min: number;
+	readonly max: number;
+
+	constructor({ entities, min, max, ...baseProps }: EntitiesFieldProps<Id, N, R>) {
+		super(baseProps);
+		this.entities = entities;
+		this.min = min ?? 0;
+		this.max = max ?? entities.length;
 	}
 }

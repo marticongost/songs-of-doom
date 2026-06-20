@@ -8,11 +8,10 @@ import {
 	type TargetType
 } from '@songsofdoom/game';
 import { type EmitEventState, type EventContext } from '../procedures/core/emitevent';
-import type { ResolveTargetState } from '../procedures/core/resolvetarget';
 import { triggerEffect, type TriggerEffectProps } from '../procedures/core/triggereffect';
 import type { MutableGameState } from '../state/gamestate';
-import type { PlayerId } from '../state/identifiers';
-import type { Field } from './input';
+import type { EntityId, PlayerId } from '../state/identifiers';
+import { EntitiesField, EntityField, type Field } from './input';
 import {
 	ProcedureDefinition,
 	type ProcedureDefinitionProps,
@@ -195,7 +194,7 @@ export function instructions<S extends ProcedureState>() {
 					if (typeof result === 'function')
 						return new ComputeStep({ logic: result as (s: S) => S | undefined });
 					// Plain object — wrap in a ComputeStep that always returns it.
-					return new ComputeStep({ logic: () => result as S | undefined });
+					return new ComputeStep({ logic: (state) => ({ ...state, ...result }) });
 				}
 			}),
 
@@ -257,24 +256,37 @@ export function instructions<S extends ProcedureState>() {
 			target: Target<T> | TargetSpec<T> | ((state: S) => Target<T> | TargetSpec<T>),
 			fieldName: string & keyof S,
 			playerId?: PlayerId
-		): CallStep<S, ResolveTargetState> => {
-			return new CallStep<S, ResolveTargetState>({
-				procedureId: ProcedureId.ResolveTarget,
-				parameters: (state) => ({
-					target: finalise(Target, typeof target === 'function' ? target(state) : target),
-					playerId
-				}),
-				then: (state, childResult) => {
-					const resolvedIds = childResult.resolvedTargetIds;
-					if (!resolvedIds || resolvedIds.length !== 1) {
-						throw new Error(
-							`Expected exactly one target to be resolved, but got ${resolvedIds?.length ?? 0}`
-						);
+		): DispatchStep<S> =>
+			new DispatchStep<S>({
+				factory: (state) => {
+					const actualTarget: Target<T> = finalise(
+						Target,
+						typeof target === 'function' ? target(state) : target
+					);
+					const possibleTargetIds = state.game.determinePossibleTargets(actualTarget);
+					let targetId: EntityId;
+
+					if (possibleTargetIds.length < 2) {
+						targetId = possibleTargetIds[0];
+					} else if (actualTarget.selection === 'player-chosen') {
+						return new InputStep<S, [Field<any, string, boolean>]>({
+							playerId,
+							fields: [
+								new EntityField({
+									name: fieldName,
+									entities: possibleTargetIds,
+									required: true
+								})
+							],
+							then: (state, inputResult) => ({ ...state, [fieldName]: inputResult[fieldName] })
+						});
+					} else {
+						targetId = state.game.resolveTarget(actualTarget, possibleTargetIds)[0];
 					}
-					return { ...state, [fieldName]: resolvedIds[0] };
+
+					return new ComputeStep<S>({ logic: (state) => ({ ...state, [fieldName]: targetId }) });
 				}
-			});
-		},
+			}),
 		/**
 		 * Defines a step that resolves a target and returns 1+ results, saving the obtained
 		 * result IDs to the given field in the state.
@@ -289,17 +301,39 @@ export function instructions<S extends ProcedureState>() {
 			target: Target<T> | TargetSpec<T> | ((state: S) => Target<T> | TargetSpec<T>),
 			fieldName: string & keyof S,
 			playerId?: PlayerId
-		): CallStep<S, ResolveTargetState> => {
-			return new CallStep<S, ResolveTargetState>({
-				procedureId: ProcedureId.ResolveTarget,
-				parameters: (state) => ({
-					target: finalise(Target, typeof target === 'function' ? target(state) : target),
-					playerId
-				}),
-				then: (state, childResult) => {
-					return { ...state, [fieldName]: childResult.resolvedTargetIds ?? [] };
+		): DispatchStep<S> =>
+			new DispatchStep<S>({
+				factory: (state) => {
+					const actualTarget: Target<T> = finalise(
+						Target,
+						typeof target === 'function' ? target(state) : target
+					);
+					const possibleTargetIds = state.game.determinePossibleTargets(actualTarget);
+					const min = state.game.evaluateScalar(actualTarget.cardinality.min);
+					const max = state.game.evaluateScalar(actualTarget.cardinality.max);
+					let targetIds: EntityId[];
+
+					if (possibleTargetIds.length <= max) {
+						targetIds = possibleTargetIds;
+					} else if (actualTarget.selection === 'player-chosen') {
+						return new InputStep<S, [Field<any, string, boolean>]>({
+							playerId,
+							fields: [
+								new EntitiesField({
+									name: fieldName,
+									entities: possibleTargetIds,
+									min,
+									max
+								})
+							],
+							then: (state, inputResult) => ({ ...state, [fieldName]: inputResult[fieldName] })
+						});
+					} else {
+						targetIds = state.game.resolveTarget(actualTarget, possibleTargetIds);
+					}
+
+					return new ComputeStep<S>({ logic: (state) => ({ ...state, [fieldName]: targetIds }) });
 				}
-			});
-		}
+			})
 	};
 }

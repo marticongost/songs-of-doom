@@ -1,13 +1,12 @@
 import { mock } from '@songsofdoom/common/test-utils';
 import { ally, creature, skill, Target, type EngageEffect, type Entity } from '@songsofdoom/game';
 import { describe, expect, it } from 'vitest';
-import { CallStep, ComputeStep } from '../../core/steps';
+import { ComputeStep, DispatchStep } from '../../core/steps';
 import type { MutableCardState } from '../../state/cardstate';
 import type { MutableEntityState } from '../../state/entitystate';
 import type { MutableGameState, ReadonlyGameState } from '../../state/gamestate';
 import type { AllyId, CreatureId, EntityId, SkillId } from '../../state/identifiers';
 import type { MutablePlayerState } from '../../state/playerstate';
-import type { ResolveTargetState } from '../core/resolvetarget';
 import { engageEffectProc, type EngageEffectState } from './engageproc';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -66,34 +65,44 @@ describe('engageEffectProc', () => {
 	// ── resolveTargets ────────────────────────────────────────────────────
 
 	describe('resolveTargets step', () => {
-		const resolveTargetsStep = engageEffectProc.steps.resolveTargets as CallStep<
-			EngageEffectState,
-			ResolveTargetState
-		>;
+		const resolveTargetsStep = engageEffectProc.steps
+			.resolveTargets as DispatchStep<EngageEffectState>;
 
-		it('passes effect.target as the target to resolve', () => {
+		it('resolves targets using effect.target', () => {
 			const target = new Target('enemy');
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const effect = mock<EngageEffect>({ target } as any);
-			const game = mock<ReadonlyGameState>();
-
-			const params = resolveTargetsStep.parameters(makeState(effect, game));
-
-			expect(params.target).toBe(target);
-		});
-
-		it('saves resolvedTargetIds to state.targetIds, defaulting to empty array', () => {
-			const effect = mock<EngageEffect>();
-			const game = mock<ReadonlyGameState>();
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => ['crt1', 'crt2'],
+				evaluateScalar: () => 3
+			});
 			const state = makeState(effect, game);
 
-			const withIds = resolveTargetsStep.then(state, {
-				resolvedTargetIds: ['crt1', 'crt2']
-			} as unknown as ResolveTargetState);
-			expect(withIds.targetIds).toEqual(['crt1', 'crt2']);
+			const resultStep = resolveTargetsStep.factory(state);
+			expect(resultStep).toBeInstanceOf(ComputeStep);
 
-			const withoutIds = resolveTargetsStep.then(state, {} as unknown as ResolveTargetState);
-			expect(withoutIds.targetIds).toEqual([]);
+			expect(game.determinePossibleTargets).toHaveBeenCalled();
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const calledTarget = (game.determinePossibleTargets as any).mock.calls[0][0] as Target;
+			expect(calledTarget).toBe(target);
+
+			const result = (resultStep as ComputeStep<EngageEffectState>).logic(state);
+			expect(result!.targetIds).toEqual(['crt1', 'crt2']);
+		});
+
+		it('saves an empty array when no targets match', () => {
+			const effect = mock<EngageEffect>();
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => [],
+				evaluateScalar: () => 1
+			});
+			const state = makeState(effect, game);
+
+			const resultStep = resolveTargetsStep.factory(state);
+			expect(resultStep).toBeInstanceOf(ComputeStep);
+
+			const result = (resultStep as ComputeStep<EngageEffectState>).logic(state);
+			expect(result!.targetIds).toEqual([]);
 		});
 	});
 
@@ -232,7 +241,6 @@ describe('engageEffectProc', () => {
 			const effect = mock<EngageEffect>();
 			const game = mock<ReadonlyGameState>();
 			// A card that is neither ally nor creature (e.g., a skill)
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const subjectEntity = skillCardState('skl1');
 			const target = creatureCardState('crt1');
 

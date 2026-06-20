@@ -1,11 +1,10 @@
 import { mock } from '@songsofdoom/common/test-utils';
 import { Target, type GatherCluesEffect } from '@songsofdoom/game';
 import { describe, expect, it } from 'vitest';
-import { CallStep, ComputeStep } from '../../core/steps';
+import { ComputeStep, DispatchStep } from '../../core/steps';
 import type { MutableCardState } from '../../state/cardstate';
 import type { MutableGameState, ReadonlyGameState } from '../../state/gamestate';
 import { type CardId, type LocationId } from '../../state/identifiers';
-import type { ResolveTargetState } from '../core/resolvetarget';
 import { gatherCluesEffectProc, type GatherCluesEffectState } from './gathercluesproc';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -41,34 +40,44 @@ describe('gatherCluesEffectProc', () => {
 	// ── resolveTargets ────────────────────────────────────────────────────
 
 	describe('resolveTargets step', () => {
-		const resolveTargetsStep = gatherCluesEffectProc.steps.resolveTargets as CallStep<
-			GatherCluesEffectState,
-			ResolveTargetState
-		>;
+		const resolveTargetsStep = gatherCluesEffectProc.steps
+			.resolveTargets as DispatchStep<GatherCluesEffectState>;
 
-		it('passes effect.target as the target to resolve', () => {
+		it('resolves targets using effect.target', () => {
 			const target = new Target('location');
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const effect = mock<GatherCluesEffect>({ target } as any);
-			const game = mock<ReadonlyGameState>();
-
-			const params = resolveTargetsStep.parameters(makeState(effect, game));
-
-			expect(params.target).toBe(target);
-		});
-
-		it('saves resolvedTargetIds to state.locationIds, defaulting to empty array', () => {
-			const effect = mock<GatherCluesEffect>();
-			const game = mock<ReadonlyGameState>();
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => ['loc1', 'loc2'],
+				evaluateScalar: () => 3
+			});
 			const state = makeState(effect, game);
 
-			const withIds = resolveTargetsStep.then(state, {
-				resolvedTargetIds: ['loc1', 'loc2']
-			} as unknown as ResolveTargetState);
-			expect(withIds.locationIds).toEqual(['loc1', 'loc2']);
+			const resultStep = resolveTargetsStep.factory(state);
+			expect(resultStep).toBeInstanceOf(ComputeStep);
 
-			const withoutIds = resolveTargetsStep.then(state, {} as unknown as ResolveTargetState);
-			expect(withoutIds.locationIds).toEqual([]);
+			expect(game.determinePossibleTargets).toHaveBeenCalled();
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const calledTarget = (game.determinePossibleTargets as any).mock.calls[0][0] as Target;
+			expect(calledTarget).toBe(target);
+
+			const result = (resultStep as ComputeStep<GatherCluesEffectState>).logic(state);
+			expect(result!.locationIds).toEqual(['loc1', 'loc2']);
+		});
+
+		it('saves an empty array when no locations match', () => {
+			const effect = mock<GatherCluesEffect>();
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => [],
+				evaluateScalar: () => 1
+			});
+			const state = makeState(effect, game);
+
+			const resultStep = resolveTargetsStep.factory(state);
+			expect(resultStep).toBeInstanceOf(ComputeStep);
+
+			const result = (resultStep as ComputeStep<GatherCluesEffectState>).logic(state);
+			expect(result!.locationIds).toEqual([]);
 		});
 	});
 

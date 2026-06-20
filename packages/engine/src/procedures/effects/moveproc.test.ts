@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { mock } from '@songsofdoom/common/test-utils';
-import { propertyData, type MoveEffect } from '@songsofdoom/game';
+import { propertyData, Target, type MoveEffect } from '@songsofdoom/game';
 import { describe, expect, it } from 'vitest';
-import { CallStep, ComputeStep } from '../../core/steps';
+import { CallStep, ComputeStep, DispatchStep } from '../../core/steps';
 import type { ReadonlyCardState } from '../../state/cardstate';
 import type { MutableGameState, ReadonlyGameState } from '../../state/gamestate';
 import type { CreatureId, LocationId, PlayerId } from '../../state/identifiers';
 import type { ReadonlyLocationState } from '../../state/locationstate';
 import type { ReadonlyPlayerState } from '../../state/playerstate';
 import type { EmitEventState } from '../core/emitevent';
-import type { ResolveTargetState } from '../core/resolvetarget';
 import { moveEffectProc, type MoveEffectState } from './moveproc';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -22,10 +21,8 @@ function makeState(effect: MoveEffect, game: ReadonlyGameState): MoveEffectState
 
 describe('moveEffectProc', () => {
 	const validateStep = moveEffectProc.steps.validate as ComputeStep<MoveEffectState>;
-	const resolveDestinationStep = moveEffectProc.steps.resolveDestination as CallStep<
-		MoveEffectState,
-		ResolveTargetState
-	>;
+	const resolveDestinationStep = moveEffectProc.steps
+		.resolveDestination as DispatchStep<MoveEffectState>;
 	const emitLeavingLocationStep = moveEffectProc.steps.emitLeavingLocation as CallStep<
 		MoveEffectState,
 		EmitEventState
@@ -124,38 +121,53 @@ describe('moveEffectProc', () => {
 	// ── resolveDestination ────────────────────────────────────────────────
 
 	describe('resolveDestination step', () => {
-		it('stores the resolved target ID in state.destinationId', () => {
+		it('stores the resolved destination ID in state.destinationId', () => {
 			const effect = mock<MoveEffect>();
-			const game = mock<ReadonlyGameState>();
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => ['loc5'],
+				evaluateScalar: () => 1,
+				resolveTarget: () => ['loc5']
+			});
 			const state = makeState(effect, game);
-			const resolveTargetState = mock<ResolveTargetState>({ resolvedTargetIds: ['loc5'] });
 
-			const result = resolveDestinationStep.then(state, resolveTargetState);
+			const resultStep = resolveDestinationStep.factory(state);
+			expect(resultStep).toBeInstanceOf(ComputeStep);
 
-			expect(result.destinationId).toBe('loc5');
+			const result = (resultStep as ComputeStep<MoveEffectState>).logic(state);
+			expect(result!.destinationId).toBe('loc5');
 		});
 
-		it('throws when no target is resolved', () => {
+		it('saves undefined when no possible destinations', () => {
 			const effect = mock<MoveEffect>();
-			const game = mock<ReadonlyGameState>();
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => [],
+				evaluateScalar: () => 1,
+				resolveTarget: () => []
+			});
 			const state = makeState(effect, game);
-			const resolveTargetState = mock<ResolveTargetState>({ resolvedTargetIds: [] });
 
-			expect(() => resolveDestinationStep.then(state, resolveTargetState)).toThrow(
-				'Expected exactly one target'
-			);
+			const resultStep = resolveDestinationStep.factory(state);
+			expect(resultStep).toBeInstanceOf(ComputeStep);
+
+			const result = (resultStep as ComputeStep<MoveEffectState>).logic(state);
+			expect(result!.destinationId).toBeUndefined();
 		});
 
-		it('provides a location target with cardinality 1', () => {
+		it('queries possible locations with cardinality 1', () => {
 			const effect = mock<MoveEffect>();
-			const game = mock<ReadonlyGameState>();
+			const game = mock<ReadonlyGameState>({
+				determinePossibleTargets: () => ['loc1'],
+				evaluateScalar: () => 1,
+				resolveTarget: () => ['loc1']
+			});
 			const state = makeState(effect, game);
 
-			const params = resolveDestinationStep.parameters(state);
+			resolveDestinationStep.factory(state);
 
-			expect(params.target).toBeDefined();
-			expect(params.target!.type).toEqual(new Set(['location']));
-			expect(params.target!.cardinality.isSingleTarget()).toBe(true);
+			expect(game.determinePossibleTargets).toHaveBeenCalled();
+			const calledTarget = (game.determinePossibleTargets as any).mock.calls[0][0] as Target;
+			expect(calledTarget.type).toEqual(new Set(['location']));
+			expect(calledTarget.cardinality.isSingleTarget()).toBe(true);
 		});
 	});
 
