@@ -779,7 +779,7 @@ export class MutableGameState extends GameState<
 			throw new Error(`Cannot generate ID for entity type ${idType}`);
 		}
 		this.entityCounts.add(idType);
-		return `${idType}${this.entityCounts.get(idType)}` as CardId;
+		return `${prefix}${this.entityCounts.get(idType)}` as CardId;
 	}
 
 	addPlayer(character: CharacterState): MutablePlayerState {

@@ -1637,7 +1637,7 @@ describe('MutableGameState.addPlayer', () => {
 		expect(player).toBeInstanceOf(MutablePlayerState);
 	});
 
-	it('generates sequential player IDs starting from player1', () => {
+	it('generates sequential player IDs starting from plr1', () => {
 		const game = new MutableGameState({});
 		const character = mock<CharacterState>({
 			archetypes: () => [],
@@ -1651,8 +1651,8 @@ describe('MutableGameState.addPlayer', () => {
 		const p1 = game.addPlayer(character);
 		const p2 = game.addPlayer(character);
 
-		expect(p1.id).toBe('player1');
-		expect(p2.id).toBe('player2');
+		expect(p1.id).toBe('plr1');
+		expect(p2.id).toBe('plr2');
 	});
 
 	it('adds the player to the players array', () => {
@@ -1709,7 +1709,7 @@ describe('MutableGameState.addPlayer', () => {
 		expect(player.attachments).toHaveLength(4);
 		// All attachment cards should be attached to the player
 		for (const card of player.attachments) {
-			expect(card.container).toEqual({ type: 'player', playerId: 'player1' });
+			expect(card.container).toEqual({ type: 'player', playerId: 'plr1' });
 		}
 		// Card entities should match
 		expect(player.attachments[0].card.type).toBe(archetype);
@@ -1735,7 +1735,7 @@ describe('MutableGameState.addPlayer', () => {
 
 		expect(player.deck).toHaveLength(3);
 		for (const card of player.deck) {
-			expect(card.container).toEqual({ type: 'deck', playerId: 'player1' });
+			expect(card.container).toEqual({ type: 'deck', playerId: 'plr1' });
 			expect(card.card.type).toBe(skill);
 		}
 	});
@@ -1803,11 +1803,11 @@ describe('MutableGameState.addPlayer', () => {
 		const p2 = game.addPlayer(character2);
 
 		expect(game.players).toHaveLength(2);
-		expect(p1.id).toBe('player1');
-		expect(p2.id).toBe('player2');
+		expect(p1.id).toBe('plr1');
+		expect(p2.id).toBe('plr2');
 		expect(p1.deck).toHaveLength(1);
 		expect(p2.deck).toHaveLength(2);
-		expect(p1.deck[0].container).toEqual({ type: 'deck', playerId: 'player1' });
-		expect(p2.deck[0].container).toEqual({ type: 'deck', playerId: 'player2' });
+		expect(p1.deck[0].container).toEqual({ type: 'deck', playerId: 'plr1' });
+		expect(p2.deck[0].container).toEqual({ type: 'deck', playerId: 'plr2' });
 	});
 });
