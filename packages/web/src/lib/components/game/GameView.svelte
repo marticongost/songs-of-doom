@@ -8,6 +8,12 @@
 	const styles = css.styles({
 		gameplay: {
 			...css.column('md')
+		},
+		playerRow: {
+			display: 'flex',
+			gap: css.spacing.md,
+			justifyContent: 'center',
+			flexWrap: 'wrap'
 		}
 	});
 </script>
@@ -15,11 +21,13 @@
 <script lang="ts">
 	import GameLog from '$lib/components/game/log/GameLog.svelte';
 	import NarrationPopup from '$lib/components/game/log/NarrationPopup.svelte';
+	import PlayerOverlay from '$lib/components/game/PlayerOverlay.svelte';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
 	import { getGameStore } from '$lib/context/gamestore';
+	import type { PlayerState } from '@songsofdoom/engine';
 	import { ProcedureId } from '@songsofdoom/engine';
 
 	interface Props extends StandardAttributeProps {
@@ -77,9 +85,32 @@
 			.slice(store.presentedJournalLength)
 			.some((e) => e.procedureId === ProcedureId.NarrationEffect && e.state.step)
 	);
+
+	// --- Player overlays ---
+
+	/**
+	 * Player entries with character names, matched from game meta participants.
+	 * Players and participants share the same ordered index.
+	 */
+	const playerEntries = $derived(
+		(store.gameState?.players ?? []).map(
+			(player: PlayerState, i: number): { player: PlayerState; characterName: string } => ({
+				player,
+				characterName: store.gameMeta?.participants[i]?.characterName ?? `Player ${i + 1}`
+			})
+		)
+	);
 </script>
 
 <div {...standardAttributes(attributes, styles.gameplay)}>
+	{#if playerEntries.length > 0}
+		<div class={styles.playerRow}>
+			{#each playerEntries as entry (entry.player.id)}
+				<PlayerOverlay player={entry.player} characterName={entry.characterName} />
+			{/each}
+		</div>
+	{/if}
+
 	<GameLog
 		journal={store.journal}
 		maxVisible={store.presentedJournalLength}
