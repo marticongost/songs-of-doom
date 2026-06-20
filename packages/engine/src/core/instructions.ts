@@ -21,6 +21,7 @@ import {
 import { ProcedureId } from './procedureid';
 import {
 	CallStep,
+	ComputeStep,
 	DispatchStep,
 	ForEachStep,
 	InputStep,
@@ -175,10 +176,28 @@ export function instructions<S extends ProcedureState>() {
 		/**
 		 * Defines a step that dispatches another step based on the current state.
 		 *
-		 * The `factory` function receives the current state and should return the step to
-		 * dispatch to.
+		 * The `factory` function receives the current state and should return:
+		 * - A {@link Step} instance (e.g. from `input()`, `call()`, another `dispatch()`).
+		 * - A plain function `(state) => state` — automatically wrapped in
+		 *   {@link ComputeStep} (same as top-level steps in
+		 *   {@link ProcedureDefinition}).
+		 * - A plain state object — automatically wrapped in {@link ComputeStep} with
+		 *   `logic: () => obj`.
+		 *
+		 * This auto-wrapping matches the behaviour of {@link ProcedureDefinition} and
+		 * {@link ForEachStep} constructors.
 		 */
-		dispatch: (factory: (state: S) => Step): DispatchStep<S> => new DispatchStep({ factory }),
+		dispatch: (factory: (state: S) => Step | ((state: S) => S | undefined) | S): DispatchStep<S> =>
+			new DispatchStep({
+				factory: (state) => {
+					const result = factory(state);
+					if (result instanceof Step) return result;
+					if (typeof result === 'function')
+						return new ComputeStep({ logic: result as (s: S) => S | undefined });
+					// Plain object — wrap in a ComputeStep that always returns it.
+					return new ComputeStep({ logic: () => result as S | undefined });
+				}
+			}),
 
 		/**
 		 * Triggers the child procedure for the given effect.
