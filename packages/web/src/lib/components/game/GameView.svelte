@@ -94,9 +94,9 @@
 	 */
 	const playerEntries = $derived(
 		(store.gameState?.players ?? []).map(
-			(player: PlayerState, i: number): { player: PlayerState; characterName: string } => ({
+			(player: PlayerState): { player: PlayerState; characterName: string } => ({
 				player,
-				characterName: store.gameMeta?.participants[i]?.characterName ?? `Player ${i + 1}`
+				characterName: player.character.name || `Player ${player.id}`
 			})
 		)
 	);

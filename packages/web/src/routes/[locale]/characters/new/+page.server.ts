@@ -63,14 +63,14 @@ export const actions: Actions = {
 		}
 
 		const initial = CharacterState.initial();
+		const stateWithName = new CharacterState({ ...initial, name: name.trim() });
 		const character = await prisma.character.create({
 			data: {
-				name: name.trim(),
 				ownerId: locals.user.id,
 				revisions: {
 					create: {
 						number: 1,
-						state: characterStateToJson(initial) as object,
+						state: characterStateToJson(stateWithName) as object,
 						totalXp: initial.totalXp,
 						finalised: false
 					}

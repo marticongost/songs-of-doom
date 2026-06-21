@@ -58,6 +58,7 @@ import { runCampaign } from './runcampaign';
  */
 function mockCharacter(overrides: Partial<CharacterState> = {}): CharacterState {
 	return mock<CharacterState>({
+		name: 'Test Character',
 		finalised: true,
 		totalXp: 10,
 		gold: 5,

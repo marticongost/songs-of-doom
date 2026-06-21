@@ -35,6 +35,9 @@ export const STARTING_EXPERIENCE = 10;
 
 /** Parameters for the {@link CharacterState} constructor. */
 export interface CharacterStateProps {
+	/** The display name of the character. */
+	name: string;
+
 	/** Indicates whether the character has been finalised (i.e. the character creation
 	 * process has been completed).
 	 */
@@ -57,6 +60,9 @@ export interface CharacterStateProps {
 }
 
 export class CharacterState {
+	/** The display name of the character. */
+	readonly name: string;
+
 	/** Indicates whether the character has been finalised (i.e. the character creation
 	 * process has been completed).
 	 */
@@ -92,7 +98,16 @@ export class CharacterState {
 	/** The number of skill cards the character's deck should have. */
 	readonly skillDeckSize = 20;
 
-	constructor({ finalised, upgrades, skillsDeck, totalXp, gold, portrait }: CharacterStateProps) {
+	constructor({
+		name,
+		finalised,
+		upgrades,
+		skillsDeck,
+		totalXp,
+		gold,
+		portrait
+	}: CharacterStateProps) {
+		this.name = name;
 		this.finalised = finalised;
 		this.upgrades = CharacterState.normaliseUpgrades(upgrades);
 		this.skillsDeck = CharacterState.normaliseSkillDeck(skillsDeck);
@@ -103,6 +118,7 @@ export class CharacterState {
 
 	public static initial(): CharacterState {
 		return new CharacterState({
+			name: '',
 			finalised: false,
 			upgrades: {},
 			skillsDeck: {},

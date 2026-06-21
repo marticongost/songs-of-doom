@@ -10,7 +10,16 @@ const GameListFields = {
 	participants: {
 		select: {
 			userId: true,
-			character: { select: { id: true, name: true } }
+			character: {
+				select: {
+					id: true,
+					revisions: {
+						orderBy: { number: 'desc' },
+						take: 1,
+						select: { state: true }
+					}
+				}
+			}
 		}
 	}
 } as const satisfies Prisma.GameInclude;
@@ -40,6 +49,11 @@ export interface GameListItem {
 // ---------------------------------------------------------------------------
 
 function toGameListItem(record: GameListRecord): GameListItem {
+	const extractName = (state: unknown): string =>
+		(typeof state === 'object' && state !== null && 'name' in state
+			? (state as Record<string, unknown>).name
+			: 'Unnamed') as string;
+
 	return {
 		id: record.id,
 		status: record.status,
@@ -50,7 +64,7 @@ function toGameListItem(record: GameListRecord): GameListItem {
 		participants: record.participants.map((p) => ({
 			userId: p.userId,
 			characterId: p.character.id,
-			characterName: p.character.name
+			characterName: extractName(p.character.revisions[0]?.state)
 		}))
 	};
 }

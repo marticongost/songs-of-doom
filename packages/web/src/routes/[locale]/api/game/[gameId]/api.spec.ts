@@ -144,8 +144,16 @@ describe('GET /api/game/[gameId]', () => {
 			campaignId: 'campaign-1',
 			ownerId: 'user-1',
 			participants: [
-				{ userId: 'user-1', characterId: 1, character: { name: 'Hero' } },
-				{ userId: 'user-2', characterId: 2, character: { name: 'Sidekick' } }
+				{
+					userId: 'user-1',
+					characterId: 1,
+					character: { revisions: [{ state: { name: 'Hero' } }] }
+				},
+				{
+					userId: 'user-2',
+					characterId: 2,
+					character: { revisions: [{ state: { name: 'Sidekick' } }] }
+				}
 			]
 		});
 

@@ -298,7 +298,20 @@ export class GameManager {
 	async startGame(gameId: string): Promise<void> {
 		const game = await prisma.game.findUnique({
 			where: { id: gameId },
-			include: { participants: { include: { character: { include: { revisions: true } } } } }
+			include: {
+				participants: {
+					include: {
+						character: {
+							include: {
+								revisions: {
+									orderBy: { number: 'desc' },
+									take: 1
+								}
+							}
+						}
+					}
+				}
+			}
 		});
 
 		if (!game) {
@@ -639,12 +652,29 @@ export class GameManager {
 				campaignId: true,
 				ownerId: true,
 				participants: {
-					select: { userId: true, characterId: true, character: { select: { name: true } } }
+					select: {
+						userId: true,
+						characterId: true,
+						character: {
+							select: {
+								revisions: {
+									orderBy: { number: 'desc' },
+									take: 1,
+									select: { state: true }
+								}
+							}
+						}
+					}
 				}
 			}
 		});
 
 		if (!game) return null;
+
+		const extractName = (state: unknown): string =>
+			(typeof state === 'object' && state !== null && 'name' in state
+				? (state as Record<string, unknown>).name
+				: 'Unnamed') as string;
 
 		return {
 			status: game.status,
@@ -653,7 +683,7 @@ export class GameManager {
 			participants: game.participants.map((p) => ({
 				userId: p.userId,
 				characterId: p.characterId,
-				characterName: p.character.name
+				characterName: extractName(p.character.revisions[0]?.state)
 			}))
 		};
 	}

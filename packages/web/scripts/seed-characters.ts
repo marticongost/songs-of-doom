@@ -16,7 +16,11 @@ const characters = [
 	{ name: fantasyNames[3], owner: 'jordiseira', totalXp: 10 }
 ];
 
-const initialState = characterStateToJson(CharacterState.initial()) as object;
+const initialState = (name: string): object => {
+	const state = CharacterState.initial();
+	const stateWithName = new CharacterState({ ...state, name });
+	return characterStateToJson(stateWithName) as object;
+};
 
 async function main() {
 	// Get user IDs
@@ -46,14 +50,13 @@ async function main() {
 	for (const char of characters) {
 		const ownerId = userMap.get(char.owner)!;
 
-		const character = await prisma.character.create({
+		await prisma.character.create({
 			data: {
-				name: char.name,
 				ownerId,
 				revisions: {
 					create: {
 						number: 1,
-						state: initialState,
+						state: initialState(char.name),
 						totalXp: char.totalXp,
 						finalised: false
 					}
@@ -61,7 +64,7 @@ async function main() {
 			}
 		});
 
-		console.log(`  Created: ${character.name} (owner: ${char.owner}, XP: ${char.totalXp})`);
+		console.log(`  Created: ${char.name} (owner: ${char.owner}, XP: ${char.totalXp})`);
 	}
 
 	console.log('Done!');

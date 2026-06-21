@@ -119,7 +119,6 @@ Used by both the read-only character view and the edit view.
 	import Text from '$lib/components/localisation/Text.svelte';
 	import StatsSheet from '$lib/components/StatsSheet.svelte';
 	import Toolbar from '$lib/components/toolbar/Toolbar.svelte';
-	import type { Character } from '$lib/models/characters';
 	import type { LocalisedText } from '@songsofdoom/common';
 	import {
 		attributeTypes,
@@ -131,7 +130,6 @@ Used by both the read-only character view and the edit view.
 	import type { Snippet } from 'svelte';
 
 	interface Props {
-		character: Character;
 		/** Current character state; may be reactive in edit mode. */
 		characterState: CharacterState;
 		/** When provided, enables add/remove in card set listings. */
@@ -149,7 +147,6 @@ Used by both the read-only character view and the edit view.
 	}
 
 	const {
-		character,
 		characterState,
 		entityManager,
 		onFilterClick,
@@ -168,7 +165,7 @@ Used by both the read-only character view and the edit view.
 
 <Toolbar>
 	<Portrait portrait={characterState.portrait} onChange={onPortraitChange} circular />
-	<h1 class={styles.characterName}>{character.name}</h1>
+	<h1 class={styles.characterName}>{characterState.name}</h1>
 	{@render toolbarActions?.()}
 	<div class={styles.resources}>
 		<GoldIndicator amount={characterState.gold} />

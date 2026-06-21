@@ -33,7 +33,19 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		where: { id: gameId },
 		include: {
 			participants: {
-				select: { userId: true, characterId: true, character: { select: { name: true } } }
+				select: {
+					userId: true,
+					characterId: true,
+					character: {
+						select: {
+							revisions: {
+								orderBy: { number: 'desc' },
+								take: 1,
+								select: { state: true }
+							}
+						}
+					}
+				}
 			}
 		}
 	});
@@ -48,6 +60,11 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		locals.user.id
 	);
 
+	const extractName = (state: unknown): string =>
+		(typeof state === 'object' && state !== null && 'name' in state
+			? (state as Record<string, unknown>).name
+			: 'Unnamed') as string;
+
 	return json({
 		id: game.id,
 		status: game.status,
@@ -56,7 +73,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		participants: game.participants.map((p) => ({
 			userId: p.userId,
 			characterId: p.characterId,
-			characterName: p.character.name
+			characterName: extractName(p.character.revisions[0]?.state)
 		})),
 		lastAcknowledgedJournalIndex,
 		state

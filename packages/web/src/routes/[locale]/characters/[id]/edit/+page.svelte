@@ -40,6 +40,7 @@
 	function stableStateJson(state: CharacterState): string {
 		const json = characterStateToJson(state);
 		return JSON.stringify({
+			name: json.name,
 			finalised: json.finalised,
 			gold: json.gold,
 			portrait: json.portrait,
@@ -106,7 +107,6 @@
 </script>
 
 <CharacterDetail
-	{character}
 	{characterState}
 	{entityManager}
 	onFilterClick={handleFilterClick}

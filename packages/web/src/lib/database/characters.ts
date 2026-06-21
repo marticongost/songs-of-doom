@@ -46,7 +46,6 @@ export const getCharactersByOwner = async (userId: string): Promise<Character[]>
 export const characterFromRecord = (characterData: CharacterRecord): Character =>
 	new Character({
 		id: characterData.id,
-		name: characterData.name,
 		owner: new User(characterData.owner),
 		revisions: characterData.revisions.map((revision) => ({
 			number: revision.number,

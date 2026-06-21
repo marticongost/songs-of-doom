@@ -48,12 +48,13 @@
 
 	const { state, ...attributes }: Props = $props();
 	const playerDrawnTokens = $derived(state.playerDrawnTokens);
+	console.log(state.game);
 </script>
 
 {#if playerDrawnTokens}
 	<div {...standardAttributes(attributes, styles.entry)}>
 		{#each [...playerDrawnTokens.entries()] as [playerId, counter] (playerId)}
-			{playerId}
+			{state.game.requirePlayer(playerId).character.name}
 			<div class={styles.focusDraw}>
 				{#each focusTypes as focusType (focusType)}
 					{#if focusValues.some((focusValue) => counter.get(makeFocusToken(focusType, focusValue)) > 0)}

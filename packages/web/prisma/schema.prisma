@@ -31,7 +31,6 @@ model Character {
   id              Int                 @id @default(autoincrement())
   ownerId         String
   owner           User                @relation(references: [id], fields: [ownerId], onDelete: Cascade)
-  name            String
   revisions       CharacterRevision[]
   gameParticipant GameParticipant[]
 }

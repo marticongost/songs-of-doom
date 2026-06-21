@@ -4,22 +4,24 @@ import type { User } from './user';
 
 export interface CharacterProps {
 	readonly id: number;
-	readonly name: string;
 	readonly owner: User;
 	readonly revisions: Array<CharacterRevision | CharacterRevisionProps>;
 }
 
 export class Character {
 	readonly id: number;
-	readonly name: string;
 	readonly owner: User;
 	readonly revisions: CharacterRevision[];
 
-	constructor({ id, name, owner, revisions }: CharacterProps) {
+	constructor({ id, owner, revisions }: CharacterProps) {
 		this.id = id;
-		this.name = name;
 		this.owner = owner;
 		this.revisions = revisions.map((revision) => finalise(CharacterRevision, revision));
+	}
+
+	/** The display name of the character, sourced from the latest revision's state. */
+	get name(): string {
+		return this.newestRevision.state.name;
 	}
 
 	get newestRevision(): CharacterRevision {

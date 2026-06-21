@@ -3,6 +3,7 @@ import { mapToRecord } from '../../../../common/src/utils';
 
 /** The JSON specification for the `CharacterRevision.state` database field. */
 export interface CharacterStateJson {
+	name: string;
 	finalised: boolean;
 	upgrades: Record<string, number>;
 	skillsDeck: Record<string, number>;
@@ -12,6 +13,7 @@ export interface CharacterStateJson {
 
 /** Transforms a {@link CharacterState} model into a {@link CharacterStateJson} record. */
 export const characterStateToJson = (state: CharacterState): CharacterStateJson => ({
+	name: state.name,
 	finalised: state.finalised,
 	upgrades: mapToRecord(state.upgrades, { mapKeys: (entity) => entity.variantId }),
 	skillsDeck: mapToRecord(state.skillsDeck, { mapKeys: (skill) => skill.variantId }),
@@ -32,6 +34,7 @@ export const characterStateFromRevision = (revision: {
 	const state = revision.state as CharacterStateJson;
 	return new CharacterState({
 		...state,
+		name: state.name ?? '',
 		totalXp: revision.totalXp
 	} as CharacterStateProps);
 };

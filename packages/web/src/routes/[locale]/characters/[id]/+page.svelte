@@ -10,7 +10,7 @@
 	const characterState = $derived(character.newestRevision.state);
 </script>
 
-<CharacterDetail {character} {characterState} cardSetsLayout="multi-column">
+<CharacterDetail {characterState} cardSetsLayout="multi-column">
 	{#snippet toolbarActions()}
 		{#if canEdit}
 			<ToolbarButton
