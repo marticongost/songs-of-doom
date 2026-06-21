@@ -48,7 +48,6 @@
 
 	const { state, ...attributes }: Props = $props();
 	const playerDrawnTokens = $derived(state.playerDrawnTokens);
-	console.log(state.game);
 </script>
 
 {#if playerDrawnTokens}

@@ -44,6 +44,7 @@ export type { EngineSerialisationContext } from './serialisation';
 // State
 export type { EmitEventState } from './procedures/core/emitevent';
 export type { TriggerCapabilityState } from './procedures/core/triggercapability';
+export type { AddChargesEffectState } from './procedures/effects/addchargesproc';
 export type { AttachEffectProcedureState } from './procedures/effects/attachproc';
 export type { ConditionalEffectState } from './procedures/effects/conditionalproc';
 export type { ConferPropertiesEffectState } from './procedures/effects/conferpropertiesproc';

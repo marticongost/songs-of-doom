@@ -48,6 +48,8 @@
 	} from '@songsofdoom/engine';
 	import { Action, Obligation, Opportunity } from '@songsofdoom/game';
 	import { standardAttributes, type StandardAttributeProps } from '../../standardattributes';
+	import AddChargesEffectLogEntry from './AddChargesEffectLogEntry .svelte';
+	import AddChargesEffectOutcomeEntry from './AddChargesEffectOutcomeEntry.svelte';
 	import AttachEffectLogEntry from './AttachEffectLogEntry.svelte';
 	import ChapterEndPhaseLogEntry from './ChapterEndPhaseLogEntry.svelte';
 	import ChapterLogEntry from './ChapterLogEntry.svelte';
@@ -139,7 +141,7 @@
 
 	/**
 	 * For {@link CallStep} entries, builds the called procedure's state
-	 * via {@link ProcedureDefinition.createState} so the dispatched
+	 * via {@link ProcedureDefinition#createState} so the dispatched
 	 * component receives the right shape.
 	 * Returns `undefined` for non-CallStep entries.
 	 */
@@ -227,6 +229,7 @@
 		[ProcedureId.TurnPlayerActionsPhase]: TurnPlayerActionsPhaseLogEntry,
 		[ProcedureId.TurnCreatureActionsPhase]: TurnCreatureActionsPhaseLogEntry,
 		[ProcedureId.TurnEndPhase]: TurnEndPhaseLogEntry,
+		[ProcedureId.AddChargesEffect]: AddChargesEffectLogEntry,
 		[ProcedureId.AttachEffect]: AttachEffectLogEntry,
 		[ProcedureId.ConferPropertiesEffect]: ConferPropertiesEffectLogEntry,
 		[ProcedureId.ConditionalEffect]: ConditionalEffectLogEntry,
@@ -250,6 +253,7 @@
 	 */
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	const outcomeComponents: Record<string, any> = {
+		[ProcedureId.AddChargesEffect]: AddChargesEffectOutcomeEntry,
 		[ProcedureId.DrawFocusEffect]: DrawFocusEffectOutcomeEntry
 	};
 
