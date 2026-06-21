@@ -12,7 +12,8 @@
 
 	const styles = css.styles({
 		gameLog: {
-			...css.column('sm')
+			...css.column('sm'),
+			fontSize: '0.8em'
 		},
 		entry: {
 			...css.row('xs')
