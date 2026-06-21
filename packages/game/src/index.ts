@@ -43,9 +43,11 @@ export {
 	focusTypes,
 	getFocusTokenType,
 	getFocusTokenValue,
+	makeFocusToken,
 	type FocusesProps,
 	type FocusToken,
-	type FocusType
+	type FocusType,
+	type FocusValue
 } from './models/focus';
 export {
 	agility,

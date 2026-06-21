@@ -72,6 +72,9 @@ export interface FocusTokenProps {
 
 export type FocusToken = `${FocusType}-${FocusValue}`;
 
+export const makeFocusToken = (focus: Focus | FocusType, value: FocusValue): FocusToken =>
+	`${typeof focus === 'string' ? focus : focus.type}-${value}` as FocusToken;
+
 export const getFocusTokenType = (token: FocusToken): FocusType => token.split('-')[0] as FocusType;
 
 export const getFocusTokenValue = (token: FocusToken): FocusValue =>

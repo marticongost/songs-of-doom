@@ -7,16 +7,6 @@
 -->
 <script lang="ts" module>
 	import * as css from '$lib/styles';
-	import {
-		CallStep,
-		DispatchStep,
-		InputStep,
-		ProcedureId,
-		procedureDefinitions,
-		type JournalEntry,
-		type ProcedureState,
-		type Step
-	} from '@songsofdoom/engine';
 
 	const INDENT_PER_LEVEL = 1; // em
 
@@ -31,12 +21,65 @@
 			color: css.text.mutedColor,
 			fontStyle: 'italic'
 		},
+		outcome: {
+			color: css.text.highlightColor
+		},
 		icon: {
 			height: '0.8em',
 			width: 'auto',
 			cursor: 'default'
 		}
 	});
+</script>
+
+<script lang="ts">
+	import InlineSvg from '$lib/components/InlineSvg.svelte';
+	import Text from '$lib/components/localisation/Text.svelte';
+	import type { NarrationEffectState, TriggerCapabilityState } from '@songsofdoom/engine';
+	import {
+		CallStep,
+		DispatchStep,
+		InputStep,
+		ProcedureId,
+		procedureDefinitions,
+		type JournalEntry,
+		type ProcedureState,
+		type Step
+	} from '@songsofdoom/engine';
+	import { Action, Obligation, Opportunity } from '@songsofdoom/game';
+	import { standardAttributes, type StandardAttributeProps } from '../../standardattributes';
+	import AttachEffectLogEntry from './AttachEffectLogEntry.svelte';
+	import ChapterEndPhaseLogEntry from './ChapterEndPhaseLogEntry.svelte';
+	import ChapterLogEntry from './ChapterLogEntry.svelte';
+	import ChapterStartPhaseLogEntry from './ChapterStartPhaseLogEntry.svelte';
+	import ConditionalEffectLogEntry from './ConditionalEffectLogEntry.svelte';
+	import ConferPropertiesEffectLogEntry from './ConferPropertiesEffectLogEntry.svelte';
+	import DiscardEffectLogEntry from './DiscardEffectLogEntry.svelte';
+	import DiscardFromHandEffectLogEntry from './DiscardFromHandEffectLogEntry.svelte';
+	import DrawCardsEffectLogEntry from './DrawCardsEffectLogEntry.svelte';
+	import DrawFocusEffectLogEntry from './DrawFocusEffectLogEntry.svelte';
+	import DrawFocusEffectOutcomeEntry from './DrawFocusEffectOutcomeEntry.svelte';
+	import DrawPhaseLogEntry from './DrawPhaseLogEntry.svelte';
+	import EmitEventLogEntry from './EmitEventLogEntry.svelte';
+	import EncounterPhaseLogEntry from './EncounterPhaseLogEntry.svelte';
+	import EngageEffectLogEntry from './EngageEffectLogEntry.svelte';
+	import ExhaustEffectLogEntry from './ExhaustEffectLogEntry.svelte';
+	import FocusPhaseLogEntry from './FocusPhaseLogEntry.svelte';
+	import GatherCluesEffectLogEntry from './GatherCluesEffectLogEntry.svelte';
+	import GenericLogEntry from './GenericLogEntry.svelte';
+	import HealEffectLogEntry from './HealEffectLogEntry.svelte';
+	import MoveEffectLogEntry from './MoveEffectLogEntry.svelte';
+	import NarrationEffectLogEntry from './NarrationEffectLogEntry.svelte';
+	import PlayStoryCardsEffectLogEntry from './PlayStoryCardsEffectLogEntry.svelte';
+	import RunCampaignLogEntry from './RunCampaignLogEntry.svelte';
+	import RunScenarioLogEntry from './RunScenarioLogEntry.svelte';
+	import TriggerCapabilityLogEntry from './TriggerCapabilityLogEntry.svelte';
+	import TurnCreatureActionsPhaseLogEntry from './TurnCreatureActionsPhaseLogEntry.svelte';
+	import TurnEndPhaseLogEntry from './TurnEndPhaseLogEntry.svelte';
+	import TurnLogEntry from './TurnLogEntry.svelte';
+	import TurnPlayerActionsPhaseLogEntry from './TurnPlayerActionsPhaseLogEntry.svelte';
+	import TurnsPhaseLogEntry from './TurnsPhaseLogEntry.svelte';
+	import TurnStartPhaseLogEntry from './TurnStartPhaseLogEntry.svelte';
 
 	/**
 	 * Resolves the {@link Step} that produced the given journal entry, or
@@ -69,30 +112,14 @@
 	}
 
 	/**
-	 * Returns true when the journal entry should produce a visible row in the log.
-	 *
-	 * Rules:
-	 * - Hide by default.
-	 * - Show {@link CallStep} entries (structural procedure invocations).
-	 * - Show {@link InputStep} entries (player interaction points).
-	 *
-	 * Exceptions:
-	 * - RunCampaign.init carries the campaign banner and must be visible
-	 *   even though it is a ComputeStep.
+	 * For {@link CallStep} entries, returns the {@link ProcedureId} of the
+	 * called procedure. Returns `undefined` for non-CallStep entries.
 	 */
-	function shouldRenderEntry(entry: JournalEntry): boolean {
-		// RunCampaign.init announces the campaign — show it even though it's a ComputeStep.
-		if (entry.procedureId === ProcedureId.RunCampaign && entry.state.step === 'init') return true;
-
-		if (!entry.state.step) return false;
-
+	function getCalledProcedureId(entry: JournalEntry): ProcedureId | undefined {
 		const step = getStep(entry);
-		if (!step) return false;
-
-		if (step instanceof CallStep) return true;
-		if (step instanceof InputStep) return true;
-
-		return false;
+		if (!(step instanceof CallStep)) return undefined;
+		const procId = step.procedureId;
+		return typeof procId === 'function' ? procId(entry.state) : procId;
 	}
 
 	/**
@@ -108,17 +135,6 @@
 		} catch {
 			return undefined;
 		}
-	}
-
-	/**
-	 * For {@link CallStep} entries, returns the {@link ProcedureId} of the
-	 * called procedure. Returns `undefined` for non-CallStep entries.
-	 */
-	function getCalledProcedureId(entry: JournalEntry): ProcedureId | undefined {
-		const step = getStep(entry);
-		if (!(step instanceof CallStep)) return undefined;
-		const procId = step.procedureId;
-		return typeof procId === 'function' ? procId(entry.state) : procId;
 	}
 
 	/**
@@ -156,9 +172,6 @@
 
 	/**
 	 * Returns the icon to display for a journal entry.
-	 *
-	 * Uses `effectiveProcId` (the called procedure for CallStep dispatches)
-	 * so the icon matches the rendered component.
 	 */
 	function getJournalEntryIcon(
 		entry: JournalEntry,
@@ -166,6 +179,7 @@
 		displayState: unknown
 	): string {
 		const step = getStep(entry);
+		if (entry.state.status === 'complete') return 'log/outcome.svg';
 		if (step instanceof InputStep) return 'log/input.svg';
 		if (effectiveProcId === ProcedureId.NarrationEffect) return 'log/narration.svg';
 		if (effectiveProcId === ProcedureId.EmitEvent) return 'log/event.svg';
@@ -178,76 +192,146 @@
 		}
 		return 'log/call.svg';
 	}
-</script>
 
-<script lang="ts">
-	import InlineSvg from '$lib/components/InlineSvg.svelte';
-	import Text from '$lib/components/localisation/Text.svelte';
-	import type {
-		AttachEffectProcedureState,
-		ChapterEndState,
-		ChapterStartState,
-		ChapterState,
-		ConditionalEffectState,
-		ConferPropertiesEffectState,
-		DiscardEffectState,
-		DiscardFromHandEffectState,
-		DrawCardsEffectState,
-		DrawFocusState,
-		DrawPhaseState,
-		EmitEventState,
-		EncounterPhaseState,
-		EngageEffectState,
-		ExhaustEffectState,
-		FocusPhaseState,
-		GatherCluesEffectState,
-		HealEffectState,
-		MoveEffectState,
-		NarrationEffectState,
-		PlayStoryCardsEffectState,
-		RunCampaignState,
-		RunScenarioState,
-		TriggerCapabilityState,
-		TurnCreatureActionsPhaseState,
-		TurnEndPhaseState,
-		TurnPlayerActionsPhaseState,
-		TurnStartPhaseState,
-		TurnState,
-		TurnsPhaseState
-	} from '@songsofdoom/engine';
-	import { Action, Obligation, Opportunity } from '@songsofdoom/game';
-	import { standardAttributes, type StandardAttributeProps } from '../../standardattributes';
-	import AttachEffectLogEntry from './AttachEffectLogEntry.svelte';
-	import ChapterEndPhaseLogEntry from './ChapterEndPhaseLogEntry.svelte';
-	import ChapterLogEntry from './ChapterLogEntry.svelte';
-	import ChapterStartPhaseLogEntry from './ChapterStartPhaseLogEntry.svelte';
-	import ConditionalEffectLogEntry from './ConditionalEffectLogEntry.svelte';
-	import ConferPropertiesEffectLogEntry from './ConferPropertiesEffectLogEntry.svelte';
-	import DiscardEffectLogEntry from './DiscardEffectLogEntry.svelte';
-	import DiscardFromHandEffectLogEntry from './DiscardFromHandEffectLogEntry.svelte';
-	import DrawCardsEffectLogEntry from './DrawCardsEffectLogEntry.svelte';
-	import DrawFocusEffectLogEntry from './DrawFocusEffectLogEntry.svelte';
-	import DrawPhaseLogEntry from './DrawPhaseLogEntry.svelte';
-	import EmitEventLogEntry from './EmitEventLogEntry.svelte';
-	import EncounterPhaseLogEntry from './EncounterPhaseLogEntry.svelte';
-	import EngageEffectLogEntry from './EngageEffectLogEntry.svelte';
-	import ExhaustEffectLogEntry from './ExhaustEffectLogEntry.svelte';
-	import FocusPhaseLogEntry from './FocusPhaseLogEntry.svelte';
-	import GatherCluesEffectLogEntry from './GatherCluesEffectLogEntry.svelte';
-	import GenericLogEntry from './GenericLogEntry.svelte';
-	import HealEffectLogEntry from './HealEffectLogEntry.svelte';
-	import MoveEffectLogEntry from './MoveEffectLogEntry.svelte';
-	import NarrationEffectLogEntry from './NarrationEffectLogEntry.svelte';
-	import PlayStoryCardsEffectLogEntry from './PlayStoryCardsEffectLogEntry.svelte';
-	import RunCampaignLogEntry from './RunCampaignLogEntry.svelte';
-	import RunScenarioLogEntry from './RunScenarioLogEntry.svelte';
-	import TriggerCapabilityLogEntry from './TriggerCapabilityLogEntry.svelte';
-	import TurnCreatureActionsPhaseLogEntry from './TurnCreatureActionsPhaseLogEntry.svelte';
-	import TurnEndPhaseLogEntry from './TurnEndPhaseLogEntry.svelte';
-	import TurnLogEntry from './TurnLogEntry.svelte';
-	import TurnPlayerActionsPhaseLogEntry from './TurnPlayerActionsPhaseLogEntry.svelte';
-	import TurnsPhaseLogEntry from './TurnsPhaseLogEntry.svelte';
-	import TurnStartPhaseLogEntry from './TurnStartPhaseLogEntry.svelte';
+	// -----------------------------------------------------------------------
+	// Component dispatch
+	// -----------------------------------------------------------------------
+
+	/** Return type for {@link getEntryComponent}. */
+	interface EntryRenderInfo {
+		/* eslint-disable @typescript-eslint/no-explicit-any */
+		component: any;
+		props: Record<string, unknown>;
+		effectiveProcId: string;
+		outcome?: boolean;
+	}
+
+	/**
+	 * Maps a procedure id to the component that renders its active entries
+	 * (both {@link CallStep} dispatches and {@link InputStep} entries).
+	 */
+	/* eslint-disable @typescript-eslint/no-explicit-any */
+	const mainEntryComponents: Record<string, any> = {
+		[ProcedureId.EmitEvent]: EmitEventLogEntry,
+		[ProcedureId.RunCampaign]: RunCampaignLogEntry,
+		[ProcedureId.RunScenario]: RunScenarioLogEntry,
+		[ProcedureId.Chapter]: ChapterLogEntry,
+		[ProcedureId.ChapterStartPhase]: ChapterStartPhaseLogEntry,
+		[ProcedureId.FocusPhase]: FocusPhaseLogEntry,
+		[ProcedureId.TurnsPhase]: TurnsPhaseLogEntry,
+		[ProcedureId.DrawPhase]: DrawPhaseLogEntry,
+		[ProcedureId.EncounterPhase]: EncounterPhaseLogEntry,
+		[ProcedureId.ChapterEndPhase]: ChapterEndPhaseLogEntry,
+		[ProcedureId.Turn]: TurnLogEntry,
+		[ProcedureId.TurnStartPhase]: TurnStartPhaseLogEntry,
+		[ProcedureId.TurnPlayerActionsPhase]: TurnPlayerActionsPhaseLogEntry,
+		[ProcedureId.TurnCreatureActionsPhase]: TurnCreatureActionsPhaseLogEntry,
+		[ProcedureId.TurnEndPhase]: TurnEndPhaseLogEntry,
+		[ProcedureId.AttachEffect]: AttachEffectLogEntry,
+		[ProcedureId.ConferPropertiesEffect]: ConferPropertiesEffectLogEntry,
+		[ProcedureId.ConditionalEffect]: ConditionalEffectLogEntry,
+		[ProcedureId.DiscardEffect]: DiscardEffectLogEntry,
+		[ProcedureId.DiscardFromHandEffect]: DiscardFromHandEffectLogEntry,
+		[ProcedureId.DrawCardsEffect]: DrawCardsEffectLogEntry,
+		[ProcedureId.DrawFocusEffect]: DrawFocusEffectLogEntry,
+		[ProcedureId.EngageEffect]: EngageEffectLogEntry,
+		[ProcedureId.ExhaustEffect]: ExhaustEffectLogEntry,
+		[ProcedureId.GatherCluesEffect]: GatherCluesEffectLogEntry,
+		[ProcedureId.HealEffect]: HealEffectLogEntry,
+		[ProcedureId.MoveEffect]: MoveEffectLogEntry,
+		[ProcedureId.NarrationEffect]: NarrationEffectLogEntry,
+		[ProcedureId.PlayStoryCardsEffect]: PlayStoryCardsEffectLogEntry,
+		[ProcedureId.TriggerCapability]: TriggerCapabilityLogEntry
+	};
+
+	/**
+	 * Maps a procedure id to the component that renders its *outcome*
+	 * (shown after the procedure completes and before the parent resumes).
+	 */
+	/* eslint-disable @typescript-eslint/no-explicit-any */
+	const outcomeComponents: Record<string, any> = {
+		[ProcedureId.DrawFocusEffect]: DrawFocusEffectOutcomeEntry
+	};
+
+	/**
+	 * Returns the component and props to render for a journal entry, or
+	 * `undefined` when the entry should produce no visible row in the log.
+	 *
+	 * Rules (in priority order):
+	 * 1. Terminal entries (`status === 'complete'`) whose procedure has an
+	 *    outcome component → show the outcome component with the procedure's
+	 *    own state.
+	 * 2. `RunCampaign.init` — always visible even though it's a ComputeStep.
+	 * 3. {@link CallStep} entries → dispatches to the *called* procedure's
+	 *    main component, with a synthetic initial state.
+	 * 4. {@link InputStep} entries → dispatches to the current procedure's
+	 *    main component.
+	 * 5. Everything else → `undefined` (hidden).
+	 */
+	function getEntryComponent(entry: JournalEntry): EntryRenderInfo | undefined {
+		const status = entry.state.status;
+
+		// Terminal entries — show outcome if registered
+		if (status === 'complete') {
+			const outcomeComp = outcomeComponents[entry.procedureId];
+			if (outcomeComp) {
+				return {
+					component: outcomeComp,
+					props: { state: entry.state },
+					effectiveProcId: entry.procedureId,
+					outcome: true
+				};
+			}
+			return undefined;
+		}
+
+		// RunCampaign.init — visible even though it's a ComputeStep
+		if (entry.procedureId === ProcedureId.RunCampaign && entry.state.step === 'init') {
+			return {
+				component: RunCampaignLogEntry,
+				props: { state: entry.state },
+				effectiveProcId: entry.procedureId
+			};
+		}
+
+		const step = getStep(entry);
+		if (!step || !entry.state.step) return undefined;
+
+		// CallStep entries — show the *called* procedure's component
+		if (step instanceof CallStep) {
+			const calledProcId = getCalledProcedureId(entry);
+			if (!calledProcId) return undefined;
+			const displayState = buildCalledState(entry) ?? entry.state;
+			const comp = mainEntryComponents[calledProcId] ?? GenericLogEntry;
+			return {
+				component: comp,
+				props:
+					comp === GenericLogEntry
+						? { procedureId: calledProcId, state: displayState as ProcedureState }
+						: { state: displayState },
+				effectiveProcId: calledProcId
+			};
+		}
+
+		// InputStep entries — show the current procedure's component
+		if (step instanceof InputStep) {
+			const comp = mainEntryComponents[entry.procedureId] ?? GenericLogEntry;
+			return {
+				component: comp,
+				props:
+					comp === GenericLogEntry
+						? { procedureId: entry.procedureId, state: entry.state }
+						: { state: entry.state },
+				effectiveProcId: entry.procedureId
+			};
+		}
+
+		return undefined;
+	}
+
+	// -----------------------------------------------------------------------
+	// Props & rendering
+	// -----------------------------------------------------------------------
 
 	interface Props extends StandardAttributeProps {
 		journal: readonly JournalEntry[];
@@ -270,12 +354,8 @@
 		</p>
 	{:else}
 		{#each visibleJournal as entry, i (i)}
-			{#if shouldRenderEntry(entry)}
-				{@const step = getStep(entry)}
-				{@const calledProcId = step instanceof CallStep ? getCalledProcedureId(entry) : undefined}
-				{@const effectiveProcId = calledProcId ?? entry.procedureId}
-				{@const displayState = ((step instanceof CallStep ? buildCalledState(entry) : undefined) ??
-					entry.state) as unknown}
+			{@const info = getEntryComponent(entry)}
+			{#if info}
 				<div class={styles.entry} style="margin-left: {depths[i] * INDENT_PER_LEVEL}em">
 					<button
 						onclick={(e) => {
@@ -287,77 +367,17 @@
 						}}
 					>
 						<InlineSvg
-							src={getJournalEntryIcon(entry, effectiveProcId, displayState)}
+							src={getJournalEntryIcon(entry, info.effectiveProcId, info.props.state)}
 							class={styles.icon}
 						/>
 					</button>
-					{#if effectiveProcId === ProcedureId.EmitEvent}
-						<EmitEventLogEntry state={displayState as EmitEventState} />
-					{:else if effectiveProcId === ProcedureId.RunCampaign}
-						<RunCampaignLogEntry state={displayState as RunCampaignState} />
-					{:else if effectiveProcId === ProcedureId.RunScenario}
-						<RunScenarioLogEntry state={displayState as RunScenarioState} />
-					{:else if effectiveProcId === ProcedureId.Chapter}
-						<ChapterLogEntry state={displayState as ChapterState} />
-					{:else if effectiveProcId === ProcedureId.ChapterStartPhase}
-						<ChapterStartPhaseLogEntry state={displayState as ChapterStartState} />
-					{:else if effectiveProcId === ProcedureId.FocusPhase}
-						<FocusPhaseLogEntry state={displayState as FocusPhaseState} />
-					{:else if effectiveProcId === ProcedureId.TurnsPhase}
-						<TurnsPhaseLogEntry state={displayState as TurnsPhaseState} />
-					{:else if effectiveProcId === ProcedureId.DrawPhase}
-						<DrawPhaseLogEntry state={displayState as DrawPhaseState} />
-					{:else if effectiveProcId === ProcedureId.EncounterPhase}
-						<EncounterPhaseLogEntry state={displayState as EncounterPhaseState} />
-					{:else if effectiveProcId === ProcedureId.ChapterEndPhase}
-						<ChapterEndPhaseLogEntry state={displayState as ChapterEndState} />
-					{:else if effectiveProcId === ProcedureId.Turn}
-						<TurnLogEntry state={displayState as TurnState} />
-					{:else if effectiveProcId === ProcedureId.TurnStartPhase}
-						<TurnStartPhaseLogEntry state={displayState as TurnStartPhaseState} />
-					{:else if effectiveProcId === ProcedureId.TurnPlayerActionsPhase}
-						<TurnPlayerActionsPhaseLogEntry state={displayState as TurnPlayerActionsPhaseState} />
-					{:else if effectiveProcId === ProcedureId.TurnCreatureActionsPhase}
-						<TurnCreatureActionsPhaseLogEntry
-							state={displayState as TurnCreatureActionsPhaseState}
-						/>
-					{:else if effectiveProcId === ProcedureId.TurnEndPhase}
-						<TurnEndPhaseLogEntry state={displayState as TurnEndPhaseState} />
-					{:else if effectiveProcId === ProcedureId.AttachEffect}
-						<AttachEffectLogEntry state={displayState as AttachEffectProcedureState} />
-					{:else if effectiveProcId === ProcedureId.ConferPropertiesEffect}
-						<ConferPropertiesEffectLogEntry state={displayState as ConferPropertiesEffectState} />
-					{:else if effectiveProcId === ProcedureId.ConditionalEffect}
-						<ConditionalEffectLogEntry state={displayState as ConditionalEffectState} />
-					{:else if effectiveProcId === ProcedureId.DiscardEffect}
-						<DiscardEffectLogEntry state={displayState as DiscardEffectState} />
-					{:else if effectiveProcId === ProcedureId.DiscardFromHandEffect}
-						<DiscardFromHandEffectLogEntry state={displayState as DiscardFromHandEffectState} />
-					{:else if effectiveProcId === ProcedureId.DrawCardsEffect}
-						<DrawCardsEffectLogEntry state={displayState as DrawCardsEffectState} />
-					{:else if effectiveProcId === ProcedureId.DrawFocusEffect}
-						<DrawFocusEffectLogEntry state={displayState as DrawFocusState} />
-					{:else if effectiveProcId === ProcedureId.EngageEffect}
-						<EngageEffectLogEntry state={displayState as EngageEffectState} />
-					{:else if effectiveProcId === ProcedureId.ExhaustEffect}
-						<ExhaustEffectLogEntry state={displayState as ExhaustEffectState} />
-					{:else if effectiveProcId === ProcedureId.GatherCluesEffect}
-						<GatherCluesEffectLogEntry state={displayState as GatherCluesEffectState} />
-					{:else if effectiveProcId === ProcedureId.HealEffect}
-						<HealEffectLogEntry state={displayState as HealEffectState} />
-					{:else if effectiveProcId === ProcedureId.MoveEffect}
-						<MoveEffectLogEntry state={displayState as MoveEffectState} />
-					{:else if effectiveProcId === ProcedureId.NarrationEffect}
+					{#if info.component === NarrationEffectLogEntry}
 						<NarrationEffectLogEntry
-							state={displayState as NarrationEffectState}
+							state={info.props.state as NarrationEffectState}
 							onclick={() => onNarrationClick?.(i)}
 						/>
-					{:else if effectiveProcId === ProcedureId.PlayStoryCardsEffect}
-						<PlayStoryCardsEffectLogEntry state={displayState as PlayStoryCardsEffectState} />
-					{:else if effectiveProcId === ProcedureId.TriggerCapability}
-						<TriggerCapabilityLogEntry state={displayState as TriggerCapabilityState} />
 					{:else}
-						<GenericLogEntry procedureId={effectiveProcId} state={displayState as ProcedureState} />
+						<info.component {...info.props} class={info.outcome ? styles.outcome : undefined} />
 					{/if}
 				</div>
 			{/if}

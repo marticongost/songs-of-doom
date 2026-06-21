@@ -9,3 +9,4 @@ export const highlightColor = palette.steel;
 export const headingColor = palette.cloud;
 export const positiveColor = palette.green;
 export const negativeColor = palette.red;
+export const lightBackgroundColor = palette.somber;
