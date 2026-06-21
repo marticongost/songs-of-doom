@@ -169,13 +169,15 @@ describe('runScenario — beginPlay step', () => {
 		expect(params).toEqual({});
 	});
 
-	it('has no then callback (uses identity default)', () => {
-		// The default `then` returns the parent state unchanged
-		const parentState = state({ step: 'beginPlay' });
-		const childResult = { status: 'complete' };
+	it('has no then callback (propagates child game state by default)', () => {
+		// The default `then` propagates the child's game state to the parent
+		const parentGame = mock<ReadonlyGameState>({});
+		const childGame = mock<ReadonlyGameState>({});
+		const parentState = state({ step: 'beginPlay', game: parentGame });
+		const childResult = { status: 'complete', game: childGame };
 
 		const result = beginPlayStep.then(parentState, childResult);
 
-		expect(result).toBe(parentState);
+		expect(result.game).toBe(childGame);
 	});
 });

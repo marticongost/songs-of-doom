@@ -192,6 +192,10 @@ export interface CallStepProps<S extends ProcedureState, C extends ProcedureStat
 	/**
 	 * Called when the child procedure finishes (status 'complete' or 'cancelled').
 	 * Returns the parent state to continue with.
+	 *
+	 * If not provided, the child's {@link ProcedureState#game game state} is
+	 * propagated to the parent (via `{ ...state, game: childResult.game }`)
+	 * so that mutations made by the child are preserved.
 	 */
 	then?: (state: S, childResult: C) => S;
 }
@@ -210,7 +214,7 @@ export class CallStep<S extends ProcedureState, C extends ProcedureState> extend
 				: typeof parameters === 'function'
 					? parameters
 					: () => parameters;
-		this.then = then ?? ((state) => state);
+		this.then = then ?? ((state, childResult) => ({ ...state, game: childResult.game }));
 	}
 }
 

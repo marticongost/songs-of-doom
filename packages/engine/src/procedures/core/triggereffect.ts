@@ -25,8 +25,7 @@ export interface TriggerEffectProps<
 	/**
 	 * Optional callback that runs after the child procedure finishes. Receives the parent
 	 * and child states, and should return the new parent state to continue with. If not
-	 * provided, the parent state will automatically auto-advance to the next step with no
-	 * other state changes.
+	 * provided, the child's game state is propagated to the parent automatically.
 	 */
 	then?: (state: S, childResult: any) => S;
 }

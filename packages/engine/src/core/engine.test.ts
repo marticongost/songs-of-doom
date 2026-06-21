@@ -1063,6 +1063,63 @@ describe('Engine with CallStep', () => {
 		expect((lastEntry.state as ParentState).childMessage).toBe('parent-continued');
 	});
 
+	it('propagates child game state when CallStep has no `then`', () => {
+		expect.assertions(2);
+
+		// The child procedure mutates the game state (simulating e.g. DrawFocusEffect).
+		const mutatedGame = { players: [], _marker: 'mutated' };
+
+		interface ChildState extends ProcedureState {}
+
+		const childProc = new ProcedureDefinition<ChildState>({
+			id: ProcedureId.Unimplemented,
+			steps: {
+				changeGame: (state: ChildState) => ({
+					...state,
+					game: mutatedGame as any,
+					status: 'complete'
+				})
+			}
+		});
+
+		interface ParentState extends ProcedureState {
+			gameMarker?: string;
+		}
+
+		const { call, define } = instructions<ParentState>();
+
+		const parentProc = define({
+			id: ProcedureId.UnimplementedAlt,
+			steps: {
+				invoke: call(childProc),
+				check: (state: ParentState) => ({
+					...state,
+					gameMarker: (state.game as any)._marker,
+					status: 'complete'
+				})
+			}
+		});
+
+		const allProcs: ProcedureRegistry = {
+			[childProc.id]: childProc,
+			[parentProc.id]: parentProc
+		};
+
+		const originalGame = { players: [], _marker: 'original' };
+		const engine = Engine.create(
+			allProcs,
+			parentProc.id,
+			parentProc.createState(originalGame as any, {})
+		);
+
+		const finished = engine.run();
+		expect(finished).toBe(true);
+
+		// The parent's 'check' step should see the mutated game, not the original.
+		const lastEntry = engine.journal.at(-1)!;
+		expect((lastEntry.state as ParentState).gameMarker).toBe('mutated');
+	});
+
 	it('uses the `then` callback when provided to set explicit step', () => {
 		expect.assertions(2);
 

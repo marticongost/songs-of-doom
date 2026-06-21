@@ -120,8 +120,8 @@ export function instructions<S extends ProcedureState>() {
 		 *  object or a function of the current state.
 		 * @param then Optional callback that runs after the child procedure finishes.
 		 *  Receives the parent and child states, and should return the new parent state to
-		 *  continue with. If not given, the parent state auto-advances to the next step
-		 *  with no other state changes.
+		 *  continue with. If not given, the child's game state is propagated to the parent
+		 *  so that any mutations made by the child are preserved.
 		 */
 		call: ((
 			procedureOrOpts:
