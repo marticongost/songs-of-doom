@@ -137,7 +137,7 @@ export const engineSerialisation = new Serialisation<EngineSerialisationContext>
 			Game.Entity as Type,
 			{
 				external: true,
-				getObjectId: (entity: Game.Entity) => Game.getEntryMetadata(entity).id,
+				getObjectId: (entity: Game.Entity) => Game.getEntryMetadata(entity).variantId,
 				resolveExternalReference: (key: string, context) => context.data.resolveEntity(key)
 			}
 		],

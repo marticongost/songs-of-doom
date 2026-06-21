@@ -773,8 +773,14 @@ export const recomposeMap = <K, V>(
 				if (keyTypeBrand === 'String') {
 					recomposeKey = (k: string) => k as unknown as K;
 				} else {
-					recomposeKey = (k: string) =>
-						context.resolveReference(context.requireTypeForBrand(keyTypeBrand), k) as K;
+					recomposeKey = (k: string) => {
+						const type = context.requireTypeForBrand(keyTypeBrand);
+						const obj = context.resolveReference(type, k) as K;
+						if (obj === undefined || obj === null) {
+							context.fail(`Can't find object of type ${type.name} with key "${k}"`);
+						}
+						return obj;
+					};
 				}
 			}
 			map.set(recomposeKey(key), context.recomposeChild(key, value));

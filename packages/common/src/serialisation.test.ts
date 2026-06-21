@@ -718,6 +718,68 @@ describe('Serialisation', () => {
 
 			expect(() => s.serialise(map)).toThrow();
 		});
+
+		it('throws RecomposeError when external key reference returns undefined', () => {
+			const people = new Map<string, Person>();
+			const alice = new Person('Alice', 30);
+			people.set('Alice', alice);
+
+			const identity: ObjectIdentity<Person, Map<string, Person>> = {
+				external: true,
+				getObjectId: (p) => p.name,
+				resolveExternalReference: (key, _context) => people.get(key)
+			};
+
+			const s = new Serialisation<Map<string, Person>>({
+				types: [Person],
+				objectIdentity: new Map([[Person, identity]])
+			});
+
+			const map = new Map<Person, string>([[alice, 'value']]);
+
+			// Serialise while Alice is still in the external registry
+			const json = s.serialise(map, people);
+
+			// Remove Alice — now the reference can't be resolved
+			people.delete('Alice');
+
+			expect(() => s.deserialise(json, people)).toThrow(RecomposeError);
+			expect(() => s.deserialise(json, people)).toThrow(
+				/Can't find object of type Person with key "Alice"/
+			);
+		});
+
+		it('throws RecomposeError when external key reference returns null', () => {
+			const people = new Map<string, Person | null>();
+			const alice = new Person('Alice', 30);
+			people.set('Alice', alice);
+
+			const identity: ObjectIdentity<Person, Map<string, Person | null>> = {
+				external: true,
+				getObjectId: (p) => p.name,
+				// resolveExternalReference is typed T | undefined, but the
+				// runtime guard also checks for null — force null through.
+				resolveExternalReference: (key, _context) => (people.get(key) ?? null) as Person | undefined
+			};
+
+			const s = new Serialisation<Map<string, Person | null>>({
+				types: [Person],
+				objectIdentity: new Map([[Person, identity]])
+			});
+
+			const map = new Map<Person, string>([[alice, 'value']]);
+
+			// Serialise while Alice is in the registry
+			const json = s.serialise(map, people);
+
+			// Replace Alice with null — resolveExternalReference now returns null
+			people.set('Alice', null);
+
+			expect(() => s.deserialise(json, people)).toThrow(RecomposeError);
+			expect(() => s.deserialise(json, people)).toThrow(
+				/Can't find object of type Person with key "Alice"/
+			);
+		});
 	});
 
 	// === Error handling ===
