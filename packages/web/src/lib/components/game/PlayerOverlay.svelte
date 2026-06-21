@@ -58,7 +58,8 @@
 			whiteSpace: 'nowrap'
 		},
 		details: {
-			...css.column('sm')
+			...css.column('sm'),
+			alignItems: 'flex-start'
 		},
 		indicators: {
 			...css.row('sm')
@@ -119,6 +120,7 @@
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
 	import type { PlayerState } from '@songsofdoom/engine';
+	import FocusTokenList from '../focuses/FocusTokenList.svelte';
 
 	interface Props extends StandardAttributeProps {
 		player: PlayerState;
@@ -132,6 +134,7 @@
 	const gold = $derived(player.gold);
 	const physicalTrauma = $derived(player.physicalTrauma);
 	const mentalTrauma = $derived(player.mentalTrauma);
+	const focusTokens = $derived(player.focusesHand);
 	const portrait = $derived(player.character.portrait);
 	const maxHealth = $derived(player.getStat('health'));
 	const maxSanity = $derived(player.getStat('sanity'));
@@ -187,5 +190,6 @@
 			<CluesIndicator amount={clues} />
 			<GoldIndicator amount={gold} />
 		</div>
+		<FocusTokenList tokens={focusTokens} />
 	</div>
 </div>
