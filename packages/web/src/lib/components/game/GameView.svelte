@@ -6,14 +6,20 @@
 	import * as css from '$lib/styles';
 
 	const styles = css.styles({
-		gameplay: {
-			...css.column('md')
+		gameView: {
+			position: 'relative',
+			flex: '1 1 auto'
 		},
-		playerRow: {
-			display: 'flex',
-			gap: css.spacing.md,
-			justifyContent: 'center',
-			flexWrap: 'wrap'
+		playerOverlays: {
+			...css.column('lg'),
+			position: 'absolute',
+			left: 0,
+			top: 0
+		},
+		gameLog: {
+			position: 'absolute',
+			right: 0,
+			top: 0
 		}
 	});
 </script>
@@ -102,16 +108,14 @@
 	);
 </script>
 
-<div {...standardAttributes(attributes, styles.gameplay)}>
-	{#if playerEntries.length > 0}
-		<div class={styles.playerRow}>
-			{#each playerEntries as entry (entry.player.id)}
-				<PlayerOverlay player={entry.player} characterName={entry.characterName} />
-			{/each}
-		</div>
-	{/if}
-
+<div {...standardAttributes(attributes, styles.gameView)}>
+	<div class={styles.playerOverlays}>
+		{#each playerEntries as entry (entry.player.id)}
+			<PlayerOverlay player={entry.player} characterName={entry.characterName} />
+		{/each}
+	</div>
 	<GameLog
+		class={styles.gameLog}
 		journal={store.journal}
 		maxVisible={store.presentedJournalLength}
 		onNarrationClick={handleNarrationClick}

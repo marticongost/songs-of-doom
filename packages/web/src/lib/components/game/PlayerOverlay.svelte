@@ -30,11 +30,7 @@
 
 	const styles = css.styles({
 		overlay: {
-			display: 'flex',
-			flexDirection: 'column',
-			alignItems: 'center',
-			gap: css.spacing.xs,
-			padding: css.spacing.sm
+			...css.row('md')
 		},
 		portraitWrapper: {
 			position: 'relative',
@@ -56,16 +52,16 @@
 			color: css.text.headingColor,
 			fontSize: '0.9em',
 			textAlign: 'center',
-			maxWidth: '6em',
+			maxWidth: '10em',
 			overflow: 'hidden',
 			textOverflow: 'ellipsis',
 			whiteSpace: 'nowrap'
 		},
+		details: {
+			...css.column('sm')
+		},
 		indicators: {
-			display: 'flex',
-			gap: css.spacing.xs,
-			alignItems: 'center',
-			justifyContent: 'center'
+			...css.row('sm')
 		}
 	});
 
@@ -184,11 +180,12 @@
 		</svg>
 	</div>
 
-	<div class={styles.name}>{characterName}</div>
-
-	<div class={styles.indicators}>
-		<CardCopiesIndicator amount={handCount} />
-		<CluesIndicator amount={clues} />
-		<GoldIndicator amount={gold} />
+	<div class={styles.details}>
+		<div class={styles.name}>{characterName}</div>
+		<div class={styles.indicators}>
+			<CardCopiesIndicator amount={handCount} />
+			<CluesIndicator amount={clues} />
+			<GoldIndicator amount={gold} />
+		</div>
 	</div>
 </div>
