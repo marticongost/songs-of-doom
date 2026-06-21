@@ -6,7 +6,7 @@ export * as fonts from './fonts';
 export * as forms from './forms';
 export { globalStyles } from './global';
 export * as palette from './palette';
-export { styles } from './processor';
+export { multipleStyles, styles } from './processor';
 export * as reset from './reset';
 export * as separators from './separators';
 export * as site from './site';

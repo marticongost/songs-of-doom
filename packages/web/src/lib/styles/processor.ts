@@ -8,6 +8,17 @@ export const styles = (rules: Record<string, CSSObject>): Record<string, string>
 	});
 };
 
+export const multipleStyles = <V extends string>(
+	variants: readonly V[],
+	rules: (variant: V) => Record<string, CSSObject>
+): Record<V, Record<string, string>> => {
+	const result = {} as Record<V, Record<string, string>>;
+	for (const variant of variants) {
+		result[variant] = styles(rules(variant));
+	}
+	return result;
+};
+
 export const mergeRules = (...rules: Array<CSSObject>): CSSObject => {
 	const result: CSSObject = {};
 	for (const rule of rules) {
