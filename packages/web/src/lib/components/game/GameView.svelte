@@ -8,23 +8,28 @@
 	const styles = css.styles({
 		gameView: {
 			position: 'relative',
-			flex: '1 1 auto'
+			flex: '1 1 auto',
+			display: 'flex',
+			flexDirection: 'column'
 		},
 		playerOverlays: {
 			...css.column('lg'),
 			position: 'absolute',
 			left: 0,
-			top: 0
+			top: 0,
+			zIndex: 1
 		},
 		gameLog: {
 			position: 'absolute',
 			right: 0,
-			top: 0
+			top: 0,
+			zIndex: 1
 		}
 	});
 </script>
 
 <script lang="ts">
+	import GameMap from '$lib/components/game/GameMap.svelte';
 	import GameLog from '$lib/components/game/log/GameLog.svelte';
 	import NarrationPopup from '$lib/components/game/log/NarrationPopup.svelte';
 	import PlayerOverlay from '$lib/components/game/PlayerOverlay.svelte';
@@ -109,6 +114,7 @@
 </script>
 
 <div {...standardAttributes(attributes, styles.gameView)}>
+	<GameMap locations={store.gameState?.locations ?? []} />
 	<div class={styles.playerOverlays}>
 		{#each playerEntries as entry (entry.player.id)}
 			<PlayerOverlay player={entry.player} characterName={entry.characterName} />
