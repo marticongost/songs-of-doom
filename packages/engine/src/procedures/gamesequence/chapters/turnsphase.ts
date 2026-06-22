@@ -18,6 +18,7 @@ export const turnsPhase = define({
 	steps: {
 		turn: call(turn, {}, (chapterState, turnState) => ({
 			...chapterState,
+			game: turnState.game,
 			step: turnState.atLeastOneActivation ? 'turn' : undefined
 		}))
 	}

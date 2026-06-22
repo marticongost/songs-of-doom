@@ -2,12 +2,13 @@
 import { mock } from '@songsofdoom/common/test-utils';
 import { type Reaction } from '@songsofdoom/game';
 import { describe, expect, it } from 'vitest';
-import { ComputeStep } from '../../core/steps';
+import { CallStep, ComputeStep } from '../../core/steps';
 import type { ReadonlyCardState } from '../../state/cardstate';
 import type { MutableGameState, ReadonlyGameState } from '../../state/gamestate';
 import type { PlayerId } from '../../state/identifiers';
 import type { ReadonlyPlayerState } from '../../state/playerstate';
 import { emitEvent, type EmitEventState, type EventContext } from './emitevent';
+import type { TriggerCapabilityState } from './triggercapability';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -192,6 +193,60 @@ describe('emitEvent', () => {
 
 			expect(game.mutate).not.toHaveBeenCalled();
 			expect(result?.game).toBe(game);
+		});
+	});
+
+	// ── invokeReaction step ──────────────────────────────────────────────────
+
+	describe('invokeReaction step', () => {
+		const invokeReactionStep = emitEvent.steps.invokeReaction as CallStep<
+			EmitEventState,
+			TriggerCapabilityState
+		>;
+
+		it('propagates the child game state to the parent', () => {
+			expect.assertions(1);
+			const parentGame = mock<ReadonlyGameState>();
+			const childGame = mock<ReadonlyGameState>();
+
+			const parentState = makeState({
+				game: parentGame,
+				reactionGroups: [],
+				chosenReaction: undefined
+			});
+			const childState = mock<TriggerCapabilityState>({ game: childGame });
+
+			const result = invokeReactionStep.then(parentState, childState);
+			expect(result.game).toBe(childGame);
+		});
+
+		it('propagates the child game state when there are remaining reactions', () => {
+			expect.assertions(1);
+			const childGame = mock<ReadonlyGameState>();
+
+			const parentState = makeState({
+				reactionGroups: [] // no reactions → should go to finalise
+			});
+			const childState = mock<TriggerCapabilityState>({ game: childGame });
+
+			const result = invokeReactionStep.then(parentState, childState);
+			expect(result.game).toBe(childGame);
+		});
+
+		it('does not use the parent game state', () => {
+			expect.assertions(1);
+			const parentGame = mock<ReadonlyGameState>();
+			const childGame = mock<ReadonlyGameState>();
+
+			const parentState = makeState({
+				game: parentGame,
+				reactionGroups: [],
+				chosenReaction: undefined
+			});
+			const childState = mock<TriggerCapabilityState>({ game: childGame });
+
+			const result = invokeReactionStep.then(parentState, childState);
+			expect(result.game).not.toBe(parentGame);
 		});
 	});
 });

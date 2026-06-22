@@ -104,7 +104,7 @@ export const emitEvent = define({
 				cardId: chosenReaction!.cardId,
 				actorId: reactionGroups![0].playerId
 			}),
-			then: (state, _result) => {
+			then: (state, childResult) => {
 				// Pop the consumed reaction — it may have been auto-selected by
 				// nextReactionState (for mandatory reactions), which skips
 				// askPlayersForNextReaction where popReaction normally lives.
@@ -114,6 +114,7 @@ export const emitEvent = define({
 				}
 				return {
 					...state,
+					game: childResult.game,
 					step: reactionGroups.length ? 'askPlayersForNextReaction' : 'finalise',
 					reactionGroups,
 					chosenReaction: undefined
