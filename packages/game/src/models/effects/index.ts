@@ -30,6 +30,15 @@ export { negateDamage, NegateDamageEffect } from './negatedamage';
 export { oneOf, OneOfEffect, type OneOfEffectProps } from './oneof';
 export { pay, PayEffect, type PayEffectProps } from './payeffect';
 export {
+	normaliseMapConnection,
+	placeLocation,
+	PlaceLocationEffect,
+	type MapConnection,
+	type MapConnectionDirection,
+	type MapCoordinates,
+	type PlaceLocationEffectProps
+} from './placelocation';
+export {
 	playStoryCards,
 	PlayStoryCardsEffect,
 	type PlayStoryCardsEffectProps

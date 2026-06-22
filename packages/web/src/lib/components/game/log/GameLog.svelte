@@ -73,6 +73,7 @@
 	import HealEffectLogEntry from './HealEffectLogEntry.svelte';
 	import MoveEffectLogEntry from './MoveEffectLogEntry.svelte';
 	import NarrationEffectLogEntry from './NarrationEffectLogEntry.svelte';
+	import PlaceLocationEffectLogEntry from './PlaceLocationEffectLogEntry.svelte';
 	import PlayStoryCardsEffectLogEntry from './PlayStoryCardsEffectLogEntry.svelte';
 	import RunCampaignLogEntry from './RunCampaignLogEntry.svelte';
 	import RunScenarioLogEntry from './RunScenarioLogEntry.svelte';
@@ -244,6 +245,7 @@
 		[ProcedureId.HealEffect]: HealEffectLogEntry,
 		[ProcedureId.MoveEffect]: MoveEffectLogEntry,
 		[ProcedureId.NarrationEffect]: NarrationEffectLogEntry,
+		[ProcedureId.PlaceLocationEffect]: PlaceLocationEffectLogEntry,
 		[ProcedureId.PlayStoryCardsEffect]: PlayStoryCardsEffectLogEntry,
 		[ProcedureId.TriggerCapability]: TriggerCapabilityLogEntry
 	};

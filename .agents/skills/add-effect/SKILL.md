@@ -298,6 +298,8 @@ export const myEffectProc = define({
 
 ## Component conventions
 
+### Effect chip components
+
 Chip components are in the `@songsofdoom/web` package:
 
 - **File name**: PascalCase with `EffectChip` suffix (e.g. `ModifyDamageEffectChip.svelte`), placed in `packages/web/src/lib/components/effects/`
@@ -305,7 +307,7 @@ Chip components are in the `@songsofdoom/web` package:
 - **Imports**: Import effect classes from `@songsofdoom/game`
 - **Localisation**: use the `<Text>` component with `ca`, `es`, and `en` props for all user-visible strings; use `%(name)` placeholders for interpolated values
 
-### Example chip component
+#### Example chip component
 
 ```svelte
 <script lang="ts">
@@ -326,6 +328,165 @@ Chip components are in the `@songsofdoom/web` package:
 	amount={effect.amount}
 />
 ```
+
+### GameLog components
+
+Every engine procedure needs at least one **log entry component** that renders its
+entries in the game log. These are placed in
+`packages/web/src/lib/components/game/log/`.
+
+There are two kinds of log entry component:
+
+1. **Active entry** (`*LogEntry.svelte`) — renders the procedure while it's running
+   (both `CallStep` dispatches and `InputStep` entries). Every procedure MUST have one.
+2. **Outcome entry** (`*OutcomeEntry.svelte`) — renders a summary after the procedure
+   completes (`status === 'complete'`). Optional: only create one if the outcome has
+   meaningful information to display beyond the final state mutation.
+
+#### File naming
+
+- Active entry: `{EffectName}LogEntry.svelte` (e.g. `HealEffectLogEntry.svelte`)
+- Outcome entry: `{EffectName}OutcomeEntry.svelte` (e.g. `DrawFocusEffectOutcomeEntry.svelte`)
+
+#### Component structure
+
+Every log entry component follows this exact pattern:
+
+```svelte
+<!--
+	@component Renders a MyEffect journal entry.
+-->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		entry: {}
+	});
+</script>
+
+<script lang="ts">
+	import MyEffectChip from '$lib/components/effects/MyEffectChip.svelte';
+	import {
+		standardAttributes,
+		type StandardAttributeProps
+	} from '$lib/components/standardattributes';
+	import type { MyEffectState } from '@songsofdoom/engine';
+
+	interface Props extends StandardAttributeProps {
+		state: MyEffectState;
+	}
+
+	const { state, ...attributes }: Props = $props();
+</script>
+
+<div {...standardAttributes(attributes, styles.entry)}>
+	<MyEffectChip effect={state.effect} />
+</div>
+```
+
+Key conventions:
+
+- **`@component` JSDoc**: first line of the file, describes what the component renders
+- **`<script lang="ts" module>`**: defines Emotion CSS styles via `$lib/styles`
+- **`Props` interface**: extends `StandardAttributeProps` (from `$lib/components/standardattributes`)
+  and takes a `state` prop typed to the engine procedure state (imported from `@songsofdoom/engine`)
+- **`$props()` destructuring**: spread remaining attributes and pass them via `standardAttributes(attributes, styles.entry)`
+- **`$derived`**: use runes for deriving display values from state
+- **`<Text>`**: localise all user-visible strings with `ca`/`es`/`en` props
+- **Snippets**: use `{#snippet name()}...{/snippet}` blocks inside `<Text>` for complex interpolated
+  content (components, styled HTML, conditionals)
+- **Reuse effect chips**: prefer importing and rendering the existing `{Name}EffectChip` component
+  (from `$lib/components/effects/`) instead of writing inline `<Text>`. The chip already handles
+  localisation and parameter display. Only fall back to inline `<Text>` when the chip doesn't
+  convey enough context for the log entry. This applies to active entries only — outcome
+  entries contain runtime results not present in the chip, so they should render their
+  own display logic (e.g. using `TextList`, `EntityLink`, token lists).
+
+#### Outcome entry specifics
+
+Outcome entries follow the same pattern but typically display richer information
+using `TextList` and entity links:
+
+```svelte
+<!--
+	@component Renders the outcome of a MyEffect procedure — summary of what happened.
+-->
+<script lang="ts" module>
+	import * as css from '$lib/styles';
+
+	const styles = css.styles({
+		playerEntry: {
+			display: 'inline-flex',
+			alignItems: 'center',
+			gap: css.spacing.sm
+		}
+	});
+</script>
+
+<script lang="ts">
+	import EntityLink from '$lib/components/EntityLink.svelte';
+	import TextList from '$lib/components/localisation/TextList.svelte';
+	import {
+		standardAttributes,
+		type StandardAttributeProps
+	} from '$lib/components/standardattributes';
+	import type { MyEffectState } from '@songsofdoom/engine';
+
+	interface Props extends StandardAttributeProps {
+		state: MyEffectState;
+	}
+
+	const { state, ...attributes }: Props = $props();
+	const results = $derived(state.someOutcomeField);
+</script>
+
+{#if results && results.size > 0}
+	<div {...standardAttributes(attributes)}>
+		<TextList items={Array.from(results.entries())}>
+			{#snippet entry([key, value])}
+				<!-- Render each result item -->
+			{/snippet}
+		</TextList>
+	</div>
+{/if}
+```
+
+Outcome entries should guard with `{#if}` to produce nothing when the outcome is
+empty or the state field hasn't been populated yet (outcome fields are often
+set during execution and only meaningful after completion).
+
+#### Registration in GameLog.svelte
+
+After creating the component, register it in
+`packages/web/src/lib/components/game/log/GameLog.svelte`:
+
+1. **Import** the component(s) at the top of the file (alphabetically among existing imports):
+
+   ```typescript
+   import MyEffectLogEntry from './MyEffectLogEntry.svelte';
+   import MyEffectOutcomeEntry from './MyEffectOutcomeEntry.svelte';
+   ```
+
+2. **Register the active entry** in the `mainEntryComponents` map under the `// Effects` section:
+
+   ```typescript
+   const mainEntryComponents: Record<string, any> = {
+   	// ...
+   	// Effects
+   	[ProcedureId.MyEffect]: MyEffectLogEntry
+   	// ...
+   };
+   ```
+
+3. **Register the outcome entry** (if created) in the `outcomeComponents` map:
+
+   ```typescript
+   const outcomeComponents: Record<string, any> = {
+   	// ...
+   	[ProcedureId.MyEffect]: MyEffectOutcomeEntry
+   	// ...
+   };
+   ```
 
 ## Tasks
 
@@ -356,9 +517,22 @@ specifically instructed to do so.
 7. **Create the chip component** `{ClassName}EffectChip.svelte` in `packages/web/src/lib/components/effects/`:
    - Accept an `effect` prop typed to the new class (import from `@songsofdoom/game`)
    - Render localised text using `<Text>` with `ca`/`es`/`en` props
-8. **Update the dispatcher** in `packages/web/src/lib/components/effects/EffectChip.svelte`:
+8. **Update the chip dispatcher** in `packages/web/src/lib/components/effects/EffectChip.svelte`:
    - Import the new effect class from `@songsofdoom/game` and the chip component
    - Add an `{:else if effect instanceof NewEffect}` branch rendering the new chip
+9. **Create the log entry component** `{ClassName}LogEntry.svelte` in `packages/web/src/lib/components/game/log/`:
+   - Follow the GameLog component conventions above
+   - Accept a `state` prop typed to the engine procedure state (import from `@songsofdoom/engine`)
+   - Render localised text describing what the effect is doing
+   - Derive display values from `state.effect` using `$derived`
+10. **Create the outcome entry component** `{ClassName}OutcomeEntry.svelte` (optional) in `packages/web/src/lib/components/game/log/`:
+    - Only create if the procedure outcome has meaningful data to display (e.g. tokens drawn, charges added, cards attached)
+    - Guard rendering with `{#if state.outcomeField}` — outcome fields may not be populated during active steps
+    - Use `TextList` with snippets for displaying lists of results, `EntityLink` for linking to cards
+11. **Register in GameLog.svelte** in `packages/web/src/lib/components/game/log/GameLog.svelte`:
+    - Import both components alphabetically among existing imports
+    - Add the active entry to `mainEntryComponents` under `// Effects`
+    - Add the outcome entry (if created) to `outcomeComponents`
 
 Make sure to use the `/svelte-component` skill to follow project conventions when creating
 or updating Svelte files. Use the `/unit-tests` skill for test-writing conventions.

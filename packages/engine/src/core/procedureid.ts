@@ -59,6 +59,7 @@ export enum ProcedureId {
 	NegateDamageEffect = 'NegateDamageEffect',
 	OneOfEffect = 'OneOfEffect',
 	PayEffect = 'PayEffect',
+	PlaceLocationEffect = 'PlaceLocationEffect',
 	PlayStoryCardsEffect = 'PlayStoryCardsEffect',
 	ProficiencyTableEffect = 'ProficiencyTableEffect',
 	ReceiveOpportunityAttacksEffect = 'ReceiveOpportunityAttacksEffect',

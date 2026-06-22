@@ -474,6 +474,23 @@ const eventData = {
 				}
 			}
 		]
+	},
+	locationPlayed: {
+		name: {
+			ca: 'Quan es posi en joc una localització',
+			es: 'Cuando se ponga en juego una localización',
+			en: 'When a location is played'
+		},
+		shortForms: [
+			{
+				match: conditionIsExactly(reactiveCardIsSubject),
+				description: {
+					ca: 'En entrar en joc',
+					es: 'Al entrar en juego',
+					en: 'When played'
+				}
+			}
+		]
 	}
 };
 

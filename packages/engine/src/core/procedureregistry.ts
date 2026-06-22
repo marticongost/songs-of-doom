@@ -32,6 +32,7 @@ import { narrationEffectProc } from '../procedures/effects/narrationeffectproc';
 import { negateDamageEffectProc } from '../procedures/effects/negatedamageproc';
 import { oneOfEffectProc } from '../procedures/effects/oneofproc';
 import { payEffectProc } from '../procedures/effects/payeffectproc';
+import { placeLocationEffectProc } from '../procedures/effects/placelocationproc';
 import { playStoryCardsEffectProc } from '../procedures/effects/playstorycardsproc';
 import { proficiencyTableEffectProc } from '../procedures/effects/proficiencytableproc';
 import { receiveOpportunityAttacksEffectProc } from '../procedures/effects/receiveopportunityattacksproc';
@@ -136,6 +137,7 @@ export const procedureDefinitions: Record<ProcedureId, ProcedureDefinition<any>>
 	[ProcedureId.NegateDamageEffect]: negateDamageEffectProc,
 	[ProcedureId.OneOfEffect]: oneOfEffectProc,
 	[ProcedureId.PayEffect]: payEffectProc,
+	[ProcedureId.PlaceLocationEffect]: placeLocationEffectProc,
 	[ProcedureId.PlayStoryCardsEffect]: playStoryCardsEffectProc,
 	[ProcedureId.ProficiencyTableEffect]: proficiencyTableEffectProc,
 	[ProcedureId.ReceiveOpportunityAttacksEffect]: receiveOpportunityAttacksEffectProc,

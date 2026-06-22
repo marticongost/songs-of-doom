@@ -30,6 +30,7 @@
 		NegateDamageEffect,
 		OneOfEffect,
 		PayEffect,
+		PlaceLocationEffect,
 		PlayStoryCardsEffect,
 		ProficiencyTableEffect,
 		ReceiveOpportunityAttacksEffect,
@@ -86,6 +87,7 @@
 	import NegateDamageEffectChip from './NegateDamageEffectChip.svelte';
 	import OneOfEffectChip from './OneOfEffectChip.svelte';
 	import PayEffectChip from './PayEffectChip.svelte';
+	import PlaceLocationEffectChip from './PlaceLocationEffectChip.svelte';
 	import PlayStoryCardsEffectChip from './PlayStoryCardsEffectChip.svelte';
 	import ProficiencyTableEffectChip from './ProficiencyTableEffectChip.svelte';
 	import ReceiveOpportunityAttacksEffectChip from './ReceiveOpportunityAttacksEffectChip.svelte';
@@ -218,5 +220,7 @@
 		<OneOfEffectChip {effect} />
 	{:else if effect instanceof PayEffect}
 		<PayEffectChip {effect} />
+	{:else if effect instanceof PlaceLocationEffect}
+		<PlaceLocationEffectChip {effect} />
 	{/if}
 </span>
