@@ -17,11 +17,13 @@
 		"test": "npm run test:unit -- --run",
 		"watch:svg": "chokidar 'src/lib/assets/svg/**/*.svg' -c 'node scripts/optimize-svg.mjs {path}'",
 		"seed:characters": "vite-node --options.transformMode.ssr='/.*/' scripts/seed-characters.ts",
-		"generate-images": "vite-node --options.transformMode.ssr='/.*/' scripts/generate-images.ts"
+		"gen-image-gemini": "vite-node --options.transformMode.ssr='/.*/' scripts/generate-images.ts",
+		"gen-image-fal": "vite-node --options.transformMode.ssr='/.*/' scripts/gen-image-fal.ts"
 	},
 	"dependencies": {
 		"@emotion/css": "^11.13.5",
 		"@emotion/server": "^11.11.0",
+		"@fal-ai/client": "^1.10.1",
 		"@node-rs/argon2": "^2.0.2",
 		"@prisma/adapter-pg": "^7.4.0",
 		"@prisma/client": "^7.4.0",

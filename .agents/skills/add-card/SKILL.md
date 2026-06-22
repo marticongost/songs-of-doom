@@ -217,7 +217,7 @@ Fix any errors. Do not suppress linting issues silently.
 
 ## Step 9 — Generate card artwork
 
-Use the `/generate-images` skill to create the card's image. Describe the card visually based on its title, capabilities, and effects:
+Use the `/gen-image-gemini` or `/gen-image-fal` skill to create the card's image. Describe the card visually based on its title, capabilities, and effects:
 
 - **Subject**: the central figure or object
 - **Action**: what is happening or the mood conveyed

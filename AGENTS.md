@@ -226,7 +226,8 @@ This project includes custom Claude Code skills:
 - `/update-rules-reference` - Create/update rules reference entries; use to understand game concepts
 - `/update-instructions` - Update CLAUDE.md and all skill files to reflect the current state of the project
 - `/unit-tests` - Guidelines for writing unit tests: how to use `mock()`, when to use real instances, and the principle of only defining what a test needs
-- `/generate-images` - Generate and refine card artwork using the Gemini image generation script
+- `/gen-image-gemini` - Generate and refine card artwork using the Gemini image generation script
+- `/gen-image-fal` - Generate and refine card artwork using the fal.ai image generation script
 - `/add-card` - Create a new card from a textual description: determine type, pick parent, design capabilities, write data file, generate image
 
 ## Post-Implementation Validation
