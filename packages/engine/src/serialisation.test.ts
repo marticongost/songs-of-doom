@@ -272,4 +272,44 @@ describe('engineSerialisation — fields', () => {
 		expect(restored.name).toBe('reaction');
 		expect(restored.choices).toEqual(field.choices);
 	});
+
+	// -------------------------------------------------------------------
+	// TargetCardinality
+	// -------------------------------------------------------------------
+
+	it('brands TargetCardinality with @type', () => {
+		const cardinality = new Game.TargetCardinality({ min: 1, max: 3 });
+		const json = serialiseToObject(cardinality);
+		expect(json['@type']).toBe('TargetCardinality');
+	});
+
+	it('round-trips TargetCardinality with numeric min and max', () => {
+		const cardinality = new Game.TargetCardinality({ min: 1, max: 3 });
+		const restored = roundTrip(cardinality);
+		expect(restored.min).toBe(1);
+		expect(restored.max).toBe(3);
+		expect(restored.isSingleTarget()).toBe(false);
+	});
+
+	it('round-trips TargetCardinality with Infinity min', () => {
+		const cardinality = new Game.TargetCardinality({ min: Infinity, max: 3 });
+		const restored = roundTrip(cardinality);
+		expect(restored.min).toBe(Infinity);
+		expect(restored.max).toBe(3);
+	});
+
+	it('round-trips TargetCardinality with Infinity max', () => {
+		const cardinality = new Game.TargetCardinality({ min: 1, max: Infinity });
+		const restored = roundTrip(cardinality);
+		expect(restored.min).toBe(1);
+		expect(restored.max).toBe(Infinity);
+	});
+
+	it('round-trips TargetCardinality with both Infinity (isEveryTarget)', () => {
+		const cardinality = new Game.TargetCardinality({ min: Infinity, max: Infinity });
+		const restored = roundTrip(cardinality);
+		expect(restored.min).toBe(Infinity);
+		expect(restored.max).toBe(Infinity);
+		expect(restored.isEveryTarget()).toBe(true);
+	});
 });

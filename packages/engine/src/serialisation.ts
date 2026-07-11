@@ -4,7 +4,11 @@ import {
 	isConcreteSubclassOf,
 	ReadonlyCounter,
 	Serialisation,
+	type DecomposeContext,
+	type JSONObject,
 	type JSONValue,
+	type ObjectMapper,
+	type RecomposeContext,
 	type Type
 } from '@songsofdoom/common';
 import * as Game from '@songsofdoom/game';
@@ -81,7 +85,57 @@ export interface EngineSerialisationContext {
  * object identity — only a reference key is stored; the caller provides a
  * {@link EngineSerialisationContext} with lookup functions.
  */
+
+/**
+ * String marker used during serialisation to represent {@link Infinity} values
+ * in {@link Game.TargetCardinality} properties, since `Infinity` is not valid JSON.
+ */
+const INFINITY_MARKER = 'Infinity';
+
+// ---------------------------------------------------------------------------
+// Custom mappers
+// ---------------------------------------------------------------------------
+
+/**
+ * Custom mapper for {@link Game.TargetCardinality} that preserves `Infinity`
+ * values across JSON serialisation by encoding them as the string `"Infinity"`.
+ */
+const targetCardinalityMapper: ObjectMapper<Game.TargetCardinality, EngineSerialisationContext> = {
+	decompose(data: Game.TargetCardinality, context: DecomposeContext<EngineSerialisationContext>) {
+		const decomposeField = (key: string, value: Game.ScalarExpressionType): JSONValue =>
+			value === Infinity ? INFINITY_MARKER : context.decomposeChild(key, value);
+
+		return {
+			min: decomposeField('min', data.min),
+			max: decomposeField('max', data.max)
+		};
+	},
+
+	recompose(
+		data: JSONObject,
+		context: RecomposeContext<EngineSerialisationContext>,
+		_target?: Game.TargetCardinality
+	): Game.TargetCardinality {
+		const recomposeField = (key: string, value: JSONValue): Game.ScalarExpressionType =>
+			value === INFINITY_MARKER
+				? Infinity
+				: (context.recomposeChild(key, value) as Game.ScalarExpressionType);
+
+		// Object.create avoids calling the constructor so we can set readonly
+		// properties directly. The intermediate Record cast works around the
+		// readonly modifier.
+		const obj = Object.create(Game.TargetCardinality.prototype) as Record<string, unknown>;
+		obj.min = recomposeField('min', data.min as JSONValue);
+		obj.max = recomposeField('max', data.max as JSONValue);
+		return obj as unknown as Game.TargetCardinality;
+	}
+};
+
 export const engineSerialisation = new Serialisation<EngineSerialisationContext>({
+	mappers: new Map([[Game.TargetCardinality, targetCardinalityMapper]]) as unknown as Map<
+		Type,
+		ObjectMapper
+	>,
 	types: [
 		// --- Engine state types (manual — not exported by @songsofdoom/game) ---
 		ReadonlyGameState,
