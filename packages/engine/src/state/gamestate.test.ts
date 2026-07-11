@@ -18,6 +18,7 @@ import {
 	Skill,
 	skill,
 	strength,
+	Target,
 	Trait,
 	trait,
 	type Entity
@@ -28,7 +29,7 @@ import {
 	ReadonlyCapabilityResolution,
 	type CapabilityResolution
 } from './capabilityresolution';
-import { type MutableCardState, type ReadonlyCardState } from './cardstate';
+import { ReadonlyCardState, type MutableCardState } from './cardstate';
 import { MutableGameState, ReadonlyGameState, type GameContext } from './gamestate';
 import type { CardId, EntityId, LocationId } from './identifiers';
 import {
@@ -1331,6 +1332,137 @@ describe('MutableGameState.setPlayerLocation', () => {
 
 		expect(state.locations[0].players).not.toContain('plr1');
 		expect(state.locations[1].players).toContain('plr1');
+	});
+});
+
+// ─── GameState.determinePossibleTargets ─────────────────────────────────────
+
+describe('GameState.determinePossibleTargets', () => {
+	it('returns ids matching the target type when no cardIds filter is set', () => {
+		const c1 = new ReadonlyCardState({
+			id: 'skl1',
+			card: { id: 'skill-card-1', type: { id: 'skill' } } as unknown as Entity,
+			properties: []
+		});
+		const c2 = new ReadonlyCardState({
+			id: 'skl2',
+			card: { id: 'skill-card-2', type: { id: 'skill' } } as unknown as Entity,
+			properties: []
+		});
+		const state = makeGameState([mock<ReadonlyPlayerState>({ cards: () => [c1, c2] })]);
+
+		const target = new Target('skill');
+		const result = state.determinePossibleTargets(target);
+
+		expect(result).toContain('skl1');
+		expect(result).toContain('skl2');
+	});
+
+	it('filters by cardIds when target.cardIds is set', () => {
+		const c1 = new ReadonlyCardState({
+			id: 'skl1',
+			card: { id: 'card-1', type: { id: 'skill' } } as unknown as Entity,
+			properties: []
+		});
+		const c2 = new ReadonlyCardState({
+			id: 'skl2',
+			card: { id: 'card-2', type: { id: 'skill' } } as unknown as Entity,
+			properties: []
+		});
+		const state = makeGameState([mock<ReadonlyPlayerState>({ cards: () => [c1, c2] })]);
+
+		const target = new Target({ type: 'skill', cardIds: ['card-1'] });
+		const result = state.determinePossibleTargets(target);
+
+		expect(result).toEqual(['skl1']);
+	});
+
+	it('excludes non-CardState entities when cardIds filter is set', () => {
+		const state = new ReadonlyGameState({
+			players: [mock<ReadonlyPlayerState>({ id: 'plr1', cards: () => [] })]
+		});
+
+		// 'player' type would include the player (PlayerState, not a CardState)
+		// With cardIds filter, only CardState instances pass
+		const target = new Target({ type: 'player', cardIds: ['some-card'] });
+		const result = state.determinePossibleTargets(target);
+
+		// 'plr1' is a PlayerState, not a CardState, so it should be excluded
+		expect(result).not.toContain('plr1');
+	});
+
+	it('includes multiple matching cardIds', () => {
+		const c1 = new ReadonlyCardState({
+			id: 'skl1',
+			card: { id: 'card-1', type: { id: 'skill' } } as unknown as Entity,
+			properties: []
+		});
+		const c2 = new ReadonlyCardState({
+			id: 'skl2',
+			card: { id: 'card-2', type: { id: 'skill' } } as unknown as Entity,
+			properties: []
+		});
+		const c3 = new ReadonlyCardState({
+			id: 'skl3',
+			card: { id: 'card-3', type: { id: 'skill' } } as unknown as Entity,
+			properties: []
+		});
+		const state = makeGameState([mock<ReadonlyPlayerState>({ cards: () => [c1, c2, c3] })]);
+
+		const target = new Target({ type: 'skill', cardIds: ['card-1', 'card-3'] });
+		const result = state.determinePossibleTargets(target);
+
+		expect(result).toContain('skl1');
+		expect(result).not.toContain('skl2');
+		expect(result).toContain('skl3');
+	});
+
+	it('returns empty array when cardIds matches no entity', () => {
+		const c1 = new ReadonlyCardState({
+			id: 'skl1',
+			card: { id: 'card-1', type: { id: 'skill' } } as unknown as Entity,
+			properties: []
+		});
+		const state = makeGameState([mock<ReadonlyPlayerState>({ cards: () => [c1] })]);
+
+		const target = new Target({ type: 'skill', cardIds: ['nonexistent'] });
+		const result = state.determinePossibleTargets(target);
+
+		expect(result).toEqual([]);
+	});
+
+	it('includes locations when cardIds filter matches location card entity ids', () => {
+		const location = new ReadonlyLocationState({
+			id: 'loc1',
+			card: { id: 'loc-card-1', type: { id: 'location' } } as unknown as Entity,
+			ownerId: 'plr1',
+			container: { type: 'location', locationId: 'loc1' },
+			properties: [],
+			coordinates: { x: 0, y: 0 }
+		});
+		const state = makeGameState([mock<ReadonlyPlayerState>({ cards: () => [] })], [location]);
+
+		const target = new Target({ type: 'location', cardIds: ['loc-card-1'] });
+		const result = state.determinePossibleTargets(target);
+
+		expect(result).toEqual(['loc1']);
+	});
+
+	it('excludes locations when cardIds filter does not match', () => {
+		const location = new ReadonlyLocationState({
+			id: 'loc1',
+			card: { id: 'loc-card-1', type: { id: 'location' } } as unknown as Entity,
+			ownerId: 'plr1',
+			container: { type: 'location', locationId: 'loc1' },
+			properties: [],
+			coordinates: { x: 0, y: 0 }
+		});
+		const state = makeGameState([mock<ReadonlyPlayerState>({ cards: () => [] })], [location]);
+
+		const target = new Target({ type: 'location', cardIds: ['other-card'] });
+		const result = state.determinePossibleTargets(target);
+
+		expect(result).toEqual([]);
 	});
 });
 

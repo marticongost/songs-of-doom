@@ -130,6 +130,9 @@ export interface TargetDiscriminatorProps<T extends TargetType = TargetType> {
 	/** The type(s) of target. Omit or set to undefined to accept targets of any type. */
 	type?: T | ReadonlyArray<T> | ReadonlySet<T>;
 
+	/** The id(s) of the target, or undefined to accept instances of any card. */
+	cardIds?: ReadonlyArray<string> | ReadonlySet<string>;
+
 	/** An optional condition that must be met for the target to be valid. */
 	condition?: BooleanExpressionType;
 }
@@ -152,7 +155,10 @@ function normalizeTargetType<T extends TargetType>(
 /** Describes a predicate that can be used to determine valid targets for a game effect. */
 export class TargetDiscriminator<T extends TargetType = TargetType> {
 	/** The type(s) of target, or undefined to accept targets of any type. */
-	readonly type: Set<T> | undefined;
+	readonly type: ReadonlySet<T> | undefined;
+
+	/** The id(s) of the target, or undefined to accept instances of any card. */
+	readonly cardIds: ReadonlySet<string> | undefined;
 
 	/** An optional condition that must be met for the target to be valid. */
 	readonly condition?: BooleanExpressionType;
@@ -167,6 +173,7 @@ export class TargetDiscriminator<T extends TargetType = TargetType> {
 		} else {
 			const p = props as TargetDiscriminatorProps<T>;
 			this.type = normalizeTargetType(p.type);
+			this.cardIds = p.cardIds === undefined ? undefined : new Set(p.cardIds);
 			this.condition = p.condition;
 		}
 	}

@@ -394,6 +394,7 @@
 	import { getLocale } from '$lib/context/locale';
 	import { possessiveRelation, toRelation, translate } from '@songsofdoom/common/localisation';
 	import { normaliseTargetCardinality, Target, type TargetDiscriminator } from '@songsofdoom/game';
+	import EntityLink from '../EntityLink.svelte';
 	import ExpressionChip from '../expressions/ExpressionChip.svelte';
 	import Text from '../localisation/Text.svelte';
 	import { standardAttributes, type StandardAttributeProps } from '../standardattributes';
@@ -467,6 +468,11 @@
 				{/if}
 			{/if}
 			<Variable class="variable">{target.variable}</Variable>
+		{/if}
+		{#if target.cardIds}
+			{#each [...target.cardIds] as cardId (cardId)}
+				<EntityLink entity={cardId} />
+			{/each}
 		{/if}
 		<ExpressionChip expression={target.condition} />
 		{#if target instanceof Target}

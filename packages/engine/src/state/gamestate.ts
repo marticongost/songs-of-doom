@@ -601,10 +601,11 @@ export abstract class GameState<
 	}
 
 	determinePossibleTargets(target: Target): EntityId[] {
-		const targetIds = new Set<EntityId>();
+		const targetIds = new Map<EntityId, EntityState>();
 
 		if (target.matchesType('current-card')) {
-			targetIds.add(this.requireCurrentCard().id);
+			const currentCard = this.requireCurrentCard();
+			targetIds.set(currentCard.id, currentCard);
 		}
 
 		for (const type of [
@@ -619,47 +620,61 @@ export abstract class GameState<
 			'story'
 		] as Array<EntityTypeId & TargetType>) {
 			if (target.matchesType(type)) {
-				this.cards({ type }).forEach((card) => targetIds.add(card.id));
+				this.cards({ type }).forEach((card) => targetIds.set(card.id, card));
 			}
 		}
 
 		if (target.matchesType('current-subject')) {
-			targetIds.add(this.requireSubject().id);
+			const currentSubject = this.requireSubject();
+			targetIds.set(currentSubject.id, currentSubject);
 		}
 		if (target.matchesType('player')) {
-			this.players.forEach((player) => targetIds.add(player.id));
+			this.players.forEach((player) => targetIds.set(player.id, player));
 		}
 		if (target.matchesType('owner')) {
 			const ownerId = this.requireCurrentCard().ownerId;
-			if (ownerId) targetIds.add(ownerId);
+			if (ownerId) {
+				const owner = this.requireEntityState(ownerId);
+				targetIds.set(ownerId, owner);
+			}
 		}
 		if (target.matchesType('active-player')) {
 			// TODO: Should this be a condition?
 			const activePlayer = this.requireActivePlayer();
-			targetIds.add(activePlayer.id);
+			targetIds.set(activePlayer.id, activePlayer);
 		}
 		if (target.matchesType('enemy')) {
 			if (this.requireSubject().hostile) {
-				this.cards({ type: 'ally' }).forEach((card) => targetIds.add(card.id));
-				this.players.forEach((player) => targetIds.add(player.id));
+				this.cards({ type: 'ally' }).forEach((card) => targetIds.set(card.id, card));
+				this.players.forEach((player) => targetIds.set(player.id, player));
 			} else {
 				this.creatures.forEach((creature) => {
-					targetIds.add(creature.id);
+					targetIds.set(creature.id, creature);
 				});
 			}
 		}
 		if (target.matchesType('attacker')) {
 			// TODO: mismatch between "attacker" and "subject"
-			targetIds.add(this.requireSubject().id);
+			const subject = this.requireSubject();
+			targetIds.set(subject.id, subject);
 		}
 		if (target.matchesType('defender')) {
 			// TODO: mismatch between "defender" and "target"
-			targetIds.add(this.requireTarget().id);
+			const targetEntity = this.requireTarget();
+			targetIds.set(targetEntity.id, targetEntity);
 		}
 
 		// TODO: Select by stored variable
 
-		return [...targetIds];
+		if (target.cardIds) {
+			return [...targetIds.entries()]
+				.filter(
+					([_id, entity]) => entity instanceof CardState && target.cardIds!.has(entity.card.id)
+				)
+				.map(([id, _entity]) => id);
+		}
+
+		return [...targetIds.keys()];
 	}
 
 	resolveTarget(target: Target, possibleTargetIds?: EntityId[]): EntityId[] {
