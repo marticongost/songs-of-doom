@@ -72,6 +72,7 @@ export {
 	SaveTargetToVariableEffect,
 	type SaveTargetToVariableEffectProps
 } from './savetargettovariable';
+export { setLocation, SetLocationEffect, type SetLocationEffectProps } from './setlocation';
 export { setRollResult, SetRollResultEffect, type SetRollResultEffectProps } from './setrollresult';
 export { talent, TalentEffect, type TalentEffectProps } from './talenteffect';
 export { test, TestEffect } from './test';

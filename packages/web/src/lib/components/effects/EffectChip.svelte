@@ -45,6 +45,7 @@
 		ResultsTableEffect,
 		SanityLossEffect,
 		SaveTargetToVariableEffect,
+		SetLocationEffect,
 		SetRollResultEffect,
 		TalentEffect,
 		TestEffect,
@@ -102,6 +103,7 @@
 	import ResultsTableEffectChip from './ResultsTableEffectChip.svelte';
 	import SanityLossEffectChip from './SanityLossEffectChip.svelte';
 	import SaveTargetToVariableEffectChip from './SaveTargetToVariableEffectChip.svelte';
+	import SetLocationEffectChip from './SetLocationEffectChip.svelte';
 	import SetRollResultEffectChip from './SetRollResultEffectChip.svelte';
 	import TalentEffectChip from './TalentEffectChip.svelte';
 	import TestEffectChip from './TestEffectChip.svelte';
@@ -198,6 +200,8 @@
 		<ProficiencyTableEffectChip {effect} {compact} />
 	{:else if effect instanceof ResultsTableEffect}
 		<ResultsTableEffectChip {effect} />
+	{:else if effect instanceof SetLocationEffect}
+		<SetLocationEffectChip {effect} />
 	{:else if effect instanceof SetRollResultEffect}
 		<SetRollResultEffectChip {effect} />
 	{:else if effect instanceof TestEffect}

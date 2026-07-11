@@ -74,6 +74,7 @@ export enum ProcedureId {
 	ResultsTableEffect = 'ResultsTableEffect',
 	SanityLossEffect = 'SanityLossEffect',
 	SaveTargetToVariableEffect = 'SaveTargetToVariableEffect',
+	SetLocationEffect = 'SetLocationEffect',
 	SetRollResultEffect = 'SetRollResultEffect',
 	TalentEffect = 'TalentEffect',
 	TestEffect = 'TestEffect',

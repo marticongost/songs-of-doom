@@ -60,6 +60,7 @@ export type { MoveEffectState } from './procedures/effects/moveproc';
 export type { NarrationEffectState } from './procedures/effects/narrationeffectproc';
 export type { PlaceLocationEffectState } from './procedures/effects/placelocationproc';
 export type { PlayStoryCardsEffectState } from './procedures/effects/playstorycardsproc';
+export type { SetLocationEffectState } from './procedures/effects/setlocationproc';
 export type { RunCampaignState } from './procedures/gamesequence/campaign/runcampaign';
 export type { ChapterState } from './procedures/gamesequence/chapters/chapter';
 export type { ChapterEndState } from './procedures/gamesequence/chapters/chapterendphase';

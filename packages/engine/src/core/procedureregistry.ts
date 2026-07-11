@@ -47,6 +47,7 @@ import { resolveEncounterEffectProc } from '../procedures/effects/resolveencount
 import { resultsTableEffectProc } from '../procedures/effects/resultstableproc';
 import { sanityLossEffectProc } from '../procedures/effects/sanitylossproc';
 import { saveTargetToVariableEffectProc } from '../procedures/effects/savetargettovariableproc';
+import { setLocationEffectProc } from '../procedures/effects/setlocationproc';
 import { setRollResultEffectProc } from '../procedures/effects/setrollresultproc';
 import { talentEffectProc } from '../procedures/effects/talenteffectproc';
 import { testEffectProc } from '../procedures/effects/testeffectproc';
@@ -152,6 +153,7 @@ export const procedureDefinitions: Record<ProcedureId, ProcedureDefinition<any>>
 	[ProcedureId.ResultsTableEffect]: resultsTableEffectProc,
 	[ProcedureId.SanityLossEffect]: sanityLossEffectProc,
 	[ProcedureId.SaveTargetToVariableEffect]: saveTargetToVariableEffectProc,
+	[ProcedureId.SetLocationEffect]: setLocationEffectProc,
 	[ProcedureId.SetRollResultEffect]: setRollResultEffectProc,
 	[ProcedureId.TalentEffect]: talentEffectProc,
 	[ProcedureId.TestEffect]: testEffectProc,

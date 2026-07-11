@@ -77,6 +77,8 @@
 	import PlayStoryCardsEffectLogEntry from './PlayStoryCardsEffectLogEntry.svelte';
 	import RunCampaignLogEntry from './RunCampaignLogEntry.svelte';
 	import RunScenarioLogEntry from './RunScenarioLogEntry.svelte';
+	import SetLocationEffectLogEntry from './SetLocationEffectLogEntry.svelte';
+	import SetLocationEffectOutcomeEntry from './SetLocationEffectOutcomeEntry.svelte';
 	import TriggerCapabilityLogEntry from './TriggerCapabilityLogEntry.svelte';
 	import TurnCreatureActionsPhaseLogEntry from './TurnCreatureActionsPhaseLogEntry.svelte';
 	import TurnEndPhaseLogEntry from './TurnEndPhaseLogEntry.svelte';
@@ -247,6 +249,7 @@
 		[ProcedureId.NarrationEffect]: NarrationEffectLogEntry,
 		[ProcedureId.PlaceLocationEffect]: PlaceLocationEffectLogEntry,
 		[ProcedureId.PlayStoryCardsEffect]: PlayStoryCardsEffectLogEntry,
+		[ProcedureId.SetLocationEffect]: SetLocationEffectLogEntry,
 		[ProcedureId.TriggerCapability]: TriggerCapabilityLogEntry
 	};
 
@@ -257,7 +260,8 @@
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	const outcomeComponents: Record<string, any> = {
 		[ProcedureId.AddChargesEffect]: AddChargesEffectOutcomeEntry,
-		[ProcedureId.DrawFocusEffect]: DrawFocusEffectOutcomeEntry
+		[ProcedureId.DrawFocusEffect]: DrawFocusEffectOutcomeEntry,
+		[ProcedureId.SetLocationEffect]: SetLocationEffectOutcomeEntry
 	};
 
 	/**

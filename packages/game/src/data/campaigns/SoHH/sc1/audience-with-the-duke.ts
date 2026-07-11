@@ -1,6 +1,6 @@
 import multiline from 'multiline-ts';
 import { Obligation } from '../../../../models/capabilities';
-import { narration, placeLocation } from '../../../../models/effects';
+import { narration, placeLocation, setLocation } from '../../../../models/effects';
 import { Story } from '../../../../models/entities/story';
 import { reactiveCardIsSubject } from '../../../../models/expressions';
 
@@ -48,6 +48,10 @@ export default new Story({
 					id: 'SoHH-sc1-old-mill',
 					coordinates: { x: 1, y: 0.5 },
 					connections: ['SoHH-sc1-battleground', 'SoHH-sc1-reddened-ford']
+				}),
+				setLocation({
+					target: { type: 'player', cardinality: 'every' },
+					destination: { cardIds: ['SoHH-sc1-battleground'] }
 				})
 			]
 		})
