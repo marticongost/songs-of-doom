@@ -22,7 +22,7 @@ export const extensionMethod = <I, O>(): ExtensionMethod<I, O> => {
 
 	const fn = <T>(obj: T, input: I): O => {
 		if (typeof obj !== 'object' || obj === null) {
-			throw new Error('Extension methods can only be called on objects');
+			throw new Error(`Extension methods can only be called on objects (got ${typeof obj})`);
 		}
 		// Find the first available implementation by recursively walking the prototype
 		// chain and checking for registered implementations for each constructor.
