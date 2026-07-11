@@ -481,7 +481,7 @@ export class Engine {
 
 		if (parentEntry._loopParentStepId) {
 			const forEachStep = this._resolveForEachStep(parentEntry);
-			const ps = forEachStep.steps[parentStepId!];
+			const ps = this._resolveStep(forEachStep.steps[parentStepId!], parentEntry.state);
 			if (!(ps instanceof CallStep)) {
 				throw new Error(`Engine invariant: parent step "${parentStepId}" is not a CallStep.`);
 			}
@@ -495,7 +495,10 @@ export class Engine {
 					parentIndex: parentEntry.parentIndex
 				});
 		} else {
-			const ps = this._requireProcedure(parentEntry.procedureId).steps[parentStepId!];
+			const ps = this._resolveStep(
+				this._requireProcedure(parentEntry.procedureId).steps[parentStepId!],
+				parentEntry.state
+			);
 			if (!(ps instanceof CallStep)) {
 				throw new Error(`Engine invariant: parent step "${parentStepId}" is not a CallStep.`);
 			}

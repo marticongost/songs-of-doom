@@ -189,7 +189,7 @@ export function instructions<S extends ProcedureState>() {
 		dispatch: (factory: (state: S) => Step | ((state: S) => S | undefined) | S): DispatchStep<S> =>
 			new DispatchStep({
 				factory: (state) => {
-					const result = factory(state);
+					const result = factory({ ...state, step: undefined } as S);
 					if (result instanceof Step) return result;
 					if (typeof result === 'function')
 						return new ComputeStep({ logic: result as (s: S) => S | undefined });
