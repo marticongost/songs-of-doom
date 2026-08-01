@@ -32,18 +32,40 @@
 </script>
 
 <script lang="ts">
+	import type { EntityCarouselApi } from '$lib/components/entities/EntityCarousel.svelte';
+	import EntityCarousel from '$lib/components/entities/EntityCarousel.svelte';
 	import {
 		standardAttributes,
 		type StandardAttributeProps
 	} from '$lib/components/standardattributes';
-	import type { LocationState } from '@songsofdoom/engine';
+	import type { CardState, LocationId, LocationState, PlayerState } from '@songsofdoom/engine';
+	import type { Entity, EntityTypeId } from '@songsofdoom/game';
+	import { tick } from 'svelte';
 	import GameMapLocation from './GameMapLocation.svelte';
 
 	interface Props extends StandardAttributeProps {
 		locations: ReadonlyArray<LocationState>;
+		locationEntities: Map<LocationId, ReadonlyArray<PlayerState | CardState>>;
 	}
 
-	const { locations, ...attributes }: Props = $props();
+	const { locations, locationEntities, ...attributes }: Props = $props();
+
+	// --- Carousel state for enemy card viewing ---
+
+	let carouselEntities = $state<Entity[]>([]);
+	let carouselRef: EntityCarouselApi | undefined;
+
+	function isCreatureCard(entity: PlayerState | CardState): entity is CardState {
+		return 'card' in entity && (entity as CardState).card.type.id === ('creature' as EntityTypeId);
+	}
+
+	function openEnemyCarousel(locationId: LocationId, creatureIndex: number): void {
+		const entities = locationEntities.get(locationId) ?? [];
+		const creatures = entities.filter(isCreatureCard).map((c) => c.card);
+		if (creatures.length === 0) return;
+		carouselEntities = creatures;
+		tick().then(() => carouselRef?.open(creatureIndex));
+	}
 
 	/**
 	 * Compute the bounding box of all location coordinates.
@@ -85,11 +107,16 @@
 	{#if bounds && locations.length > 0}
 		<div class={styles.map} style="width: {mapWidth}em; height: {mapHeight}em;">
 			{#each locations as location (location.id)}
+				{@const entities = locationEntities.get(location.id) ?? []}
 				<GameMapLocation
 					{location}
+					{entities}
+					onEnemyClick={(creatureIndex: number) => openEnemyCarousel(location.id, creatureIndex)}
 					style={positionStyle(location.coordinates.x, location.coordinates.y)}
 				/>
 			{/each}
 		</div>
 	{/if}
+
+	<EntityCarousel bind:this={carouselRef} entities={carouselEntities} />
 </div>

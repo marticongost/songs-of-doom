@@ -109,7 +109,7 @@ Used by both the read-only character view and the edit view.
 </script>
 
 <script lang="ts">
-	import Portrait from '$lib/components/characters/Portrait.svelte';
+	import CharacterPortrait from '$lib/components/characters/CharacterPortrait.svelte';
 	import EntityListing from '$lib/components/entities/EntityListing.svelte';
 	import type { EntityManager } from '$lib/components/entities/entitymanager';
 	import FocusBag from '$lib/components/focuses/FocusBag.svelte';
@@ -164,7 +164,7 @@ Used by both the read-only character view and the edit view.
 </script>
 
 <Toolbar>
-	<Portrait portrait={characterState.portrait} onChange={onPortraitChange} circular />
+	<CharacterPortrait portrait={characterState.portrait} onChange={onPortraitChange} circular />
 	<h1 class={styles.characterName}>{characterState.name}</h1>
 	{@render toolbarActions?.()}
 	<div class={styles.resources}>

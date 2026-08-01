@@ -111,10 +111,13 @@
 			})
 		)
 	);
+
+	/** Entities (players and creatures) grouped by location, for map portrait rendering. */
+	const locationEntities = $derived(store.gameState?.getLocationEntities() ?? new Map());
 </script>
 
 <div {...standardAttributes(attributes, styles.gameView)}>
-	<GameMap locations={store.gameState?.locations ?? []} />
+	<GameMap locations={store.gameState?.locations ?? []} {locationEntities} />
 	<div class={styles.playerOverlays}>
 		{#each playerEntries as entry (entry.player.id)}
 			<PlayerOverlay player={entry.player} characterName={entry.characterName} />

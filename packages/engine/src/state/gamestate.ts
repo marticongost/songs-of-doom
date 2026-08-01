@@ -219,6 +219,27 @@ export abstract class GameState<
 		return entity;
 	}
 
+	/**
+	 * Returns a map from location ID to the entities (players and cards) currently at
+	 * that location. Locations with no entities are excluded from the result.
+	 */
+	getLocationEntities(): Map<LocationId, Array<TPlayer | TCard>> {
+		const result = new Map<LocationId, Array<TPlayer | TCard>>();
+		for (const location of this.locations) {
+			const entities: Array<TPlayer | TCard> = [];
+			for (const entityId of location.players) {
+				const entity = this.getEntityState(entityId);
+				if (entity) {
+					entities.push(entity);
+				}
+			}
+			if (entities.length > 0) {
+				result.set(location.id, entities);
+			}
+		}
+		return result;
+	}
+
 	cards(options?: CardOptions): Array<TCard> {
 		const cards: TCard[] = [];
 		const includeAttachments = options?.includeAttachments ?? true;

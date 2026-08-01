@@ -111,7 +111,7 @@
 </script>
 
 <script lang="ts">
-	import Portrait from '$lib/components/characters/Portrait.svelte';
+	import CharacterPortrait from '$lib/components/characters/CharacterPortrait.svelte';
 	import CardCopiesIndicator from '$lib/components/indicators/CardCopiesIndicator.svelte';
 	import CluesIndicator from '$lib/components/indicators/CluesIndicator.svelte';
 	import GoldIndicator from '$lib/components/indicators/GoldIndicator.svelte';
@@ -144,7 +144,7 @@
 
 <div {...standardAttributes(attributes, styles.overlay)}>
 	<div class={styles.portraitWrapper}>
-		<Portrait {portrait} circular />
+		<CharacterPortrait {portrait} circular />
 
 		<!-- Concentric trauma rings — rendered outside the portrait -->
 		<svg

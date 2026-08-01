@@ -1294,6 +1294,95 @@ describe('GameState.getEntityLocation', () => {
 	});
 });
 
+// ─── GameState.getLocationEntities ────────────────────────────────────────────
+
+describe('GameState.getLocationEntities', () => {
+	it('returns an empty map when there are no locations', () => {
+		const state = makeGameState([]);
+		expect(state.getLocationEntities().size).toBe(0);
+	});
+
+	it('returns an empty map when locations have no entities', () => {
+		const loc1 = makeLocation('loc1');
+		const loc2 = makeLocation('loc2');
+		const state = makeGameState([], [loc1, loc2]);
+		expect(state.getLocationEntities().size).toBe(0);
+	});
+
+	it('includes players at locations', () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
+		const loc1 = makeLocation('loc1', ['plr1']);
+		const state = makeGameState([p1], [loc1]);
+
+		const result = state.getLocationEntities();
+		expect(result.size).toBe(1);
+		expect(result.get('loc1')).toEqual([p1]);
+	});
+
+	it('includes creature cards at locations', () => {
+		const creature = mock<ReadonlyCardState>({ id: 'crt1' });
+		const p1 = mock<ReadonlyPlayerState>({
+			id: 'plr1',
+			getCard: (id: CardId) => (id === 'crt1' ? creature : undefined)
+		});
+		const loc1 = makeLocation('loc1', ['crt1']);
+		const state = makeGameState([p1], [loc1]);
+
+		const result = state.getLocationEntities();
+		expect(result.size).toBe(1);
+		expect(result.get('loc1')).toEqual([creature]);
+	});
+
+	it('returns both players and creatures for a mixed location', () => {
+		const creature = mock<ReadonlyCardState>({ id: 'crt1' });
+		const pOwner = mock<ReadonlyPlayerState>({
+			id: 'plr1',
+			getCard: (id: CardId) => (id === 'crt1' ? creature : undefined)
+		});
+		const loc1 = makeLocation('loc1', ['plr1', 'crt1']);
+		const state = makeGameState([pOwner], [loc1]);
+
+		const result = state.getLocationEntities();
+		expect(result.size).toBe(1);
+		expect(result.get('loc1')).toEqual([pOwner, creature]);
+	});
+
+	it('returns entities for multiple locations', () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
+		const p2 = mock<ReadonlyPlayerState>({ id: 'plr2' });
+		const loc1 = makeLocation('loc1', ['plr1']);
+		const loc2 = makeLocation('loc2', ['plr2']);
+		const state = makeGameState([p1, p2], [loc1, loc2]);
+
+		const result = state.getLocationEntities();
+		expect(result.size).toBe(2);
+		expect(result.get('loc1')).toEqual([p1]);
+		expect(result.get('loc2')).toEqual([p2]);
+	});
+
+	it('excludes locations that have no entities', () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
+		const loc1 = makeLocation('loc1', ['plr1']);
+		const loc2 = makeLocation('loc2');
+		const state = makeGameState([p1], [loc1, loc2]);
+
+		const result = state.getLocationEntities();
+		expect(result.size).toBe(1);
+		expect(result.has('loc1')).toBe(true);
+		expect(result.has('loc2')).toBe(false);
+	});
+
+	it('skips entity IDs that cannot be resolved', () => {
+		const p1 = mock<ReadonlyPlayerState>({ id: 'plr1' });
+		const loc1 = makeLocation('loc1', ['plr1', 'crt99'] as EntityId[]);
+		const state = makeGameState([p1], [loc1]);
+
+		const result = state.getLocationEntities();
+		expect(result.size).toBe(1);
+		expect(result.get('loc1')).toEqual([p1]);
+	});
+});
+
 // ─── MutableGameState.setPlayerLocation ──────────────────────────────────────
 
 describe('MutableGameState.setPlayerLocation', () => {

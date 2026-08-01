@@ -7,6 +7,7 @@
 	@prop onChange - When provided, renders prev/next arrows; the callback
 		is invoked with the new portrait number when the user cycles.
 	@prop circular - When true, renders the image as a circle (e.g. for toolbar use).
+	@prop size - Controls the circle dimensions when circular is true (default: '5em').
 -->
 <script lang="ts" module>
 	import * as css from '$lib/styles';
@@ -26,8 +27,8 @@
 			border: css.separators.regularBorder
 		},
 		circularImage: {
-			width: '5em',
-			height: '5em',
+			width: 'var(--portrait-size, 5em)',
+			height: 'var(--portrait-size, 5em)',
 			objectFit: 'cover',
 			borderRadius: '50%',
 			border: css.separators.regularBorder
@@ -63,9 +64,11 @@
 		onChange?: (portrait: number) => void;
 		/** When true, renders as a circle (e.g. for toolbar use). */
 		circular?: boolean;
+		/** Controls the circle dimensions when circular is true (default: '5em'). */
+		size?: string;
 	}
 
-	const { portrait, onChange, circular = false }: Props = $props();
+	const { portrait, onChange, circular = false, size = '5em' }: Props = $props();
 
 	const PORTRAIT_PATTERN = /^\/portraits\/(\d+)\.png$/;
 
@@ -106,7 +109,7 @@
 	}
 </script>
 
-<div class={styles.wrapper}>
+<div class={styles.wrapper} style="--portrait-size: {size};">
 	<Image
 		src={`/portraits/${portrait}.png`}
 		class={circular ? styles.circularImage : styles.image}
